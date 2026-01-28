@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,5 +54,9 @@ public class Usuario {
         if (fechaCreacion == null) {
             fechaCreacion = LocalDate.now();
         }
+    }
+
+    public Set<UsuarioTipoRol> getRoles() {
+        return usuarioTipoRoles;
     }
 }

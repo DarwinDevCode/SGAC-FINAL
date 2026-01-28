@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class UsuarioDTO {
-
     private Integer idUsuario;
     private String nombres;
     private String apellidos;

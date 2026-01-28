@@ -234,4 +234,33 @@ public class UsuarioServiceImpl implements UsuarioService {
                 .roles(roles)
                 .build();
     }
+
+    public UsuarioDTO obtenerPerfilPorUsername(String username) {
+
+        Usuario usuario = usuarioRepository
+                .findByNombreUsuarioAndActivoTrue(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return UsuarioDTO.builder()
+                .idUsuario(usuario.getIdUsuario())
+                .nombres(usuario.getNombres())
+                .apellidos(usuario.getApellidos())
+                .cedula(usuario.getCedula())
+                .correo(usuario.getCorreo())
+                .nombreUsuario(usuario.getNombreUsuario())
+                .fechaCreacion(usuario.getFechaCreacion())
+                .activo(usuario.getActivo())
+                .roles(
+                        usuario.getUsuarioTipoRoles().stream()
+                                .filter(UsuarioTipoRol::getActivo)
+                                .map(utr -> TipoRolDTO.builder()
+                                        .idTipoRol(utr.getTipoRol().getIdTipoRol())
+                                        .nombreTipoRol(utr.getTipoRol().getNombreTipoRol())
+                                        .activo(utr.getTipoRol().getActivo())
+                                        .build()
+                                )
+                                .toList()
+                )
+                .build();
+    }
 }

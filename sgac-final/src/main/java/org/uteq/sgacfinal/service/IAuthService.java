@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.LoginResultadoDTO;
+import org.uteq.sgacfinal.dto.UsuarioDTO;
 
 public interface IAuthService {
-    LoginResultadoDTO login(String usuario, String contrasenia);
+    UsuarioDTO login(String usuario, String contrasenia);
 }

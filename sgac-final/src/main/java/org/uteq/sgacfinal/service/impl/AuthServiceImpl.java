@@ -2,9 +2,10 @@ package org.uteq.sgacfinal.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.uteq.sgacfinal.dto.LoginResultadoDTO;
-import org.uteq.sgacfinal.repository.IAuthRepository;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.TipoRolDTO;
+import org.uteq.sgacfinal.dto.UsuarioDTO;
+import org.uteq.sgacfinal.repository.IAuthRepository;
 import org.uteq.sgacfinal.service.IAuthService;
 
 import java.util.List;
@@ -13,11 +14,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthServiceImpl implements IAuthService {
-
     private final IAuthRepository authRepository;
 
     @Override
-    public LoginResultadoDTO login(String usuario, String contrasenia) {
+    public UsuarioDTO login(String usuario, String contrasenia) {
 
         List<Object[]> result = authRepository.login(usuario, contrasenia);
 
@@ -27,12 +27,16 @@ public class AuthServiceImpl implements IAuthService {
 
         Object[] row = result.get(0);
 
-        String rolesStr = (String) row[5];
-        List<String> roles = rolesStr == null || rolesStr.isEmpty()
+        List<TipoRolDTO> roles = row[5] == null
                 ? List.of()
-                : List.of(rolesStr.split(","));
+                : List.of(row[5].toString().split(","))
+                .stream()
+                .map(r -> TipoRolDTO.builder()
+                        .nombreTipoRol(r)
+                        .build())
+                .toList();
 
-        return LoginResultadoDTO.builder()
+        return UsuarioDTO.builder()
                 .idUsuario((Integer) row[0])
                 .nombres((String) row[1])
                 .apellidos((String) row[2])
@@ -41,5 +45,4 @@ public class AuthServiceImpl implements IAuthService {
                 .roles(roles)
                 .build();
     }
-
 }

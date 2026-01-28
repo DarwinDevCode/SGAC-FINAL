@@ -1,21 +1,14 @@
 package org.uteq.sgacfinal.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
 
-import java.util.List;
+import java.util.Collection;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class LoginResultadoDTO {
-
-    private Integer idUsuario;
-    private String nombres;
-    private String apellidos;
-    private String correo;
-    private String nombreUsuario;
-    private List<String> roles;
-    private List<RolPermisoDTO> permisos;
+    private String username;
+    private Collection<? extends GrantedAuthority> roles;
 }
