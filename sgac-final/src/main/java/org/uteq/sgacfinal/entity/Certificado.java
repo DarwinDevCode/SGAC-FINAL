@@ -36,8 +36,7 @@ public class Certificado {
     @Column(name = "total_horas_certificadas")
     private Integer totalHorasCertificadas;
 
-    @Lob
-    @Column(name = "archivo")
+    @Column(name = "archivo", columnDefinition = "bytea")
     private byte[] archivo;
 
     @Column(name = "estado", length = 30)

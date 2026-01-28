@@ -26,8 +26,7 @@ public class EvidenciaRegistroActividad {
     @Column(name = "tipo_evidencia", length = 50)
     private String tipoEvidencia;
 
-    @Lob
-    @Column(name = "archivo")
+    @Column(name = "archivo", columnDefinition = "bytea")
     private byte[] archivo;
 
     @Column(name = "nombre_archivo", length = 150)
