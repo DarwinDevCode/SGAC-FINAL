@@ -31,7 +31,8 @@ public class RequisitoAdjunto {
     @JoinColumn(name = "id_tipo_estado_requisito", nullable = false)
     private TipoEstadoRequisito tipoEstadoRequisito;
 
-    @Column(name = "archivo", columnDefinition = "bytea")
+    //@Lob
+    @Column(name = "archivo")
     private byte[] archivo;
 
     @Column(name = "nombre_archivo", length = 150)

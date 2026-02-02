@@ -24,23 +24,23 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        Usuario usuario = usuarioRepository
-                .findByNombreUsuarioAndActivoTrue(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuario no encontrado"));
-
-        List<GrantedAuthority> authorities =
-                usuario.getRoles().stream()
-                        .filter(UsuarioTipoRol::getActivo)
-                        .filter(ur -> ur.getTipoRol().getActivo())
-                        .map(ur -> (GrantedAuthority) new SimpleGrantedAuthority(
-                                "ROLE_" + ur.getTipoRol().getNombreTipoRol()))
-                        .toList();
-
-        return new org.springframework.security.core.userdetails.User(
-                usuario.getNombreUsuario(),
-                usuario.getContraseniaUsuario(),
-                authorities
-        );
+//        Usuario usuario = usuarioRepository
+//                .orElseThrow(() ->
+//                        new UsernameNotFoundException("Usuario no encontrado"));
+//
+//        List<GrantedAuthority> authorities =
+//                usuario.getRoles().stream()
+//                        .filter(UsuarioTipoRol::getActivo)
+//                        .filter(ur -> ur.getTipoRol().getActivo())
+//                        .map(ur -> (GrantedAuthority) new SimpleGrantedAuthority(
+//                                "ROLE_" + ur.getTipoRol().getNombreTipoRol()))
+//                        .toList();
+//
+//        return new org.springframework.security.core.userdetails.User(
+//                usuario.getNombreUsuario(),
+//                usuario.getContraseniaUsuario(),
+//                authorities
+//        );
+        return null;
     }
 }

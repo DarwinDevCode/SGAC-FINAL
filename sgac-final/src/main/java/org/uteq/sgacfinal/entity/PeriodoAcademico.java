@@ -37,8 +37,5 @@ public class PeriodoAcademico {
     private List<Convocatoria> convocatorias = new ArrayList<>();
 
     @OneToMany(mappedBy = "periodoAcademico", cascade = CascadeType.ALL)
-    private List<PlazoActividad> plazosActividad = new ArrayList<>();
-
-    @OneToMany(mappedBy = "periodoAcademico", cascade = CascadeType.ALL)
-    private List<PeriodoAcademicoRequisitoPostulacion> requisitosPostulacion = new ArrayList<>();
+    private List<PeriodoAcademicoRequisitoPostulacion> requisitosConfigurados = new ArrayList<>();
 }

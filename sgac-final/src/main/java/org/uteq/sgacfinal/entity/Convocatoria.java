@@ -2,7 +2,6 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,10 +31,6 @@ public class Convocatoria {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_docente", nullable = false)
     private Docente docente;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_plazo_actividad")
-    private PlazoActividad plazoActividad;
 
     @Column(name = "cupos_disponibles", nullable = false)
     private Integer cuposDisponibles;

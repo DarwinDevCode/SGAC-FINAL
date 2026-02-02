@@ -30,8 +30,8 @@ public class TipoRequisitoPostulacion {
     private Boolean activo;
 
     @OneToMany(mappedBy = "tipoRequisitoPostulacion", cascade = CascadeType.ALL)
-    private List<RequisitoAdjunto> requisitosAdjuntos = new ArrayList<>();
+    private List<PeriodoAcademicoRequisitoPostulacion> configuracionesPeriodo = new ArrayList<>();
 
     @OneToMany(mappedBy = "tipoRequisitoPostulacion", cascade = CascadeType.ALL)
-    private List<PeriodoAcademicoRequisitoPostulacion> periodosAcademicosRequisitos = new ArrayList<>();
+    private List<RequisitoAdjunto> requisitosAdjuntos = new ArrayList<>();
 }

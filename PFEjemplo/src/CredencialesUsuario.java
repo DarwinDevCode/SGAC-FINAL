@@ -25,4 +25,7 @@ public class CredencialesUsuario {
     public void setContraseniaUsuario(String contraseniaUsuario) {
         this.contraseniaUsuario = contraseniaUsuario;
     }
+
+
+
 }

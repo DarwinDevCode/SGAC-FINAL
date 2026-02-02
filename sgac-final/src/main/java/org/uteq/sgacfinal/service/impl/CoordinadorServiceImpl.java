@@ -1,18 +1,13 @@
 package org.uteq.sgacfinal.service.impl;
 
-import org.uteq.sgacfinal.dto.CoordinadorDTO;
-import org.uteq.sgacfinal.dto.CoordinadorRequest;
-import org.uteq.sgacfinal.entity.Carrera;
-import org.uteq.sgacfinal.entity.Coordinador;
-import org.uteq.sgacfinal.entity.Usuario;
-import org.uteq.sgacfinal.exception.ResourceNotFoundException;
-import org.uteq.sgacfinal.repository.CarreraRepository;
-import org.uteq.sgacfinal.repository.CoordinadorRepository;
-import org.uteq.sgacfinal.repository.UsuarioRepository;
-import org.uteq.sgacfinal.service.CoordinadorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.CoordinadorRequestDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorResponseDTO;
+import org.uteq.sgacfinal.entity.Coordinador;
+import org.uteq.sgacfinal.repository.CoordinadorRepository;
+import org.uteq.sgacfinal.service.ICoordinadorService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,88 +15,94 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CoordinadorServiceImpl implements CoordinadorService {
+public class CoordinadorServiceImpl implements ICoordinadorService {
 
     private final CoordinadorRepository coordinadorRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final CarreraRepository carreraRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<CoordinadorDTO> findAll() {
-        return coordinadorRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+    public CoordinadorResponseDTO crear(CoordinadorRequestDTO request) {
+        Integer idGenerado = coordinadorRepository.registrarCoordinador(
+                request.getIdUsuario(),
+                request.getIdCarrera(),
+                request.getFechaInicio(),
+                request.getFechaFin()
+        );
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<CoordinadorDTO> findByActivo(Boolean activo) {
-        return coordinadorRepository.findByActivo(activo).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public CoordinadorDTO findById(Integer id) {
-        Coordinador coordinador = coordinadorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Coordinador", "id", id));
-        return convertToDTO(coordinador);
-    }
-
-    @Override
-    public CoordinadorDTO create(CoordinadorRequest request) {
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.getIdUsuario()));
-        Carrera carrera = carreraRepository.findById(request.getIdCarrera())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera", "id", request.getIdCarrera()));
-
-        Coordinador coordinador = Coordinador.builder()
-                .usuario(usuario)
-                .carrera(carrera)
-                .fechaInicio(request.getFechaInicio())
-                .fechaFin(request.getFechaFin())
-                .activo(request.getActivo())
-                .build();
-        return convertToDTO(coordinadorRepository.save(coordinador));
-    }
-
-    @Override
-    public CoordinadorDTO update(Integer id, CoordinadorRequest request) {
-        Coordinador coordinador = coordinadorRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Coordinador", "id", id));
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.getIdUsuario()));
-        Carrera carrera = carreraRepository.findById(request.getIdCarrera())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera", "id", request.getIdCarrera()));
-
-        coordinador.setUsuario(usuario);
-        coordinador.setCarrera(carrera);
-        coordinador.setFechaInicio(request.getFechaInicio());
-        coordinador.setFechaFin(request.getFechaFin());
-        coordinador.setActivo(request.getActivo());
-        return convertToDTO(coordinadorRepository.save(coordinador));
-    }
-
-    @Override
-    public void delete(Integer id) {
-        if (!coordinadorRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Coordinador", "id", id);
+        if (idGenerado == -1) {
+            throw new RuntimeException("Error al registrar coordinador.");
         }
-        coordinadorRepository.deleteById(id);
+
+        return buscarPorId(idGenerado);
     }
 
-    private CoordinadorDTO convertToDTO(Coordinador coordinador) {
-        return CoordinadorDTO.builder()
-                .idCoordinador(coordinador.getIdCoordinador())
-                .idUsuario(coordinador.getUsuario().getIdUsuario())
-                .nombreCompleto(coordinador.getUsuario().getNombres() + " " + coordinador.getUsuario().getApellidos())
-                .idCarrera(coordinador.getCarrera().getIdCarrera())
-                .nombreCarrera(coordinador.getCarrera().getNombreCarrera())
-                .fechaInicio(coordinador.getFechaInicio())
-                .fechaFin(coordinador.getFechaFin())
-                .activo(coordinador.getActivo())
+    @Override
+    public CoordinadorResponseDTO actualizar(Integer id, CoordinadorRequestDTO request) {
+        Integer resultado = coordinadorRepository.actualizarCoordinador(
+                id,
+                request.getIdCarrera(),
+                request.getFechaInicio(),
+                request.getFechaFin()
+        );
+
+        if (resultado == -1) {
+            throw new RuntimeException("Error al actualizar coordinador.");
+        }
+
+        return buscarPorId(id);
+    }
+
+    @Override
+    public void desactivar(Integer id) {
+        Integer resultado = coordinadorRepository.desactivarCoordinador(id);
+        if (resultado == -1) {
+            throw new RuntimeException("Error al desactivar coordinador.");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CoordinadorResponseDTO buscarPorId(Integer id) {
+        Coordinador coordinador = coordinadorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Coordinador no encontrado con ID: " + id));
+        return mapearADTO(coordinador);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CoordinadorResponseDTO buscarPorUsuario(Integer idUsuario) {
+        Coordinador coordinador = coordinadorRepository.findByUsuario_IdUsuarioAndActivoTrue(idUsuario)
+                .orElseThrow(() -> new RuntimeException("No existe coordinador activo para el usuario ID: " + idUsuario));
+        return mapearADTO(coordinador);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CoordinadorResponseDTO> listarTodos() {
+        return coordinadorRepository.findAll().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<CoordinadorResponseDTO> listarActivosPorCarrera(Integer idCarrera) {
+//        return coordinadorRepository.findByCarrera_IdCarreraAndActivoTrue(idCarrera).stream()
+//                .map(this::mapearADTO)
+//                .collect(Collectors.toList());
+//    }
+
+    private CoordinadorResponseDTO mapearADTO(Coordinador entidad) {
+        String nombreUsuario = entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos();
+        return CoordinadorResponseDTO.builder()
+                .idCoordinador(entidad.getIdCoordinador())
+                .idUsuario(entidad.getUsuario().getIdUsuario())
+                .nombreCompletoUsuario(nombreUsuario)
+                .cedula(entidad.getUsuario().getCedula())
+                .idCarrera(entidad.getCarrera().getIdCarrera())
+                .nombreCarrera(entidad.getCarrera().getNombreCarrera())
+                .fechaInicio(entidad.getFechaInicio())
+                .fechaFin(entidad.getFechaFin())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

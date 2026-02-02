@@ -1,3 +1,3 @@
 public interface Operaciones {
-    float Operacion(int a, int b);
+    int Operacion(int a, int b);
 }

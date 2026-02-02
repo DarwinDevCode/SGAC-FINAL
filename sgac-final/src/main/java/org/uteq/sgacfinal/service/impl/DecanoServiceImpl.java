@@ -1,18 +1,13 @@
 package org.uteq.sgacfinal.service.impl;
 
-import org.uteq.sgacfinal.dto.DecanoDTO;
-import org.uteq.sgacfinal.dto.DecanoRequest;
-import org.uteq.sgacfinal.entity.Decano;
-import org.uteq.sgacfinal.entity.Facultad;
-import org.uteq.sgacfinal.entity.Usuario;
-import org.uteq.sgacfinal.exception.ResourceNotFoundException;
-import org.uteq.sgacfinal.repository.DecanoRepository;
-import org.uteq.sgacfinal.repository.FacultadRepository;
-import org.uteq.sgacfinal.repository.UsuarioRepository;
-import org.uteq.sgacfinal.service.DecanoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
+import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
+import org.uteq.sgacfinal.entity.Decano;
+import org.uteq.sgacfinal.repository.DecanoRepository;
+import org.uteq.sgacfinal.service.IDecanoService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,88 +15,85 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class DecanoServiceImpl implements DecanoService {
+public class DecanoServiceImpl implements IDecanoService {
 
     private final DecanoRepository decanoRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final FacultadRepository facultadRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<DecanoDTO> findAll() {
-        return decanoRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+    public DecanoResponseDTO crear(DecanoRequestDTO request) {
+        Integer idGenerado = decanoRepository.registrarDecano(
+                request.getIdUsuario(),
+                request.getIdFacultad(),
+                request.getFechaInicioGestion(),
+                request.getFechaFinGestion()
+        );
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<DecanoDTO> findByActivo(Boolean activo) {
-        return decanoRepository.findByActivo(activo).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public DecanoDTO findById(Integer id) {
-        Decano decano = decanoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Decano", "id", id));
-        return convertToDTO(decano);
-    }
-
-    @Override
-    public DecanoDTO create(DecanoRequest request) {
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.getIdUsuario()));
-        Facultad facultad = facultadRepository.findById(request.getIdFacultad())
-                .orElseThrow(() -> new ResourceNotFoundException("Facultad", "id", request.getIdFacultad()));
-
-        Decano decano = Decano.builder()
-                .usuario(usuario)
-                .facultad(facultad)
-                .fechaInicioGestion(request.getFechaInicioGestion())
-                .fechaFinGestion(request.getFechaFinGestion())
-                .activo(request.getActivo())
-                .build();
-        return convertToDTO(decanoRepository.save(decano));
-    }
-
-    @Override
-    public DecanoDTO update(Integer id, DecanoRequest request) {
-        Decano decano = decanoRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Decano", "id", id));
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.getIdUsuario()));
-        Facultad facultad = facultadRepository.findById(request.getIdFacultad())
-                .orElseThrow(() -> new ResourceNotFoundException("Facultad", "id", request.getIdFacultad()));
-
-        decano.setUsuario(usuario);
-        decano.setFacultad(facultad);
-        decano.setFechaInicioGestion(request.getFechaInicioGestion());
-        decano.setFechaFinGestion(request.getFechaFinGestion());
-        decano.setActivo(request.getActivo());
-        return convertToDTO(decanoRepository.save(decano));
-    }
-
-    @Override
-    public void delete(Integer id) {
-        if (!decanoRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Decano", "id", id);
+        if (idGenerado == -1) {
+            throw new RuntimeException("Error al registrar decano.");
         }
-        decanoRepository.deleteById(id);
+
+        return buscarPorId(idGenerado);
     }
 
-    private DecanoDTO convertToDTO(Decano decano) {
-        return DecanoDTO.builder()
-                .idDecano(decano.getIdDecano())
-                .idUsuario(decano.getUsuario().getIdUsuario())
-                .nombreCompleto(decano.getUsuario().getNombres() + " " + decano.getUsuario().getApellidos())
-                .idFacultad(decano.getFacultad().getIdFacultad())
-                .nombreFacultad(decano.getFacultad().getNombreFacultad())
-                .fechaInicioGestion(decano.getFechaInicioGestion())
-                .fechaFinGestion(decano.getFechaFinGestion())
-                .activo(decano.getActivo())
+    @Override
+    public DecanoResponseDTO actualizar(Integer id, DecanoRequestDTO request) {
+        Integer resultado = decanoRepository.actualizarDecano(
+                id,
+                request.getIdFacultad(),
+                request.getFechaInicioGestion(),
+                request.getFechaFinGestion()
+        );
+
+        if (resultado == -1) {
+            throw new RuntimeException("Error al actualizar decano.");
+        }
+
+        return buscarPorId(id);
+    }
+
+    @Override
+    public void desactivar(Integer id) {
+        Integer resultado = decanoRepository.desactivarDecano(id);
+        if (resultado == -1) {
+            throw new RuntimeException("Error al desactivar decano.");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DecanoResponseDTO buscarPorId(Integer id) {
+        Decano decano = decanoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Decano no encontrado con ID: " + id));
+        return mapearADTO(decano);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DecanoResponseDTO buscarPorUsuario(Integer idUsuario) {
+        Decano decano = decanoRepository.findByUsuario_IdUsuarioAndActivoTrue(idUsuario)
+                .orElseThrow(() -> new RuntimeException("No existe decano activo para el usuario ID: " + idUsuario));
+        return mapearADTO(decano);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DecanoResponseDTO> listarActivos() {
+        return decanoRepository.obtenerDecanosActivosSP().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    private DecanoResponseDTO mapearADTO(Decano entidad) {
+        String nombreUsuario = entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos();
+        return DecanoResponseDTO.builder()
+                .idDecano(entidad.getIdDecano())
+                .idUsuario(entidad.getUsuario().getIdUsuario())
+                .nombreCompletoUsuario(nombreUsuario)
+                .idFacultad(entidad.getFacultad().getIdFacultad())
+                .nombreFacultad(entidad.getFacultad().getNombreFacultad())
+                .fechaInicioGestion(entidad.getFechaInicioGestion())
+                .fechaFinGestion(entidad.getFechaFinGestion())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

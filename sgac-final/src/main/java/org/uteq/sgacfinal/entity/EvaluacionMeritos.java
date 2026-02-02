@@ -20,7 +20,7 @@ public class EvaluacionMeritos {
     @Column(name = "id_evaluacion_meritos")
     private Integer idEvaluacionMeritos;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_postulacion", nullable = false)
     private Postulacion postulacion;
 

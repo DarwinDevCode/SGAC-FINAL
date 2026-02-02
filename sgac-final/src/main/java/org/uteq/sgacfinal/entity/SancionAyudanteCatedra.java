@@ -30,9 +30,9 @@ public class SancionAyudanteCatedra {
     @Column(name = "fecha_sancion")
     private LocalDate fechaSancion;
 
-    @Column(name = "activo")
-    private Boolean activo;
-
     @Column(name = "motivo", length = 150)
     private String motivo;
+
+    @Column(name = "activo")
+    private Boolean activo;
 }

@@ -22,7 +22,7 @@ public class EvaluacionOposicion {
     @Column(name = "id_evaluacion_oposicion")
     private Integer idEvaluacionOposicion;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_postulacion", nullable = false)
     private Postulacion postulacion;
 

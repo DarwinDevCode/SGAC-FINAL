@@ -1,24 +1,30 @@
 package org.uteq.sgacfinal.repository;
 
-import org.uteq.sgacfinal.entity.UsuarioTipoRol;
-import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.uteq.sgacfinal.entity.UsuarioTipoRol;
+import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
 
 import java.util.List;
 
 @Repository
 public interface UsuarioTipoRolRepository extends JpaRepository<UsuarioTipoRol, UsuarioTipoRolId> {
 
-    @Query("SELECT utr FROM UsuarioTipoRol utr WHERE utr.usuario.idUsuario = :idUsuario")
-    List<UsuarioTipoRol> findByUsuarioId(Integer idUsuario);
+    @Query(value = "SELECT public.sp_asignar_rol_usuario(:idUsuario, :idRol)", nativeQuery = true)
+    Integer asignarRolUsuario(@Param("idUsuario") Integer idUsuario,
+                              @Param("idRol") Integer idTipoRol);
 
-    @Query("SELECT utr FROM UsuarioTipoRol utr WHERE utr.tipoRol.idTipoRol = :idTipoRol")
-    List<UsuarioTipoRol> findByTipoRolId(Integer idTipoRol);
+    @Query(value = "SELECT public.sp_actualizar_estado_rol_usuario(:idUsuario, :idRol, :activo)", nativeQuery = true)
+    Integer actualizarEstadoRol(@Param("idUsuario") Integer idUsuario,
+                                @Param("idRol") Integer idTipoRol,
+                                @Param("activo") Boolean activo);
 
-    @Query("SELECT utr FROM UsuarioTipoRol utr WHERE utr.usuario.idUsuario = :idUsuario AND utr.activo = true")
-    List<UsuarioTipoRol> findActiveByUsuarioId(Integer idUsuario);
+    @Query(value = "SELECT public.sp_desactivar_rol_usuario(:idUsuario, :idRol)", nativeQuery = true)
+    Integer desactivarRolUsuario(@Param("idUsuario") Integer idUsuario,
+                                 @Param("idRol") Integer idTipoRol);
 
-    void deleteByUsuarioIdUsuario(Integer idUsuario);
+    @Query(value = "SELECT * FROM public.sp_obtener_roles_usuario(:idUsuario)", nativeQuery = true)
+    List<Object[]> obtenerRolesPorUsuarioSP(@Param("idUsuario") Integer idUsuario);
 }

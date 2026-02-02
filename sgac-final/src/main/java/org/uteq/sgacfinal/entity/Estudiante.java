@@ -3,6 +3,9 @@ package org.uteq.sgacfinal.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "estudiante")
 @Getter
@@ -25,7 +28,7 @@ public class Estudiante {
     @JoinColumn(name = "id_carrera", nullable = false)
     private Carrera carrera;
 
-    @Column(name = "matricula", unique = true, nullable = false, length = 30)
+    @Column(name = "matricula", nullable = false, length = 30, unique = true)
     private String matricula;
 
     @Column(name = "semestre", nullable = false)
@@ -33,4 +36,7 @@ public class Estudiante {
 
     @Column(name = "estado_academico", length = 30)
     private String estadoAcademico;
+
+    @OneToMany(mappedBy = "estudiante", cascade = CascadeType.ALL)
+    private List<Postulacion> postulaciones = new ArrayList<>();
 }

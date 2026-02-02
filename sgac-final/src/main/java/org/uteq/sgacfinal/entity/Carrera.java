@@ -30,9 +30,9 @@ public class Carrera {
     @OneToMany(mappedBy = "carrera", cascade = CascadeType.ALL)
     private List<Asignatura> asignaturas = new ArrayList<>();
 
-    @OneToMany(mappedBy = "carrera", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "carrera")
     private List<Estudiante> estudiantes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "carrera", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "carrera")
     private List<Coordinador> coordinadores = new ArrayList<>();
 }

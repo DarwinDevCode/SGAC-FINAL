@@ -1,16 +1,13 @@
 package org.uteq.sgacfinal.service.impl;
 
-import org.uteq.sgacfinal.dto.DocenteDTO;
-import org.uteq.sgacfinal.dto.DocenteRequest;
-import org.uteq.sgacfinal.entity.Docente;
-import org.uteq.sgacfinal.entity.Usuario;
-import org.uteq.sgacfinal.exception.ResourceNotFoundException;
-import org.uteq.sgacfinal.repository.DocenteRepository;
-import org.uteq.sgacfinal.repository.UsuarioRepository;
-import org.uteq.sgacfinal.service.DocenteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.DocenteRequestDTO;
+import org.uteq.sgacfinal.dto.Response.DocenteResponseDTO;
+import org.uteq.sgacfinal.entity.Docente;
+import org.uteq.sgacfinal.repository.DocenteRepository;
+import org.uteq.sgacfinal.service.IDocenteService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,80 +15,82 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class DocenteServiceImpl implements DocenteService {
+public class DocenteServiceImpl implements IDocenteService {
 
     private final DocenteRepository docenteRepository;
-    private final UsuarioRepository usuarioRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<DocenteDTO> findAll() {
-        return docenteRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+    public DocenteResponseDTO crear(DocenteRequestDTO request) {
+        Integer idGenerado = docenteRepository.registrarDocente(
+                request.getIdUsuario(),
+                request.getFechaInicio()
+        );
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<DocenteDTO> findByActivo(Boolean activo) {
-        return docenteRepository.findByActivo(activo).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public DocenteDTO findById(Integer id) {
-        Docente docente = docenteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Docente", "id", id));
-        return convertToDTO(docente);
-    }
-
-    @Override
-    public DocenteDTO create(DocenteRequest request) {
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.getIdUsuario()));
-
-        Docente docente = Docente.builder()
-                .usuario(usuario)
-                .fechaInicio(request.getFechaInicio())
-                .fechaFin(request.getFechaFin())
-                .activo(request.getActivo())
-                .build();
-        return convertToDTO(docenteRepository.save(docente));
-    }
-
-    @Override
-    public DocenteDTO update(Integer id, DocenteRequest request) {
-        Docente docente = docenteRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Docente", "id", id));
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", request.getIdUsuario()));
-
-        docente.setUsuario(usuario);
-        docente.setFechaInicio(request.getFechaInicio());
-        docente.setFechaFin(request.getFechaFin());
-        docente.setActivo(request.getActivo());
-        return convertToDTO(docenteRepository.save(docente));
-    }
-
-    @Override
-    public void delete(Integer id) {
-        if (!docenteRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Docente", "id", id);
+        if (idGenerado == -1) {
+            throw new RuntimeException("Error al registrar docente.");
         }
-        docenteRepository.deleteById(id);
+
+        return buscarPorId(idGenerado);
     }
 
-    private DocenteDTO convertToDTO(Docente docente) {
-        return DocenteDTO.builder()
-                .idDocente(docente.getIdDocente())
-                .idUsuario(docente.getUsuario().getIdUsuario())
-                .nombreCompleto(docente.getUsuario().getNombres() + " " + docente.getUsuario().getApellidos())
-                .correo(docente.getUsuario().getCorreo())
-                .fechaInicio(docente.getFechaInicio())
-                .fechaFin(docente.getFechaFin())
-                .activo(docente.getActivo())
+    @Override
+    public DocenteResponseDTO actualizar(Integer id, DocenteRequestDTO request) {
+        Integer resultado = docenteRepository.actualizarDocente(
+                id,
+                request.getFechaInicio(),
+                request.getFechaFin()
+        );
+
+        if (resultado == -1) {
+            throw new RuntimeException("Error al actualizar docente.");
+        }
+
+        return buscarPorId(id);
+    }
+
+    @Override
+    public void desactivar(Integer id) {
+        Integer resultado = docenteRepository.desactivarDocente(id);
+        if (resultado == -1) {
+            throw new RuntimeException("Error al desactivar docente.");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DocenteResponseDTO buscarPorId(Integer id) {
+        Docente docente = docenteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Docente no encontrado con ID: " + id));
+        return mapearADTO(docente);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DocenteResponseDTO buscarPorUsuario(Integer idUsuario) {
+        Docente docente = docenteRepository.findByUsuario_IdUsuario(idUsuario)
+                .orElseThrow(() -> new RuntimeException("No existe registro de docente para el usuario ID: " + idUsuario));
+        return mapearADTO(docente);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DocenteResponseDTO> listarTodos() {
+        return docenteRepository.findAll().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    private DocenteResponseDTO mapearADTO(Docente entidad) {
+        String nombreUsuario = entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos();
+        return DocenteResponseDTO.builder()
+                .idDocente(entidad.getIdDocente())
+                .idUsuario(entidad.getUsuario().getIdUsuario())
+                .nombreCompletoUsuario(nombreUsuario)
+                .correoUsuario(entidad.getUsuario().getCorreo())
+                .cedulaUsuario(entidad.getUsuario().getCedula())
+                .fechaInicio(entidad.getFechaInicio())
+                .fechaFin(entidad.getFechaFin())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

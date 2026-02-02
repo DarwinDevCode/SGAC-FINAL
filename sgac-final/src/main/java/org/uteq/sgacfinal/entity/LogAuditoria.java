@@ -32,7 +32,7 @@ public class LogAuditoria {
     @Column(name = "registro_afectado")
     private Integer registroAfectado;
 
-    @Column(name = "fecha_hora")
+    @Column(name = "fecha_hora", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime fechaHora;
 
     @Column(name = "ip_origen", length = 50)
@@ -43,11 +43,4 @@ public class LogAuditoria {
 
     @Column(name = "valor_nuevo", columnDefinition = "TEXT")
     private String valorNuevo;
-
-    @PrePersist
-    public void prePersist() {
-        if (fechaHora == null) {
-            fechaHora = LocalDateTime.now();
-        }
-    }
 }

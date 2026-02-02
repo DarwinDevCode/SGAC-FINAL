@@ -3,8 +3,8 @@ package org.uteq.sgacfinal.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tipo_rol")
@@ -20,12 +20,12 @@ public class TipoRol {
     @Column(name = "id_tipo_rol")
     private Integer idTipoRol;
 
-    @Column(name = "nombre_tipo_rol", unique = true, nullable = false, length = 50)
+    @Column(name = "nombre_tipo_rol", nullable = false, length = 50, unique = true)
     private String nombreTipoRol;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 
-    @OneToMany(mappedBy = "tipoRol", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UsuarioTipoRol> usuarioTipoRoles = new HashSet<>();
+    @OneToMany(mappedBy = "tipoRol", cascade = CascadeType.ALL)
+    private List<UsuarioTipoRol> usuariosTipoRol = new ArrayList<>();
 }

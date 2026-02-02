@@ -9,8 +9,10 @@ import lombok.*;
 @Builder
 public class AsignaturaDTO {
     private Integer idAsignatura;
+
     private Integer idCarrera;
-    private String nombreCarrera;
+    private String nombreCarrera; // Dato aplanado
+
     private String nombreAsignatura;
     private Integer semestre;
 }

@@ -2,7 +2,6 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ public class AyudanteCatedra {
     private Integer idAyudanteCatedra;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario") // Puede ser nullable según script
     private Usuario usuario;
 
     @Column(name = "horas_ayudante", precision = 5, scale = 2)

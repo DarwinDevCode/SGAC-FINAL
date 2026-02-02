@@ -2,7 +2,7 @@ package org.uteq.sgacfinal.controller;
 
 import org.uteq.sgacfinal.dto.CarreraDTO;
 import org.uteq.sgacfinal.dto.CarreraRequest;
-import org.uteq.sgacfinal.service.CarreraService;
+import org.uteq.sgacfinal.service.ICarreraService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,36 +17,36 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:4200")
 public class CarreraController {
 
-    private final CarreraService carreraService;
-
-    @GetMapping
-    public ResponseEntity<List<CarreraDTO>> findAll() {
-        return ResponseEntity.ok(carreraService.findAll());
-    }
-
-    @GetMapping("/facultad/{idFacultad}")
-    public ResponseEntity<List<CarreraDTO>> findByFacultad(@PathVariable Integer idFacultad) {
-        return ResponseEntity.ok(carreraService.findByFacultad(idFacultad));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<CarreraDTO> findById(@PathVariable Integer id) {
-        return ResponseEntity.ok(carreraService.findById(id));
-    }
-
-    @PostMapping
-    public ResponseEntity<CarreraDTO> create(@Valid @RequestBody CarreraRequest request) {
-        return new ResponseEntity<>(carreraService.create(request), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<CarreraDTO> update(@PathVariable Integer id, @Valid @RequestBody CarreraRequest request) {
-        return ResponseEntity.ok(carreraService.update(id, request));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        carreraService.delete(id);
-        return ResponseEntity.noContent().build();
-    }
+//    private final ICarreraService carreraService;
+//
+//    @GetMapping
+//    public ResponseEntity<List<CarreraDTO>> findAll() {
+//        return ResponseEntity.ok(carreraService.findAll());
+//    }
+//
+//    @GetMapping("/facultad/{idFacultad}")
+//    public ResponseEntity<List<CarreraDTO>> findByFacultad(@PathVariable Integer idFacultad) {
+//        return ResponseEntity.ok(carreraService.findByFacultad(idFacultad));
+//    }
+//
+//    @GetMapping("/{id}")
+//    public ResponseEntity<CarreraDTO> findById(@PathVariable Integer id) {
+//        return ResponseEntity.ok(carreraService.findById(id));
+//    }
+//
+//    @PostMapping
+//    public ResponseEntity<CarreraDTO> create(@Valid @RequestBody CarreraRequest request) {
+//        return new ResponseEntity<>(carreraService.create(request), HttpStatus.CREATED);
+//    }
+//
+//    @PutMapping("/{id}")
+//    public ResponseEntity<CarreraDTO> update(@PathVariable Integer id, @Valid @RequestBody CarreraRequest request) {
+//        return ResponseEntity.ok(carreraService.update(id, request));
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+//        carreraService.delete(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

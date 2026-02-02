@@ -29,10 +29,6 @@ public class Postulacion {
     @JoinColumn(name = "id_estudiante", nullable = false)
     private Estudiante estudiante;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_plazo_actividad")
-    private PlazoActividad plazoActividad;
-
     @Column(name = "fecha_postulacion")
     private LocalDate fechaPostulacion;
 
@@ -46,13 +42,13 @@ public class Postulacion {
     private Boolean activo;
 
     @OneToMany(mappedBy = "postulacion", cascade = CascadeType.ALL)
+    private List<EvaluacionMeritos> evaluacionesMeritos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "postulacion", cascade = CascadeType.ALL)
+    private List<EvaluacionOposicion> evaluacionesOposicion = new ArrayList<>();
+
+    @OneToMany(mappedBy = "postulacion", cascade = CascadeType.ALL)
     private List<RequisitoAdjunto> requisitosAdjuntos = new ArrayList<>();
-
-    @OneToOne(mappedBy = "postulacion", cascade = CascadeType.ALL)
-    private EvaluacionMeritos evaluacionMeritos;
-
-    @OneToOne(mappedBy = "postulacion", cascade = CascadeType.ALL)
-    private EvaluacionOposicion evaluacionOposicion;
 
     @OneToMany(mappedBy = "postulacion", cascade = CascadeType.ALL)
     private List<Ayudantia> ayudantias = new ArrayList<>();

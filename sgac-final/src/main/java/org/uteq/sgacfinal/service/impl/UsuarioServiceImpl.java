@@ -1,266 +1,126 @@
 package org.uteq.sgacfinal.service.impl;
 
-import org.uteq.sgacfinal.dto.TipoRolDTO;
-import org.uteq.sgacfinal.dto.UsuarioDTO;
-import org.uteq.sgacfinal.dto.UsuarioRequest;
-import org.uteq.sgacfinal.entity.TipoRol;
-import org.uteq.sgacfinal.entity.Usuario;
-import org.uteq.sgacfinal.entity.UsuarioTipoRol;
-import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
-import org.uteq.sgacfinal.exception.BadRequestException;
-import org.uteq.sgacfinal.exception.ResourceNotFoundException;
-import org.uteq.sgacfinal.repository.TipoRolRepository;
-import org.uteq.sgacfinal.repository.UsuarioRepository;
-import org.uteq.sgacfinal.repository.UsuarioTipoRolRepository;
-import org.uteq.sgacfinal.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.UsuarioRequestDTO;
+import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
+import org.uteq.sgacfinal.entity.Usuario;
+import org.uteq.sgacfinal.repository.UsuarioRepository;
+import org.uteq.sgacfinal.service.IUsuarioService;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UsuarioServiceImpl implements UsuarioService {
+public class UsuarioServiceImpl implements IUsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final TipoRolRepository tipoRolRepository;
-    private final UsuarioTipoRolRepository usuarioTipoRolRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<UsuarioDTO> findAll() {
-        return usuarioRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public UsuarioResponseDTO crear(UsuarioRequestDTO request) {
+        if (usuarioRepository.existsByCedula(request.getCedula())) {
+            throw new RuntimeException("La cédula ya está registrada.");
+        }
+
+        Integer idGenerado = usuarioRepository.registrarUsuario(
+                request.getNombres(),
+                request.getApellidos(),
+                request.getCedula(),
+                request.getCorreo(),
+                request.getNombreUsuario(),
+                request.getContraseniaUsuario()
+        );
+
+        if (idGenerado == -1) {
+            throw new RuntimeException("Error al registrar el usuario.");
+        }
+
+        return buscarPorId(idGenerado);
+    }
+
+    @Override
+    public UsuarioResponseDTO actualizar(Integer id, UsuarioRequestDTO request) {
+        Integer resultado = usuarioRepository.actualizarUsuario(
+                id,
+                request.getNombres(),
+                request.getApellidos(),
+                request.getCorreo()
+        );
+
+        if (resultado == -1) {
+            throw new RuntimeException("Error al actualizar usuario.");
+        }
+
+        return buscarPorId(id);
+    }
+
+    @Override
+    public void desactivar(Integer id) {
+        Integer resultado = usuarioRepository.desactivarUsuario(id);
+        if (resultado == -1) {
+            throw new RuntimeException("Error al desactivar usuario.");
+        }
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UsuarioDTO> findAllActive() {
-        return usuarioRepository.findAllActiveWithRoles().stream()
-                .map(this::convertToDTOWithRoles)
-                .collect(Collectors.toList());
+    public UsuarioResponseDTO buscarPorId(Integer id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+        return mapearADTO(usuario);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public UsuarioDTO findById(Integer id) {
-        Usuario usuario = usuarioRepository.findByIdWithRoles(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-        return convertToDTOWithRoles(usuario);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public UsuarioDTO findByNombreUsuario(String nombreUsuario) {
+    public UsuarioResponseDTO buscarPorNombreUsuario(String nombreUsuario) {
         Usuario usuario = usuarioRepository.findByNombreUsuario(nombreUsuario)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "nombreUsuario", nombreUsuario));
-        return convertToDTO(usuario);
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + nombreUsuario));
+        return mapearADTO(usuario);
     }
 
     @Override
-    public UsuarioDTO create(UsuarioRequest request) {
-        validateUniqueFields(request, null);
+    @Transactional(readOnly = true)
+    public Object login(String usuario, String contrasenia) {
+        List<Object[]> resultados = usuarioRepository.loginSgac(usuario, contrasenia);
 
-        Usuario usuario = Usuario.builder()
-                .nombres(request.getNombres())
-                .apellidos(request.getApellidos())
-                .cedula(request.getCedula())
-                .correo(request.getCorreo())
-                .nombreUsuario(request.getNombreUsuario())
-                .contraseniaUsuario(request.getContraseniaUsuario())
-                .fechaCreacion(LocalDate.now())
-                .activo(request.getActivo())
-                .build();
-
-        Usuario saved = usuarioRepository.save(usuario);
-
-        // Assign roles if provided
-        if (request.getRolesIds() != null && !request.getRolesIds().isEmpty()) {
-            for (Integer rolId : request.getRolesIds()) {
-                assignRoleInternal(saved, rolId);
-            }
+        if (resultados.isEmpty()) {
+            throw new RuntimeException("Credenciales incorrectas o usuario inactivo.");
         }
 
-        return convertToDTOWithRoles(usuarioRepository.findByIdWithRoles(saved.getIdUsuario()).orElse(saved));
+        Object[] row = resultados.get(0);
+        Map<String, Object> loginResponse = new HashMap<>();
+        loginResponse.put("idUsuario", row[0]);
+        loginResponse.put("nombres", row[1]);
+        loginResponse.put("apellidos", row[2]);
+        loginResponse.put("correo", row[3]);
+        loginResponse.put("nombreUsuario", row[4]);
+        loginResponse.put("roles", row[5]);
+        return loginResponse;
     }
 
     @Override
-    public UsuarioDTO update(Integer id, UsuarioRequest request) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-
-        validateUniqueFields(request, id);
-
-        usuario.setNombres(request.getNombres());
-        usuario.setApellidos(request.getApellidos());
-        usuario.setCedula(request.getCedula());
-        usuario.setCorreo(request.getCorreo());
-        usuario.setNombreUsuario(request.getNombreUsuario());
-        if (request.getContraseniaUsuario() != null && !request.getContraseniaUsuario().isEmpty()) {
-            usuario.setContraseniaUsuario(request.getContraseniaUsuario());
-        }
-        usuario.setActivo(request.getActivo());
-
-        Usuario updated = usuarioRepository.save(usuario);
-
-        // Update roles if provided
-        if (request.getRolesIds() != null) {
-            usuarioTipoRolRepository.deleteByUsuarioIdUsuario(id);
-            for (Integer rolId : request.getRolesIds()) {
-                assignRoleInternal(updated, rolId);
-            }
-        }
-
-        return convertToDTOWithRoles(usuarioRepository.findByIdWithRoles(updated.getIdUsuario()).orElse(updated));
+    @Transactional(readOnly = true)
+    public List<UsuarioResponseDTO> listarTodos() {
+        return usuarioRepository.findAll().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public void delete(Integer id) {
-        if (!usuarioRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Usuario", "id", id);
-        }
-        usuarioRepository.deleteById(id);
-    }
-
-    @Override
-    public void toggleActive(Integer id) {
-        Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", id));
-        usuario.setActivo(!usuario.getActivo());
-        usuarioRepository.save(usuario);
-    }
-
-    @Override
-    public void assignRole(Integer usuarioId, Integer tipoRolId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", "id", usuarioId));
-        assignRoleInternal(usuario, tipoRolId);
-    }
-
-    @Override
-    public void removeRole(Integer usuarioId, Integer tipoRolId) {
-        UsuarioTipoRolId id = new UsuarioTipoRolId(usuarioId, tipoRolId);
-        if (!usuarioTipoRolRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Relación Usuario-Rol no encontrada");
-        }
-        usuarioTipoRolRepository.deleteById(id);
-    }
-
-    private void assignRoleInternal(Usuario usuario, Integer tipoRolId) {
-        TipoRol tipoRol = tipoRolRepository.findById(tipoRolId)
-                .orElseThrow(() -> new ResourceNotFoundException("TipoRol", "id", tipoRolId));
-
-        UsuarioTipoRolId id = new UsuarioTipoRolId(usuario.getIdUsuario(), tipoRolId);
-
-        if (usuarioTipoRolRepository.existsById(id)) {
-            return; // Role already assigned
-        }
-
-        UsuarioTipoRol usuarioTipoRol = UsuarioTipoRol.builder()
-                .id(id)
-                .usuario(usuario)
-                .tipoRol(tipoRol)
-                .activo(true)
-                .build();
-
-        usuarioTipoRolRepository.save(usuarioTipoRol);
-    }
-
-    private void validateUniqueFields(UsuarioRequest request, Integer excludeId) {
-        usuarioRepository.findByNombreUsuario(request.getNombreUsuario())
-                .ifPresent(existing -> {
-                    if (excludeId == null || !existing.getIdUsuario().equals(excludeId)) {
-                        throw new BadRequestException("Ya existe un usuario con el nombre de usuario: " + request.getNombreUsuario());
-                    }
-                });
-
-        usuarioRepository.findByCedula(request.getCedula())
-                .ifPresent(existing -> {
-                    if (excludeId == null || !existing.getIdUsuario().equals(excludeId)) {
-                        throw new BadRequestException("Ya existe un usuario con la cédula: " + request.getCedula());
-                    }
-                });
-
-        usuarioRepository.findByCorreo(request.getCorreo())
-                .ifPresent(existing -> {
-                    if (excludeId == null || !existing.getIdUsuario().equals(excludeId)) {
-                        throw new BadRequestException("Ya existe un usuario con el correo: " + request.getCorreo());
-                    }
-                });
-    }
-
-    private UsuarioDTO convertToDTO(Usuario usuario) {
-        return UsuarioDTO.builder()
-                .idUsuario(usuario.getIdUsuario())
-                .nombres(usuario.getNombres())
-                .apellidos(usuario.getApellidos())
-                .cedula(usuario.getCedula())
-                .correo(usuario.getCorreo())
-                .nombreUsuario(usuario.getNombreUsuario())
-                .fechaCreacion(usuario.getFechaCreacion())
-                .activo(usuario.getActivo())
-                .roles(new ArrayList<>())
-                .build();
-    }
-
-    private UsuarioDTO convertToDTOWithRoles(Usuario usuario) {
-        List<TipoRolDTO> roles = new ArrayList<>();
-        if (usuario.getUsuarioTipoRoles() != null) {
-            roles = usuario.getUsuarioTipoRoles().stream()
-                    .filter(utr -> utr.getActivo() != null && utr.getActivo())
-                    .map(utr -> TipoRolDTO.builder()
-                            .idTipoRol(utr.getTipoRol().getIdTipoRol())
-                            .nombreTipoRol(utr.getTipoRol().getNombreTipoRol())
-                            .activo(utr.getTipoRol().getActivo())
-                            .build())
-                    .collect(Collectors.toList());
-        }
-
-        return UsuarioDTO.builder()
-                .idUsuario(usuario.getIdUsuario())
-                .nombres(usuario.getNombres())
-                .apellidos(usuario.getApellidos())
-                .cedula(usuario.getCedula())
-                .correo(usuario.getCorreo())
-                .nombreUsuario(usuario.getNombreUsuario())
-                .fechaCreacion(usuario.getFechaCreacion())
-                .activo(usuario.getActivo())
-                .roles(roles)
-                .build();
-    }
-
-    public UsuarioDTO obtenerPerfilPorUsername(String username) {
-
-        Usuario usuario = usuarioRepository
-                .findByNombreUsuarioAndActivoTrue(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        return UsuarioDTO.builder()
-                .idUsuario(usuario.getIdUsuario())
-                .nombres(usuario.getNombres())
-                .apellidos(usuario.getApellidos())
-                .cedula(usuario.getCedula())
-                .correo(usuario.getCorreo())
-                .nombreUsuario(usuario.getNombreUsuario())
-                .fechaCreacion(usuario.getFechaCreacion())
-                .activo(usuario.getActivo())
-                .roles(
-                        usuario.getUsuarioTipoRoles().stream()
-                                .filter(UsuarioTipoRol::getActivo)
-                                .map(utr -> TipoRolDTO.builder()
-                                        .idTipoRol(utr.getTipoRol().getIdTipoRol())
-                                        .nombreTipoRol(utr.getTipoRol().getNombreTipoRol())
-                                        .activo(utr.getTipoRol().getActivo())
-                                        .build()
-                                )
-                                .toList()
-                )
+    private UsuarioResponseDTO mapearADTO(Usuario entidad) {
+        return UsuarioResponseDTO.builder()
+                .idUsuario(entidad.getIdUsuario())
+                .nombres(entidad.getNombres())
+                .apellidos(entidad.getApellidos())
+                .cedula(entidad.getCedula())
+                .correo(entidad.getCorreo())
+                .nombreUsuario(entidad.getNombreUsuario())
+                .fechaCreacion(entidad.getFechaCreacion())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

@@ -17,12 +17,12 @@ public class UsuarioTipoRol {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("idUsuario")
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("idTipoRol")
-    @JoinColumn(name = "id_tipo_rol")
+    @JoinColumn(name = "id_tipo_rol", nullable = false)
     private TipoRol tipoRol;
 
     @Column(name = "activo", nullable = false)

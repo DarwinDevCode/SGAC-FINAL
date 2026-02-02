@@ -20,19 +20,24 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
-        Usuario usuario = usuarioRepository
-                .findByNombreUsuarioAndActivoTrue(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
-
-        return new User(
-                usuario.getNombreUsuario(),
-                usuario.getContraseniaUsuario(),
-                usuario.getUsuarioTipoRoles()
-                        .stream()
-                        .filter(r -> r.getActivo())
-                        .map(r -> new SimpleGrantedAuthority(r.getTipoRol().getNombreTipoRol()))
-                        .collect(Collectors.toList())
-        );
+        return null;
     }
+
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//
+//        Usuario usuario = usuarioRepository
+//                .findByNombreUsuarioAndActivoTrue(username)
+//                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+//
+//        return new User(
+//                usuario.getNombreUsuario(),
+//                usuario.getContraseniaUsuario(),
+//                usuario.getUsuarioTipoRoles()
+//                        .stream()
+//                        .filter(r -> r.getActivo())
+//                        .map(r -> new SimpleGrantedAuthority(r.getTipoRol().getNombreTipoRol()))
+//                        .collect(Collectors.toList())
+//        );
+//    }
 }

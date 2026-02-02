@@ -2,7 +2,6 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +38,8 @@ public class Ayudantia {
     private Integer horasCumplidas;
 
     @OneToMany(mappedBy = "ayudantia", cascade = CascadeType.ALL)
-    private List<RegistroActividad> registrosActividad = new ArrayList<>();
+    private List<Certificado> certificados = new ArrayList<>();
 
     @OneToMany(mappedBy = "ayudantia", cascade = CascadeType.ALL)
-    private List<Certificado> certificados = new ArrayList<>();
+    private List<RegistroActividad> registrosActividad = new ArrayList<>();
 }

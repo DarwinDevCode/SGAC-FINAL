@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usuario")
@@ -28,35 +27,31 @@ public class Usuario {
     @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
 
-    @Column(name = "cedula", unique = true, nullable = false, length = 20)
+    @Column(name = "cedula", nullable = false, length = 20, unique = true)
     private String cedula;
 
-    @Column(name = "correo", unique = true, nullable = false, length = 150)
+    @Column(name = "correo", nullable = false, length = 150, unique = true)
     private String correo;
 
-    @Column(name = "nombre_usuario", unique = true, nullable = false, length = 50)
+    @Column(name = "nombre_usuario", nullable = false, length = 50, unique = true)
     private String nombreUsuario;
 
     @Column(name = "contrasenia_usuario", nullable = false, length = 255)
     private String contraseniaUsuario;
 
     @Column(name = "fecha_creacion", nullable = false)
-    private LocalDate fechaCreacion;
+    @Builder.Default
+    private LocalDate fechaCreacion = LocalDate.now();
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
 
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<UsuarioTipoRol> usuarioTipoRoles = new HashSet<>();
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<UsuarioTipoRol> roles = new ArrayList<>();
 
-    @PrePersist
-    public void prePersist() {
-        if (fechaCreacion == null) {
-            fechaCreacion = LocalDate.now();
-        }
-    }
+    @OneToMany(mappedBy = "usuario")
+    private List<Estudiante> estudiantes = new ArrayList<>();
 
-    public Set<UsuarioTipoRol> getRoles() {
-        return usuarioTipoRoles;
-    }
+    @OneToMany(mappedBy = "usuario")
+    private List<Docente> docentes = new ArrayList<>();
 }

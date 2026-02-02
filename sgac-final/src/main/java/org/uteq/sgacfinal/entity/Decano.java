@@ -2,7 +2,6 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Entity

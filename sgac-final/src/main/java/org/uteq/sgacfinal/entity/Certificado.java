@@ -2,7 +2,6 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 
 @Entity
@@ -24,7 +23,7 @@ public class Certificado {
     private Ayudantia ayudantia;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario")
+    @JoinColumn(name = "id_usuario") // Nullable
     private Usuario usuario;
 
     @Column(name = "codigo_verificacion", length = 50)
@@ -36,7 +35,8 @@ public class Certificado {
     @Column(name = "total_horas_certificadas")
     private Integer totalHorasCertificadas;
 
-    @Column(name = "archivo", columnDefinition = "bytea")
+    //@Lob
+    @Column(name = "archivo")
     private byte[] archivo;
 
     @Column(name = "estado", length = 30)

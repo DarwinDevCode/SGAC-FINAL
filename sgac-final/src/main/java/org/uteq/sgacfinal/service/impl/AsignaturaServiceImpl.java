@@ -1,16 +1,16 @@
 package org.uteq.sgacfinal.service.impl;
 
-import org.uteq.sgacfinal.dto.AsignaturaDTO;
-import org.uteq.sgacfinal.dto.AsignaturaRequest;
-import org.uteq.sgacfinal.entity.Asignatura;
-import org.uteq.sgacfinal.entity.Carrera;
-import org.uteq.sgacfinal.exception.ResourceNotFoundException;
-import org.uteq.sgacfinal.repository.AsignaturaRepository;
-import org.uteq.sgacfinal.repository.CarreraRepository;
-import org.uteq.sgacfinal.service.AsignaturaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.AsignaturaRequestDTO;
+import org.uteq.sgacfinal.dto.Response.AsignaturaResponseDTO;
+import org.uteq.sgacfinal.entity.Asignatura;
+import org.uteq.sgacfinal.entity.Carrera;
+import org.uteq.sgacfinal.exception.ResourceNotFoundException; // Asumiendo que tienes una excepción personalizada o usa RuntimeException
+import org.uteq.sgacfinal.repository.AsignaturaRepository;
+import org.uteq.sgacfinal.repository.CarreraRepository;
+import org.uteq.sgacfinal.service.IAsignaturaService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,77 +18,81 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class AsignaturaServiceImpl implements AsignaturaService {
+public class AsignaturaServiceImpl implements IAsignaturaService {
 
     private final AsignaturaRepository asignaturaRepository;
     private final CarreraRepository carreraRepository;
 
     @Override
-    @Transactional(readOnly = true)
-    public List<AsignaturaDTO> findAll() {
-        return asignaturaRepository.findAll().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+    public AsignaturaResponseDTO crear(AsignaturaRequestDTO request) {
+        Integer idGenerado = asignaturaRepository.registrarAsignatura(
+                request.getIdCarrera(),
+                request.getNombreAsignatura(),
+                request.getSemestre()
+        );
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<AsignaturaDTO> findByCarrera(Integer idCarrera) {
-        return asignaturaRepository.findByCarreraIdCarrera(idCarrera).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public AsignaturaDTO findById(Integer id) {
-        Asignatura asignatura = asignaturaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Asignatura", "id", id));
-        return convertToDTO(asignatura);
-    }
-
-    @Override
-    public AsignaturaDTO create(AsignaturaRequest request) {
-        Carrera carrera = carreraRepository.findById(request.getIdCarrera())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera", "id", request.getIdCarrera()));
-        
-        Asignatura asignatura = Asignatura.builder()
-                .carrera(carrera)
-                .nombreAsignatura(request.getNombreAsignatura())
-                .semestre(request.getSemestre())
-                .build();
-        return convertToDTO(asignaturaRepository.save(asignatura));
-    }
-
-    @Override
-    public AsignaturaDTO update(Integer id, AsignaturaRequest request) {
-        Asignatura asignatura = asignaturaRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Asignatura", "id", id));
-        
-        Carrera carrera = carreraRepository.findById(request.getIdCarrera())
-                .orElseThrow(() -> new ResourceNotFoundException("Carrera", "id", request.getIdCarrera()));
-        
-        asignatura.setCarrera(carrera);
-        asignatura.setNombreAsignatura(request.getNombreAsignatura());
-        asignatura.setSemestre(request.getSemestre());
-        return convertToDTO(asignaturaRepository.save(asignatura));
-    }
-
-    @Override
-    public void delete(Integer id) {
-        if (!asignaturaRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Asignatura", "id", id);
+        if (idGenerado == -1) {
+            throw new RuntimeException("Error al crear la asignatura. Verifique que la carrera exista.");
         }
-        asignaturaRepository.deleteById(id);
+
+        return buscarPorId(idGenerado);
     }
 
-    private AsignaturaDTO convertToDTO(Asignatura asignatura) {
-        return AsignaturaDTO.builder()
-                .idAsignatura(asignatura.getIdAsignatura())
-                .idCarrera(asignatura.getCarrera().getIdCarrera())
-                .nombreCarrera(asignatura.getCarrera().getNombreCarrera())
-                .nombreAsignatura(asignatura.getNombreAsignatura())
-                .semestre(asignatura.getSemestre())
+    @Override
+    public AsignaturaResponseDTO actualizar(Integer id, AsignaturaRequestDTO request) {
+        Integer resultado = asignaturaRepository.actualizarAsignatura(
+                id,
+                request.getIdCarrera(),
+                request.getNombreAsignatura(),
+                request.getSemestre()
+        );
+
+        if (resultado == -1) {
+            throw new RuntimeException("Error al actualizar la asignatura.");
+        }
+
+        return buscarPorId(id);
+    }
+
+    @Override
+    public void desactivar(Integer id) {
+        Integer resultado = asignaturaRepository.desactivarAsignatura(id);
+        if (resultado == -1) {
+            throw new RuntimeException("Error al desactivar la asignatura.");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AsignaturaResponseDTO buscarPorId(Integer id) {
+        Asignatura asignatura = asignaturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Asignatura no encontrada con ID: " + id));
+        return mapearADTO(asignatura);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AsignaturaResponseDTO> listarTodas() {
+        return asignaturaRepository.findAll().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AsignaturaResponseDTO> listarPorCarrera(Integer idCarrera) {
+        return asignaturaRepository.findByCarrera_IdCarrera(idCarrera).stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    private AsignaturaResponseDTO mapearADTO(Asignatura entidad) {
+        return AsignaturaResponseDTO.builder()
+                .idAsignatura(entidad.getIdAsignatura())
+                .idCarrera(entidad.getCarrera().getIdCarrera())
+                .nombreCarrera(entidad.getCarrera().getNombreCarrera())
+                .nombreAsignatura(entidad.getNombreAsignatura())
+                .semestre(entidad.getSemestre())
                 .build();
     }
 }
