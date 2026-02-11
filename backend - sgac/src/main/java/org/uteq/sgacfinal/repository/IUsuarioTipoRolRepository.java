@@ -10,7 +10,7 @@ import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
 import java.util.List;
 
 @Repository
-public interface UsuarioTipoRolRepository extends JpaRepository<UsuarioTipoRol, UsuarioTipoRolId> {
+public interface IUsuarioTipoRolRepository extends JpaRepository<UsuarioTipoRol, UsuarioTipoRolId> {
 
     @Query(value = "SELECT public.sp_asignar_rol_usuario(:idUsuario, :idRol)", nativeQuery = true)
     Integer asignarRolUsuario(@Param("idUsuario") Integer idUsuario,

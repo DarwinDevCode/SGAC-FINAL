@@ -6,11 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.UsuarioTipoRolRequestDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioTipoRolResponseDTO;
 import org.uteq.sgacfinal.entity.Usuario;
-import org.uteq.sgacfinal.entity.UsuarioTipoRol;
-import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
+import org.uteq.sgacfinal.repository.IUsuariosRepository;
 import org.uteq.sgacfinal.repository.TipoRolRepository;
-import org.uteq.sgacfinal.repository.UsuarioRepository;
-import org.uteq.sgacfinal.repository.UsuarioTipoRolRepository;
+import org.uteq.sgacfinal.repository.IUsuarioTipoRolRepository;
 import org.uteq.sgacfinal.service.IUsuarioTipoRolService;
 
 import java.util.ArrayList;
@@ -21,13 +19,13 @@ import java.util.List;
 @Transactional
 public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
 
-    private final UsuarioTipoRolRepository usuarioTipoRolRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final IUsuarioTipoRolRepository IUsuarioTipoRolRepository;
+    private final IUsuariosRepository usuarioRepository;
     private final TipoRolRepository tipoRolRepository;
 
     @Override
     public UsuarioTipoRolResponseDTO asignarRol(UsuarioTipoRolRequestDTO request) {
-        Integer idUsuario = usuarioTipoRolRepository.asignarRolUsuario(
+        Integer idUsuario = IUsuarioTipoRolRepository.asignarRolUsuario(
                 request.getIdUsuario(),
                 request.getIdTipoRol()
         );
@@ -41,7 +39,7 @@ public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
 
     @Override
     public UsuarioTipoRolResponseDTO cambiarEstado(Integer idUsuario, Integer idRol, Boolean activo) {
-        Integer resultado = usuarioTipoRolRepository.actualizarEstadoRol(idUsuario, idRol, activo);
+        Integer resultado = IUsuarioTipoRolRepository.actualizarEstadoRol(idUsuario, idRol, activo);
         if (resultado == -1) {
             throw new RuntimeException("Error al cambiar estado del rol.");
         }
@@ -50,7 +48,7 @@ public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
 
     @Override
     public void revocarRol(Integer idUsuario, Integer idRol) {
-        Integer resultado = usuarioTipoRolRepository.desactivarRolUsuario(idUsuario, idRol);
+        Integer resultado = IUsuarioTipoRolRepository.desactivarRolUsuario(idUsuario, idRol);
         if (resultado == -1) {
             throw new RuntimeException("Error al revocar rol.");
         }
@@ -59,7 +57,7 @@ public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
     @Override
     @Transactional(readOnly = true)
     public List<UsuarioTipoRolResponseDTO> listarRolesPorUsuario(Integer idUsuario) {
-        List<Object[]> resultados = usuarioTipoRolRepository.obtenerRolesPorUsuarioSP(idUsuario);
+        List<Object[]> resultados = IUsuarioTipoRolRepository.obtenerRolesPorUsuarioSP(idUsuario);
         List<UsuarioTipoRolResponseDTO> listaDTO = new ArrayList<>();
 
         String nombreUsuario = usuarioRepository.findById(idUsuario)

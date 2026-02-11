@@ -1,4 +1,4 @@
-import http from "../config/http-common";
+import http from "../config/api.ts";
 import type { Customer } from "../types/Customer";
 import type { AxiosResponse } from "axios";
 

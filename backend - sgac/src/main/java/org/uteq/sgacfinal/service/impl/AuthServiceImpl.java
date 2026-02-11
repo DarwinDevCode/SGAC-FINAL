@@ -5,13 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.*;
 import org.uteq.sgacfinal.service.IAuthService;
-import org.uteq.sgacfinal.service.IEstudianteService;
-import org.uteq.sgacfinal.service.IUsuarioService;
-import org.uteq.sgacfinal.service.IUsuarioTipoRolService;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -19,6 +16,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class AuthServiceImpl implements IAuthService {
     private final IAuthRepository authRepository;
+    private final IUsuariosRepository usuarioRepository;
 
     @Override
     public UsuarioResponseDTO loginUsuario(LoginRequestDTO request) {
@@ -31,26 +29,35 @@ public class AuthServiceImpl implements IAuthService {
             throw new RuntimeException("Credenciales incorrectas o usuario inactivo.");
 
         Object[] row = resultados.get(0);
+        Integer idUsuario = (Integer) row[0];
 
-        String rolesConcatenados = (String) row[5];
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Error de integridad: Usuario no encontrado."));
 
-        if (rolesConcatenados == null || rolesConcatenados.isBlank())
-            throw new RuntimeException("El usuario no tiene roles asignados.");
+        List<TipoRolResponseDTO> listaRoles = usuario.getRoles().stream()
+                .map(utr -> TipoRolResponseDTO.builder()
+                        .idTipoRol(utr.getTipoRol().getIdTipoRol())
+                        .nombreTipoRol(utr.getTipoRol().getNombreTipoRol())
+                        .activo(utr.getActivo())
+                        .build())
+                .toList();
 
-        String[] arrayRoles = rolesConcatenados.split(",");
-
-        String rolPrincipal = arrayRoles[0];
-
-        List<String> listaRoles = List.of(arrayRoles);
+        String rolPrincipal = listaRoles.stream()
+                .filter(TipoRolResponseDTO::getActivo)
+                .map(TipoRolResponseDTO::getNombreTipoRol)
+                .findFirst()
+                .orElse("SIN_ROL");
 
         return UsuarioResponseDTO.builder()
-                .idUsuario((Integer) row[0])
-                .nombres((String) row[1])
-                .apellidos((String) row[2])
-                .correo((String) row[3])
-                .nombreUsuario((String) row[4])
+                .idUsuario(usuario.getIdUsuario())
+                .nombres(usuario.getNombres())
+                .apellidos(usuario.getApellidos())
+                .correo(usuario.getCorreo())
+                .nombreUsuario(usuario.getNombreUsuario())
                 .rolActual(rolPrincipal)
                 .roles(listaRoles)
+                .activo(usuario.getActivo())
                 .build();
+
     }
 }

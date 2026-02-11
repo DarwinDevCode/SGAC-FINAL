@@ -5,9 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.uteq.sgacfinal.dto.Response.AsignaturaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteResponseDTO;
-import org.uteq.sgacfinal.dto.Response.PeriodoAcademicoResponseDTO;
+import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.service.IRecursosConvocatoriaService;
 
 import java.util.List;
@@ -32,5 +30,15 @@ public class RecursosConvocatoriaController {
     @GetMapping("/periodos")
     public ResponseEntity<PeriodoAcademicoResponseDTO> getPeriodoActivo() {
         return ResponseEntity.ok(recursosService.obtenerPeriodoActivo());
+    }
+
+    @GetMapping("/facultades")
+    public ResponseEntity<List<FacultadResponseDTO>> listarFacultades() {
+        return ResponseEntity.ok(recursosService.listarFacultades());
+    }
+
+    @GetMapping("/carreras")
+    public ResponseEntity<List<CarreraResponseDTO>> listarCarreras() {
+        return ResponseEntity.ok(recursosService.listarCarreras());
     }
 }

@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.repository;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,7 +11,7 @@ import org.uteq.sgacfinal.entity.Usuario;
 import java.math.BigDecimal;
 
 @Repository
-public interface IRegistroUsuariosRepository extends JpaRepository<Usuario, Integer> {
+public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
 
     @Modifying
     @Query(value = "CALL public.sp_registrar_estudiante(:nombres, :apellidos, :cedula, :correo, :username, :password, :idCarrera, :matricula, :semestre)", nativeQuery = true)
@@ -92,4 +93,5 @@ public interface IRegistroUsuariosRepository extends JpaRepository<Usuario, Inte
     );
 
 
+    Remapper findByNombreUsuario(String nombreUsuario);
 }

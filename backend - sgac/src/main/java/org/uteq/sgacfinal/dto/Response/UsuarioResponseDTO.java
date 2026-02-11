@@ -16,7 +16,7 @@ public class UsuarioResponseDTO {
     private String correo;
     private String nombreUsuario;
     private String rolActual;
-    private List<String> roles;
+    private List<TipoRolResponseDTO> roles;
     private String token;
     private Boolean activo;
 }

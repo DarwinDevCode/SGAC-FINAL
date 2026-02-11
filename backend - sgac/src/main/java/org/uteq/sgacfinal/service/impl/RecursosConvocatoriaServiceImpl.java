@@ -3,15 +3,12 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Response.AsignaturaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteResponseDTO;
-import org.uteq.sgacfinal.dto.Response.PeriodoAcademicoResponseDTO;
+import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.entity.Asignatura;
 import org.uteq.sgacfinal.entity.Docente;
 import org.uteq.sgacfinal.entity.PeriodoAcademico;
-import org.uteq.sgacfinal.repository.IAsignaturaRepository;
-import org.uteq.sgacfinal.repository.DocenteRepository;
-import org.uteq.sgacfinal.repository.IPeriodoAcademicoRepository;
+import org.uteq.sgacfinal.repository.*;
+import org.uteq.sgacfinal.service.IPeriodoAcademicoService;
 import org.uteq.sgacfinal.service.IRecursosConvocatoriaService;
 
 import java.util.List;
@@ -24,6 +21,8 @@ public class RecursosConvocatoriaServiceImpl implements IRecursosConvocatoriaSer
     private final DocenteRepository docenteRepository;
     private final IAsignaturaRepository asignaturaRepository;
     private final IPeriodoAcademicoRepository periodoRepository;
+    private final FacultadRepository facultadRepository;
+    private final CarreraRepository carreraRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -69,5 +68,27 @@ public class RecursosConvocatoriaServiceImpl implements IRecursosConvocatoriaSer
                 .fechaFin(periodo.getFechaFin())
                 .estado(periodo.getEstado())
                 .build();
+    }
+
+    @Override
+    public List<FacultadResponseDTO> listarFacultades() {
+        return facultadRepository.findAll().stream()
+                .map(f -> FacultadResponseDTO.builder()
+                        .idFacultad(f.getIdFacultad())
+                        .nombreFacultad(f.getNombreFacultad())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CarreraResponseDTO> listarCarreras() {
+        return carreraRepository.findAll().stream()
+                .map(c -> CarreraResponseDTO.builder()
+                        .idCarrera(c.getIdCarrera())
+                        .nombreCarrera(c.getNombreCarrera())
+                        .idFacultad(c.getFacultad().getIdFacultad())
+                        .nombreFacultad(c.getFacultad().getNombreFacultad())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
