@@ -95,6 +95,7 @@ public class AuthController {
         return ResponseEntity.noContent().build();
     }
 
+
     @PatchMapping("/{idUsuario}/roles/{idRol}/estado")
     public ResponseEntity<Void> cambiarEstadoRol(
             @PathVariable Integer idUsuario,

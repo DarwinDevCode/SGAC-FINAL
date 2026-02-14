@@ -35,7 +35,6 @@ public class Certificado {
     @Column(name = "total_horas_certificadas")
     private Integer totalHorasCertificadas;
 
-    //@Lob
     @Column(name = "archivo")
     private byte[] archivo;
 

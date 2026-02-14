@@ -11,7 +11,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class AsignaturaRequestDTO {
-
     @NotNull(message = "La carrera es obligatoria")
     private Integer idCarrera;
 
@@ -21,4 +20,6 @@ public class AsignaturaRequestDTO {
     @NotNull(message = "El semestre es obligatorio")
     @Min(value = 1, message = "El semestre debe ser mayor a 0")
     private Integer semestre;
+
+
 }

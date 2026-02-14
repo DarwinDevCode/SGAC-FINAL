@@ -18,14 +18,14 @@ import org.uteq.sgacfinal.security.UsuarioPrincipal;
 public class ApplicationConfig {
 
     private final IUsuariosRepository repository;
-
+//
 //    @Bean
 //    public UserDetailsService userDetailsService() {
 //        return username -> repository.findByNombreUsuario((username)
 //                .map(UsuarioPrincipal::new)
 //                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
 //    }
-
+//
 //    @Bean
 //    public AuthenticationProvider authenticationProvider() {
 //        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
