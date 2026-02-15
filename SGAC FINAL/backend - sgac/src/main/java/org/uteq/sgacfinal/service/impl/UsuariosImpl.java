@@ -117,7 +117,7 @@ public class UsuariosImpl implements IUsuariosService {
 
     @Override
     public List<UsuarioResponseDTO> listarTodos() {
-        return usuarioRepository.findAll().stream()
+        return usuarioRepository.findAllWithRolesAndTipoRol().stream()
                 .map(u -> UsuarioResponseDTO.builder()
                         .idUsuario(u.getIdUsuario())
                         .nombres(u.getNombres())
