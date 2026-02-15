@@ -1,0 +1,82 @@
+<main class="login-main">
+  <div class="login-card">
+
+    <div *ngIf="view === 'login'">
+      <div class="p-8 header-container">
+        <h3 class="title">Bienvenido de nuevo</h3>
+        <p class="subtitle">Introduzca sus credenciales para acceder a su cuenta.</p>
+      </div>
+
+      <div class="p-8 pt-0">
+        <form (ngSubmit)="handleLogin()" class="form-container">
+          <div class="space-y-2">
+            <label for="identifier">Nombre de usuario o correo</label>
+            <input
+              id="identifier"
+              name="identifier"
+              [(ngModel)]="identifier"
+              type="text"
+              placeholder="usuario o correo@ejemplo.com"
+              class="input-field"
+              required
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label for="password">Contraseña</label>
+            <div class="relative">
+              <input
+                id="password"
+                name="password"
+                [(ngModel)]="password"
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="••••••••"
+                class="input-field"
+                required
+              />
+
+              <button type="button" class="password-toggle" (click)="showPassword = !showPassword">
+                <lucide-icon [name]="showPassword ? 'EyeOff' : 'Eye'" size="20"></lucide-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="options-row">
+            <div class="remember-me">
+              <input type="checkbox" id="remember-me" name="remember" />
+              <label for="remember-me" style="font-weight: 400;">Recordar contraseña</label>
+            </div>
+            <button type="button" class="link-button" (click)="view = 'forgot-password'">
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+
+          <button type="submit" class="btn-primary" [disabled]="loading">
+            <span *ngIf="loading">Iniciando sesión...</span>
+            <span *ngIf="!loading">Login</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="view === 'forgot-password'">
+      <div class="p-8 header-container">
+        <h3 class="title">¿Olvidaste tu contraseña?</h3>
+        <p class="subtitle">Le enviaremos instrucciones para restablecerla.</p>
+      </div>
+      <div class="p-8 pt-0">
+        <form (ngSubmit)="handleForgotPassword()" class="form-container">
+          <div class="space-y-2">
+            <label for="reset-email">Email</label>
+            <input id="reset-email" name="resetEmail" type="email" placeholder="name@example.com" class="input-field" required />
+          </div>
+          <button type="submit" class="btn-primary">Enviar instrucciones</button>
+          <button type="button" class="link-button" style="text-align: center; margin-top: 10px;" (click)="view = 'login'">
+            Volver al inicio de sesión
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</main>

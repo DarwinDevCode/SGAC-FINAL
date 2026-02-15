@@ -1,0 +1,89 @@
+<div class="gestion-container">
+  <div class="search-card">
+    <input type="text" [ngModel]="busqueda()" (ngModelChange)="filtrarUsuarios($event)" placeholder="Buscar..." class="input-field">
+  </div>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Roles</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="3">Cargando...</td></tr>
+        } @else {
+          @for (user of usuariosFiltrados; track user.idUsuario) {
+            <tr>
+              <td>{{ user.nombres }} {{ user.apellidos }}</td>
+              <td>
+                <div class="roles-wrapper">
+                  @for (rol of user.roles; track rol.idTipoRol) {
+                    <button type="button" (click)="toggleEstadoRol(user, rol)" [class.active]="rol.activo" class="badge-rol">
+                      {{ rol.nombreTipoRol }}
+                    </button>
+                  }
+                </div>
+              </td>
+              <td class="text-right">
+                <button type="button" (click)="toggleEstado(user)"><lucide-icon name="Power" size="18"></lucide-icon></button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4">No hay registros</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (mostrarModal()) {
+    <div class="modal-backdrop">
+      <div class="modal-box">
+        <form (submit)="guardarUsuario(); $event.preventDefault()">
+          <div class="form-group">
+            <label>Rol</label>
+            <select [(ngModel)]="form.roles[0]" name="rol" class="input-field">
+              <option value="ESTUDIANTE">Estudiante</option>
+              <option value="DOCENTE">Docente</option>
+              <option value="COORDINADOR">Coordinador</option>
+              <option value="DECANO">Decano</option>
+            </select>
+          </div>
+
+          @if (getEsEstudiante()) {
+            <div class="form-group">
+              <label>Carrera</label>
+              <select [(ngModel)]="form.idCarrera" name="idCarrera" class="input-field">
+                <option [ngValue]="undefined">Seleccione carrera</option>
+                @for (c of listaCarreras; track c.idCarrera) {
+                  <option [value]="c.idCarrera">{{ c.nombreCarrera }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (getEsDecano()) {
+            <div class="form-group">
+              <label>Facultad</label>
+              <select [(ngModel)]="form.idFacultad" name="idFacultad" class="input-field">
+                <option [ngValue]="undefined">Seleccione facultad</option>
+                @for (f of listaFacultades; track f.idFacultad) {
+                  <option [value]="f.idFacultad">{{ f.nombreFacultad }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          <div class="form-footer">
+            <button type="button" (click)="mostrarModal.set(false)">Cancelar</button>
+            <button type="submit">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
