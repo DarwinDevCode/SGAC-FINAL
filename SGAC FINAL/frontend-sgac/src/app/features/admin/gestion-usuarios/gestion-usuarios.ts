@@ -123,9 +123,13 @@ export class GestionUsuariosComponent implements OnInit, OnDestroy {
           this.cargarDatos();
         },
         error: (error: any) => {
-          const msg = error?.error?.mensaje || '';
-          if (msg.toLowerCase().includes('duplicate')) {
+          const msg = (error?.error?.mensaje || '').toLowerCase();
+          if (msg.includes('duplicate') || msg.includes('duplic')) {
             alert('Error: Ya existe un usuario con esa cédula, correo o matrícula.');
+            return;
+          }
+          if (msg.includes('permission denied to create role')) {
+            alert('Error de permisos en base de datos: revise CREATEROLE/SECURITY DEFINER para role_administrador (guía: backend - sgac/docs/sql/permisos_role_administrador.sql).');
             return;
           }
           alert('Error al registrar: verifique los datos.');
