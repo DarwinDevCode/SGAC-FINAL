@@ -33,9 +33,30 @@ public class UsuariosImpl implements IUsuariosService {
             throw new IllegalStateException("No hay usuario autenticado para aplicar rol de BD");
         }
 
+        String appRole = UserContext.getAppRole();
+        String dbRole = resolveDbRole(username, appRole);
+
         entityManager.createNativeQuery("SELECT set_config('role', :rol, true)")
-                .setParameter("rol", username.toLowerCase())
+                .setParameter("rol", dbRole)
                 .getSingleResult();
+    }
+
+    private String resolveDbRole(String username, String appRole) {
+        if (appRole == null || appRole.isBlank()) {
+            return username.toLowerCase();
+        }
+
+        return switch (appRole.toUpperCase()) {
+            // IMPORTANTE: atributos como CREATEROLE NO se heredan por membresía de rol.
+            // Para CREATE USER/ROLE debemos asumir el rol con atributo explícito.
+            case "ADMINISTRADOR" -> "role_administrador";
+            case "DECANO" -> "role_decano";
+            case "COORDINADOR" -> "role_coordinador";
+            case "DOCENTE" -> "role_docente";
+            case "ESTUDIANTE" -> "role_estudiante";
+            case "AYUDANTE_CATEDRA" -> "role_ayudante_catedra";
+            default -> username.toLowerCase();
+        };
     }
 
     @Override

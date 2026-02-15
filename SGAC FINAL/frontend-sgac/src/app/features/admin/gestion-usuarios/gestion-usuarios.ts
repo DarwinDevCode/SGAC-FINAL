@@ -129,7 +129,7 @@ export class GestionUsuariosComponent implements OnInit, OnDestroy {
             return;
           }
           if (msg.includes('permission denied to create role')) {
-            alert('Error de permisos en base de datos: el usuario de conexión no puede crear roles. Configure SECURITY DEFINER o privilegios/grants adecuados.');
+            alert('Error de permisos en base de datos: revise CREATEROLE/SECURITY DEFINER para role_administrador (guía: backend - sgac/docs/sql/permisos_role_administrador.sql).');
             return;
           }
           alert('Error al registrar: verifique los datos.');

@@ -44,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         jwt = authHeader.substring(7);
         username = jwtService.extractUsername(jwt);
+        String appRole = jwtService.extractClaim(jwt, claims -> claims.get("rol", String.class));
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
@@ -57,8 +58,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                // Activar Impersonación de BD
+                // Activar contexto para impersonación de BD
                 UserContext.setUsername(username);
+                UserContext.setAppRole(appRole);
             }
         }
 
