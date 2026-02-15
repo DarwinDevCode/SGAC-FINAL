@@ -110,7 +110,7 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
             FROM Usuario u
             LEFT JOIN FETCH u.roles r
             LEFT JOIN FETCH r.tipoRol
-            """)
+""")
     List<Usuario> findAllWithRolesAndTipoRol();
 
 }
