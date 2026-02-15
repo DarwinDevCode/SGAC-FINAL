@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.uteq.sgacfinal.entity.Usuario;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -94,5 +95,13 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
 
 
     Optional<Usuario> findByNombreUsuario(String nombreUsuario);
+
+    @Query("""
+            SELECT DISTINCT u
+            FROM Usuario u
+            LEFT JOIN FETCH u.roles r
+            LEFT JOIN FETCH r.tipoRol
+            """)
+    List<Usuario> findAllWithRolesAndTipoRol();
 
 }
