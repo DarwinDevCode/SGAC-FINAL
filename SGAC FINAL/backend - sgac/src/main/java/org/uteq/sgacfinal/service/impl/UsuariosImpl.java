@@ -1,11 +1,13 @@
 package org.uteq.sgacfinal.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
+import org.uteq.sgacfinal.config.UserContext;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.entity.UsuarioTipoRol;
 import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
@@ -23,9 +25,23 @@ import java.util.stream.Collectors;
 public class UsuariosImpl implements IUsuariosService {
     private final IUsuariosRepository usuarioRepository;
     private final IUsuarioTipoRolRepository usuarioTipoRolRepository;
+    private final EntityManager entityManager;
+
+    private void applyCurrentDbRole() {
+        String username = UserContext.getUsername();
+        if (username == null || username.isBlank()) {
+            throw new IllegalStateException("No hay usuario autenticado para aplicar rol de BD");
+        }
+
+        entityManager.createNativeQuery("SELECT set_config('role', :rol, true)")
+                .setParameter("rol", username.toLowerCase())
+                .getSingleResult();
+    }
+
     @Override
     @Transactional
     public void registrarEstudiante(RegistroEstudianteRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarEstudiante(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -41,6 +57,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarDocente(RegistroDocenteRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarDocente(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -54,6 +71,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarDecano(RegistroDecanoRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarDecano(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -68,6 +86,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarCoordinador(RegistroCoordinadorRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarCoordinador(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -82,6 +101,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarAdministrador(RegistroAdministradorRequest dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarAdministrador(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -95,6 +115,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarAyudanteDirecto(RegistroAyudanteCatedraRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarAyudanteDirecto(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -109,6 +130,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void promoverEstudiante(PromoverEstudianteAyudanteRequest dto) {
+        applyCurrentDbRole();
         usuarioRepository.promoverEstudianteAAyudante(
                 dto.getUsername(),
                 dto.getHorasAsignadas()
@@ -117,6 +139,7 @@ public class UsuariosImpl implements IUsuariosService {
 
     @Override
     public List<UsuarioResponseDTO> listarTodos() {
+        applyCurrentDbRole();
         return usuarioRepository.findAllWithRolesAndTipoRol().stream()
                 .map(u -> UsuarioResponseDTO.builder()
                         .idUsuario(u.getIdUsuario())
