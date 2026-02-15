@@ -15,7 +15,6 @@ import org.uteq.sgacfinal.repository.IUsuarioTipoRolRepository;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
 import org.uteq.sgacfinal.service.IUsuariosService;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.entity.TipoRol;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,8 +46,6 @@ public class UsuariosImpl implements IUsuariosService {
         }
 
         return switch (appRole.toUpperCase()) {
-            // IMPORTANTE: atributos como CREATEROLE NO se heredan por membresía de rol.
-            // Para CREATE USER/ROLE debemos asumir el rol con atributo explícito.
             case "ADMINISTRADOR" -> "role_administrador";
             case "DECANO" -> "role_decano";
             case "COORDINADOR" -> "role_coordinador";
