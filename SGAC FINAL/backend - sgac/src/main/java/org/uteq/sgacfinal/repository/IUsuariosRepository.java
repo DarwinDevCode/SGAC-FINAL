@@ -101,6 +101,15 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
             FROM Usuario u
             LEFT JOIN FETCH u.roles r
             LEFT JOIN FETCH r.tipoRol
+            WHERE u.nombreUsuario = :nombreUsuario
+            """)
+    Optional<Usuario> findByNombreUsuarioWithRolesAndTipoRol(@Param("nombreUsuario") String nombreUsuario);
+
+    @Query("""
+            SELECT DISTINCT u
+            FROM Usuario u
+            LEFT JOIN FETCH u.roles r
+            LEFT JOIN FETCH r.tipoRol
             """)
     List<Usuario> findAllWithRolesAndTipoRol();
 
