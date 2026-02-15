@@ -36,8 +36,8 @@ public class UsuariosImpl implements IUsuariosService {
         String appRole = UserContext.getAppRole();
         String dbRole = resolveDbRole(username, appRole);
 
-        entityManager.createNativeQuery("SELECT set_config('role', :rol, true)")
-                .setParameter("rol", dbRole)
+        entityManager.createNativeQuery("SELECT set_config('role', ?1, true)")
+                .setParameter(1, dbRole)
                 .getSingleResult();
     }
 
