@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     @Transactional
     public UserDetailsService userDetailsService() {
-        return username -> usuarioRepository.findByNombreUsuarioWithRolesAndTipoRol(username)
+        return username -> usuarioRepository.findByNombreUsuario(username)
                 .map(UsuarioPrincipal::new)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
     }
