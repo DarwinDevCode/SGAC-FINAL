@@ -1,0 +1,679 @@
+Consola de intellij idea:
+"C:\Program Files\Java\jdk-25\bin\java.exe" -XX:TieredStopAtLevel=1 -Dspring.output.ansi.enabled=always -Dcom.sun.management.jmxremote -Dspring.jmx.enabled=true -Dspring.liveBeansView.mbeanDomain -Dspring.application.admin.enabled=true "-Dmanagement.endpoints.jmx.exposure.include=*" "-javaagent:C:\Users\Darwin Sánchez\AppData\Local\Programs\IntelliJ IDEA 2025.2.5\lib\idea_rt.jar=49864" -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath "C:\SGAC-FINAL\SGAC FINAL\backend - sgac\target\classes;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-data-jpa\4.0.2\spring-boot-starter-data-jpa-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter\4.0.2\spring-boot-starter-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-logging\4.0.2\spring-boot-starter-logging-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\ch\qos\logback\logback-classic\1.5.25\logback-classic-1.5.25.jar;C:\Users\Darwin Sánchez\.m2\repository\ch\qos\logback\logback-core\1.5.25\logback-core-1.5.25.jar;C:\Users\Darwin Sánchez\.m2\repository\org\apache\logging\log4j\log4j-to-slf4j\2.25.3\log4j-to-slf4j-2.25.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\apache\logging\log4j\log4j-api\2.25.3\log4j-api-2.25.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\slf4j\jul-to-slf4j\2.0.17\jul-to-slf4j-2.0.17.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\annotation\jakarta.annotation-api\3.0.0\jakarta.annotation-api-3.0.0.jar;C:\Users\Darwin Sánchez\.m2\repository\org\yaml\snakeyaml\2.5\snakeyaml-2.5.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-jdbc\4.0.2\spring-boot-starter-jdbc-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\com\zaxxer\HikariCP\7.0.2\HikariCP-7.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\slf4j\slf4j-api\2.0.17\slf4j-api-2.0.17.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-data-jpa\4.0.2\spring-boot-data-jpa-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-data-commons\4.0.2\spring-boot-data-commons-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-persistence\4.0.2\spring-boot-persistence-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\data\spring-data-commons\4.0.2\spring-data-commons-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-hibernate\4.0.2\spring-boot-hibernate-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-jpa\4.0.2\spring-boot-jpa-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\persistence\jakarta.persistence-api\3.2.0\jakarta.persistence-api-3.2.0.jar;C:\Users\Darwin Sánchez\.m2\repository\org\hibernate\orm\hibernate-core\7.2.1.Final\hibernate-core-7.2.1.Final.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\transaction\jakarta.transaction-api\2.0.1\jakarta.transaction-api-2.0.1.jar;C:\Users\Darwin Sánchez\.m2\repository\org\hibernate\models\hibernate-models\1.0.1\hibernate-models-1.0.1.jar;C:\Users\Darwin Sánchez\.m2\repository\org\glassfish\jaxb\jaxb-runtime\4.0.6\jaxb-runtime-4.0.6.jar;C:\Users\Darwin Sánchez\.m2\repository\org\glassfish\jaxb\jaxb-core\4.0.6\jaxb-core-4.0.6.jar;C:\Users\Darwin Sánchez\.m2\repository\org\eclipse\angus\angus-activation\2.0.3\angus-activation-2.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\glassfish\jaxb\txw2\4.0.6\txw2-4.0.6.jar;C:\Users\Darwin Sánchez\.m2\repository\com\sun\istack\istack-commons-runtime\4.1.2\istack-commons-runtime-4.1.2.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\inject\jakarta.inject-api\2.0.1\jakarta.inject-api-2.0.1.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-orm\7.0.3\spring-orm-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\data\spring-data-jpa\4.0.2\spring-data-jpa-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-tx\7.0.3\spring-tx-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\antlr\antlr4-runtime\4.13.2\antlr4-runtime-4.13.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-aspects\7.0.3\spring-aspects-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\aspectj\aspectjweaver\1.9.25.1\aspectjweaver-1.9.25.1.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-jdbc\4.0.2\spring-boot-jdbc-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-sql\4.0.2\spring-boot-sql-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-transaction\4.0.2\spring-boot-transaction-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-jdbc\7.0.3\spring-jdbc-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-validation\4.0.2\spring-boot-starter-validation-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-validation\4.0.2\spring-boot-validation-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\apache\tomcat\embed\tomcat-embed-el\11.0.15\tomcat-embed-el-11.0.15.jar;C:\Users\Darwin Sánchez\.m2\repository\org\hibernate\validator\hibernate-validator\9.0.1.Final\hibernate-validator-9.0.1.Final.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\validation\jakarta.validation-api\3.1.1\jakarta.validation-api-3.1.1.jar;C:\Users\Darwin Sánchez\.m2\repository\org\jboss\logging\jboss-logging\3.6.1.Final\jboss-logging-3.6.1.Final.jar;C:\Users\Darwin Sánchez\.m2\repository\com\fasterxml\classmate\1.7.3\classmate-1.7.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-webmvc\4.0.2\spring-boot-starter-webmvc-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-jackson\4.0.2\spring-boot-starter-jackson-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-jackson\4.0.2\spring-boot-jackson-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\tools\jackson\core\jackson-databind\3.0.4\jackson-databind-3.0.4.jar;C:\Users\Darwin Sánchez\.m2\repository\tools\jackson\core\jackson-core\3.0.4\jackson-core-3.0.4.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-tomcat\4.0.2\spring-boot-starter-tomcat-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-tomcat-runtime\4.0.2\spring-boot-starter-tomcat-runtime-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\apache\tomcat\embed\tomcat-embed-core\11.0.15\tomcat-embed-core-11.0.15.jar;C:\Users\Darwin Sánchez\.m2\repository\org\apache\tomcat\embed\tomcat-embed-websocket\11.0.15\tomcat-embed-websocket-11.0.15.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-tomcat\4.0.2\spring-boot-tomcat-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-http-converter\4.0.2\spring-boot-http-converter-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-web\7.0.3\spring-web-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\io\micrometer\micrometer-observation\1.16.2\micrometer-observation-1.16.2.jar;C:\Users\Darwin Sánchez\.m2\repository\io\micrometer\micrometer-commons\1.16.2\micrometer-commons-1.16.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-webmvc\4.0.2\spring-boot-webmvc-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-servlet\4.0.2\spring-boot-servlet-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-webmvc\7.0.3\spring-webmvc-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-expression\7.0.3\spring-expression-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-devtools\4.0.2\spring-boot-devtools-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot\4.0.2\spring-boot-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-core\7.0.3\spring-core-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\commons-logging\commons-logging\1.3.5\commons-logging-1.3.5.jar;C:\Users\Darwin Sánchez\.m2\repository\org\jspecify\jspecify\1.0.0\jspecify-1.0.0.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-context\7.0.3\spring-context-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-autoconfigure\4.0.2\spring-boot-autoconfigure-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\postgresql\postgresql\42.7.9\postgresql-42.7.9.jar;C:\Users\Darwin Sánchez\.m2\repository\org\checkerframework\checker-qual\3.52.0\checker-qual-3.52.0.jar;C:\Users\Darwin Sánchez\.m2\repository\org\projectlombok\lombok\1.18.42\lombok-1.18.42.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\xml\bind\jakarta.xml.bind-api\4.0.4\jakarta.xml.bind-api-4.0.4.jar;C:\Users\Darwin Sánchez\.m2\repository\jakarta\activation\jakarta.activation-api\2.1.4\jakarta.activation-api-2.1.4.jar;C:\Users\Darwin Sánchez\.m2\repository\net\bytebuddy\byte-buddy\1.17.8\byte-buddy-1.17.8.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-web-server\4.0.2\spring-boot-web-server-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\modelmapper\modelmapper\3.2.4\modelmapper-3.2.4.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-starter-security\4.0.2\spring-boot-starter-security-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\boot\spring-boot-security\4.0.2\spring-boot-security-4.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\security\spring-security-config\7.0.2\spring-security-config-7.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\security\spring-security-core\7.0.2\spring-security-core-7.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\security\spring-security-web\7.0.2\spring-security-web-7.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-aop\7.0.3\spring-aop-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\spring-beans\7.0.3\spring-beans-7.0.3.jar;C:\Users\Darwin Sánchez\.m2\repository\org\springframework\security\spring-security-crypto\7.0.2\spring-security-crypto-7.0.2.jar;C:\Users\Darwin Sánchez\.m2\repository\io\jsonwebtoken\jjwt-api\0.11.5\jjwt-api-0.11.5.jar;C:\Users\Darwin Sánchez\.m2\repository\io\jsonwebtoken\jjwt-impl\0.11.5\jjwt-impl-0.11.5.jar;C:\Users\Darwin Sánchez\.m2\repository\io\jsonwebtoken\jjwt-jackson\0.11.5\jjwt-jackson-0.11.5.jar;C:\Users\Darwin Sánchez\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.20.2\jackson-databind-2.20.2.jar;C:\Users\Darwin Sánchez\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.20\jackson-annotations-2.20.jar;C:\Users\Darwin Sánchez\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.20.2\jackson-core-2.20.2.jar" org.uteq.sgacfinal.SgacFinalApplication
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.2)
+
+2026-02-15T14:38:02.739-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.uteq.sgacfinal.SgacFinalApplication    : Starting SgacFinalApplication using Java 25.0.1 with PID 30688 (C:\SGAC-FINAL\SGAC FINAL\backend - sgac\target\classes started by Darwin Sánchez in C:\SGAC-FINAL\SGAC FINAL)
+2026-02-15T14:38:02.741-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.uteq.sgacfinal.SgacFinalApplication    : No active profile set, falling back to 1 default profile: "default"
+2026-02-15T14:38:02.775-05:00  INFO 30688 --- [sgac-final] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-02-15T14:38:02.775-05:00  INFO 30688 --- [sgac-final] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-02-15T14:38:03.308-05:00  INFO 30688 --- [sgac-final] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-02-15T14:38:03.410-05:00  INFO 30688 --- [sgac-final] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 95 ms. Found 33 JPA repository interfaces.
+2026-02-15T14:38:03.761-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat initialized with port 8080 (http)
+2026-02-15T14:38:03.770-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-15T14:38:03.770-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-02-15T14:38:03.796-05:00  INFO 30688 --- [sgac-final] [  restartedMain] b.w.c.s.WebApplicationContextInitializer : Root WebApplicationContext: initialization completed in 1021 ms
+2026-02-15T14:38:03.867-05:00  INFO 30688 --- [sgac-final] [  restartedMain] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-02-15T14:38:03.900-05:00  INFO 30688 --- [sgac-final] [  restartedMain] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.1.Final
+2026-02-15T14:38:04.194-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-02-15T14:38:04.214-05:00  INFO 30688 --- [sgac-final] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-02-15T14:38:04.312-05:00  INFO 30688 --- [sgac-final] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5aa5033e
+2026-02-15T14:38:04.313-05:00  INFO 30688 --- [sgac-final] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-02-15T14:38:04.333-05:00  WARN 30688 --- [sgac-final] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-02-15T14:38:04.349-05:00  INFO 30688 --- [sgac-final] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:postgresql://localhost:5432/SGAC-FINAL]
+	Database driver: PostgreSQL JDBC Driver
+	Database dialect: PostgreSQLDialect
+	Database version: 18.1
+	Default catalog/schema: SGAC-FINAL/public
+	Autocommit mode: undefined/unknown
+	Isolation level: READ_COMMITTED [default READ_COMMITTED]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-02-15T14:38:05.368-05:00  INFO 30688 --- [sgac-final] [  restartedMain] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-02-15T14:38:05.408-05:00  INFO 30688 --- [sgac-final] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-02-15T14:38:05.451-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-02-15T14:38:05.712-05:00  INFO 30688 --- [sgac-final] [  restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-02-15T14:38:05.713-05:00  WARN 30688 --- [sgac-final] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2026-02-15T14:38:06.243-05:00  WARN 30688 --- [sgac-final] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-02-15T14:38:06.353-05:00 DEBUG 30688 --- [sgac-final] [  restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, JwtAuthenticationFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2026-02-15T14:38:06.597-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.s.boot.tomcat.TomcatWebServer          : Tomcat started on port 8080 (http) with context path '/'
+2026-02-15T14:38:06.600-05:00  INFO 30688 --- [sgac-final] [  restartedMain] o.uteq.sgacfinal.SgacFinalApplication    : Started SgacFinalApplication in 4.108 seconds (process running for 4.533)
+2026-02-15T14:38:24.953-05:00  INFO 30688 --- [sgac-final] [nio-8080-exec-3] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-15T14:38:24.958-05:00  INFO 30688 --- [sgac-final] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-15T14:38:24.958-05:00  INFO 30688 --- [sgac-final] [nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-02-15T14:38:24.972-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/auth/login
+2026-02-15T14:38:24.993-05:00 DEBUG 30688 --- [sgac-final] [io-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/auth/login
+2026-02-15T14:38:25.133-05:00 DEBUG 30688 --- [sgac-final] [io-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+2026-02-15T14:38:25.163-05:00 DEBUG 30688 --- [sgac-final] [io-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+Hibernate: 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+2026-02-15T14:38:25.182-05:00 ERROR 30688 --- [sgac-final] [io-8080-exec-10] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+
+org.hibernate.LazyInitializationException: Could not initialize proxy [org.uteq.sgacfinal.entity.TipoRol#6] - no session
+	at org.hibernate.proxy.AbstractLazyInitializer.initialize(AbstractLazyInitializer.java:170) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.AbstractLazyInitializer.getImplementation(AbstractLazyInitializer.java:323) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor.intercept(ByteBuddyInterceptor.java:42) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.ProxyConfiguration$InterceptorDispatcher.intercept(ProxyConfiguration.java:95) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.uteq.sgacfinal.entity.TipoRol$HibernateProxy.getNombreTipoRol(Unknown Source) ~[classes/:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.lambda$getAuthorities$0(UsuarioPrincipal.java:46) ~[classes/:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.Iterator.forEachRemaining(Iterator.java:133) ~[na:na]
+	at java.base/java.util.Spliterators$IteratorSpliterator.forEachRemaining(Spliterators.java:1939) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:723) ~[na:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.getAuthorities(UsuarioPrincipal.java:47) ~[classes/:na]
+	at org.uteq.sgacfinal.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:55) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1778) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+
+2026-02-15T14:38:25.193-05:00 DEBUG 30688 --- [sgac-final] [io-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-02-15T14:38:25.193-05:00 DEBUG 30688 --- [sgac-final] [io-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-15T14:38:25.193-05:00 DEBUG 30688 --- [sgac-final] [io-8080-exec-10] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2026-02-15T14:38:38.640-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/auth/login
+2026-02-15T14:38:38.644-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/auth/login
+2026-02-15T14:38:38.644-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-15T14:38:38.644-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/auth/login
+2026-02-15T14:38:38.726-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+2026-02-15T14:38:38.729-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+Hibernate: 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+2026-02-15T14:38:38.736-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        tr1_0.id_tipo_rol,
+        tr1_0.activo,
+        tr1_0.nombre_tipo_rol 
+    from
+        tipo_rol tr1_0 
+    where
+        tr1_0.id_tipo_rol=?
+Hibernate: 
+    select
+        tr1_0.id_tipo_rol,
+        tr1_0.activo,
+        tr1_0.nombre_tipo_rol 
+    from
+        tipo_rol tr1_0 
+    where
+        tr1_0.id_tipo_rol=?
+2026-02-15T14:38:38.757-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-5] org.hibernate.SQL                        : 
+    SELECT
+        * 
+    FROM
+        public.fn_login_sgac(?, ?)
+Hibernate: 
+    SELECT
+        * 
+    FROM
+        public.fn_login_sgac(?, ?)
+2026-02-15T14:38:40.114-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/auth
+2026-02-15T14:38:40.115-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/recursos/facultades
+2026-02-15T14:38:40.115-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/recursos/carreras
+2026-02-15T14:38:40.116-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/auth
+2026-02-15T14:38:40.117-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/recursos/facultades
+2026-02-15T14:38:40.118-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/recursos/carreras
+2026-02-15T14:38:40.119-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+2026-02-15T14:38:40.120-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+Hibernate: 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+2026-02-15T14:38:40.121-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+2026-02-15T14:38:40.122-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+Hibernate: 
+    select
+        u1_0.id_usuario,
+        u1_0.activo,
+        u1_0.apellidos,
+        u1_0.cedula,
+        u1_0.contrasenia_usuario,
+        u1_0.correo,
+        u1_0.fecha_creacion,
+        u1_0.nombre_usuario,
+        u1_0.nombres 
+    from
+        usuario u1_0 
+    where
+        u1_0.nombre_usuario=?
+2026-02-15T14:38:40.124-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+Hibernate: 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+2026-02-15T14:38:40.125-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+Hibernate: 
+    select
+        r1_0.id_usuario,
+        r1_0.id_tipo_rol,
+        r1_0.activo,
+        r1_0.fecha_creacion 
+    from
+        usuario_tipo_rol r1_0 
+    where
+        r1_0.id_usuario=?
+2026-02-15T14:38:40.126-05:00 ERROR 30688 --- [sgac-final] [nio-8080-exec-7] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+
+org.hibernate.LazyInitializationException: Could not initialize proxy [org.uteq.sgacfinal.entity.TipoRol#6] - no session
+	at org.hibernate.proxy.AbstractLazyInitializer.initialize(AbstractLazyInitializer.java:170) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.AbstractLazyInitializer.getImplementation(AbstractLazyInitializer.java:323) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor.intercept(ByteBuddyInterceptor.java:42) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.ProxyConfiguration$InterceptorDispatcher.intercept(ProxyConfiguration.java:95) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.uteq.sgacfinal.entity.TipoRol$HibernateProxy.getNombreTipoRol(Unknown Source) ~[classes/:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.lambda$getAuthorities$0(UsuarioPrincipal.java:46) ~[classes/:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.Iterator.forEachRemaining(Iterator.java:133) ~[na:na]
+	at java.base/java.util.Spliterators$IteratorSpliterator.forEachRemaining(Spliterators.java:1939) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:723) ~[na:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.getAuthorities(UsuarioPrincipal.java:47) ~[classes/:na]
+	at org.uteq.sgacfinal.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:55) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1778) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+
+2026-02-15T14:38:40.127-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-02-15T14:38:40.127-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-15T14:38:40.127-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-7] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2026-02-15T14:38:40.129-05:00 ERROR 30688 --- [sgac-final] [nio-8080-exec-1] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+
+org.hibernate.LazyInitializationException: Could not initialize proxy [org.uteq.sgacfinal.entity.TipoRol#6] - no session
+	at org.hibernate.proxy.AbstractLazyInitializer.initialize(AbstractLazyInitializer.java:170) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.AbstractLazyInitializer.getImplementation(AbstractLazyInitializer.java:323) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor.intercept(ByteBuddyInterceptor.java:42) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.ProxyConfiguration$InterceptorDispatcher.intercept(ProxyConfiguration.java:95) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.uteq.sgacfinal.entity.TipoRol$HibernateProxy.getNombreTipoRol(Unknown Source) ~[classes/:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.lambda$getAuthorities$0(UsuarioPrincipal.java:46) ~[classes/:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.Iterator.forEachRemaining(Iterator.java:133) ~[na:na]
+	at java.base/java.util.Spliterators$IteratorSpliterator.forEachRemaining(Spliterators.java:1939) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:723) ~[na:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.getAuthorities(UsuarioPrincipal.java:47) ~[classes/:na]
+	at org.uteq.sgacfinal.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:55) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1778) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+
+2026-02-15T14:38:40.130-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-02-15T14:38:40.130-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-15T14:38:40.130-05:00 ERROR 30688 --- [sgac-final] [nio-8080-exec-6] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+
+org.hibernate.LazyInitializationException: Could not initialize proxy [org.uteq.sgacfinal.entity.TipoRol#6] - no session
+	at org.hibernate.proxy.AbstractLazyInitializer.initialize(AbstractLazyInitializer.java:170) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.AbstractLazyInitializer.getImplementation(AbstractLazyInitializer.java:323) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.pojo.bytebuddy.ByteBuddyInterceptor.intercept(ByteBuddyInterceptor.java:42) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.hibernate.proxy.ProxyConfiguration$InterceptorDispatcher.intercept(ProxyConfiguration.java:95) ~[hibernate-core-7.2.1.Final.jar:7.2.1.Final]
+	at org.uteq.sgacfinal.entity.TipoRol$HibernateProxy.getNombreTipoRol(Unknown Source) ~[classes/:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.lambda$getAuthorities$0(UsuarioPrincipal.java:46) ~[classes/:na]
+	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:214) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:197) ~[na:na]
+	at java.base/java.util.Iterator.forEachRemaining(Iterator.java:133) ~[na:na]
+	at java.base/java.util.Spliterators$IteratorSpliterator.forEachRemaining(Spliterators.java:1939) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:570) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:560) ~[na:na]
+	at java.base/java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:921) ~[na:na]
+	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:265) ~[na:na]
+	at java.base/java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:723) ~[na:na]
+	at org.uteq.sgacfinal.security.UsuarioPrincipal.getAuthorities(UsuarioPrincipal.java:47) ~[classes/:na]
+	at org.uteq.sgacfinal.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:55) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:110) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:96) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:380) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:237) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:195) ~[spring-security-web-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:317) ~[spring-security-config-7.0.2.jar:7.0.2]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:355) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:272) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:199) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-7.0.3.jar:7.0.3]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:107) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:77) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:341) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:397) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1778) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:946) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:480) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:57) ~[tomcat-embed-core-11.0.15.jar:11.0.15]
+	at java.base/java.lang.Thread.run(Thread.java:1474) ~[na:na]
+
+2026-02-15T14:38:40.130-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-1] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+2026-02-15T14:38:40.131-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /error
+2026-02-15T14:38:40.131-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2026-02-15T14:38:40.131-05:00 DEBUG 30688 --- [sgac-final] [nio-8080-exec-6] o.s.s.w.a.Http403ForbiddenEntryPoint     : Pre-authenticated entry point called. Rejecting access
+
+
+
+
+
+Errores al presionar F12 en el aplicativo:
+_debug_node-chunk.mjs:10555 Angular is running in development mode.
+:8080/api/auth/login:1  Failed to load resource: the server responded with a status of 403 ()
+:8080/api/auth:1  Failed to load resource: the server responded with a status of 403 ()
+:8080/api/recursos/carreras:1  Failed to load resource: the server responded with a status of 403 ()
+:8080/api/recursos/facultades:1  Failed to load resource: the server responded with a status of 403 ()
+_untracked-chunk.mjs:2593 ERROR HttpErrorResponseerror: nullheaders: _HttpHeaders {headers: undefined, normalizedNames: Map(0), lazyUpdate: null, lazyInit: ƒ}message: "Http failure response for http://localhost:8080/api/recursos/carreras: 403 OK"name: "HttpErrorResponse"ok: falseredirected: undefinedresponseType: undefinedstatus: 403statusText: "OK"type: undefinedurl: "http://localhost:8080/api/recursos/carreras"[[Prototype]]: HttpResponseBase
+handleError @ _untracked-chunk.mjs:2593
+_untracked-chunk.mjs:2593 ERROR HttpErrorResponseerror: nullheaders: _HttpHeaders {headers: undefined, normalizedNames: Map(0), lazyUpdate: null, lazyInit: ƒ}message: "Http failure response for http://localhost:8080/api/recursos/facultades: 403 OK"name: "HttpErrorResponse"ok: falseredirected: undefinedresponseType: undefinedstatus: 403statusText: "OK"type: undefinedurl: "http://localhost:8080/api/recursos/facultades"[[Prototype]]: HttpResponseBase
+handleError @ _untracked-chunk.mjs:2593
+
