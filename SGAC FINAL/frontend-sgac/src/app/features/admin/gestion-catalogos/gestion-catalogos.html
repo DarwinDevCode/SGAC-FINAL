@@ -1,0 +1,255 @@
+<div class="gestion-container">
+  <div class="section-header">
+    <h2 class="title">Gestión de Catálogos</h2>
+  </div>
+
+  <div class="tabs-row">
+    <button type="button" class="tab-btn" [class.active]="tabActiva() === 'facultades'" (click)="setTab('facultades')">Facultades</button>
+    <button type="button" class="tab-btn" [class.active]="tabActiva() === 'carreras'" (click)="setTab('carreras')">Carreras</button>
+    <button type="button" class="tab-btn" [class.active]="tabActiva() === 'asignaturas'" (click)="setTab('asignaturas')">Asignaturas</button>
+    <button type="button" class="tab-btn" [class.active]="tabActiva() === 'periodos'" (click)="setTab('periodos')">Períodos</button>
+  </div>
+
+  <div class="search-card">
+    <div class="search-wrapper">
+      <span class="search-icon" aria-hidden="true">🔎</span>
+      <input
+        type="text"
+        [ngModel]="busqueda()"
+        (ngModelChange)="filtrar($event)"
+        placeholder="Buscar..."
+        class="input-field search-input"
+      />
+    </div>
+  </div>
+
+  @if (tabActiva() === 'facultades') {
+    <div class="form-card">
+      <h3>{{ editandoFacultadId ? 'Actualizar facultad' : 'Registrar facultad' }}</h3>
+      <form class="catalog-form" (submit)="guardarFacultad(); $event.preventDefault()">
+        <div class="form-group grow">
+          <label>Nombre de facultad</label>
+          <input [(ngModel)]="facultadForm.nombreFacultad" name="facultadNombre" class="input-field" required />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">{{ editandoFacultadId ? 'Actualizar' : 'Registrar' }}</button>
+          @if (editandoFacultadId) {
+            <button type="button" class="btn-ghost" (click)="cancelarEdicionFacultad()">Cancelar</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr><th>ID</th><th>Facultad</th><th class="text-right">Acciones</th></tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr><td colspan="3">Cargando...</td></tr>
+          } @else {
+            @for (f of getFacultadesFiltradas(); track f.idFacultad) {
+              <tr>
+                <td>{{ f.idFacultad }}</td>
+                <td>{{ f.nombreFacultad }}</td>
+                <td class="text-right">
+                  <button type="button" class="btn-action" (click)="cargarFacultadEnFormulario(f)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarFacultad(f)">Desactivar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3">No hay registros</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (tabActiva() === 'carreras') {
+    <div class="form-card">
+      <h3>{{ editandoCarreraId ? 'Actualizar carrera' : 'Registrar carrera' }}</h3>
+      <form class="catalog-form" (submit)="guardarCarrera(); $event.preventDefault()">
+        <div class="form-group">
+          <label>Facultad</label>
+          <select [(ngModel)]="carreraForm.idFacultad" name="carreraFacultad" class="input-field" required>
+            <option [ngValue]="0">Seleccione facultad</option>
+            @for (f of facultades; track f.idFacultad) {
+              <option [ngValue]="f.idFacultad">{{ f.nombreFacultad }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group grow">
+          <label>Nombre de carrera</label>
+          <input [(ngModel)]="carreraForm.nombreCarrera" name="carreraNombre" class="input-field" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">{{ editandoCarreraId ? 'Actualizar' : 'Registrar' }}</button>
+          @if (editandoCarreraId) {
+            <button type="button" class="btn-ghost" (click)="cancelarEdicionCarrera()">Cancelar</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr><th>ID</th><th>Facultad</th><th>Carrera</th><th class="text-right">Acciones</th></tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr><td colspan="4">Cargando...</td></tr>
+          } @else {
+            @for (c of getCarrerasFiltradas(); track c.idCarrera) {
+              <tr>
+                <td>{{ c.idCarrera }}</td>
+                <td>{{ c.nombreFacultad }}</td>
+                <td>{{ c.nombreCarrera }}</td>
+                <td class="text-right">
+                  <button type="button" class="btn-action" (click)="cargarCarreraEnFormulario(c)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarCarrera(c)">Desactivar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="4">No hay registros</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (tabActiva() === 'asignaturas') {
+    <div class="form-card">
+      <h3>{{ editandoAsignaturaId ? 'Actualizar asignatura' : 'Registrar asignatura' }}</h3>
+      <form class="catalog-form" (submit)="guardarAsignatura(); $event.preventDefault()">
+        <div class="form-group">
+          <label>Carrera</label>
+          <select [(ngModel)]="asignaturaForm.idCarrera" name="asignaturaCarrera" class="input-field" required>
+            <option [ngValue]="0">Seleccione carrera</option>
+            @for (c of carreras; track c.idCarrera) {
+              <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group grow">
+          <label>Nombre de asignatura</label>
+          <input [(ngModel)]="asignaturaForm.nombreAsignatura" name="asignaturaNombre" class="input-field" required />
+        </div>
+
+        <div class="form-group small">
+          <label>Semestre</label>
+          <input type="number" min="1" [(ngModel)]="asignaturaForm.semestre" name="asignaturaSemestre" class="input-field" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">{{ editandoAsignaturaId ? 'Actualizar' : 'Registrar' }}</button>
+          @if (editandoAsignaturaId) {
+            <button type="button" class="btn-ghost" (click)="cancelarEdicionAsignatura()">Cancelar</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr><th>ID</th><th>Carrera</th><th>Asignatura</th><th>Semestre</th><th class="text-right">Acciones</th></tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr><td colspan="5">Cargando...</td></tr>
+          } @else {
+            @for (a of getAsignaturasFiltradas(); track a.idAsignatura) {
+              <tr>
+                <td>{{ a.idAsignatura }}</td>
+                <td>{{ a.nombreCarrera }}</td>
+                <td>{{ a.nombreAsignatura }}</td>
+                <td>{{ a.semestre }}</td>
+                <td class="text-right">
+                  <button type="button" class="btn-action" (click)="cargarAsignaturaEnFormulario(a)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarAsignatura(a)">Desactivar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5">No hay registros</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (tabActiva() === 'periodos') {
+    <div class="form-card">
+      <h3>{{ editandoPeriodoId ? 'Actualizar período académico' : 'Registrar período académico' }}</h3>
+      <form class="catalog-form" (submit)="guardarPeriodo(); $event.preventDefault()">
+        <div class="form-group grow">
+          <label>Nombre de período</label>
+          <input [(ngModel)]="periodoForm.nombrePeriodo" name="periodoNombre" class="input-field" required />
+        </div>
+
+        <div class="form-group">
+          <label>Fecha inicio</label>
+          <input type="date" [(ngModel)]="periodoForm.fechaInicio" name="periodoInicio" class="input-field" required />
+        </div>
+
+        <div class="form-group">
+          <label>Fecha fin</label>
+          <input type="date" [(ngModel)]="periodoForm.fechaFin" name="periodoFin" class="input-field" required />
+        </div>
+
+        <div class="form-group">
+          <label>Estado</label>
+          <select [(ngModel)]="periodoForm.estado" name="periodoEstado" class="input-field" required>
+            <option value="ACTIVO">ACTIVO</option>
+            <option value="INACTIVO">INACTIVO</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">{{ editandoPeriodoId ? 'Actualizar' : 'Registrar' }}</button>
+          @if (editandoPeriodoId) {
+            <button type="button" class="btn-ghost" (click)="cancelarEdicionPeriodo()">Cancelar</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+          <tr><th>ID</th><th>Período</th><th>Inicio</th><th>Fin</th><th>Estado</th><th class="text-right">Acciones</th></tr>
+        </thead>
+        <tbody>
+          @if (loading()) {
+            <tr><td colspan="6">Cargando...</td></tr>
+          } @else {
+            @for (p of getPeriodosFiltrados(); track p.idPeriodoAcademico) {
+              <tr>
+                <td>{{ p.idPeriodoAcademico }}</td>
+                <td>{{ p.nombrePeriodo }}</td>
+                <td>{{ p.fechaInicio }}</td>
+                <td>{{ p.fechaFin }}</td>
+                <td>
+                  <span class="status-pill" [class.active]="p.estado === 'ACTIVO'" [class.inactive]="p.estado !== 'ACTIVO'">{{ p.estado }}</span>
+                </td>
+                <td class="text-right">
+                  <button type="button" class="btn-action" (click)="cargarPeriodoEnFormulario(p)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarPeriodo(p)">Desactivar</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6">No hay registros</td></tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
