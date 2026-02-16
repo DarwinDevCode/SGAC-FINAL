@@ -8,6 +8,7 @@ import { CoordinadorComponent } from './features/dashboard/coordinador/coordinad
 import { DecanoComponent } from './features/dashboard/decano/decano';
 import { AyudanteComponent } from './features/dashboard/ayudante/ayudante';
 import {GestionUsuariosComponent} from './features/admin/gestion-usuarios/gestion-usuarios';
+import { GestionCatalogosComponent } from './features/admin/gestion-catalogos/gestion-catalogos';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -24,6 +25,8 @@ export const routes: Routes = [
       { path: 'decano/dashboard', component: DecanoComponent },
       { path: 'ayudante/dashboard', component: AyudanteComponent },
       { path: 'admin/usuarios', component: GestionUsuariosComponent},
+      { path: 'admin/configuracion', component: GestionCatalogosComponent },
+      { path: 'admin/periodos', component: GestionCatalogosComponent },
     ]
   },
 
