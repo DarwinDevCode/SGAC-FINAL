@@ -31,7 +31,7 @@
           <input [(ngModel)]="facultadForm.nombreFacultad" name="facultadNombre" class="input-field" required />
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn-primary">{{ editandoFacultadId ? 'Actualizar' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoFacultadId ? 'Actualizando...' : 'Registrar' }}</button>
           @if (editandoFacultadId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionFacultad()">Cancelar</button>
           }
@@ -54,8 +54,8 @@
                 <td>{{ f.idFacultad }}</td>
                 <td>{{ f.nombreFacultad }}</td>
                 <td class="text-right">
-                  <button type="button" class="btn-action" (click)="cargarFacultadEnFormulario(f)">Actualizar</button>
-                  <button type="button" class="btn-action danger" (click)="desactivarFacultad(f)">Desactivar</button>
+                  <button type="button" class="btn-action" (click)="cargarFacultadEnFormulario(f)" [disabled]="estaProcesando('facultad', f.idFacultad)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarFacultad(f)" [disabled]="estaProcesando('facultad', f.idFacultad)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
@@ -88,7 +88,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary">{{ editandoCarreraId ? 'Actualizar' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoCarreraId ? 'Actualizando...' : 'Registrar' }}</button>
           @if (editandoCarreraId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionCarrera()">Cancelar</button>
           }
@@ -112,8 +112,8 @@
                 <td>{{ c.nombreFacultad }}</td>
                 <td>{{ c.nombreCarrera }}</td>
                 <td class="text-right">
-                  <button type="button" class="btn-action" (click)="cargarCarreraEnFormulario(c)">Actualizar</button>
-                  <button type="button" class="btn-action danger" (click)="desactivarCarrera(c)">Desactivar</button>
+                  <button type="button" class="btn-action" (click)="cargarCarreraEnFormulario(c)" [disabled]="estaProcesando('carrera', c.idCarrera)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarCarrera(c)" [disabled]="estaProcesando('carrera', c.idCarrera)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
@@ -151,7 +151,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary">{{ editandoAsignaturaId ? 'Actualizar' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoAsignaturaId ? 'Actualizando...' : 'Registrar' }}</button>
           @if (editandoAsignaturaId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionAsignatura()">Cancelar</button>
           }
@@ -176,8 +176,8 @@
                 <td>{{ a.nombreAsignatura }}</td>
                 <td>{{ a.semestre }}</td>
                 <td class="text-right">
-                  <button type="button" class="btn-action" (click)="cargarAsignaturaEnFormulario(a)">Actualizar</button>
-                  <button type="button" class="btn-action danger" (click)="desactivarAsignatura(a)">Desactivar</button>
+                  <button type="button" class="btn-action" (click)="cargarAsignaturaEnFormulario(a)" [disabled]="estaProcesando('asignatura', a.idAsignatura)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarAsignatura(a)" [disabled]="estaProcesando('asignatura', a.idAsignatura)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
@@ -218,7 +218,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary">{{ editandoPeriodoId ? 'Actualizar' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoPeriodoId ? 'Actualizando...' : 'Registrar' }}</button>
           @if (editandoPeriodoId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionPeriodo()">Cancelar</button>
           }
@@ -246,8 +246,8 @@
                   <span class="status-pill" [class.active]="p.estado === 'ACTIVO'" [class.inactive]="p.estado !== 'ACTIVO'">{{ p.estado }}</span>
                 </td>
                 <td class="text-right">
-                  <button type="button" class="btn-action" (click)="cargarPeriodoEnFormulario(p)">Actualizar</button>
-                  <button type="button" class="btn-action danger" (click)="desactivarPeriodo(p)">Desactivar</button>
+                  <button type="button" class="btn-action" (click)="cargarPeriodoEnFormulario(p)" [disabled]="estaProcesando('periodo', p.idPeriodoAcademico)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarPeriodo(p)" [disabled]="estaProcesando('periodo', p.idPeriodoAcademico)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
