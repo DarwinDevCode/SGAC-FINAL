@@ -58,16 +58,22 @@
   position: relative;
 }
 
-.search-icon {
-  position: absolute;
-  left: 0.85rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
+.table-scroll {
+  max-height: 420px;
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
+.table-scroll .data-table thead th {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1;
+}
+
+
 .search-input {
-  padding-left: 2.4rem;
+  padding-left: 0.75rem;
 }
 
 .form-card h3 {

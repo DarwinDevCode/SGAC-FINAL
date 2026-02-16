@@ -12,7 +12,6 @@
 
   <div class="search-card">
     <div class="search-wrapper">
-      <span class="search-icon" aria-hidden="true">🔎</span>
       <input
         type="text"
         [ngModel]="busqueda()"
@@ -41,6 +40,7 @@
     </div>
 
     <div class="table-card">
+      <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr><th>ID</th><th>Facultad</th><th class="text-right">Acciones</th></tr>
@@ -64,6 +64,7 @@
           }
         </tbody>
       </table>
+      </div>
     </div>
   }
 
@@ -96,6 +97,7 @@
     </div>
 
     <div class="table-card">
+      <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr><th>ID</th><th>Facultad</th><th>Carrera</th><th class="text-right">Acciones</th></tr>
@@ -120,6 +122,7 @@
           }
         </tbody>
       </table>
+      </div>
     </div>
   }
 
@@ -157,6 +160,7 @@
     </div>
 
     <div class="table-card">
+      <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr><th>ID</th><th>Carrera</th><th>Asignatura</th><th>Semestre</th><th class="text-right">Acciones</th></tr>
@@ -182,6 +186,7 @@
           }
         </tbody>
       </table>
+      </div>
     </div>
   }
 
@@ -222,6 +227,7 @@
     </div>
 
     <div class="table-card">
+      <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr><th>ID</th><th>Período</th><th>Inicio</th><th>Fin</th><th>Estado</th><th class="text-right">Acciones</th></tr>
@@ -250,6 +256,7 @@
           }
         </tbody>
       </table>
+      </div>
     </div>
   }
 </div>
