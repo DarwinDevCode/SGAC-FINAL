@@ -75,10 +75,10 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
         periodos: this.usuarioService.listarPeriodosCatalogo()
       }).subscribe({
         next: ({ facultades, carreras, asignaturas, periodos }) => {
-          this.facultades = facultades || [];
-          this.carreras = carreras || [];
-          this.asignaturas = asignaturas || [];
-          this.periodos = periodos || [];
+          this.facultades = (facultades || []).map((f) => ({ ...f, activo: f.activo ?? true }));
+          this.carreras = (carreras || []).map((c) => ({ ...c, activo: c.activo ?? true }));
+          this.asignaturas = (asignaturas || []).map((a) => ({ ...a, activo: a.activo ?? true }));
+          this.periodos = (periodos || []).map((p) => ({ ...p, activo: p.activo ?? true }));
           this.loading.set(false);
         },
         error: (error) => {
@@ -87,6 +87,14 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+  esActivo(registro: { activo?: boolean }): boolean {
+    return registro.activo ?? true;
+  }
+
+  etiquetaActivo(registro: { activo?: boolean }): string {
+    return this.esActivo(registro) ? 'Activo' : 'Inactivo';
   }
 
   getFacultadesFiltradas(): Facultad[] {
