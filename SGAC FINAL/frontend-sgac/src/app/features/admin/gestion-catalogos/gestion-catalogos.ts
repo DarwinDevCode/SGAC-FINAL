@@ -1,7 +1,8 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
+import { Subscription, forkJoin } from 'rxjs';
 import {
   AsignaturaCatalogo,
   AsignaturaCatalogoRequest,
@@ -17,7 +18,7 @@ import {
 @Component({
   selector: 'app-gestion-catalogos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './gestion-catalogos.html',
   styleUrl: './gestion-catalogos.css'
 })
@@ -25,7 +26,8 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   private usuarioService = inject(UsuarioService);
   private subs = new Subscription();
 
-  cargando = signal(false);
+  loading = signal(false);
+  busqueda = signal('');
   tabActiva = signal<'facultades' | 'carreras' | 'asignaturas' | 'periodos'>('facultades');
 
   facultades: Facultad[] = [];
@@ -33,160 +35,322 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   asignaturas: AsignaturaCatalogo[] = [];
   periodos: PeriodoCatalogo[] = [];
 
-  nuevaFacultad = '';
-  nuevaCarrera: CarreraCatalogoRequest = { idFacultad: 0, nombreCarrera: '' };
-  nuevaAsignatura: AsignaturaCatalogoRequest = { idCarrera: 0, nombreAsignatura: '', semestre: 1 };
-  nuevoPeriodo: PeriodoCatalogoRequest = {
-    nombrePeriodo: '',
-    fechaInicio: '',
-    fechaFin: '',
-    estado: 'ACTIVO'
-  };
+  editandoFacultadId: number | null = null;
+  editandoCarreraId: number | null = null;
+  editandoAsignaturaId: number | null = null;
+  editandoPeriodoId: number | null = null;
 
-  ngOnInit() {
+  facultadForm: FacultadCatalogoRequest = { nombreFacultad: '' };
+  carreraForm: CarreraCatalogoRequest = { idFacultad: 0, nombreCarrera: '' };
+  asignaturaForm: AsignaturaCatalogoRequest = { idCarrera: 0, nombreAsignatura: '', semestre: 1 };
+  periodoForm: PeriodoCatalogoRequest = { nombrePeriodo: '', fechaInicio: '', fechaFin: '', estado: 'ACTIVO' };
+
+  ngOnInit(): void {
     this.cargarCatalogos();
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
 
-  setTab(tab: 'facultades' | 'carreras' | 'asignaturas' | 'periodos') {
+  setTab(tab: 'facultades' | 'carreras' | 'asignaturas' | 'periodos'): void {
     this.tabActiva.set(tab);
+    this.busqueda.set('');
   }
 
-  cargarCatalogos() {
-    this.cargando.set(true);
-
-    this.subs.add(this.usuarioService.listarFacultadesCatalogo().subscribe(data => this.facultades = data || []));
-    this.subs.add(this.usuarioService.listarCarrerasCatalogo().subscribe(data => this.carreras = data || []));
-    this.subs.add(this.usuarioService.listarAsignaturasCatalogo().subscribe(data => this.asignaturas = data || []));
-    this.subs.add(this.usuarioService.listarPeriodosCatalogo().subscribe({
-      next: (data) => {
-        this.periodos = data || [];
-        this.cargando.set(false);
-      },
-      error: () => this.cargando.set(false)
-    }));
+  filtrar(texto: string): void {
+    this.busqueda.set(texto);
   }
 
-  crearFacultad() {
-    if (!this.nuevaFacultad.trim()) return;
-    const payload: FacultadCatalogoRequest = { nombreFacultad: this.nuevaFacultad.trim() };
-    this.subs.add(this.usuarioService.crearFacultadCatalogo(payload).subscribe({
-      next: () => {
-        this.nuevaFacultad = '';
-        this.cargarCatalogos();
-      },
-      error: () => alert('No se pudo crear la facultad')
-    }));
+  cargarCatalogos(): void {
+    this.loading.set(true);
+
+    this.subs.add(
+      forkJoin({
+        facultades: this.usuarioService.listarFacultadesCatalogo(),
+        carreras: this.usuarioService.listarCarrerasCatalogo(),
+        asignaturas: this.usuarioService.listarAsignaturasCatalogo(),
+        periodos: this.usuarioService.listarPeriodosCatalogo()
+      }).subscribe({
+        next: ({ facultades, carreras, asignaturas, periodos }) => {
+          this.facultades = facultades || [];
+          this.carreras = carreras || [];
+          this.asignaturas = asignaturas || [];
+          this.periodos = periodos || [];
+          this.loading.set(false);
+        },
+        error: (error) => {
+          this.loading.set(false);
+          alert(this.obtenerMensajeError(error, 'No se pudieron cargar los catálogos'));
+        }
+      })
+    );
   }
 
-  editarFacultad(facultad: Facultad) {
-    const nombre = prompt('Nuevo nombre de facultad:', facultad.nombreFacultad);
-    if (!nombre || !nombre.trim()) return;
-    this.subs.add(this.usuarioService.actualizarFacultadCatalogo(facultad.idFacultad, { nombreFacultad: nombre.trim() }).subscribe({
-      next: () => this.cargarCatalogos(),
-      error: () => alert('No se pudo actualizar la facultad')
-    }));
+  getFacultadesFiltradas(): Facultad[] {
+    const term = this.busqueda().toLowerCase().trim();
+    if (!term) return this.facultades;
+    return this.facultades.filter((f) => f.nombreFacultad.toLowerCase().includes(term));
   }
 
-  desactivarFacultad(facultad: Facultad) {
-    if (!confirm(`¿Desactivar facultad ${facultad.nombreFacultad}?`)) return;
-    this.subs.add(this.usuarioService.desactivarFacultadCatalogo(facultad.idFacultad).subscribe(() => this.cargarCatalogos()));
+  getCarrerasFiltradas(): Carrera[] {
+    const term = this.busqueda().toLowerCase().trim();
+    if (!term) return this.carreras;
+    return this.carreras.filter((c) =>
+      c.nombreCarrera.toLowerCase().includes(term) ||
+      c.nombreFacultad.toLowerCase().includes(term)
+    );
   }
 
-  crearCarrera() {
-    if (!this.nuevaCarrera.idFacultad || !this.nuevaCarrera.nombreCarrera.trim()) return;
-    this.subs.add(this.usuarioService.crearCarreraCatalogo({
-      idFacultad: this.nuevaCarrera.idFacultad,
-      nombreCarrera: this.nuevaCarrera.nombreCarrera.trim()
-    }).subscribe({
-      next: () => {
-        this.nuevaCarrera = { idFacultad: 0, nombreCarrera: '' };
-        this.cargarCatalogos();
-      },
-      error: () => alert('No se pudo crear la carrera')
-    }));
+  getAsignaturasFiltradas(): AsignaturaCatalogo[] {
+    const term = this.busqueda().toLowerCase().trim();
+    if (!term) return this.asignaturas;
+    return this.asignaturas.filter((a) =>
+      a.nombreAsignatura.toLowerCase().includes(term) ||
+      a.nombreCarrera.toLowerCase().includes(term)
+    );
   }
 
-  editarCarrera(carrera: Carrera) {
-    const nombre = prompt('Nuevo nombre de carrera:', carrera.nombreCarrera);
-    if (!nombre || !nombre.trim()) return;
-    this.subs.add(this.usuarioService.actualizarCarreraCatalogo(carrera.idCarrera, {
+  getPeriodosFiltrados(): PeriodoCatalogo[] {
+    const term = this.busqueda().toLowerCase().trim();
+    if (!term) return this.periodos;
+    return this.periodos.filter((p) => p.nombrePeriodo.toLowerCase().includes(term) || p.estado.toLowerCase().includes(term));
+  }
+
+  guardarFacultad(): void {
+    if (!this.facultadForm.nombreFacultad.trim()) {
+      alert('Ingrese el nombre de la facultad.');
+      return;
+    }
+
+    const payload: FacultadCatalogoRequest = { nombreFacultad: this.facultadForm.nombreFacultad.trim() };
+    const request$ = this.editandoFacultadId
+      ? this.usuarioService.actualizarFacultadCatalogo(this.editandoFacultadId, payload)
+      : this.usuarioService.crearFacultadCatalogo(payload);
+
+    this.subs.add(
+      request$.subscribe({
+        next: (facultad) => {
+          if (this.editandoFacultadId) {
+            this.facultades = this.facultades.map((f) => (f.idFacultad === facultad.idFacultad ? facultad : f));
+          } else {
+            this.facultades = [...this.facultades, facultad];
+            if (!this.carreraForm.idFacultad) this.carreraForm.idFacultad = facultad.idFacultad;
+          }
+          this.cancelarEdicionFacultad();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar la facultad'))
+      })
+    );
+  }
+
+  cargarFacultadEnFormulario(facultad: Facultad): void {
+    this.editandoFacultadId = facultad.idFacultad;
+    this.facultadForm = { nombreFacultad: facultad.nombreFacultad };
+  }
+
+  cancelarEdicionFacultad(): void {
+    this.editandoFacultadId = null;
+    this.facultadForm = { nombreFacultad: '' };
+  }
+
+  desactivarFacultad(facultad: Facultad): void {
+    if (!confirm(`¿Seguro que desea desactivar la facultad ${facultad.nombreFacultad}?`)) return;
+
+    this.subs.add(
+      this.usuarioService.desactivarFacultadCatalogo(facultad.idFacultad).subscribe({
+        next: () => {
+          this.facultades = this.facultades.filter((f) => f.idFacultad !== facultad.idFacultad);
+          if (this.carreraForm.idFacultad === facultad.idFacultad) this.carreraForm.idFacultad = 0;
+          if (this.editandoFacultadId === facultad.idFacultad) this.cancelarEdicionFacultad();
+          this.cargarCatalogos();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo desactivar la facultad'))
+      })
+    );
+  }
+
+  guardarCarrera(): void {
+    if (!this.carreraForm.idFacultad || !this.carreraForm.nombreCarrera.trim()) {
+      alert('Seleccione facultad e ingrese nombre de carrera.');
+      return;
+    }
+
+    const payload: CarreraCatalogoRequest = {
+      idFacultad: this.carreraForm.idFacultad,
+      nombreCarrera: this.carreraForm.nombreCarrera.trim()
+    };
+
+    const request$ = this.editandoCarreraId
+      ? this.usuarioService.actualizarCarreraCatalogo(this.editandoCarreraId, payload)
+      : this.usuarioService.crearCarreraCatalogo(payload);
+
+    this.subs.add(
+      request$.subscribe({
+        next: (carrera) => {
+          if (this.editandoCarreraId) {
+            this.carreras = this.carreras.map((c) => (c.idCarrera === carrera.idCarrera ? carrera : c));
+          } else {
+            this.carreras = [...this.carreras, carrera];
+            if (!this.asignaturaForm.idCarrera) this.asignaturaForm.idCarrera = carrera.idCarrera;
+          }
+          this.cancelarEdicionCarrera();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar la carrera'))
+      })
+    );
+  }
+
+  cargarCarreraEnFormulario(carrera: Carrera): void {
+    this.editandoCarreraId = carrera.idCarrera;
+    this.carreraForm = {
       idFacultad: carrera.idFacultad,
-      nombreCarrera: nombre.trim()
-    }).subscribe({
-      next: () => this.cargarCatalogos(),
-      error: () => alert('No se pudo actualizar la carrera')
-    }));
+      nombreCarrera: carrera.nombreCarrera
+    };
   }
 
-  desactivarCarrera(carrera: Carrera) {
-    if (!confirm(`¿Desactivar carrera ${carrera.nombreCarrera}?`)) return;
-    this.subs.add(this.usuarioService.desactivarCarreraCatalogo(carrera.idCarrera).subscribe(() => this.cargarCatalogos()));
+  cancelarEdicionCarrera(): void {
+    this.editandoCarreraId = null;
+    this.carreraForm = { idFacultad: 0, nombreCarrera: '' };
   }
 
-  crearAsignatura() {
-    if (!this.nuevaAsignatura.idCarrera || !this.nuevaAsignatura.nombreAsignatura.trim()) return;
-    this.subs.add(this.usuarioService.crearAsignaturaCatalogo({
-      idCarrera: this.nuevaAsignatura.idCarrera,
-      nombreAsignatura: this.nuevaAsignatura.nombreAsignatura.trim(),
-      semestre: this.nuevaAsignatura.semestre
-    }).subscribe({
-      next: () => {
-        this.nuevaAsignatura = { idCarrera: 0, nombreAsignatura: '', semestre: 1 };
-        this.cargarCatalogos();
-      },
-      error: () => alert('No se pudo crear la asignatura')
-    }));
+  desactivarCarrera(carrera: Carrera): void {
+    if (!confirm(`¿Seguro que desea desactivar la carrera ${carrera.nombreCarrera}?`)) return;
+
+    this.subs.add(
+      this.usuarioService.desactivarCarreraCatalogo(carrera.idCarrera).subscribe({
+        next: () => {
+          this.carreras = this.carreras.filter((c) => c.idCarrera !== carrera.idCarrera);
+          if (this.asignaturaForm.idCarrera === carrera.idCarrera) this.asignaturaForm.idCarrera = 0;
+          if (this.editandoCarreraId === carrera.idCarrera) this.cancelarEdicionCarrera();
+          this.cargarCatalogos();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo desactivar la carrera'))
+      })
+    );
   }
 
-  editarAsignatura(asignatura: AsignaturaCatalogo) {
-    const nombre = prompt('Nuevo nombre de asignatura:', asignatura.nombreAsignatura);
-    if (!nombre || !nombre.trim()) return;
-    this.subs.add(this.usuarioService.actualizarAsignaturaCatalogo(asignatura.idAsignatura, {
+  guardarAsignatura(): void {
+    if (!this.asignaturaForm.idCarrera || !this.asignaturaForm.nombreAsignatura.trim() || this.asignaturaForm.semestre < 1) {
+      alert('Complete carrera, nombre y semestre válidos para la asignatura.');
+      return;
+    }
+
+    const payload: AsignaturaCatalogoRequest = {
+      idCarrera: this.asignaturaForm.idCarrera,
+      nombreAsignatura: this.asignaturaForm.nombreAsignatura.trim(),
+      semestre: this.asignaturaForm.semestre
+    };
+
+    const request$ = this.editandoAsignaturaId
+      ? this.usuarioService.actualizarAsignaturaCatalogo(this.editandoAsignaturaId, payload)
+      : this.usuarioService.crearAsignaturaCatalogo(payload);
+
+    this.subs.add(
+      request$.subscribe({
+        next: (asignatura) => {
+          if (this.editandoAsignaturaId) {
+            this.asignaturas = this.asignaturas.map((a) => (a.idAsignatura === asignatura.idAsignatura ? asignatura : a));
+          } else {
+            this.asignaturas = [...this.asignaturas, asignatura];
+          }
+          this.cancelarEdicionAsignatura();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar la asignatura'))
+      })
+    );
+  }
+
+  cargarAsignaturaEnFormulario(asignatura: AsignaturaCatalogo): void {
+    this.editandoAsignaturaId = asignatura.idAsignatura;
+    this.asignaturaForm = {
       idCarrera: asignatura.idCarrera,
-      nombreAsignatura: nombre.trim(),
+      nombreAsignatura: asignatura.nombreAsignatura,
       semestre: asignatura.semestre
-    }).subscribe({
-      next: () => this.cargarCatalogos(),
-      error: () => alert('No se pudo actualizar la asignatura')
-    }));
+    };
   }
 
-  desactivarAsignatura(asignatura: AsignaturaCatalogo) {
-    if (!confirm(`¿Desactivar asignatura ${asignatura.nombreAsignatura}?`)) return;
-    this.subs.add(this.usuarioService.desactivarAsignaturaCatalogo(asignatura.idAsignatura).subscribe(() => this.cargarCatalogos()));
+  cancelarEdicionAsignatura(): void {
+    this.editandoAsignaturaId = null;
+    this.asignaturaForm = { idCarrera: 0, nombreAsignatura: '', semestre: 1 };
   }
 
-  crearPeriodo() {
-    if (!this.nuevoPeriodo.nombrePeriodo.trim() || !this.nuevoPeriodo.fechaInicio || !this.nuevoPeriodo.fechaFin) return;
-    this.subs.add(this.usuarioService.crearPeriodoCatalogo({ ...this.nuevoPeriodo, nombrePeriodo: this.nuevoPeriodo.nombrePeriodo.trim() }).subscribe({
-      next: () => {
-        this.nuevoPeriodo = { nombrePeriodo: '', fechaInicio: '', fechaFin: '', estado: 'ACTIVO' };
-        this.cargarCatalogos();
-      },
-      error: () => alert('No se pudo crear el período académico')
-    }));
+  desactivarAsignatura(asignatura: AsignaturaCatalogo): void {
+    if (!confirm(`¿Seguro que desea desactivar la asignatura ${asignatura.nombreAsignatura}?`)) return;
+
+    this.subs.add(
+      this.usuarioService.desactivarAsignaturaCatalogo(asignatura.idAsignatura).subscribe({
+        next: () => {
+          this.asignaturas = this.asignaturas.filter((a) => a.idAsignatura !== asignatura.idAsignatura);
+          if (this.editandoAsignaturaId === asignatura.idAsignatura) this.cancelarEdicionAsignatura();
+          this.cargarCatalogos();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo desactivar la asignatura'))
+      })
+    );
   }
 
-  editarPeriodo(periodo: PeriodoCatalogo) {
-    const nombre = prompt('Nuevo nombre del período:', periodo.nombrePeriodo);
-    if (!nombre || !nombre.trim()) return;
-    this.subs.add(this.usuarioService.actualizarPeriodoCatalogo(periodo.idPeriodoAcademico, {
-      nombrePeriodo: nombre.trim(),
+  guardarPeriodo(): void {
+    if (!this.periodoForm.nombrePeriodo.trim() || !this.periodoForm.fechaInicio || !this.periodoForm.fechaFin) {
+      alert('Complete nombre y fechas del período académico.');
+      return;
+    }
+
+    const payload: PeriodoCatalogoRequest = {
+      ...this.periodoForm,
+      nombrePeriodo: this.periodoForm.nombrePeriodo.trim()
+    };
+
+    const request$ = this.editandoPeriodoId
+      ? this.usuarioService.actualizarPeriodoCatalogo(this.editandoPeriodoId, payload)
+      : this.usuarioService.crearPeriodoCatalogo(payload);
+
+    this.subs.add(
+      request$.subscribe({
+        next: (periodo) => {
+          if (this.editandoPeriodoId) {
+            this.periodos = this.periodos.map((p) => (p.idPeriodoAcademico === periodo.idPeriodoAcademico ? periodo : p));
+          } else {
+            this.periodos = [...this.periodos, periodo];
+          }
+          this.cancelarEdicionPeriodo();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar el período académico'))
+      })
+    );
+  }
+
+  cargarPeriodoEnFormulario(periodo: PeriodoCatalogo): void {
+    this.editandoPeriodoId = periodo.idPeriodoAcademico;
+    this.periodoForm = {
+      nombrePeriodo: periodo.nombrePeriodo,
       fechaInicio: periodo.fechaInicio,
       fechaFin: periodo.fechaFin,
       estado: periodo.estado
-    }).subscribe({
-      next: () => this.cargarCatalogos(),
-      error: () => alert('No se pudo actualizar el período')
-    }));
+    };
   }
 
-  desactivarPeriodo(periodo: PeriodoCatalogo) {
-    if (!confirm(`¿Desactivar período ${periodo.nombrePeriodo}?`)) return;
-    this.subs.add(this.usuarioService.desactivarPeriodoCatalogo(periodo.idPeriodoAcademico).subscribe(() => this.cargarCatalogos()));
+  cancelarEdicionPeriodo(): void {
+    this.editandoPeriodoId = null;
+    this.periodoForm = { nombrePeriodo: '', fechaInicio: '', fechaFin: '', estado: 'ACTIVO' };
+  }
+
+  desactivarPeriodo(periodo: PeriodoCatalogo): void {
+    if (!confirm(`¿Seguro que desea desactivar el período ${periodo.nombrePeriodo}?`)) return;
+
+    this.subs.add(
+      this.usuarioService.desactivarPeriodoCatalogo(periodo.idPeriodoAcademico).subscribe({
+        next: () => {
+          this.periodos = this.periodos.filter((p) => p.idPeriodoAcademico !== periodo.idPeriodoAcademico);
+          if (this.editandoPeriodoId === periodo.idPeriodoAcademico) this.cancelarEdicionPeriodo();
+          this.cargarCatalogos();
+        },
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo desactivar el período académico'))
+      })
+    );
+  }
+
+  private obtenerMensajeError(error: any, fallback: string): string {
+    return error?.error?.message || error?.error?.mensaje || error?.message || fallback;
   }
 }
