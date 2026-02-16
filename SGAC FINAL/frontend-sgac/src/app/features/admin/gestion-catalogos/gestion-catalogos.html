@@ -31,7 +31,7 @@
           <input [(ngModel)]="facultadForm.nombreFacultad" name="facultadNombre" class="input-field" required />
         </div>
         <div class="form-actions">
-          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoFacultadId ? 'Actualizando...' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoFacultadId ? (guardando() ? 'Actualizando...' : 'Actualizar') : (guardando() ? 'Registrando...' : 'Registrar') }}</button>
           @if (editandoFacultadId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionFacultad()">Cancelar</button>
           }
@@ -88,7 +88,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoCarreraId ? 'Actualizando...' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoCarreraId ? (guardando() ? 'Actualizando...' : 'Actualizar') : (guardando() ? 'Registrando...' : 'Registrar') }}</button>
           @if (editandoCarreraId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionCarrera()">Cancelar</button>
           }
@@ -151,7 +151,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoAsignaturaId ? 'Actualizando...' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoAsignaturaId ? (guardando() ? 'Actualizando...' : 'Actualizar') : (guardando() ? 'Registrando...' : 'Registrar') }}</button>
           @if (editandoAsignaturaId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionAsignatura()">Cancelar</button>
           }
@@ -218,7 +218,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoPeriodoId ? 'Actualizando...' : 'Registrar' }}</button>
+          <button type="submit" class="btn-primary" [disabled]="guardando()">{{ editandoPeriodoId ? (guardando() ? 'Actualizando...' : 'Actualizar') : (guardando() ? 'Registrando...' : 'Registrar') }}</button>
           @if (editandoPeriodoId) {
             <button type="button" class="btn-ghost" (click)="cancelarEdicionPeriodo()">Cancelar</button>
           }
