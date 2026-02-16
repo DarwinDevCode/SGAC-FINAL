@@ -1,7 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, forkJoin } from 'rxjs';
 import {
   AsignaturaCatalogo,
@@ -18,7 +17,7 @@ import {
 @Component({
   selector: 'app-gestion-catalogos',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './gestion-catalogos.html',
   styleUrl: './gestion-catalogos.css'
 })

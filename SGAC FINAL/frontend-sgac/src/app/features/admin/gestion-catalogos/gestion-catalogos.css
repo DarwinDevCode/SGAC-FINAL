@@ -164,23 +164,28 @@
   text-align: right !important;
 }
 
-.btn-icon {
-  border: 0;
-  background: transparent;
-  color: #64748b;
-  border-radius: 0.5rem;
+.btn-action {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+  border-radius: var(--radius);
   cursor: pointer;
-  padding: 0.45rem;
-  margin-left: 0.15rem;
+  padding: 0.4rem 0.75rem;
+  margin-left: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
-.btn-icon:hover {
+.btn-action:hover {
   background: #f1f5f9;
-  color: hsl(var(--primary));
+  border-color: #94a3b8;
+  color: #334155;
 }
 
-.btn-icon.danger:hover {
-  color: #dc2626;
+.btn-action.danger:hover {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fef2f2;
 }
 
 .status-pill {

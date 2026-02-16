@@ -12,7 +12,7 @@
 
   <div class="search-card">
     <div class="search-wrapper">
-      <lucide-icon class="search-icon" name="Search" size="18"></lucide-icon>
+      <span class="search-icon" aria-hidden="true">🔎</span>
       <input
         type="text"
         [ngModel]="busqueda()"
@@ -54,12 +54,8 @@
                 <td>{{ f.idFacultad }}</td>
                 <td>{{ f.nombreFacultad }}</td>
                 <td class="text-right">
-                  <button type="button" class="btn-icon" title="Actualizar" (click)="cargarFacultadEnFormulario(f)">
-                    <lucide-icon name="SquarePen" size="18"></lucide-icon>
-                  </button>
-                  <button type="button" class="btn-icon danger" title="Desactivar" (click)="desactivarFacultad(f)">
-                    <lucide-icon name="Power" size="18"></lucide-icon>
-                  </button>
+                  <button type="button" class="btn-action" (click)="cargarFacultadEnFormulario(f)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarFacultad(f)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
@@ -114,12 +110,8 @@
                 <td>{{ c.nombreFacultad }}</td>
                 <td>{{ c.nombreCarrera }}</td>
                 <td class="text-right">
-                  <button type="button" class="btn-icon" title="Actualizar" (click)="cargarCarreraEnFormulario(c)">
-                    <lucide-icon name="SquarePen" size="18"></lucide-icon>
-                  </button>
-                  <button type="button" class="btn-icon danger" title="Desactivar" (click)="desactivarCarrera(c)">
-                    <lucide-icon name="Power" size="18"></lucide-icon>
-                  </button>
+                  <button type="button" class="btn-action" (click)="cargarCarreraEnFormulario(c)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarCarrera(c)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
@@ -180,12 +172,8 @@
                 <td>{{ a.nombreAsignatura }}</td>
                 <td>{{ a.semestre }}</td>
                 <td class="text-right">
-                  <button type="button" class="btn-icon" title="Actualizar" (click)="cargarAsignaturaEnFormulario(a)">
-                    <lucide-icon name="SquarePen" size="18"></lucide-icon>
-                  </button>
-                  <button type="button" class="btn-icon danger" title="Desactivar" (click)="desactivarAsignatura(a)">
-                    <lucide-icon name="Power" size="18"></lucide-icon>
-                  </button>
+                  <button type="button" class="btn-action" (click)="cargarAsignaturaEnFormulario(a)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarAsignatura(a)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
@@ -252,12 +240,8 @@
                   <span class="status-pill" [class.active]="p.estado === 'ACTIVO'" [class.inactive]="p.estado !== 'ACTIVO'">{{ p.estado }}</span>
                 </td>
                 <td class="text-right">
-                  <button type="button" class="btn-icon" title="Actualizar" (click)="cargarPeriodoEnFormulario(p)">
-                    <lucide-icon name="SquarePen" size="18"></lucide-icon>
-                  </button>
-                  <button type="button" class="btn-icon danger" title="Desactivar" (click)="desactivarPeriodo(p)">
-                    <lucide-icon name="Power" size="18"></lucide-icon>
-                  </button>
+                  <button type="button" class="btn-action" (click)="cargarPeriodoEnFormulario(p)">Actualizar</button>
+                  <button type="button" class="btn-action danger" (click)="desactivarPeriodo(p)">Desactivar</button>
                 </td>
               </tr>
             } @empty {
