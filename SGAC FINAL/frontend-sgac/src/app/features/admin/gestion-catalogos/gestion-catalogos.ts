@@ -89,6 +89,11 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     );
   }
 
+
+  private normalizarTexto(valor: string | null | undefined): string {
+    return (valor || '').trim().toLowerCase();
+  }
+
   getFacultadesFiltradas(): Facultad[] {
     const term = this.busqueda().toLowerCase().trim();
     if (!term) return this.facultades;
@@ -128,6 +133,15 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     }
 
     const payload: FacultadCatalogoRequest = { nombreFacultad: this.facultadForm.nombreFacultad.trim() };
+
+    if (this.editandoFacultadId) {
+      const original = this.facultades.find((f) => f.idFacultad === this.editandoFacultadId);
+      if (original && this.normalizarTexto(original.nombreFacultad) === this.normalizarTexto(payload.nombreFacultad)) {
+        alert('No hay cambios para actualizar en la facultad.');
+        return;
+      }
+    }
+
     const request$ = this.editandoFacultadId
       ? this.usuarioService.actualizarFacultadCatalogo(this.editandoFacultadId, payload)
       : this.usuarioService.crearFacultadCatalogo(payload);
@@ -144,7 +158,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
           }
           this.cancelarEdicionFacultad();
         },
-        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar la facultad'))
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar la facultad (si no cambió el nombre, no es necesario actualizar).'))
       }).add(() => this.guardando.set(false))
     );
   }
@@ -342,6 +356,20 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       nombrePeriodo: this.periodoForm.nombrePeriodo.trim()
     };
 
+    if (this.editandoPeriodoId) {
+      const original = this.periodos.find((p) => p.idPeriodoAcademico === this.editandoPeriodoId);
+      if (
+        original &&
+        this.normalizarTexto(original.nombrePeriodo) === this.normalizarTexto(payload.nombrePeriodo) &&
+        original.fechaInicio === payload.fechaInicio &&
+        original.fechaFin === payload.fechaFin &&
+        this.normalizarTexto(original.estado) === this.normalizarTexto(payload.estado)
+      ) {
+        alert('No hay cambios para actualizar en el período académico.');
+        return;
+      }
+    }
+
     const request$ = this.editandoPeriodoId
       ? this.usuarioService.actualizarPeriodoCatalogo(this.editandoPeriodoId, payload)
       : this.usuarioService.crearPeriodoCatalogo(payload);
@@ -357,7 +385,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
           }
           this.cancelarEdicionPeriodo();
         },
-        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar el período académico'))
+        error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar el período académico (si no cambió, no es necesario actualizar).'))
       }).add(() => this.guardando.set(false))
     );
   }
