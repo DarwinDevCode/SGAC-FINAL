@@ -36,8 +36,8 @@ export interface UsuarioRequest {
   horasAyudante?: number;
 }
 
-export interface Facultad { idFacultad: number; nombreFacultad: string; activo?: boolean; }
-export interface Carrera { idCarrera: number; idFacultad: number; nombreFacultad: string; nombreCarrera: string; activo?: boolean; }
+export interface Facultad { idFacultad: number; nombreFacultad: string; }
+export interface Carrera { idCarrera: number; idFacultad: number; nombreFacultad: string; nombreCarrera: string; }
 export interface Docente { idDocente: number; nombres: string; apellidos: string; cedula: string; }
 export interface Asignatura { idAsignatura: number; nombreAsignatura: string; semestre: number; idCarrera: number; }
 export interface PeriodoAcademico { idPeriodo: number; nombrePeriodo: string; activo: boolean; }
@@ -58,7 +58,6 @@ export interface AsignaturaCatalogo {
   nombreCarrera: string;
   nombreAsignatura: string;
   semestre: number;
-  activo?: boolean;
 }
 
 export interface PeriodoCatalogo {
@@ -67,7 +66,6 @@ export interface PeriodoCatalogo {
   fechaInicio: string;
   fechaFin: string;
   estado: string;
-  activo?: boolean;
 }
 
 @Injectable({
