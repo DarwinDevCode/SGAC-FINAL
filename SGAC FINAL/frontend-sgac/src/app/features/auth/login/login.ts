@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { AuthService } from '../../../core/services/auth';
+import { AuthService, AuthUser, LoginRequest } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -31,13 +31,13 @@ export class LoginComponent {
 
     this.loading = true;
 
-    const payload = {
+    const payload: LoginRequest = {
       usuario: this.identifier,
       password: this.password
     };
 
     this.authService.login(payload).subscribe({
-      next: (res: any) => {
+      next: (res: AuthUser) => {
         const role = res.rolActual;
         this.redirectByRole(role);
       },
