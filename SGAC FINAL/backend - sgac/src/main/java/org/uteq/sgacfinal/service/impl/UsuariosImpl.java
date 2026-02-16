@@ -15,6 +15,7 @@ import org.uteq.sgacfinal.repository.IUsuarioTipoRolRepository;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
 import org.uteq.sgacfinal.service.IUsuariosService;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.entity.TipoRol;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,14 @@ public class UsuariosImpl implements IUsuariosService {
             return username.toLowerCase();
         }
 
-        return switch (appRole.toUpperCase()) {
+        String normalizedRole = appRole.trim().toUpperCase();
+        if (normalizedRole.startsWith("ROLE_")) {
+            normalizedRole = normalizedRole.substring(5);
+        }
+
+        return switch (normalizedRole) {
+            // IMPORTANTE: atributos como CREATEROLE NO se heredan por membresía de rol.
+            // Para CREATE USER/ROLE debemos asumir el rol con atributo explícito.
             case "ADMINISTRADOR" -> "role_administrador";
             case "DECANO" -> "role_decano";
             case "COORDINADOR" -> "role_coordinador";
@@ -181,18 +189,37 @@ public class UsuariosImpl implements IUsuariosService {
     }
 
     @Override
+    @Transactional
     public void cambiarEstadoGlobal(Integer idUsuario) {
+        applyCurrentDbRole();
+
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
-        usuario.setActivo(!usuario.getActivo());
+
+        boolean nuevoEstadoGlobal = !usuario.getActivo();
+        usuario.setActivo(nuevoEstadoGlobal);
+
+        if (usuario.getRoles() != null) {
+            usuario.getRoles().forEach(rol -> rol.setActivo(nuevoEstadoGlobal));
+        }
+
         usuarioRepository.save(usuario);
     }
 
     @Override
+    @Transactional
     public void cambiarEstadoRol(Integer idUsuario, Integer idTipoRol) {
+        applyCurrentDbRole();
+
         UsuarioTipoRolId idCompuesto = new UsuarioTipoRolId(idUsuario, idTipoRol);
         UsuarioTipoRol relacion = usuarioTipoRolRepository.findById(idCompuesto)
                 .orElseThrow(() -> new EntityNotFoundException("Rol no asignado a este usuario"));
+
+        Usuario usuario = relacion.getUsuario();
+        if (usuario != null && !Boolean.TRUE.equals(usuario.getActivo())) {
+            throw new IllegalStateException("No se puede cambiar estado de roles cuando el usuario está inactivo globalmente");
+        }
+
         relacion.setActivo(!relacion.getActivo());
         usuarioTipoRolRepository.save(relacion);
     }

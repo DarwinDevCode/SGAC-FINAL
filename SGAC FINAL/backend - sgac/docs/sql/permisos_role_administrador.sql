@@ -48,6 +48,37 @@ ALTER ROLE role_administrador CREATEROLE;
 -- Recomendado: heredar privilegios de los roles concedidos.
 ALTER ROLE role_administrador INHERIT;
 
+-- Si el error es "permission denied to grant role "role_docente"" (o similar),
+-- al rol activo le falta ADMIN OPTION sobre el rol que intenta asignar.
+-- Ejemplos:
+GRANT role_docente TO role_administrador WITH ADMIN OPTION;
+GRANT role_estudiante TO role_administrador WITH ADMIN OPTION;
+GRANT role_coordinador TO role_administrador WITH ADMIN OPTION;
+GRANT role_decano TO role_administrador WITH ADMIN OPTION;
+GRANT role_ayudante_catedra TO role_administrador WITH ADMIN OPTION;
+
+
+-- Diagnóstico específico para "permission denied to grant role "role_administrador"":
+-- verificar quién tiene ADMIN OPTION sobre role_administrador.
+SELECT
+  parent.rolname AS rol_objetivo,
+  child.rolname  AS otorgado_a,
+  m.admin_option,
+  grantor.rolname AS otorgado_por
+FROM pg_auth_members m
+JOIN pg_roles parent  ON parent.oid  = m.roleid
+JOIN pg_roles child   ON child.oid   = m.member
+LEFT JOIN pg_roles grantor ON grantor.oid = m.grantor
+WHERE parent.rolname = 'role_administrador'
+ORDER BY child.rolname;
+
+-- Si el SP se ejecuta con SET ROLE role_administrador, ese rol debe poder otorgarse.
+-- Ejecutar con un superusuario/owner:
+GRANT role_administrador TO role_administrador WITH ADMIN OPTION;
+
+-- Si usas SECURITY DEFINER y owner = admin1, también conviene:
+GRANT role_administrador TO admin1 WITH ADMIN OPTION;
+
 -- (Opcional) Si app_user_default debe poder SET ROLE a usuarios creados dinámicamente,
 -- tu SP ya hace: GRANT <usuario_creado> TO app_user_default.
 -- Verificación rápida:

@@ -132,6 +132,13 @@ export class GestionUsuariosComponent implements OnInit, OnDestroy {
             alert('Error de permisos en base de datos: revise CREATEROLE/SECURITY DEFINER para role_administrador (guía: backend - sgac/docs/sql/permisos_role_administrador.sql).');
             return;
           }
+          if (
+            msg.includes('permission denied to grant role') ||
+            msg.includes('se ha denegado el permiso para otorgar el rol')
+          ) {
+            alert('Error de permisos en base de datos: falta ADMIN OPTION para asignar el rol solicitado (por ejemplo role_docente o role_administrador). Revise la guía SQL de permisos.');
+            return;
+          }
           alert('Error al registrar: verifique los datos.');
         }
       })
@@ -140,7 +147,13 @@ export class GestionUsuariosComponent implements OnInit, OnDestroy {
 
   toggleEstado(u: Usuario) {
     if (!confirm(`¿Cambiar estado global de ${u.nombreUsuario}?`)) return;
-    this.subs.add(this.usuarioService.cambiarEstado(u.idUsuario).subscribe(() => u.activo = !u.activo));
+
+    this.subs.add(
+      this.usuarioService.cambiarEstado(u.idUsuario).subscribe(() => {
+        u.activo = !u.activo;
+        u.roles = (u.roles || []).map(r => ({ ...r, activo: u.activo }));
+      })
+    );
   }
 
   toggleEstadoRol(u: Usuario, r: TipoRol) {
