@@ -45,10 +45,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   asignaturaForm: AsignaturaCatalogoRequest = { idCarrera: 0, nombreAsignatura: '', semestre: 1 };
   periodoForm: PeriodoCatalogoRequest = { nombrePeriodo: '', fechaInicio: '', fechaFin: '', estado: 'ACTIVO' };
 
-  private originalFacultadForm: FacultadCatalogoRequest | null = null;
-  private originalCarreraForm: CarreraCatalogoRequest | null = null;
-  private originalAsignaturaForm: AsignaturaCatalogoRequest | null = null;
-  private originalPeriodoForm: PeriodoCatalogoRequest | null = null;
   private accionesEnCurso = new Set<string>();
 
   ngOnInit(): void {
@@ -136,11 +132,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       ? this.usuarioService.actualizarFacultadCatalogo(this.editandoFacultadId, payload)
       : this.usuarioService.crearFacultadCatalogo(payload);
 
-    if (this.editandoFacultadId && this.originalFacultadForm && this.esMismoFacultad(payload, this.originalFacultadForm)) {
-      alert('No hay cambios para actualizar en la facultad.');
-      return;
-    }
-
     this.guardando.set(true);
     this.subs.add(
       request$.subscribe({
@@ -156,10 +147,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
         error: (error) => alert(this.obtenerMensajeError(error, 'No se pudo guardar la facultad'))
       }).add(() => this.guardando.set(false))
     );
-  }
-
-  private esMismoFacultad(a: FacultadCatalogoRequest, b: FacultadCatalogoRequest): boolean {
-    return (a.nombreFacultad || '').trim().toLowerCase() === (b.nombreFacultad || '').trim().toLowerCase();
   }
 
   private claveAccion(tipo: string, id: number): string {
@@ -184,13 +171,11 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   cargarFacultadEnFormulario(facultad: Facultad): void {
     this.editandoFacultadId = facultad.idFacultad;
     this.facultadForm = { nombreFacultad: facultad.nombreFacultad };
-    this.originalFacultadForm = { ...this.facultadForm };
   }
 
   cancelarEdicionFacultad(): void {
     this.editandoFacultadId = null;
     this.facultadForm = { nombreFacultad: '' };
-    this.originalFacultadForm = null;
   }
 
   desactivarFacultad(facultad: Facultad): void {
@@ -229,11 +214,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       ? this.usuarioService.actualizarCarreraCatalogo(this.editandoCarreraId, payload)
       : this.usuarioService.crearCarreraCatalogo(payload);
 
-    if (this.editandoCarreraId && this.originalCarreraForm && this.esMismoCarrera(payload, this.originalCarreraForm)) {
-      alert('No hay cambios para actualizar en la carrera.');
-      return;
-    }
-
     this.guardando.set(true);
     this.subs.add(
       request$.subscribe({
@@ -251,24 +231,17 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     );
   }
 
-  private esMismoCarrera(a: CarreraCatalogoRequest, b: CarreraCatalogoRequest): boolean {
-    return a.idFacultad === b.idFacultad &&
-      (a.nombreCarrera || '').trim().toLowerCase() === (b.nombreCarrera || '').trim().toLowerCase();
-  }
-
   cargarCarreraEnFormulario(carrera: Carrera): void {
     this.editandoCarreraId = carrera.idCarrera;
     this.carreraForm = {
       idFacultad: carrera.idFacultad,
       nombreCarrera: carrera.nombreCarrera
     };
-    this.originalCarreraForm = { ...this.carreraForm };
   }
 
   cancelarEdicionCarrera(): void {
     this.editandoCarreraId = null;
     this.carreraForm = { idFacultad: 0, nombreCarrera: '' };
-    this.originalCarreraForm = null;
   }
 
   desactivarCarrera(carrera: Carrera): void {
@@ -308,11 +281,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       ? this.usuarioService.actualizarAsignaturaCatalogo(this.editandoAsignaturaId, payload)
       : this.usuarioService.crearAsignaturaCatalogo(payload);
 
-    if (this.editandoAsignaturaId && this.originalAsignaturaForm && this.esMismoAsignatura(payload, this.originalAsignaturaForm)) {
-      alert('No hay cambios para actualizar en la asignatura.');
-      return;
-    }
-
     this.guardando.set(true);
     this.subs.add(
       request$.subscribe({
@@ -329,11 +297,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     );
   }
 
-  private esMismoAsignatura(a: AsignaturaCatalogoRequest, b: AsignaturaCatalogoRequest): boolean {
-    return a.idCarrera === b.idCarrera && a.semestre === b.semestre &&
-      (a.nombreAsignatura || '').trim().toLowerCase() === (b.nombreAsignatura || '').trim().toLowerCase();
-  }
-
   cargarAsignaturaEnFormulario(asignatura: AsignaturaCatalogo): void {
     this.editandoAsignaturaId = asignatura.idAsignatura;
     this.asignaturaForm = {
@@ -341,13 +304,11 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       nombreAsignatura: asignatura.nombreAsignatura,
       semestre: asignatura.semestre
     };
-    this.originalAsignaturaForm = { ...this.asignaturaForm };
   }
 
   cancelarEdicionAsignatura(): void {
     this.editandoAsignaturaId = null;
     this.asignaturaForm = { idCarrera: 0, nombreAsignatura: '', semestre: 1 };
-    this.originalAsignaturaForm = null;
   }
 
   desactivarAsignatura(asignatura: AsignaturaCatalogo): void {
@@ -385,11 +346,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       ? this.usuarioService.actualizarPeriodoCatalogo(this.editandoPeriodoId, payload)
       : this.usuarioService.crearPeriodoCatalogo(payload);
 
-    if (this.editandoPeriodoId && this.originalPeriodoForm && this.esMismoPeriodo(payload, this.originalPeriodoForm)) {
-      alert('No hay cambios para actualizar en el período académico.');
-      return;
-    }
-
     this.guardando.set(true);
     this.subs.add(
       request$.subscribe({
@@ -406,13 +362,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     );
   }
 
-  private esMismoPeriodo(a: PeriodoCatalogoRequest, b: PeriodoCatalogoRequest): boolean {
-    return (a.nombrePeriodo || '').trim().toLowerCase() === (b.nombrePeriodo || '').trim().toLowerCase()
-      && a.fechaInicio === b.fechaInicio
-      && a.fechaFin === b.fechaFin
-      && a.estado === b.estado;
-  }
-
   cargarPeriodoEnFormulario(periodo: PeriodoCatalogo): void {
     this.editandoPeriodoId = periodo.idPeriodoAcademico;
     this.periodoForm = {
@@ -421,13 +370,11 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       fechaFin: periodo.fechaFin,
       estado: periodo.estado
     };
-    this.originalPeriodoForm = { ...this.periodoForm };
   }
 
   cancelarEdicionPeriodo(): void {
     this.editandoPeriodoId = null;
     this.periodoForm = { nombrePeriodo: '', fechaInicio: '', fechaFin: '', estado: 'ACTIVO' };
-    this.originalPeriodoForm = null;
   }
 
   desactivarPeriodo(periodo: PeriodoCatalogo): void {
