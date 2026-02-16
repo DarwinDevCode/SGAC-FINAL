@@ -1,11 +1,13 @@
 package org.uteq.sgacfinal.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
+import org.uteq.sgacfinal.config.UserContext;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.entity.UsuarioTipoRol;
 import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
@@ -23,9 +25,49 @@ import java.util.stream.Collectors;
 public class UsuariosImpl implements IUsuariosService {
     private final IUsuariosRepository usuarioRepository;
     private final IUsuarioTipoRolRepository usuarioTipoRolRepository;
+    private final EntityManager entityManager;
+
+    private void applyCurrentDbRole() {
+        String username = UserContext.getUsername();
+        if (username == null || username.isBlank()) {
+            throw new IllegalStateException("No hay usuario autenticado para aplicar rol de BD");
+        }
+
+        String appRole = UserContext.getAppRole();
+        String dbRole = resolveDbRole(username, appRole);
+
+        entityManager.createNativeQuery("SELECT set_config('role', ?1, true)")
+                .setParameter(1, dbRole)
+                .getSingleResult();
+    }
+
+    private String resolveDbRole(String username, String appRole) {
+        if (appRole == null || appRole.isBlank()) {
+            return username.toLowerCase();
+        }
+
+        String normalizedRole = appRole.trim().toUpperCase();
+        if (normalizedRole.startsWith("ROLE_")) {
+            normalizedRole = normalizedRole.substring(5);
+        }
+
+        return switch (normalizedRole) {
+            // IMPORTANTE: atributos como CREATEROLE NO se heredan por membresía de rol.
+            // Para CREATE USER/ROLE debemos asumir el rol con atributo explícito.
+            case "ADMINISTRADOR" -> "role_administrador";
+            case "DECANO" -> "role_decano";
+            case "COORDINADOR" -> "role_coordinador";
+            case "DOCENTE" -> "role_docente";
+            case "ESTUDIANTE" -> "role_estudiante";
+            case "AYUDANTE_CATEDRA" -> "role_ayudante_catedra";
+            default -> username.toLowerCase();
+        };
+    }
+
     @Override
     @Transactional
     public void registrarEstudiante(RegistroEstudianteRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarEstudiante(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -41,6 +83,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarDocente(RegistroDocenteRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarDocente(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -54,6 +97,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarDecano(RegistroDecanoRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarDecano(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -68,6 +112,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarCoordinador(RegistroCoordinadorRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarCoordinador(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -82,6 +127,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarAdministrador(RegistroAdministradorRequest dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarAdministrador(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -95,6 +141,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void registrarAyudanteDirecto(RegistroAyudanteCatedraRequestDTO dto) {
+        applyCurrentDbRole();
         usuarioRepository.registrarAyudanteDirecto(
                 dto.getNombres(),
                 dto.getApellidos(),
@@ -109,6 +156,7 @@ public class UsuariosImpl implements IUsuariosService {
     @Override
     @Transactional
     public void promoverEstudiante(PromoverEstudianteAyudanteRequest dto) {
+        applyCurrentDbRole();
         usuarioRepository.promoverEstudianteAAyudante(
                 dto.getUsername(),
                 dto.getHorasAsignadas()
@@ -117,6 +165,7 @@ public class UsuariosImpl implements IUsuariosService {
 
     @Override
     public List<UsuarioResponseDTO> listarTodos() {
+        applyCurrentDbRole();
         return usuarioRepository.findAllWithRolesAndTipoRol().stream()
                 .map(u -> UsuarioResponseDTO.builder()
                         .idUsuario(u.getIdUsuario())
@@ -140,18 +189,37 @@ public class UsuariosImpl implements IUsuariosService {
     }
 
     @Override
+    @Transactional
     public void cambiarEstadoGlobal(Integer idUsuario) {
+        applyCurrentDbRole();
+
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado"));
-        usuario.setActivo(!usuario.getActivo());
+
+        boolean nuevoEstadoGlobal = !usuario.getActivo();
+        usuario.setActivo(nuevoEstadoGlobal);
+
+        if (usuario.getRoles() != null) {
+            usuario.getRoles().forEach(rol -> rol.setActivo(nuevoEstadoGlobal));
+        }
+
         usuarioRepository.save(usuario);
     }
 
     @Override
+    @Transactional
     public void cambiarEstadoRol(Integer idUsuario, Integer idTipoRol) {
+        applyCurrentDbRole();
+
         UsuarioTipoRolId idCompuesto = new UsuarioTipoRolId(idUsuario, idTipoRol);
         UsuarioTipoRol relacion = usuarioTipoRolRepository.findById(idCompuesto)
                 .orElseThrow(() -> new EntityNotFoundException("Rol no asignado a este usuario"));
+
+        Usuario usuario = relacion.getUsuario();
+        if (usuario != null && !Boolean.TRUE.equals(usuario.getActivo())) {
+            throw new IllegalStateException("No se puede cambiar estado de roles cuando el usuario está inactivo globalmente");
+        }
+
         relacion.setActivo(!relacion.getActivo());
         usuarioTipoRolRepository.save(relacion);
     }
