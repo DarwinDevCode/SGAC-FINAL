@@ -1,0 +1,11 @@
+.catalogos-container { padding: 1rem; }
+.tabs { display: flex; gap: .5rem; margin: 1rem 0; }
+.tabs button { padding: .5rem .9rem; border: 1px solid #cbd5e1; border-radius: .5rem; background: #fff; }
+.tabs button.active { background: #166534; color: white; border-color: #166534; }
+.card { background: white; border: 1px solid #e2e8f0; border-radius: .75rem; padding: 1rem; }
+.form-inline { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .75rem; }
+.form-inline input, .form-inline select { padding: .45rem .65rem; border: 1px solid #cbd5e1; border-radius: .45rem; }
+button { cursor: pointer; }
+button.danger { color: #b91c1c; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: .55rem; border-bottom: 1px solid #e2e8f0; text-align: left; font-size: .9rem; }
