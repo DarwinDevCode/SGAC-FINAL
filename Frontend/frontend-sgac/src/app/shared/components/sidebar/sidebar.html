@@ -1,1 +1,43 @@
-<p>sidebar works!</p>
+<aside class="sidebar-container">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      SGAC Portal
+    </div>
+  </div>
+
+  <div class="sidebar-content">
+    <nav class="nav-group">
+      <div class="role-label">
+        {{ userRole().replace('_', ' ') }}
+      </div>
+
+      <a
+        *ngFor="let item of currentMenu()"
+        [routerLink]="item.route"
+        routerLinkActive="active-link"
+        class="nav-item"
+      >
+        <lucide-icon [name]="item.icon" class="nav-icon"></lucide-icon>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">
+    <nav class="nav-group">
+      <a
+        routerLink="/settings"
+        routerLinkActive="active-link"
+        class="nav-item"
+      >
+        <lucide-icon name="Settings" class="nav-icon"></lucide-icon>
+        <span class="nav-label">Ajustes</span>
+      </a>
+
+      <button (click)="logout()" class="nav-item logout-btn">
+        <lucide-icon name="LogOut" class="nav-icon"></lucide-icon>
+        <span class="nav-label">Cerrar sesión</span>
+      </button>
+    </nav>
+  </div>
+</aside>

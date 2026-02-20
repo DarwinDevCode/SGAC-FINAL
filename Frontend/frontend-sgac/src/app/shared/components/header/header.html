@@ -1,1 +1,38 @@
-<p>header works!</p>
+<header class="header-main">
+  <button class="mobile-menu-btn">
+    <lucide-icon name="Menu" size="20"></lucide-icon>
+  </button>
+
+  <nav class="breadcrumb-nav">
+    <ng-container *ngFor="let crumb of breadcrumbs(); let i = index">
+      <span *ngIf="i > 0" class="breadcrumb-separator">/</span>
+      <span class="breadcrumb-item" [class.active-crumb]="i === breadcrumbs().length - 1">
+        {{ crumb.label }}
+      </span>
+    </ng-container>
+  </nav>
+
+  <div class="header-right-group">
+
+    <div class="search-wrapper">
+      <lucide-icon name="Search" class="search-icon" size="16"></lucide-icon>
+      <input type="search" placeholder="Buscar..." class="search-input" />
+    </div>
+
+    <button class="notification-btn">
+      <lucide-icon name="Bell" size="20"></lucide-icon>
+      <span class="notif-badge"></span>
+    </button>
+
+    <div class="user-container">
+      <div class="user-info">
+        <p class="user-name">{{ user()?.nombreUsuario }}</p>
+        <p class="user-role">{{ user()?.rolActual }}</p>
+      </div>
+
+      <div class="avatar">
+        {{ user()?.nombres?.charAt(0) || 'U' }}{{ user()?.apellidos?.charAt(0) || '' }}
+      </div>
+    </div>
+  </div>
+</header>

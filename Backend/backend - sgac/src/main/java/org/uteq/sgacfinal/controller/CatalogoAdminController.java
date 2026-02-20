@@ -21,7 +21,7 @@ import org.uteq.sgacfinal.service.IPeriodoAcademicoService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/catalogos")
+    @RequestMapping("/api/admin/catalogos")
 @RequiredArgsConstructor
 public class CatalogoAdminController {
 
