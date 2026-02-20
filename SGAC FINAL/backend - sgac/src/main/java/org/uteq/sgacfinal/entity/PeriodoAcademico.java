@@ -33,6 +33,9 @@ public class PeriodoAcademico {
     @Column(name = "estado", nullable = false, length = 30)
     private String estado;
 
+    @Column(name = "activo")
+    private Boolean activo;
+
     @OneToMany(mappedBy = "periodoAcademico", cascade = CascadeType.ALL)
     private List<Convocatoria> convocatorias = new ArrayList<>();
 

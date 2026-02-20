@@ -30,6 +30,9 @@ public class Asignatura {
     @Column(name = "semestre", nullable = false)
     private Integer semestre;
 
+    @Column(name = "activo")
+    private Boolean activo;
+
     @OneToMany(mappedBy = "asignatura", cascade = CascadeType.ALL)
     private List<DocenteAsignatura> docenteAsignaturas = new ArrayList<>();
 

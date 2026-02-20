@@ -54,9 +54,20 @@ public class PeriodoAcademicoServiceImpl implements IPeriodoAcademicoService {
 
     @Override
     public void desactivar(Integer id) {
-        Integer resultado = periodoRepository.desactivarPeriodo(id);
-        if (resultado == -1) {
-            throw new RuntimeException("Error al desactivar periodo académico.");
+        PeriodoAcademico periodo = periodoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Periodo no encontrado con ID: " + id));
+
+        if (Boolean.TRUE.equals(periodo.getActivo())) {
+            Integer resultado = periodoRepository.desactivarPeriodo(id);
+            if (resultado == -1) {
+                throw new RuntimeException("Error al desactivar periodo académico.");
+            }
+            return;
+        }
+
+        int actualizados = periodoRepository.activarPeriodo(id);
+        if (actualizados == 0) {
+            throw new RuntimeException("Error al activar periodo académico.");
         }
     }
 
@@ -89,6 +100,7 @@ public class PeriodoAcademicoServiceImpl implements IPeriodoAcademicoService {
                 .fechaInicio(entidad.getFechaInicio())
                 .fechaFin(entidad.getFechaFin())
                 .estado(entidad.getEstado())
+                .activo(entidad.getActivo())
                 .build();
     }
 

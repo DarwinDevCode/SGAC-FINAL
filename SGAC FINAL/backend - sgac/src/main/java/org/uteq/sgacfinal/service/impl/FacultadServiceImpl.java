@@ -43,9 +43,20 @@ public class FacultadServiceImpl implements IFacultadService {
 
     @Override
     public void desactivar(Integer id) {
-        Integer resultado = facultadRepository.desactivarFacultad(id);
-        if (resultado == -1) {
-            throw new RuntimeException("Error al eliminar la facultad.");
+        Facultad facultad = facultadRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Facultad no encontrada con ID: " + id));
+
+        if (Boolean.TRUE.equals(facultad.getActivo())) {
+            Integer resultado = facultadRepository.desactivarFacultad(id);
+            if (resultado == -1) {
+                throw new RuntimeException("Error al desactivar la facultad.");
+            }
+            return;
+        }
+
+        int actualizados = facultadRepository.activarFacultad(id);
+        if (actualizados == 0) {
+            throw new RuntimeException("Error al activar la facultad.");
         }
     }
 
@@ -69,6 +80,7 @@ public class FacultadServiceImpl implements IFacultadService {
         return FacultadResponseDTO.builder()
                 .idFacultad(entidad.getIdFacultad())
                 .nombreFacultad(entidad.getNombreFacultad())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

@@ -54,9 +54,20 @@ public class AsignaturaServiceImpl implements IAsignaturaService {
 
     @Override
     public void desactivar(Integer id) {
-        Integer resultado = asignaturaRepository.desactivarAsignatura(id);
-        if (resultado == -1) {
-            throw new RuntimeException("Error al desactivar la asignatura.");
+        Asignatura asignatura = asignaturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Asignatura no encontrada con ID: " + id));
+
+        if (Boolean.TRUE.equals(asignatura.getActivo())) {
+            Integer resultado = asignaturaRepository.desactivarAsignatura(id);
+            if (resultado == -1) {
+                throw new RuntimeException("Error al desactivar la asignatura.");
+            }
+            return;
+        }
+
+        int actualizados = asignaturaRepository.activarAsignatura(id);
+        if (actualizados == 0) {
+            throw new RuntimeException("Error al activar la asignatura.");
         }
     }
 
@@ -91,6 +102,7 @@ public class AsignaturaServiceImpl implements IAsignaturaService {
                 .nombreCarrera(entidad.getCarrera().getNombreCarrera())
                 .nombreAsignatura(entidad.getNombreAsignatura())
                 .semestre(entidad.getSemestre())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

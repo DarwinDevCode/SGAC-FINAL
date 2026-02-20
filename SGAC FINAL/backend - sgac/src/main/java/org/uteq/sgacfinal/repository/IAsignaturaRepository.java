@@ -11,19 +11,24 @@ import java.util.List;
 @Repository
 public interface IAsignaturaRepository extends JpaRepository<Asignatura, Integer> {
 
-    @Query(value = "SELECT public.sp_crear_asignatura(:idCarrera, :nombre, :semestre)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_crear_asignatura(:idCarrera, :nombre, :semestre)", nativeQuery = true)
     Integer registrarAsignatura(@Param("idCarrera") Integer idCarrera,
                                 @Param("nombre") String nombreAsignatura,
                                 @Param("semestre") Integer semestre);
 
-    @Query(value = "SELECT public.sp_actualizar_asignatura(:id, :idCarrera, :nombre, :semestre)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_actualizar_asignatura(:id, :idCarrera, :nombre, :semestre)", nativeQuery = true)
     Integer actualizarAsignatura(@Param("id") Integer idAsignatura,
                                  @Param("idCarrera") Integer idCarrera,
                                  @Param("nombre") String nombreAsignatura,
                                  @Param("semestre") Integer semestre);
 
-    @Query(value = "SELECT public.sp_desactivar_asignatura(:id)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_desactivar_asignatura(:id)", nativeQuery = true)
     Integer desactivarAsignatura(@Param("id") Integer idAsignatura);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query(value = "UPDATE asignatura SET activo = true WHERE id_asignatura = :id", nativeQuery = true)
+    int activarAsignatura(@Param("id") Integer idAsignatura);
 
     List<Asignatura> findByCarrera_IdCarrera(Integer idCarrera);
 

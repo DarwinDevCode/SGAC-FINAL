@@ -14,4 +14,5 @@ public class PeriodoAcademicoResponseDTO {
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private String estado;
+    private Boolean activo;
 }

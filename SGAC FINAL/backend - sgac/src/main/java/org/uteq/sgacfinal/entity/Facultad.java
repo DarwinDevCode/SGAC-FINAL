@@ -23,6 +23,9 @@ public class Facultad {
     @Column(name = "nombre_facultad", nullable = false, length = 150)
     private String nombreFacultad;
 
+    @Column(name = "activo")
+    private Boolean activo;
+
     @OneToMany(mappedBy = "facultad", cascade = CascadeType.ALL)
     private List<Carrera> carreras = new ArrayList<>();
 

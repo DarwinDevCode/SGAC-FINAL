@@ -50,9 +50,20 @@ public class CarreraServiceImpl implements ICarreraService {
 
     @Override
     public void desactivar(Integer id) {
-        Integer resultado = carreraRepository.desactivarCarrera(id);
-        if (resultado == -1) {
-            throw new RuntimeException("Error al desactivar la carrera.");
+        Carrera carrera = carreraRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Carrera no encontrada con ID: " + id));
+
+        if (Boolean.TRUE.equals(carrera.getActivo())) {
+            Integer resultado = carreraRepository.desactivarCarrera(id);
+            if (resultado == -1) {
+                throw new RuntimeException("Error al desactivar la carrera.");
+            }
+            return;
+        }
+
+        int actualizados = carreraRepository.activarCarrera(id);
+        if (actualizados == 0) {
+            throw new RuntimeException("Error al activar la carrera.");
         }
     }
 
@@ -86,6 +97,7 @@ public class CarreraServiceImpl implements ICarreraService {
                 .idFacultad(entidad.getFacultad().getIdFacultad())
                 .nombreFacultad(entidad.getFacultad().getNombreFacultad())
                 .nombreCarrera(entidad.getNombreCarrera())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

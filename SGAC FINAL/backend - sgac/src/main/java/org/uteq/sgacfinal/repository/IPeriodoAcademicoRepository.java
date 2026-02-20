@@ -13,21 +13,26 @@ import java.util.Optional;
 @Repository
 public interface IPeriodoAcademicoRepository extends JpaRepository<PeriodoAcademico, Integer> {
 
-    @Query(value = "SELECT public.sp_crear_periodo_academico(:nombre, :inicio, :fin, :estado)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_crear_periodo_academico(:nombre, :inicio, :fin, :estado)", nativeQuery = true)
     Integer registrarPeriodo(@Param("nombre") String nombrePeriodo,
                              @Param("inicio") LocalDate fechaInicio,
                              @Param("fin") LocalDate fechaFin,
                              @Param("estado") String estado);
 
-    @Query(value = "SELECT public.sp_actualizar_periodo_academico(:id, :nombre, :inicio, :fin, :estado)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_actualizar_periodo_academico(:id, :nombre, :inicio, :fin, :estado)", nativeQuery = true)
     Integer actualizarPeriodo(@Param("id") Integer idPeriodo,
                               @Param("nombre") String nombrePeriodo,
                               @Param("inicio") LocalDate fechaInicio,
                               @Param("fin") LocalDate fechaFin,
                               @Param("estado") String estado);
 
-    @Query(value = "SELECT public.sp_desactivar_periodo_academico(:id)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_desactivar_periodo_academico(:id)", nativeQuery = true)
     Integer desactivarPeriodo(@Param("id") Integer idPeriodo);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.transaction.annotation.Transactional
+    @Query(value = "UPDATE periodo_academico SET activo = true WHERE id_periodo_academico = :id", nativeQuery = true)
+    int activarPeriodo(@Param("id") Integer idPeriodo);
 
     List<PeriodoAcademico> findByEstado(String estado);
 }
