@@ -12,6 +12,7 @@ import { AuthService, AuthUser, LoginRequest } from '../../../core/services/auth
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
+
 export class LoginComponent {
   view: 'login' | 'forgot-password' = 'login';
   showPassword = false;

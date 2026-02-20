@@ -14,6 +14,10 @@ import {
   UsuarioService
 } from '../../../core/services/usuario';
 
+import {AsignaturaDTO} from '../../../core/dto/Asignatura';
+import {AsignaturaService} from '../../../core/services/asignatura';
+
+
 @Component({
   selector: 'app-gestion-catalogos',
   standalone: true,
@@ -426,4 +430,11 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   private obtenerMensajeError(error: any, fallback: string): string {
     return error?.error?.message || error?.error?.mensaje || error?.message || fallback;
   }
+
+
+
+
+
+
+
 }

@@ -12,4 +12,5 @@ public class CarreraResponseDTO {
     private Integer idFacultad;
     private String nombreFacultad;
     private String nombreCarrera;
+    private Boolean activo;
 }

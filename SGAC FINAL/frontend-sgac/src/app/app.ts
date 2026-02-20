@@ -7,7 +7,7 @@ import { RouterOutlet } from '@angular/router';
   imports: [RouterOutlet],
   template: `<router-outlet></router-outlet>`,
   styles: [],
-  encapsulation: ViewEncapsulation.None // ESTO ES OBLIGATORIO
+  encapsulation: ViewEncapsulation.None
 })
 export class App {
   protected readonly title = signal('frontend-sgac');

@@ -13,4 +13,5 @@ public class AsignaturaResponseDTO {
     private String nombreCarrera;
     private String nombreAsignatura;
     private Integer semestre;
+    private Boolean activo;
 }

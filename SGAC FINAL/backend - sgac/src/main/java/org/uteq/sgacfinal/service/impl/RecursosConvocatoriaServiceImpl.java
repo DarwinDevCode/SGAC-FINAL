@@ -46,6 +46,7 @@ public class RecursosConvocatoriaServiceImpl implements IRecursosConvocatoriaSer
         return asignaturas.stream().map(asignatura -> AsignaturaResponseDTO.builder()
                 .idAsignatura(asignatura.getIdAsignatura())
                 .nombreAsignatura(asignatura.getNombreAsignatura())
+                .activo(asignatura.getActivo())
                 .build()
         ).collect(Collectors.toList());
     }
@@ -67,6 +68,7 @@ public class RecursosConvocatoriaServiceImpl implements IRecursosConvocatoriaSer
                 .fechaInicio(periodo.getFechaInicio())
                 .fechaFin(periodo.getFechaFin())
                 .estado(periodo.getEstado())
+                .activo(periodo.getActivo())
                 .build();
     }
 
@@ -76,6 +78,7 @@ public class RecursosConvocatoriaServiceImpl implements IRecursosConvocatoriaSer
                 .map(f -> FacultadResponseDTO.builder()
                         .idFacultad(f.getIdFacultad())
                         .nombreFacultad(f.getNombreFacultad())
+                        .activo(f.getActivo())
                         .build())
                 .collect(Collectors.toList());
     }
@@ -88,6 +91,7 @@ public class RecursosConvocatoriaServiceImpl implements IRecursosConvocatoriaSer
                         .nombreCarrera(c.getNombreCarrera())
                         .idFacultad(c.getFacultad().getIdFacultad())
                         .nombreFacultad(c.getFacultad().getNombreFacultad())
+                        .activo(c.getActivo())
                         .build())
                 .collect(Collectors.toList());
     }

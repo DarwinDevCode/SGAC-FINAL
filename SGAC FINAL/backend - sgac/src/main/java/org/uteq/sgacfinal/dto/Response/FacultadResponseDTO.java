@@ -10,4 +10,5 @@ import lombok.*;
 public class FacultadResponseDTO {
     private Integer idFacultad;
     private String nombreFacultad;
+    private Boolean activo;
 }

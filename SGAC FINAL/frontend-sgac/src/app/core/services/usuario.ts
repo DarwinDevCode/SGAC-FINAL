@@ -36,10 +36,31 @@ export interface UsuarioRequest {
   horasAyudante?: number;
 }
 
-export interface Facultad { idFacultad: number; nombreFacultad: string; }
-export interface Carrera { idCarrera: number; idFacultad: number; nombreFacultad: string; nombreCarrera: string; }
+export interface Facultad
+{
+  idFacultad: number;
+  nombreFacultad: string;
+  activo: boolean;
+}
+
+export interface Carrera
+{
+  idCarrera: number;
+  idFacultad: number;
+  nombreFacultad: string;
+  nombreCarrera: string;
+  activo: boolean;
+}
 export interface Docente { idDocente: number; nombres: string; apellidos: string; cedula: string; }
-export interface Asignatura { idAsignatura: number; nombreAsignatura: string; semestre: number; idCarrera: number; }
+
+export interface Asignatura
+{ idAsignatura: number;
+  nombreAsignatura: string;
+  semestre: number;
+  idCarrera: number;
+  activo: boolean;
+}
+
 export interface PeriodoAcademico { idPeriodo: number; nombrePeriodo: string; activo: boolean; }
 
 export interface FacultadCatalogoRequest { nombreFacultad: string; }
@@ -79,6 +100,7 @@ export class UsuarioService {
   private readonly API_AUTH = `${this.baseUrl}/auth`;
   private readonly API_RECURSOS = `${this.baseUrl}/recursos`;
   private readonly API_ADMIN_CATALOGOS = `${this.baseUrl}/admin/catalogos`;
+
 
   listarTodos(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(this.API_AUTH);
@@ -222,6 +244,11 @@ export class UsuarioService {
 
   desactivarPeriodoCatalogo(id: number): Observable<void> {
     return this.http.patch<void>(`${this.API_ADMIN_CATALOGOS}/periodos/${id}/desactivar`, {});
+  }
+
+
+  listarFacultad(): Observable<Facultad[]>{
+    return this.http.get<Facultad[]>(`${this.API_ADMIN_CATALOGOS}/facultades`)
   }
 
 }

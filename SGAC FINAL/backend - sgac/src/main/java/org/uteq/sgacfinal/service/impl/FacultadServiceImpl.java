@@ -61,7 +61,11 @@ public class FacultadServiceImpl implements IFacultadService {
     @Transactional(readOnly = true)
     public List<FacultadResponseDTO> listarTodas() {
         return facultadRepository.findAll().stream()
-                .map(this::mapearADTO)
+                .map(f -> FacultadResponseDTO.builder()
+                        .idFacultad(f.getIdFacultad())
+                        .nombreFacultad(f.getNombreFacultad())
+                        .activo(f.getActivo())
+                        .build())
                 .collect(Collectors.toList());
     }
 
