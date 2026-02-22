@@ -8,6 +8,7 @@ import { UsuarioDTO } from '../../../core/dto/usuario';
 import {CarreraDTO} from '../../../core/dto/carrera';
 import {FacultadDTO} from '../../../core/dto/facultad';
 import { TipoRolDTO } from '../../../core/dto/tipo-rol';
+import { CatalogosService} from '../../../core/services/catalogos-service';
 
 @Component({
   selector: 'app-gestion-usuarios',
@@ -17,6 +18,7 @@ import { TipoRolDTO } from '../../../core/dto/tipo-rol';
   styleUrl: './gestion-usuarios.css',
 })
 export class GestionUsuarios implements OnInit, OnDestroy {
+  catalogoService = inject(CatalogosService);
   usuarioService = inject(UsuarioService);
   private subs = new Subscription(); // Para limpiar las peticiones al destruir el componente
 
@@ -58,11 +60,10 @@ export class GestionUsuarios implements OnInit, OnDestroy {
   }
 
   cargarCatalogos() {
-    this.subs.add(this.usuarioService.listarCarreras().subscribe(data => this.listaCarreras = data || []));
-    this.subs.add(this.usuarioService.listarFacultades().subscribe(data => this.listaFacultades = data || []));
+    this.subs.add(this.catalogoService.getCarreras().subscribe(data => this.listaCarreras = data || []));
+    this.subs.add(this.catalogoService.getFacultades().subscribe(data => this.listaFacultades = data || []));
   }
 
-  // --- BUSCADOR ---
   filtrarUsuarios(texto: string) {
     this.busqueda = texto;
     this.aplicarFiltro(texto);

@@ -14,7 +14,6 @@ import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Plus, Edit, Powe
     {
       provide: LUCIDE_ICONS,
       multi: true,
-      // 2. Envolvemos el objeto en un 'new LucideIconProvider'
       useValue: new LucideIconProvider({ Plus, Edit, Power, X })
     }
   ],

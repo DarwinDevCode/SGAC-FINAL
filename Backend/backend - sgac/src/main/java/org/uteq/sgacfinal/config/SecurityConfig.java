@@ -33,17 +33,16 @@ import java.util.Arrays;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final IUsuariosRepository usuarioRepository;
     private final JwtService jwtService;
+    private final UserDetailsService userDetailsService;
 
-    @Bean
-    @Transactional
-    public UserDetailsService userDetailsService() {
-        return username -> usuarioRepository.findByNombreUsuarioWithRolesAndTipoRol(username)
-                .map(UsuarioPrincipal::new)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
-    }
+//    @Bean
+//    @Transactional
+//    public UserDetailsService userDetailsService() {
+//        return username -> usuarioRepository.findByNombreUsuarioWithRolesAndTipoRol(username)
+//                .map(UsuarioPrincipal::new)
+//                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+//    }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
@@ -53,7 +52,8 @@ public class SecurityConfig {
                 String username = authentication.getName();
                 String password = authentication.getCredentials().toString();
 
-                UserDetails user = userDetailsService().loadUserByUsername(username);
+                UserDetails user = userDetailsService.loadUserByUsername(username);
+
                 if (!passwordEncoder().matches(password, user.getPassword())) {
                     throw new BadCredentialsException("Contraseña incorrecta");
                 }
@@ -82,7 +82,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter(jwtService, userDetailsService());
+        return new JwtAuthenticationFilter(jwtService, userDetailsService);
     }
 
     @Bean

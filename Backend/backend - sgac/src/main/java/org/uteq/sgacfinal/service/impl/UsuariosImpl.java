@@ -3,6 +3,9 @@ package org.uteq.sgacfinal.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
@@ -13,6 +16,7 @@ import org.uteq.sgacfinal.entity.UsuarioTipoRol;
 import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
 import org.uteq.sgacfinal.repository.IUsuarioTipoRolRepository;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
+import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.IUsuariosService;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.entity.TipoRol;
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UsuariosImpl implements IUsuariosService {
+public class UsuariosImpl implements IUsuariosService, UserDetailsService {
     private final IUsuariosRepository usuarioRepository;
     private final IUsuarioTipoRolRepository usuarioTipoRolRepository;
     private final EntityManager entityManager;
@@ -52,8 +56,6 @@ public class UsuariosImpl implements IUsuariosService {
         }
 
         return switch (normalizedRole) {
-            // IMPORTANTE: atributos como CREATEROLE NO se heredan por membresía de rol.
-            // Para CREATE USER/ROLE debemos asumir el rol con atributo explícito.
             case "ADMINISTRADOR" -> "role_administrador";
             case "DECANO" -> "role_decano";
             case "COORDINADOR" -> "role_coordinador";
@@ -223,5 +225,12 @@ public class UsuariosImpl implements IUsuariosService {
 
         relacion.setActivo(!relacion.getActivo());
         usuarioTipoRolRepository.save(relacion);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return usuarioRepository.findByNombreUsuarioWithRolesAndTipoRol(username)
+                .map(UsuarioPrincipal::new)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
     }
 }

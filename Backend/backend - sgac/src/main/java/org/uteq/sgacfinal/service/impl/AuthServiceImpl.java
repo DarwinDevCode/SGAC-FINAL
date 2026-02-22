@@ -19,6 +19,7 @@ public class AuthServiceImpl implements IAuthService {
     private final IUsuariosRepository usuarioRepository;
 
     @Override
+    @Transactional
     public UsuarioResponseDTO loginUsuario(LoginRequestDTO request) {
         List<Object[]> resultados = authRepository.login(
                 request.getUsuario(),
