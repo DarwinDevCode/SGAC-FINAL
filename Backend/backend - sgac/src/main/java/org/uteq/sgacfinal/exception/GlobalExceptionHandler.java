@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -16,22 +17,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.NOT_FOUND.value());
-        response.put("error", "Not Found");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", ex.getMessage());
     }
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> handleBadRequestException(BadRequestException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Bad Request");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -52,40 +43,55 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        Map<String, Object> response = new HashMap<>();
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String mensajeLimpio = "Error: Un dato único ya existe en el sistema.";
 
-        String errorCrudo = ex.getMessage();
-        String mensajeLimpio = "Ocurrió un error inesperado en el servidor.";
+        Throwable rootCause = ex.getRootCause() != null ? ex.getRootCause() : ex;
+        String errorCrudo = rootCause.getMessage();
 
         if (errorCrudo != null) {
-            if (errorCrudo.contains("23505") || errorCrudo.contains("duplicate key")) {
-                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("constraint \"(.*?)\"").matcher(errorCrudo);
+            java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("[\"«]([a-zA-Z0-9_]+)[\"»]").matcher(errorCrudo);
 
-                if (matcher.find()) {
-                    String constraint = matcher.group(1);
+            if (matcher.find()) {
+                String constraint = matcher.group(1);
 
-                    String campo = constraint
-                            .replace("usuario_", "")
-                            .replace("uk_", "")
-                            .replace("_key", "")
-                            .toUpperCase();
+                String campo = constraint
+                        .replace("usuario_", "")
+                        .replace("uk_", "")
+                        .replace("_key", "")
+                        .toUpperCase();
 
-                    mensajeLimpio = "Error: El dato ingresado para el campo " + campo + " ya se encuentra registrado.";
-                } else {
-                    mensajeLimpio = "Error: Un dato único ya existe en el sistema.";
-                }
-            } else {
-                mensajeLimpio = errorCrudo.replaceAll("org.hibernate.exception.GenericJDBCException: ", "").split("\n")[0];
+                mensajeLimpio = "Error: El dato ingresado para el campo " + campo + " ya se encuentra registrado.";
             }
         }
 
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Database / Business Logic Error");
-        response.put("message", mensajeLimpio);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Data Integrity Violation", mensajeLimpio);
+    }
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        Throwable rootCause = ex;
+        while (rootCause.getCause() != null && rootCause != rootCause.getCause()) {
+            rootCause = rootCause.getCause();
+        }
+
+        String errorCrudo = rootCause.getMessage() != null ? rootCause.getMessage() : ex.getMessage();
+        String mensajeLimpio = "Ocurrió un error inesperado en el servidor.";
+
+        if (errorCrudo != null) {
+            mensajeLimpio = errorCrudo.replaceAll("org.hibernate.exception.GenericJDBCException: ", "").split("\n")[0];
+        }
+
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error", mensajeLimpio);
+    }
+
+    private ResponseEntity<Map<String, Object>> buildResponse(HttpStatus status, String error, String message) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", status.value());
+        response.put("error", error);
+        response.put("message", message);
+        return new ResponseEntity<>(response, status);
     }
 }

@@ -9,6 +9,8 @@ import {CarreraDTO} from '../../../core/dto/carrera';
 import {FacultadDTO} from '../../../core/dto/facultad';
 import { TipoRolDTO } from '../../../core/dto/tipo-rol';
 import { CatalogosService} from '../../../core/services/catalogos-service';
+import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
+
 
 @Component({
   selector: 'app-gestion-usuarios',
@@ -60,8 +62,25 @@ export class GestionUsuarios implements OnInit, OnDestroy {
   }
 
   cargarCatalogos() {
-    this.subs.add(this.catalogoService.getCarreras().subscribe(data => this.listaCarreras = data || []));
-    this.subs.add(this.catalogoService.getFacultades().subscribe(data => this.listaFacultades = data || []));
+    this.subs.add(
+      this.catalogoService.getCarreras().subscribe({
+        next: (data) => this.listaCarreras = data || [],
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || 'Error al cargar carreras';
+          alert(msg);
+        }
+      })
+    );
+
+    this.subs.add(
+      this.catalogoService.getFacultades().subscribe({
+        next: (data) => this.listaFacultades = data || [],
+        error: (err: HttpErrorResponse) => {
+          const msg = err.error?.message || 'Error al cargar facultades';
+          alert(msg);
+        }
+      })
+    );
   }
 
   filtrarUsuarios(texto: string) {
@@ -84,7 +103,6 @@ export class GestionUsuarios implements OnInit, OnDestroy {
     );
   }
 
-  // --- CONTROL DE UI ---
   abrirModalCrear() {
     this.form = this.initForm();
     this.mostrarModal = true;
@@ -108,9 +126,8 @@ export class GestionUsuarios implements OnInit, OnDestroy {
   getEsDecano(): boolean { return this.form.rolRegistro === 'DECANO'; }
   getEsAyudante(): boolean { return this.form.rolRegistro === 'AYUDANTE_CATEDRA'; }
 
-  // --- ACCIONES CON EL BACKEND ---
+
   guardarUsuario() {
-    // Validaciones
     if (this.getEsEstudiante() && !this.form.idCarrera) {
       alert('Seleccione una carrera.'); return;
     }
@@ -128,19 +145,22 @@ export class GestionUsuarios implements OnInit, OnDestroy {
           this.cerrarModal();
           this.listarUsuarios(); // Recargar tabla
         },
-        error: (error: any) => {
-          const msg = (error?.error?.mensaje || '').toLowerCase();
-          if (msg.includes('duplicate') || msg.includes('duplic')) {
-            alert('Error: Ya existe un usuario con esa cédula, correo o usuario.');
-          } else if (msg.includes('permission denied')) {
-            alert('Error de permisos en BD. Revisa los roles de PostgreSQL.');
-          } else {
-            alert('Error al registrar: verifique los datos.');
+        error: (err: HttpErrorResponse) => {
+          console.error('Error del backend:', err);
+
+          if (err.error?.errors) {
+            const mensajesValidacion = Object.values(err.error.errors).join('\n - ');
+            alert(`Por favor, corrige lo siguiente:\n - ${mensajesValidacion}`);
           }
+          else if (err.error?.message)
+            alert(`Atención: ${err.error.message}`);
+          else
+            alert("Error de red o servidor no disponible");
         }
       })
     );
   }
+
 
   toggleEstado(u: UsuarioDTO) {
     if (!u.idUsuario) return;
