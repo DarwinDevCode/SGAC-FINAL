@@ -55,10 +55,37 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
         Map<String, Object> response = new HashMap<>();
+
+        String errorCrudo = ex.getMessage();
+        String mensajeLimpio = "Ocurrió un error inesperado en el servidor.";
+
+        if (errorCrudo != null) {
+            if (errorCrudo.contains("23505") || errorCrudo.contains("duplicate key")) {
+                java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("constraint \"(.*?)\"").matcher(errorCrudo);
+
+                if (matcher.find()) {
+                    String constraint = matcher.group(1);
+
+                    String campo = constraint
+                            .replace("usuario_", "")
+                            .replace("uk_", "")
+                            .replace("_key", "")
+                            .toUpperCase();
+
+                    mensajeLimpio = "Error: El dato ingresado para el campo " + campo + " ya se encuentra registrado.";
+                } else {
+                    mensajeLimpio = "Error: Un dato único ya existe en el sistema.";
+                }
+            } else {
+                mensajeLimpio = errorCrudo.replaceAll("org.hibernate.exception.GenericJDBCException: ", "").split("\n")[0];
+            }
+        }
+
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "Internal Server Error");
-        response.put("message", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", "Database / Business Logic Error");
+        response.put("message", mensajeLimpio);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

@@ -7,7 +7,7 @@ import org.uteq.sgacfinal.dto.Request.UsuarioTipoRolRequestDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioTipoRolResponseDTO;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
-import org.uteq.sgacfinal.repository.TipoRolRepository;
+import org.uteq.sgacfinal.repository.ITipoRolRepository;
 import org.uteq.sgacfinal.repository.IUsuarioTipoRolRepository;
 import org.uteq.sgacfinal.service.IUsuarioTipoRolService;
 
@@ -21,7 +21,7 @@ public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
 
     private final IUsuarioTipoRolRepository IUsuarioTipoRolRepository;
     private final IUsuariosRepository usuarioRepository;
-    private final TipoRolRepository tipoRolRepository;
+    private final ITipoRolRepository ITipoRolRepository;
 
     @Override
     public UsuarioTipoRolResponseDTO asignarRol(UsuarioTipoRolRequestDTO request) {
@@ -68,7 +68,7 @@ public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
             Integer idRol = (Integer) fila[0];
             Boolean activo = (Boolean) fila[1];
 
-            String nombreRol = tipoRolRepository.findById(idRol)
+            String nombreRol = ITipoRolRepository.findById(idRol)
                     .map(r -> r.getNombreTipoRol())
                     .orElse("Rol ID " + idRol);
 
@@ -88,7 +88,7 @@ public class UsuarioTipoRolServiceImpl implements IUsuarioTipoRolService {
                 .map(Usuario::getNombreUsuario)
                 .orElse("N/A");
 
-        String nombreRol = tipoRolRepository.findById(idRol)
+        String nombreRol = ITipoRolRepository.findById(idRol)
                 .map(r -> r.getNombreTipoRol())
                 .orElse("N/A");
 

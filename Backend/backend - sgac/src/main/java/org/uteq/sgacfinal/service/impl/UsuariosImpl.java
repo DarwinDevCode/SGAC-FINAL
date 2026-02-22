@@ -173,6 +173,7 @@ public class UsuariosImpl implements IUsuariosService {
                         .apellidos(u.getApellidos())
                         .correo(u.getCorreo())
                         .nombreUsuario(u.getNombreUsuario())
+                        .cedula(u.getCedula())
                         .activo(u.getActivo())
                         .token(null)
 

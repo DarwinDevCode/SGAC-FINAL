@@ -18,5 +18,6 @@ public class UsuarioResponseDTO {
     private String rolActual;
     private List<TipoRolResponseDTO> roles;
     private String token;
+    private String cedula;
     private Boolean activo;
 }

@@ -26,6 +26,9 @@ public class TipoEstadoRequisito {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(name="activo")
+    private Boolean activo;
+
     @OneToMany(mappedBy = "tipoEstadoRequisito", cascade = CascadeType.ALL)
     private List<RequisitoAdjunto> requisitosAdjuntos = new ArrayList<>();
 }

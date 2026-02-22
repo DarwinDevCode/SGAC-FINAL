@@ -26,6 +26,9 @@ public class TipoEstadoEvidenciaAyudantia {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(name="activo")
+    private Boolean activo;
+
     @OneToMany(mappedBy = "tipoEstadoEvidenciaAyudantia", cascade = CascadeType.ALL)
     private List<Ayudantia> ayudantias = new ArrayList<>();
 }

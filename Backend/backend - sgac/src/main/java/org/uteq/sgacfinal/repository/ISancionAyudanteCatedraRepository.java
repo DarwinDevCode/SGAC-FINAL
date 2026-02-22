@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface SancionAyudanteCatedraRepository extends JpaRepository<SancionAyudanteCatedra, Integer> {
+public interface ISancionAyudanteCatedraRepository extends JpaRepository<SancionAyudanteCatedra, Integer> {
 
     @Query(value = "SELECT public.sp_crear_sancion(:idTipo, :idAyudante, :fecha, :motivo)", nativeQuery = true)
     Integer registrarSancion(@Param("idTipo") Integer idTipoSancion,

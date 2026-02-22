@@ -1,1 +1,203 @@
-<p>gestion-usuarios works!</p>
+<div class="gestion-container">
+  <div class="section-header">
+    <h2 class="title">Gestión de Usuarios</h2>
+    <button type="button" class="btn-primary" (click)="abrirModalCrear()">
+      <lucide-icon name="Plus" size="18"></lucide-icon>
+      Nuevo Usuario
+    </button>
+  </div>
+
+  <div class="search-card">
+    <div class="search-wrapper">
+      <lucide-icon class="search-icon" name="Search" size="18"></lucide-icon>
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        (ngModelChange)="filtrarUsuarios($event)"
+        placeholder="Buscar..."
+        class="input-field search-input"
+      />
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Roles</th>
+        <th>Estado Global</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          <tr><td colspan="4">Cargando datos...</td></tr>
+        } @else {
+          @for (user of usuariosList; track user.idUsuario) {
+            <tr>
+              <td>
+                <div class="user-info-cell">
+                  <div class="full-name">{{ user.nombres }} {{ user.apellidos }}</div>
+                  <div class="user-email">{{ user.correo }}</div>
+                  <div class="user-username">{{ '@' + user.nombreUsuario }}</div>
+                </div>
+              </td>
+
+              <td>
+                <div class="roles-wrapper">
+                  @for (rol of user.roles; track rol.idTipoRol) {
+                    <button
+                      type="button"
+                      (click)="toggleEstadoRol(user, rol)"
+                      class="badge-rol"
+                      [class.active]="rol.activo && user.activo"
+                      [class.inactive]="!rol.activo && user.activo"
+                      [class.disabled]="!user.activo"
+                    >
+                      {{ rol.nombreTipoRol }}
+                    </button>
+                  }
+                </div>
+              </td>
+
+              <td>
+                <span class="status-pill" [class.active]="user.activo" [class.inactive]="!user.activo">
+                  {{ user.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button type="button" class="btn-icon" (click)="toggleEstado(user)" title="Cambiar estado global">
+                  <lucide-icon name="Power" size="18"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="4">No hay registros</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (mostrarModal) {
+    <div class="modal-backdrop">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Registrar Nuevo Usuario</h3>
+          <button type="button" class="btn-icon" (click)="cerrarModal()">
+            <lucide-icon name="X" size="18"></lucide-icon>
+          </button>
+        </div>
+
+        <form class="user-form" (submit)="guardarUsuario(); $event.preventDefault()">
+          <div class="form-group full-width">
+            <label>Tipo de Usuario</label>
+            <select [(ngModel)]="form.rolRegistro" name="rol" class="input-field highlight">
+              <option value="ESTUDIANTE">Estudiante</option>
+              <option value="DOCENTE">Docente</option>
+              <option value="COORDINADOR">Coordinador</option>
+              <option value="DECANO">Decano</option>
+              <option value="ADMINISTRADOR">Administrador</option>
+              <option value="AYUDANTE_CATEDRA">Ayudante Directo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Cédula</label>
+            <input [(ngModel)]="form.cedula" name="cedula" required maxlength="10" class="input-field" />
+          </div>
+
+          <div class="form-group">
+            <label>Nombres</label>
+            <input [(ngModel)]="form.nombres" name="nombres" required class="input-field" />
+          </div>
+
+          <div class="form-group">
+            <label>Apellidos</label>
+            <input [(ngModel)]="form.apellidos" name="apellidos" required class="input-field" />
+          </div>
+
+          <div class="form-group">
+            <label>Correo</label>
+            <input [(ngModel)]="form.correo" name="correo" type="email" required class="input-field" />
+          </div>
+
+          <div class="form-group">
+            <label>Usuario</label>
+            <input [(ngModel)]="form.nombreUsuario" name="nombreUsuario" required class="input-field" />
+          </div>
+
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input [(ngModel)]="form.password" name="password" type="password" required class="input-field" />
+          </div>
+
+          @if (getEsEstudiante()) {
+            <div class="form-divider full-width">Datos Académicos</div>
+
+            <div class="form-group">
+              <label>Carrera</label>
+              <select [(ngModel)]="form.idCarrera" name="idCarreraEstudiante" class="input-field">
+                <option [ngValue]="undefined">Seleccione carrera</option>
+                @for (c of listaCarreras; track c.idCarrera) {
+                  <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Matrícula</label>
+              <input [(ngModel)]="form.matricula" name="matricula" class="input-field" placeholder="Ej: 2024-A-001" />
+            </div>
+
+            <div class="form-group">
+              <label>Semestre</label>
+              <input [(ngModel)]="form.semestre" name="semestre" type="number" min="1" max="10" class="input-field" />
+            </div>
+          }
+
+          @if (getEsCoordinador()) {
+            <div class="form-divider full-width">Asignación</div>
+            <div class="form-group full-width">
+              <label>Carrera a Coordinar</label>
+              <select [(ngModel)]="form.idCarrera" name="idCarreraCoordinador" class="input-field">
+                <option [ngValue]="undefined">Seleccione carrera</option>
+                @for (c of listaCarreras; track c.idCarrera) {
+                  <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (getEsDecano()) {
+            <div class="form-divider full-width">Asignación</div>
+            <div class="form-group full-width">
+              <label>Facultad</label>
+              <select [(ngModel)]="form.idFacultad" name="idFacultad" class="input-field">
+                <option [ngValue]="undefined">Seleccione facultad</option>
+                @for (f of listaFacultades; track f.idFacultad) {
+                  <option [ngValue]="f.idFacultad">{{ f.nombreFacultad }}</option>
+                }
+              </select>
+            </div>
+          }
+
+          @if (getEsAyudante()) {
+            <div class="form-divider full-width">Contrato</div>
+            <div class="form-group">
+              <label>Horas Asignadas</label>
+              <input [(ngModel)]="form.horasAyudante" name="horasAyudante" type="number" min="0" class="input-field" />
+            </div>
+          }
+
+          <div class="form-footer full-width">
+            <button type="button" class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn-primary">Guardar Registro</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

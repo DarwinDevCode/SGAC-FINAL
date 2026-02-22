@@ -1,5 +1,5 @@
 export interface FacultadDTO {
-  idFacultad?: number;
+  idFacultad: number;
   nombreFacultad: string;
-  activo?: boolean;
+  activo: boolean;
 }

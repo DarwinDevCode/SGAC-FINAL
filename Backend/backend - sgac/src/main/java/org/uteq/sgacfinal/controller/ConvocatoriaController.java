@@ -17,7 +17,7 @@ public class ConvocatoriaController {
 
     private final IConvocatoriaService convocatoriaService;
 
-    @GetMapping
+    @GetMapping("/listar-vista")
     public ResponseEntity<List<ConvocatoriaResponseDTO>> listarTodo() {
         return ResponseEntity.ok(convocatoriaService.findAll());
     }

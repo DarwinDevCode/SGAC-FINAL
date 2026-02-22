@@ -29,12 +29,6 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(UserDetails userDetails, String rolActual) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("rol", rolActual);
-        return createToken(claims, userDetails.getUsername());
-    }
-
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .setClaims(claims)

@@ -41,10 +41,14 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthUser> {
     return this.http.post<AuthUser>(`${this.API_AUTH}/login`, credentials).pipe(
       tap((res) => {
-        if (res?.token) {
-          localStorage.setItem(this.TOKEN_KEY, res.token);
+        try {
+          if (res?.token) {
+            localStorage.setItem(this.TOKEN_KEY, res.token);
+          }
+          localStorage.setItem(this.USER_KEY, JSON.stringify(res));
+        } catch (error) {
+          console.error('El navegador bloqueó el acceso al localStorage. Verifica si estás en modo incógnito.', error);
         }
-        localStorage.setItem(this.USER_KEY, JSON.stringify(res));
       })
     );
   }

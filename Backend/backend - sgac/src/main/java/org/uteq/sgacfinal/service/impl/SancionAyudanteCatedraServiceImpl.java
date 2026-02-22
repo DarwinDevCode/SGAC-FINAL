@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.SancionAyudanteCatedraRequestDTO;
 import org.uteq.sgacfinal.dto.Response.SancionAyudanteCatedraResponseDTO;
 import org.uteq.sgacfinal.entity.SancionAyudanteCatedra;
-import org.uteq.sgacfinal.repository.SancionAyudanteCatedraRepository;
+import org.uteq.sgacfinal.repository.ISancionAyudanteCatedraRepository;
 import org.uteq.sgacfinal.service.ISancionAyudanteCatedraService;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class SancionAyudanteCatedraServiceImpl implements ISancionAyudanteCatedraService {
 
-    private final SancionAyudanteCatedraRepository sancionRepository;
+    private final ISancionAyudanteCatedraRepository sancionRepository;
 
     @Override
     public SancionAyudanteCatedraResponseDTO crear(SancionAyudanteCatedraRequestDTO request) {

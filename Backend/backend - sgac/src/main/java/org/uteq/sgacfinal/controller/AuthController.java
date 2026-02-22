@@ -33,12 +33,6 @@ public class AuthController {
                 .body(new MensajeResponseDTO(mensaje, true));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<MensajeResponseDTO> handleException(Exception e) {
-        String errorLimpio = e.getMessage().replaceAll("org.hibernate.exception.GenericJDBCException: ", "");
-        return ResponseEntity.badRequest().body(new MensajeResponseDTO(errorLimpio, false));
-    }
-
     @PostMapping("/registro-estudiante")
     public ResponseEntity<MensajeResponseDTO> regEstudiante(@Valid @RequestBody RegistroEstudianteRequestDTO dto) {
         usuarioService.registrarEstudiante(dto);

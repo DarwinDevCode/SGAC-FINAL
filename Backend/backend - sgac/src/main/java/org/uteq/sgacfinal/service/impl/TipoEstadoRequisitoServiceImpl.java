@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.TipoEstadoRequisitoRequestDTO;
 import org.uteq.sgacfinal.dto.Response.TipoEstadoRequisitoResponseDTO;
 import org.uteq.sgacfinal.entity.TipoEstadoRequisito;
-import org.uteq.sgacfinal.repository.TipoEstadoRequisitoRepository;
+import org.uteq.sgacfinal.repository.ITipoEstadoRequisitoRepository;
 import org.uteq.sgacfinal.service.ITipoEstadoRequisitoService;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class TipoEstadoRequisitoServiceImpl implements ITipoEstadoRequisitoService {
 
-    private final TipoEstadoRequisitoRepository repository;
+    private final ITipoEstadoRequisitoRepository repository;
 
     @Override
     public TipoEstadoRequisitoResponseDTO crear(TipoEstadoRequisitoRequestDTO request) {
@@ -40,16 +40,11 @@ public class TipoEstadoRequisitoServiceImpl implements ITipoEstadoRequisitoServi
     }
 
     @Override
-    public void eliminar(Integer id) {
-        repository.deleteById(id);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public TipoEstadoRequisitoResponseDTO buscarPorId(Integer id) {
-        TipoEstadoRequisito entidad = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Estado no encontrado con ID: " + id));
-        return mapearADTO(entidad);
+    public void desactivar(Integer id) {
+        Integer resultado = repository.desactivarTipoEstadoRequisito(id);
+        if (resultado == -1) {
+            throw new RuntimeException("Error al desactivar la asignatura.");
+        }
     }
 
     @Override

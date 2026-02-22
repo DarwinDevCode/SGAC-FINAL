@@ -1,5 +1,8 @@
 export interface PeriodoAcademicoDTO {
-  idPeriodo?: number;
+  idPeriodoAcademico?: number;
   nombrePeriodo: string;
+  fechaInicio: string;
+  fechaFin: string;
+  estado: string;
   activo?: boolean;
 }

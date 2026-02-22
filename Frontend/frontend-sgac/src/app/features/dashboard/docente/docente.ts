@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-docente',
+  standalone: true,
   imports: [],
   templateUrl: './docente.html',
   styleUrl: './docente.css',

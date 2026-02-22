@@ -5,14 +5,9 @@ import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
 import java.util.List;
 
 public interface ITipoRolService {
-
-    TipoRolResponseDTO crear(TipoRolRequestDTO request);
-
-    TipoRolResponseDTO actualizar(Integer id, TipoRolRequestDTO request);
-
-    TipoRolResponseDTO buscarPorId(Integer id);
-
-    TipoRolResponseDTO buscarPorNombre(String nombre);
-
     List<TipoRolResponseDTO> listarTodos();
+    List<TipoRolResponseDTO> listarActivos();
+    TipoRolResponseDTO crear(TipoRolRequestDTO request);
+    TipoRolResponseDTO actualizar(Integer id, TipoRolRequestDTO request);
+    void desactivar(Integer id);
 }

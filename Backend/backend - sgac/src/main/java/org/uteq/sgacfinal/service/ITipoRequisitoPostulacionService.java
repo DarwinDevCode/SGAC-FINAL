@@ -5,14 +5,9 @@ import org.uteq.sgacfinal.dto.Response.TipoRequisitoPostulacionResponseDTO;
 import java.util.List;
 
 public interface ITipoRequisitoPostulacionService {
-
-    TipoRequisitoPostulacionResponseDTO crear(TipoRequisitoPostulacionRequestDTO request);
-
-    TipoRequisitoPostulacionResponseDTO actualizar(Integer id, TipoRequisitoPostulacionRequestDTO request);
-
-    void eliminar(Integer id);
-
-    TipoRequisitoPostulacionResponseDTO buscarPorId(Integer id);
-    List<TipoRequisitoPostulacionResponseDTO> listarRequisitosActivos();
     List<TipoRequisitoPostulacionResponseDTO> listarTodos();
+    List<TipoRequisitoPostulacionResponseDTO> listarActivos();
+    TipoRequisitoPostulacionResponseDTO crear(TipoRequisitoPostulacionRequestDTO request);
+    TipoRequisitoPostulacionResponseDTO actualizar(Integer id, TipoRequisitoPostulacionRequestDTO request);
+    void desactivar(Integer id);
 }

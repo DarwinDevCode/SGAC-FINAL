@@ -1,1 +1,15 @@
-<p>main-layout works!</p>
+<app-sidebar></app-sidebar>
+
+<app-header></app-header>
+
+<main
+  style="
+    margin-left:260px;
+    margin-top:64px;
+    padding:24px;
+    min-height:calc(100vh - 64px);
+    background:#f6f7fb;
+  "
+>
+  <router-outlet></router-outlet>
+</main>
