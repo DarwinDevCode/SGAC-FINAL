@@ -28,4 +28,8 @@ public class TipoRol {
 
     @OneToMany(mappedBy = "tipoRol", cascade = CascadeType.ALL)
     private List<UsuarioTipoRol> usuariosTipoRol = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_rol_bd")
+    private RolBD rolBd;
 }
