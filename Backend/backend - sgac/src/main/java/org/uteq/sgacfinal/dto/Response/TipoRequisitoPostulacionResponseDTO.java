@@ -11,4 +11,5 @@ public class TipoRequisitoPostulacionResponseDTO {
     private Integer idTipoRequisitoPostulacion;
     private String nombreRequisito;
     private String descripcion;
+    private Boolean activo;
 }

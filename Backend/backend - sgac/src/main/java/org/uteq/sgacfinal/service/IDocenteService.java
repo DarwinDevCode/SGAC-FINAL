@@ -17,4 +17,7 @@ public interface IDocenteService {
     DocenteResponseDTO buscarPorUsuario(Integer idUsuario);
 
     List<DocenteResponseDTO> listarTodos();
+
+    List<DocenteResponseDTO> listarDocentesActivos();
+
 }

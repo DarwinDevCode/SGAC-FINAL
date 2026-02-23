@@ -103,10 +103,15 @@
   font-weight: 600;
 }
 
+.tabs-container .btn-ghost {
+  font-size: 16px;
+  padding: 10px 18px;
+  font-weight: 500;
+}
+
 .status-pill.active { background: #dcfce7; color: #15803d; }
 .status-pill.inactive { background: #fee2e2; color: #b91c1c; }
 
-/* Modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;

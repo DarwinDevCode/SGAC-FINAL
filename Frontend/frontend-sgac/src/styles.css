@@ -53,6 +53,8 @@ body {
 .font-medium { font-weight: 500; }
 .font-bold { font-weight: 700; }
 .leading-none { line-height: 1; }
+.text-left {text-align: left; }
+
 
 .text-primary { color: hsl(var(--primary)); }
 .text-muted-foreground { color: hsl(var(--muted-foreground)); }

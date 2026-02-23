@@ -13,4 +13,6 @@ public interface IPostulacionService {
     PostulacionResponseDTO buscarPorId(Integer id);
     List<PostulacionResponseDTO> listarPorEstudiante(Integer idEstudiante);
     String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito);    List<PostulacionResponseDTO> listarPorConvocatoria(Integer idConvocatoria);
+    void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion);
+
 }

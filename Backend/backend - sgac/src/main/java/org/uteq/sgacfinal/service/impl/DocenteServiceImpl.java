@@ -80,6 +80,13 @@ public class DocenteServiceImpl implements IDocenteService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<DocenteResponseDTO> listarDocentesActivos() {
+        return docenteRepository.findAllActive().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
     private DocenteResponseDTO mapearADTO(Docente entidad) {
         String nombreUsuario = entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos();
         return DocenteResponseDTO.builder()

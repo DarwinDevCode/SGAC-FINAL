@@ -11,4 +11,5 @@ public class TipoEstadoEvidenciaAyudantiaResponseDTO {
     private Integer idTipoEstadoEvidenciaAyudantia;
     private String nombreEstado;
     private String descripcion;
+    private Boolean activo;
 }

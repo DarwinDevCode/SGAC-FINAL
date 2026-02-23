@@ -59,6 +59,7 @@ public class TipoEstadoRequisitoServiceImpl implements ITipoEstadoRequisitoServi
         return TipoEstadoRequisitoResponseDTO.builder()
                 .idTipoEstadoRequisito(entidad.getIdTipoEstadoRequisito())
                 .nombreEstado(entidad.getNombreEstado())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

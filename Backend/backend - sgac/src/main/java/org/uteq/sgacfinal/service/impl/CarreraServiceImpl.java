@@ -86,6 +86,7 @@ public class CarreraServiceImpl implements ICarreraService {
                 .idFacultad(entidad.getFacultad().getIdFacultad())
                 .nombreFacultad(entidad.getFacultad().getNombreFacultad())
                 .nombreCarrera(entidad.getNombreCarrera())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

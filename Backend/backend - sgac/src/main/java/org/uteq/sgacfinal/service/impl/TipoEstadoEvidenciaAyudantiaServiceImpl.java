@@ -49,6 +49,7 @@ public class TipoEstadoEvidenciaAyudantiaServiceImpl implements ITipoEstadoEvide
                 .idTipoEstadoEvidenciaAyudantia(entity.getIdTipoEstadoEvidenciaAyudantia())
                 .nombreEstado(entity.getNombreEstado())
                 .descripcion(entity.getDescripcion())
+                .activo(entity.getActivo())
                 .build();
     }
 

@@ -41,8 +41,36 @@ public class PostulacionController {
         }
     }
 
-//    @GetMapping("/listar-activos")
-//    public ResponseEntity<List<TipoRequisitoPostulacionResponseDTO>> listar() {
-//        return ResponseEntity.ok(requisitoService.listarRequisitosActivos());
-//    }
+    @GetMapping("/listar-activos")
+    public ResponseEntity<List<TipoRequisitoPostulacionResponseDTO>> listar() {
+        return ResponseEntity.ok(requisitoService.listarRequisitosActivos());
+    }
+
+    @PutMapping("/cambiar-estado/{id}")
+    public ResponseEntity<?> cambiarEstado(@PathVariable Integer id, @RequestParam String estado, @RequestParam String observacion) {
+        try {
+            postulacionService.actualizarEstado(id, estado, observacion);
+            return ResponseEntity.ok("Estado actualizado correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/mis-postulaciones/{idEstudiante}")
+    public ResponseEntity<?> listarPorEstudiante(@PathVariable Integer idEstudiante) {
+        try {
+            return ResponseEntity.ok(postulacionService.listarPorEstudiante(idEstudiante));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar postulaciones: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/convocatoria/{idConvocatoria}")
+    public ResponseEntity<?> listarPorConvocatoria(@PathVariable Integer idConvocatoria) {
+        try {
+            return ResponseEntity.ok(postulacionService.listarPorConvocatoria(idConvocatoria));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar postulaciones: " + e.getMessage());
+        }
+    }
 }

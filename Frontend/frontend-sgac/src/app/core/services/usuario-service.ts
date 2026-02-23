@@ -2,8 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { UsuarioDTO} from '../dto/usuario';
-import {FacultadDTO} from '../dto/facultad';
-import {CarreraDTO} from '../dto/carrera';
+
 import { HttpClient } from '@angular/common/http';
 
 @Injectable({
@@ -14,7 +13,6 @@ export class UsuarioService {
 
   private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
   private readonly API_AUTH = `${this.baseUrl}/auth`;
-  private readonly API_RECURSOS = `${this.baseUrl}/recursos`;
 
   listarUsuarios(): Observable<UsuarioDTO[]> {
     return this.http.get<UsuarioDTO[]>(this.API_AUTH);
@@ -71,13 +69,5 @@ export class UsuarioService {
 
   cambiarEstadoRol(idUsuario: number, idTipoRol: number): Observable<void> {
     return this.http.patch<void>(`${this.API_AUTH}/${idUsuario}/roles/${idTipoRol}/estado`, {});
-  }
-
-  listarFacultades(): Observable<FacultadDTO[]> {
-    return this.http.get<FacultadDTO[]>(`${this.API_RECURSOS}/facultades`);
-  }
-
-  listarCarreras(): Observable<CarreraDTO[]> {
-    return this.http.get<CarreraDTO[]>(`${this.API_RECURSOS}/carreras`);
   }
 }

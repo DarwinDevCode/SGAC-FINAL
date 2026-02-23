@@ -1,8 +1,40 @@
-import { Injectable } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {environment} from '../../../environments/environment';
+import {UsuarioComisionDTO} from '../dto/usuario-comision';
+import {EvaluacionMeritosDTO} from '../dto/evaluacion-meritos';
+import {EvaluacionOposicionDTO} from '../dto/evaluacion-oposicion';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ComisionSeleccionService {
-  
+  private http = inject(HttpClient);
+  private apiUrlComisiones = `${environment.apiUrl}/comisiones`;
+  private apiUrlEvaluaciones = `${environment.apiUrl}/evaluaciones`;
+
+  listarMisAsignaciones(idUsuario: number): Observable<UsuarioComisionDTO[]> {
+    return this.http.get<UsuarioComisionDTO[]>(`${this.apiUrlComisiones}/mis-asignaciones/${idUsuario}`);
+  }
+
+  registrarMeritos(evaluacion: EvaluacionMeritosDTO): Observable<any> {
+    return this.http.post(`${this.apiUrlEvaluaciones}/meritos`, evaluacion);
+  }
+
+  registrarOposicion(evaluacion: UsuarioComisionDTO): Observable<any> {
+    return this.http.post(`${this.apiUrlEvaluaciones}/oposicion`, evaluacion);
+  }
+
+  crearComision(request: any): Observable<any> {
+    return this.http.post(`${this.apiUrlComisiones}/crear`, request);
+  }
+
+  asignarEvaluador(request: any): Observable<any> {
+    return this.http.post(`${this.apiUrlComisiones}/asignar-evaluador`, request);
+  }
+
+  listarComisionPorConvocatoria(idConvocatoria: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrlComisiones}/convocatoria/${idConvocatoria}`);
+  }
 }

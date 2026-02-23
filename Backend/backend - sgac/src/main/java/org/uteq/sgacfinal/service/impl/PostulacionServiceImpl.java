@@ -8,6 +8,7 @@ import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
 import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
+import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IPostulacionService;
 
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class PostulacionServiceImpl implements IPostulacionService {
 
     private final PostulacionRepository postulacionRepository;
+    private final INotificacionService notificacionService;
 
     @Override
     public PostulacionResponseDTO crear(PostulacionRequestDTO request) {
@@ -92,6 +94,25 @@ public class PostulacionServiceImpl implements IPostulacionService {
         return postulacionRepository.findByConvocatoria_IdConvocatoria(idConvocatoria).stream()
                 .map(this::mapearADTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion) {
+        Postulacion postulacion = postulacionRepository.findById(idPostulacion)
+                .orElseThrow(() -> new RuntimeException("Postulación no encontrada"));
+
+        postulacion.setEstadoPostulacion(nuevoEstado);
+        postulacion.setObservaciones(observacion);
+        postulacionRepository.save(postulacion);
+
+        if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
+            String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
+            notificacionService.enviarNotificacion(
+                    postulacion.getEstudiante().getUsuario().getIdUsuario(),
+                    mensaje,
+                    "ESTADO_POSTULACION"
+            );
+        }
     }
 
     private PostulacionResponseDTO mapearADTO(Postulacion entidad) {

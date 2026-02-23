@@ -143,7 +143,7 @@ export class GestionUsuarios implements OnInit, OnDestroy {
         next: () => {
           alert('Usuario registrado correctamente');
           this.cerrarModal();
-          this.listarUsuarios(); // Recargar tabla
+          this.listarUsuarios();
         },
         error: (err: HttpErrorResponse) => {
           console.error('Error del backend:', err);

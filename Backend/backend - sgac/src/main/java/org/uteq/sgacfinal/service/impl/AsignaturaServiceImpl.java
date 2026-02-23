@@ -91,6 +91,7 @@ public class AsignaturaServiceImpl implements IAsignaturaService {
                 .nombreCarrera(entidad.getCarrera().getNombreCarrera())
                 .nombreAsignatura(entidad.getNombreAsignatura())
                 .semestre(entidad.getSemestre())
+                .activo(entidad.getActivo())
                 .build();
     }
 }

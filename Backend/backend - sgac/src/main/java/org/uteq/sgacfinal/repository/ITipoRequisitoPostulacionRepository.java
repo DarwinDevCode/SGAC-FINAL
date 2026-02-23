@@ -18,7 +18,7 @@ public interface ITipoRequisitoPostulacionRepository extends JpaRepository<TipoR
                                                @Param("nombre") String nombre,
                                                @Param("descripcion") String descripcion);
 
-    @Query(value = "SELECT public.fn_crear_tipo_requisito_postulacion(:nombre, descripcion)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_crear_tipo_requisito_postulacion(:nombre, :descripcion)", nativeQuery = true)
     Integer crearTipoRequisitoPostulacion(@Param("nombre") String nombre, @Param("descripcion") String descripcion);
 
     @Query(value = "SELECT public.fn_desactivar_tipo_requisito_postulacion(:id)", nativeQuery = true)

@@ -17,7 +17,7 @@ public interface ITipoRolRepository extends JpaRepository<TipoRol, Integer> {
     @Query(value = "SELECT public.fn_crear_tipo_rol(:nombre)", nativeQuery = true)
     Integer crearTipoRol(@Param("nombre") String nombre);
 
-    @Query(value = "SELECT public.fn_desactivar_tipo_ro(:id)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_desactivar_tipo_rol(:id)", nativeQuery = true)
     Integer desactivarTipoRol(@Param("id") Integer id);
 
     Optional<TipoRol> findByNombreTipoRol(String nombreTipoRol);

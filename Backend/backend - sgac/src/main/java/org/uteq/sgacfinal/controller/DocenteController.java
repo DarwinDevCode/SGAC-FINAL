@@ -1,20 +1,31 @@
 package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.uteq.sgacfinal.dto.Response.DocenteResponseDTO;
+import org.uteq.sgacfinal.service.IDocenteService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/docentes")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class DocenteController {
 //
-//    private final IDocenteService docenteService;
-//
+    private final IDocenteService docenteService;
+
+    @GetMapping
+    public ResponseEntity<List<DocenteResponseDTO>> listarDocentesActivos() {
+        return ResponseEntity.ok(docenteService.listarDocentesActivos());
+    }
+
 //    @GetMapping
-//    public ResponseEntity<List<DocenteDTO>> findAll() {
+//    public ResponseEntity<List<DocenteResponseDTO>> findAll() {
 //        return ResponseEntity.ok(docenteService.findAll());
 //    }
+
+
 //
 //    @GetMapping("/activos")
 //    public ResponseEntity<List<DocenteDTO>> findByActivo() {

@@ -21,7 +21,9 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
     @Override
     @Transactional(readOnly = true)
     public List<TipoRequisitoPostulacionResponseDTO> listarTodos() {
-        return repository.findAll().stream().map(this::mapToDTO).toList();
+        return repository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -40,8 +42,15 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
     @Override
     @Transactional
     public TipoRequisitoPostulacionResponseDTO actualizar(Integer id, TipoRequisitoPostulacionRequestDTO request) {
-        repository.actualizarTipoRequisitoPostulacion(id, request.getNombreRequisito(), request.getDescripcion());
-        return repository.findById(id).map(this::mapToDTO).orElseThrow();
+        TipoRequisitoPostulacion entidad = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Requisito no encontrado con ID: " + id));
+
+        entidad.setNombreRequisito(request.getNombreRequisito());
+        entidad.setDescripcion(request.getDescripcion());
+        if(request.getActivo() != null) entidad.setActivo(request.getActivo());
+
+        entidad = repository.save(entidad);
+        return mapToDTO(entidad);
     }
 
     @Override
@@ -50,12 +59,38 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
         repository.desactivarTipoRequisitoPostulacion(id);
     }
 
+    @Override
+    public void eliminar(Integer id) {
+        repository.deleteById(id);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public TipoRequisitoPostulacionResponseDTO buscarPorId(Integer id) {
+        TipoRequisitoPostulacion entidad = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Requisito no encontrado con ID: " + id));
+        return mapToDTO(entidad);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TipoRequisitoPostulacionResponseDTO> listarRequisitosActivos() {
+        List<TipoRequisitoPostulacion> lista = repository.findByActivoTrue();
+        return lista.stream().map(req -> TipoRequisitoPostulacionResponseDTO.builder()
+                .idTipoRequisitoPostulacion(req.getIdTipoRequisitoPostulacion())
+                .nombreRequisito(req.getNombreRequisito())
+                .descripcion(req.getDescripcion())
+                .build()
+        ).collect(Collectors.toList());
+    }
+
     private TipoRequisitoPostulacionResponseDTO mapToDTO(TipoRequisitoPostulacion entity) {
         return TipoRequisitoPostulacionResponseDTO.builder()
                 .idTipoRequisitoPostulacion(entity.getIdTipoRequisitoPostulacion())
                 .nombreRequisito(entity.getNombreRequisito())
                 .descripcion(entity.getDescripcion())
-                // .activo(entity.getActivo()) // Descomentar si tu ResponseDTO de esto maneja el boolean
+                .activo(entity.getActivo())
                 .build();
     }
 
