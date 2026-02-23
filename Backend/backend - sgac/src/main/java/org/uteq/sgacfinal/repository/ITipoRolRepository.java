@@ -20,6 +20,15 @@ public interface ITipoRolRepository extends JpaRepository<TipoRol, Integer> {
     @Query(value = "SELECT public.fn_desactivar_tipo_rol(:id)", nativeQuery = true)
     Integer desactivarTipoRol(@Param("id") Integer id);
 
+    @Query(value = "SELECT seguridad.fn_gestionar_permiso_rol(:nombreRol, :esquema, :tabla, :privilegio, :otorgar)", nativeQuery = true)
+    Boolean gestionarPermisoRol(
+            @Param("nombreRol") String nombreRol,
+            @Param("esquema") String esquema,
+            @Param("tabla") String tabla,
+            @Param("privilegio") String privilegio,
+            @Param("otorgar") Boolean otorgar
+    );
+
     Optional<TipoRol> findByNombreTipoRol(String nombreTipoRol);
     List<TipoRol> findByActivo(Boolean activo);
     List<TipoRol> findByActivoTrue();
