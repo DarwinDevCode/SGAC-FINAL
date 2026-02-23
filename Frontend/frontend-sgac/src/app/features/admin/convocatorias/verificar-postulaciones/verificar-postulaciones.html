@@ -1,1 +1,178 @@
-<p>verificar-postulaciones works!</p>
+<div class="container mx-auto p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-2xl font-bold">Postulantes de la Convocatoria #{{ idConvocatoria }}</h2>
+    <div class="space-x-2">
+      <button (click)="abrirModalComision()"
+              class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+        Asignar Comisión
+      </button>
+      <button (click)="volver()" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <div class="bg-white shadow-md rounded my-6 overflow-x-auto">
+    <table class="min-w-full table-auto">
+      <thead>
+      <tr class="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+        <th class="py-3 px-6 text-left">Estudiante</th>
+        <th class="py-3 px-6 text-left">Matrícula</th>
+        <th class="py-3 px-6 text-center">Fecha</th>
+        <th class="py-3 px-6 text-center">Estado</th>
+        <th class="py-3 px-6 text-center">Acciones</th>
+      </tr>
+      </thead>
+      <tbody class="text-gray-600 text-sm font-light">
+      <tr *ngFor="let p of postulantes()" class="border-b border-gray-200 hover:bg-gray-100">
+        <td class="py-3 px-6 text-left whitespace-nowrap font-medium">{{ p.nombreCompletoEstudiante }}</td>
+        <td class="py-3 px-6 text-left">{{ p.matriculaEstudiante }}</td>
+        <td class="py-3 px-6 text-center">{{ p.fechaPostulacion }}</td>
+        <td class="py-3 px-6 text-center">
+                        <span [ngClass]="{
+                'bg-yellow-200 text-yellow-600': p.estadoPostulacion === 'PENDIENTE',
+                'bg-green-200 text-green-600': p.estadoPostulacion === 'APROBADO',
+                'bg-red-200 text-red-600': p.estadoPostulacion === 'RECHAZADO'
+              }" class="py-1 px-3 rounded-full text-xs">
+                            {{ p.estadoPostulacion }}
+                        </span>
+        </td>
+        <td class="py-3 px-6 text-center space-x-2">
+          <button (click)="verDetalle(p)"
+                  class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs">
+            Ver Detalle
+          </button>
+          <button (click)="abrirModalCalificaciones(p)"
+                  class="bg-indigo-500 hover:bg-indigo-700 text-white py-1 px-3 rounded text-xs">
+            Ver Calf.
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="postulantes().length === 0">
+        <td colspan="5" class="py-4 text-center text-gray-500">No hay postulantes registrados.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal Comisión -->
+  <div *ngIf="showComisionModal()"
+       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <div class="relative p-5 border w-96 shadow-lg rounded-md bg-white">
+      <h3 class="text-lg font-bold mb-4">Asignar Docente a Comisión</h3>
+
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2">Seleccionar Docente:</label>
+        <select [(ngModel)]="selectedDocenteId"
+                class="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          <option [ngValue]="null">Seleccione un docente...</option>
+          <option *ngFor="let docente of docentes" [ngValue]="docente.idUsuario">
+            {{ docente.nombres }} {{ docente.apellidos }}
+          </option>
+        </select>
+      </div>
+
+      <div class="flex justify-end space-x-2">
+        <button (click)="cerrarModalComision()"
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+          Cancelar
+        </button>
+        <button (click)="asignarDocente()" [disabled]="!selectedDocenteId"
+                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50">
+          Asignar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Calificaciones -->
+  <div *ngIf="showCalificacionesModal()"
+       class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+    <div class="relative p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-2xl font-bold">Calificaciones: {{ selectedPostulacionForGrades?.nombreCompletoEstudiante
+          }}</h3>
+        <button (click)="cerrarModalCalificaciones()" class="text-gray-500 hover:text-gray-700">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Méritos -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h4 class="text-xl font-semibold mb-3 text-blue-800">Evaluación de Méritos</h4>
+          <div *ngIf="evaluacionMeritos; else noMeritos">
+            <div class="space-y-2">
+              <div class="flex justify-between border-b pb-2">
+                <span>Nota Asignatura:</span>
+                <span class="font-bold">{{ evaluacionMeritos.notaAsignatura }}</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span>Semestres:</span>
+                <span class="font-bold">{{ evaluacionMeritos.notaSemestres }}</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span>Eventos:</span>
+                <span class="font-bold">{{ evaluacionMeritos.notaEventos }}</span>
+              </div>
+              <div class="flex justify-between border-b pb-2">
+                <span>Experiencia:</span>
+                <span class="font-bold">{{ evaluacionMeritos.notaExperiencia }}</span>
+              </div>
+              <div class="flex justify-between pt-2 text-lg font-bold text-blue-600">
+                <span>Total Méritos:</span>
+                <span>{{ (evaluacionMeritos.notaAsignatura || 0) + (evaluacionMeritos.notaSemestres ||
+                  0) + (evaluacionMeritos.notaEventos || 0) + (evaluacionMeritos.notaExperiencia || 0)
+                  }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Oposición -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h4 class="text-xl font-semibold mb-3 text-purple-800">Evaluación de Oposición</h4>
+          <div *ngIf="evaluacionOposicion; else noOposicion">
+            <p class="mb-2"><span class="font-bold">Tema:</span> {{ evaluacionOposicion.temaExposicion }}
+            </p>
+            <p class="mb-4"><span class="font-bold">Estado:</span> {{ evaluacionOposicion.estado }}</p>
+
+            <h5 class="font-bold mb-2">Evaluaciones de la Comisión:</h5>
+            <div *ngFor="let ev of evaluacionOposicion.evaluacionesComision"
+                 class="bg-white p-3 rounded border mb-2 text-sm">
+              <p class="font-bold text-gray-700">{{ ev.nombreCompletoUsuario }} ({{ ev.rolIntegrante }})
+              </p>
+              <div class="grid grid-cols-3 gap-2 mt-1">
+                <div>Material: {{ ev.puntajeMaterial }}</div>
+                <div>Respuestas: {{ ev.puntajeRespuestas }}</div>
+                <div>Exposición: {{ ev.puntajeExposicion }}</div>
+              </div>
+              <div class="mt-1 font-bold text-right text-purple-600">
+                Total: {{ (ev.puntajeMaterial || 0) + (ev.puntajeRespuestas || 0) +
+              (ev.puntajeExposicion || 0) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noMeritos>
+        <p class="text-gray-500 italic">No se han registrado calificaciones de méritos.</p>
+      </ng-template>
+
+      <ng-template #noOposicion>
+        <p class="text-gray-500 italic">No se han registrado calificaciones de oposición.</p>
+      </ng-template>
+
+      <div class="mt-6 flex justify-end">
+        <button (click)="cerrarModalCalificaciones()"
+                class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "ayudante_catedra")
+@Table(name = "ayudante_catedra", schema = "academico")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +21,7 @@ public class AyudanteCatedra {
     private Integer idAyudanteCatedra;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario") // Puede ser nullable según script
+    @JoinColumn(name = "id_usuario")
     private Usuario usuario;
 
     @Column(name = "horas_ayudante", precision = 5, scale = 2)

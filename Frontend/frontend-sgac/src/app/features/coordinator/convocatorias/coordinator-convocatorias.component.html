@@ -1,0 +1,48 @@
+<div class="space-y-6 animate-fade-in">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Gestión de Convocatorias</h1>
+            <p class="text-gray-500">Administra las convocatorias y sus comisiones.</p>
+        </div>
+        <!-- Usually only Dean creates convocatorias? Coordinator manages them. -->
+    </div>
+
+    <!-- Filters -->
+    <app-filters-bar placeholder="Buscar convocatoria..." (searchChange)="searchQuery.set($event)"></app-filters-bar>
+
+    <!-- Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div *ngFor="let c of convocatorias()"
+            class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <app-status-chip [status]="c.estado" type="CONVOCATORIA"></app-status-chip>
+                    <button [routerLink]="['/coordinator/convocatorias', c.idConvocatoria]"
+                        class="text-gray-400 hover:text-primary">
+                        <lucide-icon [img]="Settings" class="w-5 h-5"></lucide-icon>
+                    </button>
+                </div>
+
+                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ c.nombreAsignatura }}</h3>
+                <p class="text-sm text-gray-500 mb-4">{{ c.nombrePeriodo }}</p>
+
+                <div class="flex items-center gap-4 text-sm text-gray-600 mb-4">
+                    <div class="flex items-center gap-1">
+                        <lucide-icon [img]="Users" class="w-4 h-4"></lucide-icon>
+                        <span>{{ c.cuposDisponibles }} vacantes</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-xs text-gray-500 font-medium upppercase">Gestión</span>
+                <button (click)="manage(c.idConvocatoria!)"
+                    class="text-primary-700 font-medium text-sm flex items-center gap-2 hover:underline">
+                    Ver Detalles
+                    <lucide-icon [img]="FileText" class="w-4 h-4"></lucide-icon>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "evaluacion_oposicion")
+@Table(name = "evaluacion_oposicion", schema = "postulacion")
 @Getter
 @Setter
 @NoArgsConstructor

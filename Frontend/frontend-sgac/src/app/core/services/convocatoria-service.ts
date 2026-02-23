@@ -12,8 +12,9 @@ import {DocenteDTO} from '../dto/docente';
 })
 export class ConvocatoriaService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/convocatorias`;
-  private apiGlobal = `${environment.apiUrl}`;
+
+  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly apiUrl = `${this.baseUrl}/convocatorias`;
 
   getAll(): Observable<ConvocatoriaDTO[]> {
     return this.http.get<ConvocatoriaDTO[]>(this.apiUrl);
@@ -37,14 +38,14 @@ export class ConvocatoriaService {
 
 
   getPeriodoActivo(): Observable<PeriodoAcademicoDTO[]> {
-    return this.http.get<PeriodoAcademicoDTO[]>(`${this.apiGlobal}/api/recursos/periodos`)
+    return this.http.get<PeriodoAcademicoDTO[]>(`${this.baseUrl}/api/recursos/periodos`)
   }
 
   getAsignaturas(): Observable<AsignaturaDTO[]> {
-    return this.http.get<AsignaturaDTO[]>(`${this.apiGlobal}/admin/catalogos/asignaturas`);
+    return this.http.get<AsignaturaDTO[]>(`${this.baseUrl}/admin/catalogos/asignaturas`);
   }
 
   getDocentes(): Observable<DocenteDTO[]> {
-    return this.http.get<DocenteDTO[]>(`${this.apiGlobal}/recursos/docentes`);
+    return this.http.get<DocenteDTO[]>(`${this.baseUrl}/recursos/docentes`);
   }
 }

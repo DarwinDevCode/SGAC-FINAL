@@ -1,7 +1,7 @@
 export interface ConvocatoriaDTO {
   idConvocatoria?: number;
-  nombrePeriodo: string;
-  nombreAsignatura: string;
+  nombrePeriodo?: string;
+  nombreAsignatura?: string;
   idPeriodoAcademico: number;
   idAsignatura: number;
   idDocente: number;

@@ -1,0 +1,80 @@
+<div class="space-y-6 animate-fade-in">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Panel del Decano</h1>
+            <p class="text-gray-500">Gestión de convocatorias y aprobaciones.</p>
+        </div>
+        <button routerLink="/dean/convocatorias/crear"
+            class="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 font-medium flex items-center gap-2 shadow-sm transition-colors">
+            <lucide-icon [img]="Plus" class="w-5 h-5"></lucide-icon>
+            Nueva Convocatoria
+        </button>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Active -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Convocatorias Activas</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().active }}</p>
+            </div>
+            <div class="p-3 bg-green-50 rounded-lg text-green-600">
+                <lucide-icon [img]="CheckCircle" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+
+        <!-- Review -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Por Aprobar</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().review }}</p>
+            </div>
+            <div class="p-3 bg-yellow-50 rounded-lg text-yellow-600">
+                <lucide-icon [img]="AlertCircle" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+
+        <!-- Draft -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Borradores</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().draft }}</p>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg text-gray-600">
+                <lucide-icon [img]="FileText" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity / Pending Approvals -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+            <h3 class="font-bold text-gray-800">Convocatorias por Aprobar Resultados</h3>
+            <button routerLink="/dean/aprobaciones" class="text-sm text-primary font-medium hover:underline">Ver
+                todas</button>
+        </div>
+        <div class="p-6 text-center text-gray-500 italic" *ngIf="stats().review === 0">
+            No hay convocatorias pendientes de aprobación.
+        </div>
+        <div class="divide-y divide-gray-100" *ngIf="stats().review > 0">
+            <!-- Mock Item -->
+            <div class="p-4 hover:bg-gray-50 flex items-center justify-between group cursor-pointer"
+                routerLink="/dean/aprobaciones">
+                <div class="flex items-center gap-4">
+                    <div class="p-2 bg-yellow-100 text-yellow-700 rounded-lg">
+                        <lucide-icon [img]="AlertCircle" class="w-5 h-5"></lucide-icon>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-gray-900">Ayudantía de Investigación - Física</h4>
+                        <p class="text-sm text-gray-500">Periodo 2024-1 • Resultados consolidados</p>
+                    </div>
+                </div>
+                <lucide-icon name="arrow-right" class="w-5 h-5 text-gray-300 group-hover:text-primary"></lucide-icon>
+            </div>
+        </div>
+    </div>
+
+</div>

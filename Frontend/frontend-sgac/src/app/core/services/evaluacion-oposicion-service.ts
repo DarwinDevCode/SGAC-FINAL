@@ -9,7 +9,8 @@ import {EvaluacionOposicionDTO} from '../dto/evaluacion-oposicion';
 })
 export class EvaluacionOposicionService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/evaluaciones`;
+  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly apiUrl = `${this.baseUrl}/evaluaciones`;
 
   obtenerOposicionPorPostulacion(idPostulacion: number): Observable<EvaluacionOposicionDTO> {
     return this.http.get<EvaluacionOposicionDTO>(`${this.apiUrl}/oposicion/postulacion/${idPostulacion}`);

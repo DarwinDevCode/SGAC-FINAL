@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "tipo_estado_requisito")
+@Table(name = "tipo_estado_requisito", schema = "convocatoria")
 @Getter
 @Setter
 @NoArgsConstructor

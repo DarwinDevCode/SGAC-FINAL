@@ -1,30 +1,35 @@
-import {Component, EventEmitter, inject, Input, Output, signal} from '@angular/core';
-import {ConvocatoriaService} from '../../../../core/services/convocatoria-service';
-import {ConvocatoriaDTO} from '../../../../core/dto/convocatoria';
-import {DocenteDTO} from '../../../../core/dto/docente';
-import {AsignaturaDTO} from '../../../../core/dto/asignatura';
-import {PeriodoAcademicoDTO} from '../../../../core/dto/periodo-academico';
-import {forkJoin} from 'rxjs';
-import { LucideAngularModule, X, Save, Calendar, Users, BookOpen, GraduationCap } from 'lucide-angular';
+import { Component, EventEmitter, inject, Input, Output, signal, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ConvocatoriaService } from '../../../../core/services/convocatoria-service';
+import { ConvocatoriaDTO } from '../../../../core/dto/convocatoria';
+import { DocenteDTO } from '../../../../core/dto/docente';
+import { AsignaturaDTO } from '../../../../core/dto/asignatura';
+import { PeriodoAcademicoDTO } from '../../../../core/dto/periodo-academico';
+import { forkJoin } from 'rxjs';
+import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, X, Save, Calendar, Users, BookOpen, GraduationCap } from 'lucide-angular';
+import {HttpErrorResponse} from '@angular/common/http';
+import {ConvocatoriaCardComponent} from '../../../convocatorias/convocatoria-card/convocatoria-card';
 
 @Component({
   selector: 'app-convocatoria-form-modal',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, FormsModule, LucideAngularModule],
+  providers: [
+    {
+      provide: LUCIDE_ICONS,
+      multi: true,
+      useValue: new LucideIconProvider({ X, Save, Calendar, Users, BookOpen, GraduationCap })
+    }
+  ],
   templateUrl: './convocatoria-form-modal.html',
   styleUrl: './convocatoria-form-modal.css',
 })
-export class ConvocatoriaFormModal {
+export class ConvocatoriaFormModalComponent implements OnInit {
   private convocatoriasService = inject(ConvocatoriaService);
 
   @Input() convocatoria?: ConvocatoriaDTO;
   @Output() close = new EventEmitter<void>();
-
-  readonly X = X;
-  readonly Save = Save;
-  readonly Calendar = Calendar;
-  readonly Users = Users;
-  readonly BookOpen = BookOpen;
-  readonly GraduationCap = GraduationCap;
 
   loading = signal(false);
   loadingData = signal(true);
@@ -40,13 +45,9 @@ export class ConvocatoriaFormModal {
     estado: 'ABIERTA'
   });
 
-  docentes = signal<DocenteDTO[]>([]);
-  asignaturas = signal<AsignaturaDTO[]>([]);
-  periodo = signal<PeriodoAcademicoDTO | null>(null);
-
-  docentesList: DocenteDTO[] = [];
-  asignaturasList: AsignaturaDTO[] = [];
-  periodosList: PeriodoAcademicoDTO | undefined;
+  docentesList = signal<DocenteDTO[]>([]);
+  asignaturasList = signal<AsignaturaDTO[]>([]);
+  periodoActivo = signal<PeriodoAcademicoDTO | null>(null);
 
   ngOnInit(): void {
     this.loadResources();
@@ -61,15 +62,18 @@ export class ConvocatoriaFormModal {
       asignaturas: this.convocatoriasService.getAsignaturas()
     }).subscribe({
       next: ({ periodo, docentes, asignaturas }) => {
-        this.docentesList = docentes;
-        this.asignaturasList = asignaturas;
-        this.periodosList = periodo? | undefined;
+        this.docentesList.set(docentes || []);
+        this.asignaturasList.set(asignaturas || []);
 
+        const periodoReal = Array.isArray(periodo) ? periodo[0] : periodo;
+        this.periodoActivo.set(periodoReal || null);
+
+        const p = this.periodoActivo();
 
         this.form.update(f => ({
           ...f,
-          idPeriodo: this.periodosList?.idPeriodoAcademico,
-          nombrePeriodo: this.periodosList.nombrePeriodo
+          idPeriodo: p?.idPeriodoAcademico || 0,
+          nombrePeriodo: p?.nombrePeriodo || ''
         }));
 
         if (this.convocatoria) {
@@ -80,7 +84,7 @@ export class ConvocatoriaFormModal {
             vacantes: this.convocatoria!.cuposDisponibles,
             fechaInicio: this.convocatoria!.fechaPublicacion,
             fechaFin: this.convocatoria!.fechaCierre,
-            estado: this.convocatoria!.estado
+            estado: this.convocatoria!.estado || 'ABIERTA'
           }));
         }
 
@@ -132,8 +136,8 @@ export class ConvocatoriaFormModal {
         this.loading.set(false);
         this.onClose();
       },
-      error: (error) => {
-        console.error('Error saving convocatoria:', error);
+      error: (error: HttpErrorResponse) => {
+        console.error('Error al guardar la  convocatoria:', error);
         alert(error.error?.message || 'Error al guardar la convocatoria');
         this.loading.set(false);
       }
@@ -143,4 +147,11 @@ export class ConvocatoriaFormModal {
   onClose(): void {
     this.close.emit();
   }
+
+  protected readonly X = X;
+  protected readonly Calendar = Calendar;
+  protected readonly GraduationCap = GraduationCap;
+  protected readonly BookOpen = BookOpen;
+  protected readonly Users = Users;
+  protected readonly Save = Save;
 }

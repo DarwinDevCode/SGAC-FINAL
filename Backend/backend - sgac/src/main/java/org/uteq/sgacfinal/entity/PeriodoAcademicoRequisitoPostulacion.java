@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "periodo_academico_requisito_postulacion")
+@Table(name = "periodo_academico_requisito_postulacion", schema = "convocatoria")
 @Getter
 @Setter
 @NoArgsConstructor

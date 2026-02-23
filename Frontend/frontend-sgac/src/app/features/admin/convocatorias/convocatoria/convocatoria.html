@@ -1,0 +1,52 @@
+<div class="space-y-6 animate-fade-in">
+
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Gestión de Convocatorias</h1>
+      <p class="text-gray-500">Administre la oferta de ayudantías de la facultad.</p>
+    </div>
+
+    <button (click)="onOpenCreate()"
+            class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all shadow-sm font-medium">
+      <lucide-icon [img]="PlusCircle" [size]="20"></lucide-icon>
+      Nueva Convocatoria
+    </button>
+  </div>
+
+  <div class="relative">
+    <lucide-icon [img]="Search" [size]="16"
+                 class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></lucide-icon>
+    <input type="text" [(ngModel)]="searchQuery" placeholder="Buscar por asignatura o docente..."
+           class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20" />
+  </div>
+
+  @if (loading()) {
+    <div class="text-center py-10">
+      <div
+        class="animate-spin inline-block w-8 h-8 border-[3px] border-current border-t-transparent text-primary rounded-full mb-2">
+      </div>
+      <p class="text-gray-500">Cargando...</p>
+    </div>
+  } @else {
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      @for (convocatoria of convocatorias(); track convocatoria.idConvocatoria) {
+        <app-convocatoria-card [convocatoria]="convocatoria"
+                               (viewDetails)="onViewDetails($event)"></app-convocatoria-card>
+      }
+    </div>
+  }
+
+  @if (showCreateModal()) {
+    <app-convocatoria-form-modal (close)="onCloseCreate()"></app-convocatoria-form-modal>
+  }
+
+  @if (showEditModal() && convocatoriaToEdit()) {
+    <app-convocatoria-form-modal [convocatoria]="convocatoriaToEdit()!"
+                                 (close)="onCloseEdit()"></app-convocatoria-form-modal>
+  }
+  @if (selectedConvocatoria()) {
+    <app-convocatoria-detail-modal [convocatoria]="selectedConvocatoria()!"
+                                   (close)="onCloseDetail()"></app-convocatoria-detail-modal>
+  }
+
+</div>

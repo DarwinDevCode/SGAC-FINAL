@@ -9,7 +9,8 @@ import {Observable} from 'rxjs';
 })
 export class PostulacionService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/postulaciones`;
+  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private apiUrl = `${this.baseUrl}/postulaciones`;
 
   registrar(request: PostulacionDTO, files: File[], tiposRequisito: number[]): Observable<any> {
     const formData = new FormData();

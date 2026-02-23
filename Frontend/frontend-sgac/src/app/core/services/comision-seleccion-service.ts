@@ -11,8 +11,10 @@ import {EvaluacionOposicionDTO} from '../dto/evaluacion-oposicion';
 })
 export class ComisionSeleccionService {
   private http = inject(HttpClient);
-  private apiUrlComisiones = `${environment.apiUrl}/comisiones`;
-  private apiUrlEvaluaciones = `${environment.apiUrl}/evaluaciones`;
+
+  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly apiUrlComisiones = `${this.baseUrl}/comisiones`;
+  private readonly apiUrlEvaluaciones = `${this.baseUrl}/evaluaciones`;
 
   listarMisAsignaciones(idUsuario: number): Observable<UsuarioComisionDTO[]> {
     return this.http.get<UsuarioComisionDTO[]>(`${this.apiUrlComisiones}/mis-asignaciones/${idUsuario}`);

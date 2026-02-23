@@ -1,0 +1,102 @@
+<div class="space-y-6 animate-fade-in">
+
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Panel de Coordinación</h1>
+        <p class="text-gray-500">Resumen de actividades y tareas pendientes.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Pending -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Pendientes de Revisión</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().pending }}</p>
+            </div>
+            <div class="p-3 bg-yellow-50 rounded-lg text-yellow-600">
+                <lucide-icon [img]="Clock" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Observadas</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().observed }}</p>
+            </div>
+            <div class="p-3 bg-orange-50 rounded-lg text-orange-600">
+                <lucide-icon [img]="AlertCircle" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+
+        <!-- Reviewed -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Evaluadas</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().reviewed }}</p>
+            </div>
+            <div class="p-3 bg-green-50 rounded-lg text-green-600">
+                <lucide-icon [img]="CheckCircle" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+
+        <!-- Total -->
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p class="text-sm font-medium text-gray-500">Total Postulantes</p>
+                <p class="text-3xl font-bold text-gray-800 mt-1">{{ stats().total }}</p>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-lg text-blue-600">
+                <lucide-icon [img]="Users" class="w-6 h-6"></lucide-icon>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Areas -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Urgent Tasks / Inbox -->
+        <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-gray-800 flex items-center gap-2">
+                    <lucide-icon [img]="AlertCircle" class="w-5 h-5 text-red-500"></lucide-icon>
+                    Atención Urgente
+                </h3>
+                <button class="text-sm text-primary font-medium hover:underline">Ver todo</button>
+            </div>
+
+            <div class="divide-y divide-gray-100">
+                <div *ngFor="let task of urgentTasks"
+                    class="p-4 hover:bg-gray-50 transition-colors flex gap-4 items-start cursor-pointer">
+                    <div class="w-2 h-2 mt-2 rounded-full"
+                        [ngClass]="{'bg-red-500': task.status === 'warning', 'bg-blue-500': task.status === 'info', 'bg-yellow-500': task.status === 'pending'}">
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-medium text-gray-800">{{ task.title }}</h4>
+                        <p class="text-sm text-gray-500 mt-1">{{ task.date }} • {{ task.type }}</p>
+                    </div>
+                    <button class="text-gray-400 hover:text-gray-600">
+                        <lucide-icon name="arrow-right" class="w-5 h-5"></lucide-icon>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <h3 class="font-bold text-gray-800 mb-4">Accesos Rápidos</h3>
+            <div class="space-y-3">
+                <button routerLink="/coordinator/convocatorias"
+                    class="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary-50 transition-all group">
+                    <span class="font-medium text-gray-700 group-hover:text-primary-700">Gestionar Convocatorias</span>
+                    <lucide-icon [img]="FileText"
+                        class="w-5 h-5 text-gray-400 group-hover:text-primary-600"></lucide-icon>
+                </button>
+                <button routerLink="/coordinator/postulaciones"
+                    class="w-full flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary-50 transition-all group">
+                    <span class="font-medium text-gray-700 group-hover:text-primary-700">Revisar Documentos</span>
+                    <lucide-icon [img]="CheckCircle"
+                        class="w-5 h-5 text-gray-400 group-hover:text-primary-600"></lucide-icon>
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>

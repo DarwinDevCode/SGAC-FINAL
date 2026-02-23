@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "certificado")
+@Table(name = "certificado", schema = "ayudantia")
 @Getter
 @Setter
 @NoArgsConstructor

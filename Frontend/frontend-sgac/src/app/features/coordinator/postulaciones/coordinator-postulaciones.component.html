@@ -1,0 +1,78 @@
+<div class="space-y-6 animate-fade-in">
+    <!-- Header -->
+    <div>
+        <h1 class="text-2xl font-bold text-gray-800">Gestión de Postulaciones</h1>
+        <p class="text-gray-500">Revisa y valida las postulaciones recibidas.</p>
+    </div>
+
+    <!-- Filters -->
+    <app-filters-bar placeholder="Buscar por estudiante..." (searchChange)="searchQuery.set($event)">
+        <!-- Convocatoria Filter -->
+        <div class="w-full md:w-[300px] relative">
+            <select [ngModel]="selectedConvocatoria()"
+                (ngModelChange)="selectedConvocatoria.set($event); onConvocatoriaChange()"
+                class="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 appearance-none pr-8">
+                <option value="all">Seleccione Convocatoria...</option>
+                <option *ngFor="let c of convocatorias()" [value]="c.idConvocatoria">
+                    {{ c.nombreAsignatura }} ({{ c.nombrePeriodo }})
+                </option>
+            </select>
+            <lucide-icon [img]="Filter" [size]="16"
+                class="absolute right-3 top-2.5 text-muted-foreground pointer-events-none"></lucide-icon>
+        </div>
+
+        <!-- Estado Filter -->
+        <div class="w-full md:w-[200px] relative">
+            <select [ngModel]="selectedEstado()" (ngModelChange)="selectedEstado.set($event)"
+                class="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 appearance-none pr-8">
+                <option value="all">Todos los estados</option>
+                <option value="REGISTRADA">Registrada</option>
+                <option value="EN_REVISION">En Revisión</option>
+                <option value="OBSERVADA">Observada</option>
+                <option value="VALIDADA">Validada</option>
+            </select>
+            <lucide-icon [img]="Filter" [size]="16"
+                class="absolute right-3 top-2.5 text-muted-foreground pointer-events-none"></lucide-icon>
+        </div>
+    </app-filters-bar>
+
+    <!-- Table -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th class="px-6 py-4 font-semibold text-gray-700">Estudiante</th>
+                    <th class="px-6 py-4 font-semibold text-gray-700">Fecha</th>
+                    <th class="px-6 py-4 font-semibold text-gray-700">Convocatoria</th>
+                    <th class="px-6 py-4 font-semibold text-gray-700">Estado</th>
+                    <th class="px-6 py-4 font-semibold text-gray-700 text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                <tr *ngFor="let p of filteredPostulaciones()" class="hover:bg-gray-50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-gray-900">
+                        Estudiante #{{ p.idEstudiante }}
+                        <!-- TODO: Resolve Name -->
+                    </td>
+                    <td class="px-6 py-4 text-gray-500">{{ p.fechaPostulacion }}</td>
+                    <td class="px-6 py-4 text-gray-500">{{ p.asignaturaConvocatoria }}</td>
+                    <td class="px-6 py-4">
+                        <app-status-chip [status]="p.estadoPostulacion" type="POSTULACION"></app-status-chip>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button (click)="onReview(p.idPostulacion)"
+                            class="inline-flex items-center gap-2 px-3 py-1.5 text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-md font-medium transition-colors">
+                            <lucide-icon [img]="Eye" [size]="16"></lucide-icon>
+                            Revisar
+                        </button>
+                    </td>
+                </tr>
+                <tr *ngIf="filteredPostulaciones().length === 0" class="text-center">
+                    <td colspan="5" class="py-12 text-gray-500">
+                        No se encontraron postulaciones. Seleccione una convocatoria.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

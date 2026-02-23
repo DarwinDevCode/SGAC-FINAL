@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import {BehaviorSubject, Observable, tap} from 'rxjs';
 import { environment } from '../../../environments/environment';
+import {UsuarioDTO} from '../dto/usuario';
 
 export interface LoginRequest {
   usuario: string;
@@ -31,6 +32,7 @@ export interface AuthUser {
 })
 export class AuthService {
   private http = inject(HttpClient);
+  private currentUserSubject = new BehaviorSubject<UsuarioDTO | null>(null);
 
   private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
   private readonly API_AUTH = `${this.baseUrl}/auth`;
@@ -65,5 +67,16 @@ export class AuthService {
   getUser(): AuthUser | null {
     const user = localStorage.getItem(this.USER_KEY);
     return user ? JSON.parse(user) as AuthUser : null;
+  }
+
+  getCurrentUser(): UsuarioDTO | null {
+    return this.currentUserSubject.value;
+  }
+
+  hasRole(roles: string[]): boolean {
+    const user = this.getCurrentUser();
+    if (!user || !user.rolActual)
+      return false;
+    return roles.includes(user.rolActual);
   }
 }

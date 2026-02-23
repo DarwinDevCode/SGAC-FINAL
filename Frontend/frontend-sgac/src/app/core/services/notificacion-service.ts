@@ -9,8 +9,8 @@ import {NotificacionDTO} from '../dto/notificacion';
 })
 export class NotificacionService {
   private http = inject(HttpClient);
-
-  private apiUrl = `${environment.apiUrl}/notificaciones`;
+  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly apiUrl = `${this.baseUrl}/notificaciones`;
 
   listarMisNotificaciones(idUsuario: number): Observable<NotificacionDTO[]> {
     return this.http.get<NotificacionDTO[]>(`${this.apiUrl}/mis-notificaciones/${idUsuario}`);
