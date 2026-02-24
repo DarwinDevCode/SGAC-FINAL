@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.PermisoDTO;
+import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.Response.PermisoRolResponseDTO;
 import org.uteq.sgacfinal.repository.IPermisoRepository;
 import org.uteq.sgacfinal.service.IPermisoService;
 
@@ -27,5 +29,25 @@ public class PermisoServiceImpl implements IPermisoService {
                         .permiso((String) row[2])
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PermisoRolResponseDTO> consultarPermisos(FiltroPermisosRequestDTO filtro) {
+        List<Object[]> resultadosRaw = permisoRepository.consultarPermisosRolRaw(
+                filtro.getRolBd(),
+                filtro.getEsquema(),
+                filtro.getCategoria(),
+                filtro.getPrivilegio()
+        );
+
+        return resultadosRaw.stream().map(row ->
+                PermisoRolResponseDTO.builder()
+                        .esquema((String) row[0])
+                        .elemento((String) row[1])
+                        .categoria((String) row[2])
+                        .privilegio((String) row[3])
+                        .build()
+        ).collect(Collectors.toList());
     }
 }
