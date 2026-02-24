@@ -1,0 +1,189 @@
+<div class="gestion-container">
+
+  <div class="section-header" style="margin-bottom: 20px;">
+    <div>
+      <h2 class="title" style="margin-bottom: 5px;">Gestión de Permisos</h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Seleccione un rol para administrar sus privilegios en la base de datos.</p>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre del Rol (Lógico)</th>
+        <th>Rol en BD</th>
+        <th>Estado</th>
+        <th class="text-right">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          <tr><td colspan="5" style="text-align: center; padding: 20px;">Cargando roles...</td></tr>
+        }
+        @else {
+          @for (rol of rolesList; track rol.idTipoRol) {
+            <tr>
+              <td>{{ rol.idTipoRol }}</td>
+              <td style="font-weight: 500;">{{ rol.nombreLogico }}</td>
+
+              <td>
+                <span style="background-color: #f1f5f9; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem; color: #475569;">
+                  {{ rol.nombreRolBd }}
+                </span>
+              </td>
+
+              <td>
+                <span class="status-pill" [class.active]="rol.activo" [class.inactive]="!rol.activo">
+                  {{ rol.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button type="button" class="btn-primary" style="padding: 6px 12px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px;"
+                        (click)="abrirConfiguracionPermisos(rol)">
+                  <lucide-icon name="Shield" size="16"></lucide-icon> Ver Permisos
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="5" style="text-align: center;">No hay roles disponibles</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (mostrarModalPermisos && rolSeleccionado) {
+    <div class="modal-backdrop">
+      <div class="modal-box" style="max-width: 1200px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+
+        <div class="modal-header" style="align-items: center; flex-shrink: 0;">
+          <div>
+            <h3 style="margin: 0; display: flex; align-items: center; gap: 8px;">
+              <lucide-icon name="ShieldCheck" size="20" color="#2563eb"></lucide-icon>
+              Permisos del Rol: {{ rolSeleccionado.nombreLogico }}
+            </h3>
+            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.85rem; font-family: monospace;">
+              Consultando privilegios de: {{ rolSeleccionado.nombreRolBd }}
+            </p>
+          </div>
+          <button type="button" class="btn-icon" (click)="cerrarModalPermisos()">
+            <lucide-icon name="X" size="18"></lucide-icon>
+          </button>
+        </div>
+
+        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex-grow: 1;">
+
+          <div style="display: flex; gap: 15px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; align-items: flex-end; flex-wrap: wrap;">
+
+            <div class="form-group" style="margin: 0; flex: 1; min-width: 150px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Esquema</label>
+              <select class="input-field" [(ngModel)]="filtros.esquema" (change)="cargarPermisos()">
+                <option value="todo">Todos los esquemas</option>
+                <option value="academico">academico</option>
+                <option value="ayudantia">ayudantia</option>
+                <option value="convocatoria">convocatoria</option>
+                <option value="notificacion">notificacion</option>
+                <option value="postulacion">postulacion</option>
+                <option value="public">public</option>
+                <option value="seguridad">seguridad</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0; flex: 1; min-width: 150px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Categoría</label>
+              <select class="input-field" [(ngModel)]="filtros.categoria" (change)="cargarPermisos()">
+                <option value="todo">Todas las categorías</option>
+                <option value="TABLAS">TABLAS</option>
+                <option value="VISTAS">VISTAS</option>
+                <option value="VISTAS MATERIALIZADAS">VISTAS MATERIALIZADAS</option>
+                <option value="FUNCIONES">FUNCIONES</option>
+                <option value="PROCEDIMIENTOS">PROCEDIMIENTOS</option>
+                <option value="SECUENCIAS">SECUENCIAS</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0; flex: 1; min-width: 150px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Privilegio</label>
+              <select class="input-field" [(ngModel)]="filtros.privilegio" (change)="cargarPermisos()">
+                <option value="todo">Todos los permisos</option>
+                <option value="SELECT">SELECT</option>
+                <option value="INSERT">INSERT</option>
+                <option value="UPDATE">UPDATE</option>
+                <option value="DELETE">DELETE</option>
+                <option value="EXECUTE">EXECUTE</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin: 0; flex: 2; min-width: 250px;">
+              <label style="font-size: 0.85rem; font-weight: 600; color: #475569;">Búsqueda rápida</label>
+              <div style="position: relative;">
+                <lucide-icon name="Search" size="18" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #94a3b8;"></lucide-icon>
+                <input type="text" class="input-field" placeholder="Ej: sp_crear, docente, select..."
+                       style="padding-left: 35px;"
+                       [(ngModel)]="terminoBusqueda" (ngModelChange)="filtrarPermisosRapido()">
+              </div>
+            </div>
+
+          </div>
+
+          <div class="table-card" style="margin: 0;">
+            <table class="data-table">
+              <thead style="background-color: #f1f5f9;">
+              <tr>
+                <th style="width: 15%;">Esquema</th>
+                <th style="width: 45%;">Elemento (Tabla, Función, etc.)</th>
+                <th style="width: 25%;">Categoría</th>
+                <th style="width: 15%; text-align: center;">Privilegio</th>
+              </tr>
+              </thead>
+              <tbody>
+                @if (loadingPermisos) {
+                  <tr><td colspan="4" style="text-align: center; padding: 30px;">Ejecutando consulta en PostgreSQL...</td></tr>
+                }
+                @else {
+                  @for (p of permisosListFiltrados; track $index) {
+                    <tr>
+                      <td>
+                        <span style="font-size: 0.8rem; font-weight: 600; color: #64748b;">{{ p.esquema }}</span>
+                      </td>
+                      <td style="font-family: monospace; font-size: 0.9rem; color: #0f172a;">
+                        {{ p.elemento }}
+                      </td>
+                      <td>
+                        <span style="font-size: 0.8rem; color: #475569;">{{ p.categoria }}</span>
+                      </td>
+                      <td style="text-align: center;">
+                        <span class="status-pill" [ngStyle]="getPrivilegioColor(p.privilegio)" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: bold;">
+                          {{ p.privilegio }}
+                        </span>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
+                        <lucide-icon name="Database" size="40" style="opacity: 0.5; margin-bottom: 10px;"></lucide-icon>
+                        <p>No se encontraron coincidencias.</p>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        <div class="form-footer full-width" style="padding: 15px 20px; border-top: 1px solid #e2e8f0; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
+          <div style="font-size: 0.85rem; color: #64748b; font-weight: 500;">
+            Mostrando {{ permisosListFiltrados.length }} permisos
+          </div>
+          <button type="button" class="btn-primary" (click)="cerrarModalPermisos()">Cerrar panel</button>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>

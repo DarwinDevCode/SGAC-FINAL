@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.PermisoDTO;
 import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Response.PermisoRolResponseDTO;
 import org.uteq.sgacfinal.repository.IPermisoRepository;
 import org.uteq.sgacfinal.service.IPermisoService;
@@ -49,5 +50,18 @@ public class PermisoServiceImpl implements IPermisoService {
                         .privilegio((String) row[3])
                         .build()
         ).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public Boolean gestionarPermiso(GestionPermisosRequestDTO request) {
+        return permisoRepository.gestionarPermisoElementoRaw(
+                request.getRolBd(),
+                request.getEsquema(),
+                request.getElemento(),
+                request.getCategoria(),
+                request.getPrivilegio(),
+                request.getOtorgar()
+        );
     }
 }

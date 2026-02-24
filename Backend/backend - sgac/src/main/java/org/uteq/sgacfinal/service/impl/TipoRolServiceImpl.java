@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Request.TipoRolRequestDTO;
+import org.uteq.sgacfinal.dto.Response.RolResumenResponseDTO;
 import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.entity.TipoRol;
 import org.uteq.sgacfinal.repository.ITipoRolRepository;
@@ -51,6 +52,11 @@ public class TipoRolServiceImpl implements ITipoRolService {
         repository.desactivarTipoRol(id);
     }
 
+    @Override
+    public List<RolResumenResponseDTO> obtenerRolesParaPermisos() {
+        return repository.obtenerRolesParaPermisos();
+    }
+
     private TipoRolResponseDTO mapToDTO(TipoRol entity) {
         return TipoRolResponseDTO.builder()
                 .idTipoRol(entity.getIdTipoRol())
@@ -60,23 +66,23 @@ public class TipoRolServiceImpl implements ITipoRolService {
     }
 
 
-    @Transactional
-    public void sincronizarPermisos(GestionPermisosRequestDTO request) {
-        for (GestionPermisosRequestDTO.PermisoDetalleDTO permiso : request.getPermisos()) {
-
-            Boolean exito = repository.gestionarPermisoRol(
-                    request.getNombreRol(),
-                    request.getEsquema(),
-                    request.getTabla(),
-                    permiso.getPrivilegio(),
-                    permiso.isOtorgar()
-            );
-
-            if (exito == null || !exito)
-                throw new RuntimeException("Error al gestionar el permiso " + permiso.getPrivilegio() + " para la tabla " + request.getTabla());
-        }
-    }
-
+//    @Transactional
+//    public void sincronizarPermisos(GestionPermisosRequestDTO request) {
+//        for (GestionPermisosRequestDTO.PermisoDetalleDTO permiso : request.getPermisos()) {
+//
+//            Boolean exito = repository.gestionarPermisoRol(
+//                    request.getNombreRol(),
+//                    request.getEsquema(),
+//                    request.getTabla(),
+//                    permiso.getPrivilegio(),
+//                    permiso.isOtorgar()
+//            );
+//
+//            if (exito == null || !exito)
+//                throw new RuntimeException("Error al gestionar el permiso " + permiso.getPrivilegio() + " para la tabla " + request.getTabla());
+//        }
+//    }
+//
 
 
 

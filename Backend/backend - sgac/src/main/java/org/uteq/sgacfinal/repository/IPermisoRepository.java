@@ -24,4 +24,17 @@ public interface IPermisoRepository extends JpaRepository<Usuario, Integer> {
             @Param("categoria") String categoria,
             @Param("privilegio") String privilegio
     );
+
+
+    @Query(value = "SELECT seguridad.fn_gestionar_permisos_elemento(" +
+            ":rolBd, :esquema, :elemento, :categoria, :privilegio, :otorgar)",
+            nativeQuery = true)
+    Boolean gestionarPermisoElementoRaw(
+            @Param("rolBd") String rolBd,
+            @Param("esquema") String esquema,
+            @Param("elemento") String elemento,
+            @Param("categoria") String categoria,
+            @Param("privilegio") String privilegio,
+            @Param("otorgar") Boolean otorgar
+    );
 }

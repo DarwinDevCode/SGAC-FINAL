@@ -1,13 +1,27 @@
 package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.uteq.sgacfinal.dto.Response.RolResumenResponseDTO;
+import org.uteq.sgacfinal.service.ITipoRolService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/tipos-rol")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class TipoRolController {
+    private final ITipoRolService tipoRolService;
+
+    @GetMapping("/resumen-permisos")
+    public ResponseEntity<List<RolResumenResponseDTO>> obtenerRolesParaPermisos() {
+        List<RolResumenResponseDTO> roles = tipoRolService.obtenerRolesParaPermisos();
+        return ResponseEntity.ok(roles);
+    }
+
+
+
 //
 //    private final ITipoRolService tipoRolService;
 //

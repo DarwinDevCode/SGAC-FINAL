@@ -66,6 +66,7 @@ export class SidebarComponent {
       { label: 'Gestión Usuarios', icon: 'Users', route: '/admin/usuarios' },
       { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
       { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },
+      { label: 'Roles y Permisos', icon: 'Settings', route: '/admin/rol-permiso' },
       { label: 'Notificaciones', icon: 'Bell', route: '/admin/notifications' },
     ],
   };

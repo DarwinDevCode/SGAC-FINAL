@@ -24,7 +24,10 @@ import {
   Plus,
   Power,
   Edit2,
-  X
+  X,
+  Shield,
+  ShieldCheck,
+  Database
 } from 'lucide-angular';
 import {authInterceptor} from './core/interceptors/auth-interceptor';
 
@@ -56,7 +59,10 @@ export const appConfig: ApplicationConfig = {
         Plus,
         Power,
         Edit2,
-        X
+        X,
+        Shield,
+        ShieldCheck,
+        Database
       })
     )
   ]
