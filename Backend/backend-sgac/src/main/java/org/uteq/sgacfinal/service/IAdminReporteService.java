@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.service;
 
 import org.uteq.sgacfinal.dto.response.AdminReporteGlobalDTO;
 import org.uteq.sgacfinal.dto.response.AuditoriaGlobalDTO;
+
 import java.util.List;
 
 public interface IAdminReporteService {

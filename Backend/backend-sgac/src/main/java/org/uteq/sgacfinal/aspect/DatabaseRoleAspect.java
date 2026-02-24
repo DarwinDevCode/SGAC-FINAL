@@ -8,8 +8,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
-import org.uteq.sgacfinal.security.UserContext;
-
 import java.sql.Statement;
 
 @Aspect
@@ -21,28 +19,8 @@ public class DatabaseRoleAspect {
 
     @Around("execution(* org.uteq.sgacfinal.repository.*.*(..))")
     public Object applyDatabaseRole(ProceedingJoinPoint joinPoint) throws Throwable {
-        String appRole = UserContext.getAppRole();
         boolean roleChanged = false;
 
-
-        if (appRole != null && !appRole.isEmpty()) {
-            String dbRole = appRole.toLowerCase().startsWith("role_")
-                    ? appRole.toLowerCase()
-                    : "role_" + appRole.toLowerCase();
-
-            try {
-                Session session = entityManager.unwrap(Session.class);
-                session.doWork(connection -> {
-                    try (Statement statement = connection.createStatement()) {
-                        statement.execute("SET LOCAL ROLE " + dbRole);
-                        log.debug("Rol de BD cambiado exitosamente a: {}", dbRole);
-                    }
-                });
-                roleChanged = true;
-            } catch (Exception e) {
-                log.error("No se pudo hacer SET ROLE en la base de datos", e);
-            }
-        }
 
         try {
             return joinPoint.proceed();

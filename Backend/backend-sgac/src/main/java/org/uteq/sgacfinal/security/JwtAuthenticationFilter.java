@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.uteq.sgacfinal.config.UserContext;
 
 import java.io.IOException;
 
@@ -54,19 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                    UserContext.setUsername(username);
-                    UserContext.setAppRole(appRole);
                 }
             }
         } catch (Exception e) {
             logger.error("Error al procesar token JWT: " + e.getMessage(), e);
         }
 
-        try {
-            filterChain.doFilter(request, response);
-        } finally {
-            UserContext.clear();
-        }
     }
 }

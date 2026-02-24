@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.security.UserContext;
 import org.uteq.sgacfinal.dto.request.*;
 import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;
@@ -132,15 +131,24 @@ public class UsuariosImpl implements IUsuariosService, UserDetailsService {
         }
     }
 
+
     private void applyCurrentDbRole() {
-        String username = UserContext.getUsername();
-        if (username == null || username.isBlank()) {
-            throw new IllegalStateException("No hay usuario autenticado para aplicar rol de BD");
+        try {
+            org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && auth.getPrincipal() instanceof UsuarioPrincipal) {
+                UsuarioPrincipal principal = (UsuarioPrincipal) auth.getPrincipal();
+                String appRole = auth.getAuthorities().stream().map(org.springframework.security.core.GrantedAuthority::getAuthority).findFirst().orElse("");
+                String dbRole = resolveDbRole(principal.getUsername(), appRole);
+                org.hibernate.Session session = entityManager.unwrap(org.hibernate.Session.class);
+                session.doWork(connection -> {
+                    try (java.sql.Statement statement = connection.createStatement()) {
+                        statement.execute("SET ROLE " + dbRole);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            log.error("Error aplicando rol de BD", e);
         }
-        String dbRole = resolveDbRole(username, UserContext.getAppRole());
-        entityManager.createNativeQuery("SELECT set_config('role', ?1, true)")
-                .setParameter(1, dbRole)
-                .getSingleResult();
     }
 
     private String resolveDbRole(String username, String appRole) {
