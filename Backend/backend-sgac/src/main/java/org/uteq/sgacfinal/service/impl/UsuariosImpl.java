@@ -12,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.config.UserContext;
+import org.uteq.sgacfinal.security.UserContext;
 import org.uteq.sgacfinal.dto.request.*;
 import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;

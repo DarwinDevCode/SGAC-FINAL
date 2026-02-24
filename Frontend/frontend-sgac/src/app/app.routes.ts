@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+// Trigger rebuild
 import { selectorRolGuard } from './core/guards/selector-rol-guard-guard';
 import { salaEvaluacionGuard } from './features/evaluacionOposicion/sala-evaluacion-guard-guard';
 import { coordinadorGuard } from './features/coordinador/auth';
@@ -61,12 +62,20 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/dashboard/dashboard').then(m => m.DashboardComponent)
       },
       {
+        path: 'admin/reportes',
+        loadComponent: () => import('./features/admin/reportes-globales/reportes-globales.component').then(m => m.ReportesGlobalesComponent)
+      },
+      {
         path: 'admin/usuarios',
         loadComponent: () => import('./features/admin/gestion-usuarios/gestion-usuarios').then(m => m.GestionUsuarios)
       },
       {
         path: 'admin/configuracion',
         loadComponent: () => import('./features/admin/gestion-catalogos/gestion-catalogos').then(m => m.GestionCatalogosComponent)
+      },
+      {
+        path: 'admin/auditoria',
+        loadComponent: () => import('./features/admin/auditoria-global/auditoria-global.component').then(m => m.AuditoriaGlobalComponent)
       },
       {
         path: 'admin/carga-academica',

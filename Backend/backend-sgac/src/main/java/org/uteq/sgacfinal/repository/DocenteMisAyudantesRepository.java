@@ -52,8 +52,6 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
         WHERE d.id_usuario = :idUsuario
           AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
-          AND c.activo = true
-          AND p.activo = true
         ORDER BY a.id_ayudantia DESC
         """, nativeQuery = true)
     List<Object[]> listarMisAyudantes(@Param("idUsuario") Integer idUsuario);
@@ -69,7 +67,7 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ra.descripcion_actividad,
           ra.tema_tratado,
           ra.fecha,
-          ra.numero_asistentes,
+          0 AS numero_asistentes,
           ra.horas_dedicadas,
           ra.id_tipo_estado_registro,
           ter.nombre_estado AS nombre_estado,

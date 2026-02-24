@@ -100,6 +100,8 @@ export class SidebarComponent {
     ],
     ADMINISTRADOR: [
       { label: 'Inicio',              icon: 'LayoutDashboard', route: '/admin/dashboard' },
+      { label: 'Auditoría Global',    icon: 'History',         route: '/admin/auditoria' },
+      { label: 'Reportes Globales',   icon: 'ClipboardList',   route: '/admin/reportes' },
       { label: 'Gestión Usuarios',    icon: 'Users',           route: '/admin/usuarios' },
       { label: 'Carga Académica',     icon: 'Briefcase',       route: '/admin/carga-academica' },
       { label: 'Gestión Documentos',  icon: 'Files',           route: '/documentos-gestion' },

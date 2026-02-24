@@ -99,15 +99,35 @@ public class DecanoServiceImpl implements IDecanoService {
     @Transactional(readOnly = true)
     public DecanoEstadisticasDTO obtenerEstadisticasPorFacultad(Integer idFacultad) {
         log.info("Obteniendo estadísticas para la facultad ID: {}", idFacultad);
-        String sql = "SELECT academico.fn_obtener_estadisticas_decano(?)";
+        String sql = "SELECT * FROM academico.fn_obtener_estadisticas_decano(?)";
 
         try {
-            String jsonResult = jdbcTemplate.queryForObject(sql, String.class, idFacultad);
-            if (jsonResult == null) return new DecanoEstadisticasDTO();
-            return objectMapper.readValue(jsonResult, DecanoEstadisticasDTO.class);
-        } catch (JsonProcessingException e) {
-            log.error("Error al procesar JSON de estadísticas del decano: {}", e.getMessage());
-            return new DecanoEstadisticasDTO();
+            return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+                DecanoEstadisticasDTO dto = new DecanoEstadisticasDTO();
+                dto.setTotalConvocatorias(rs.getLong("total_convocatorias"));
+                dto.setConvocatoriasActivas(rs.getLong("convocatorias_activas"));
+                dto.setConvocatoriasInactivas(rs.getLong("convocatorias_inactivas"));
+                dto.setTotalPostulantes(rs.getLong("total_postulantes"));
+                dto.setPostulantesSeleccionados(rs.getLong("postulantes_seleccionados"));
+                dto.setPostulantesNoSeleccionados(rs.getLong("postulantes_no_seleccionados"));
+                dto.setPostulantesEnEvaluacion(rs.getLong("postulantes_en_evaluacion"));
+                dto.setPostulantesPendientes(rs.getLong("postulantes_pendientes"));
+
+                String jsonActividad = rs.getString("actividad_coordinador");
+                try {
+                    if (jsonActividad != null && !jsonActividad.isEmpty()) {
+                        List<DecanoEstadisticasDTO.ActividadCoordinadorDTO> actividad =
+                                objectMapper.readValue(jsonActividad, new com.fasterxml.jackson.core.type.TypeReference<List<DecanoEstadisticasDTO.ActividadCoordinadorDTO>>() {});
+                        dto.setActividadPorCoordinador(actividad);
+                    } else {
+                        dto.setActividadPorCoordinador(new ArrayList<>());
+                    }
+                } catch (Exception e) {
+                    log.warn("Error al parsear actividad de coordinadores: {}", e.getMessage());
+                    dto.setActividadPorCoordinador(new ArrayList<>());
+                }
+                return dto;
+            }, idFacultad);
         } catch (Exception e) {
             log.error("Error al ejecutar fn_obtener_estadisticas_decano: {}", e.getMessage());
             return new DecanoEstadisticasDTO();
@@ -118,38 +138,44 @@ public class DecanoServiceImpl implements IDecanoService {
     @Transactional(readOnly = true)
     public List<ConvocatoriaReporteDTO> reporteConvocatoriasPorFacultad(Integer idFacultad) {
         log.info("Generando reporte de convocatorias para facultad ID: {}", idFacultad);
-        String sql = "SELECT academico.fn_reporte_convocatorias_decano(?)";
+        String sql = "SELECT * FROM academico.fn_reporte_convocatorias_decano(?)";
 
-        try {
-            String jsonResult = jdbcTemplate.queryForObject(sql, String.class, idFacultad);
-            if (jsonResult == null) return new ArrayList<>();
-            return Arrays.asList(objectMapper.readValue(jsonResult, ConvocatoriaReporteDTO[].class));
-        } catch (JsonProcessingException e) {
-            log.error("Error al procesar JSON de reporte de convocatorias (decano): {}", e.getMessage());
-            return new ArrayList<>();
-        } catch (Exception e) {
-            log.error("Error inesperado en reporte convocatorias (decano): {}", e.getMessage());
-            return new ArrayList<>();
-        }
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            java.sql.Date fechaInicioSQL = rs.getDate("fecha_inicio");
+            java.sql.Date fechaFinSQL = rs.getDate("fecha_fin");
+
+            return ConvocatoriaReporteDTO.builder()
+                    .idConvocatoria(rs.getInt("id_convocatoria"))
+                    .nombreAsignatura(rs.getString("nombre_asignatura"))
+                    .nombreCarrera(rs.getString("nombre_carrera"))
+                    .nombreCoordinador(rs.getString("nombre_coordinador"))
+                    .fechaInicio(fechaInicioSQL != null ? fechaInicioSQL.toLocalDate() : null)
+                    .fechaFin(fechaFinSQL != null ? fechaFinSQL.toLocalDate() : null)
+                    .estado(rs.getString("estado"))
+                    .numeroPostulantes(rs.getLong("numero_postulantes"))
+                    .build();
+        }, idFacultad);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorPostulanteReporteDTO> reportePostulantesPorFacultad(Integer idFacultad) {
         log.info("Generando reporte de postulantes para facultad ID: {}", idFacultad);
-        String sql = "SELECT academico.fn_reporte_postulantes_decano(?)";
+        String sql = "SELECT * FROM academico.fn_reporte_postulantes_decano(?)";
 
-        try {
-            String jsonResult = jdbcTemplate.queryForObject(sql, String.class, idFacultad);
-            if (jsonResult == null) return new ArrayList<>();
-            return Arrays.asList(objectMapper.readValue(jsonResult, CoordinadorPostulanteReporteDTO[].class));
-        } catch (JsonProcessingException e) {
-            log.error("Error al procesar JSON de reporte de postulantes (decano): {}", e.getMessage());
-            return new ArrayList<>();
-        } catch (Exception e) {
-            log.error("Error inesperado en reporte postulantes (decano): {}", e.getMessage());
-            return new ArrayList<>();
-        }
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            java.sql.Date fechaPostSQL = rs.getDate("fecha_postulacion");
+
+            return CoordinadorPostulanteReporteDTO.builder()
+                    .idPostulacion(rs.getInt("id_postulacion"))
+                    .nombreEstudiante(rs.getString("nombre_estudiante"))
+                    .cedula(rs.getString("cedula"))
+                    .nombreAsignatura(rs.getString("nombre_asignatura"))
+                    .nombrePeriodo(rs.getString("nombre_periodo"))
+                    .fechaPostulacion(fechaPostSQL != null ? fechaPostSQL.toLocalDate() : null)
+                    .estadoEvaluacion(rs.getString("estado_evaluacion"))
+                    .build();
+        }, idFacultad);
     }
 
     @Override

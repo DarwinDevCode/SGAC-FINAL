@@ -1,0 +1,130 @@
+<div class="audit-container">
+  <!-- Header -->
+  <header class="audit-header">
+    <div class="title-group">
+      <h1 class="audit-title">Auditoría Global del Sistema</h1>
+      <p class="subtitle" style="margin-top: 0.25rem; color: hsl(var(--muted-foreground)); font-size: 0.875rem;">
+        Rastro completo de acciones, cambios y accesos de todos los usuarios
+      </p>
+    </div>
+    <div class="action-buttons">
+      <button class="btn-export btn-pdf" (click)="exportarPDF()">
+        <i-lucide name="FileDown"></i-lucide>
+        Descargar Reporte PDF
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters Card -->
+  <section class="filter-card">
+    <div class="filter-grid">
+      <!-- Filtro Facultad -->
+      <div class="filter-group">
+        <label class="filter-label">Facultad</label>
+        <select class="filter-select" [(ngModel)]="filtros.facultad" (change)="onFacultadChange()">
+          <option value="">Todas las Facultades</option>
+          <option *ngFor="let f of listas.facultades" [value]="f.nombreFacultad">{{ f.nombreFacultad }}</option>
+        </select>
+      </div>
+
+      <!-- Filtro Carrera -->
+      <div class="filter-group">
+        <label class="filter-label">Carrera</label>
+        <select class="filter-select" [(ngModel)]="filtros.carrera" (change)="aplicarFiltros()">
+          <option value="">Todas las Carreras</option>
+          <option *ngFor="let c of carrerasFiltradas" [value]="c.nombreCarrera">{{ c.nombreCarrera }}</option>
+        </select>
+      </div>
+
+      <!-- Filtro Rol -->
+      <div class="filter-group">
+        <label class="filter-label">Rol del Usuario</label>
+        <select class="filter-select" [(ngModel)]="filtros.rol" (change)="aplicarFiltros()">
+          <option value="">Cualquier Rol</option>
+          <option *ngFor="let r of listas.roles" [value]="r">{{ r }}</option>
+        </select>
+      </div>
+
+      <!-- Filtro Módulo/Tabla -->
+      <div class="filter-group">
+        <label class="filter-label">Módulo/Tabla</label>
+        <select class="filter-select" [(ngModel)]="filtros.modulo" (change)="aplicarFiltros()">
+          <option value="">Todos los Módulos</option>
+          <option *ngFor="let m of listas.modulos" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+
+      <!-- Buscador por nombre -->
+      <div class="filter-group">
+        <label class="filter-label">Buscar Usuario</label>
+        <input type="text" class="filter-input" placeholder="Nombre completo..." [(ngModel)]="filtros.busqueda" (input)="aplicarFiltros()">
+      </div>
+    </div>
+  </section>
+
+  <!-- Table Card -->
+  <main class="table-card" style="position: relative; min-height: 400px;">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha y Hora</th>
+            <th>Usuario</th>
+            <th>Facultad / Carrera</th>
+            <th>Acción Realizada</th>
+            <th>Módulo</th>
+            <th>Detalles del Cambio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of filteredLogs">
+            <td style="white-space: nowrap;">
+              <strong>{{ log.fecha | date:'dd/MM/yyyy HH:mm' }}</strong>
+            </td>
+            <td>
+              <div style="display: flex; flex-direction: column;">
+                <strong>{{ log.usuario }}</strong>
+                <div class="roles-list" style="margin-top: 0.25rem;">
+                  <span class="role-tag" *ngFor="let r of log.roles.split(', ')">{{ r }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size: 0.75rem;">
+                <p><strong>F:</strong> {{ log.facultad }}</p>
+                <p><strong>C:</strong> {{ log.carrera }}</p>
+              </div>
+            </td>
+            <td>
+              <span style="font-weight: 500;">{{ log.accion }}</span>
+            </td>
+            <td>
+              <span class="module-badge">{{ log.modulo }}</span>
+            </td>
+            <td>
+              <div class="detail-text" [title]="log.detalle">
+                {{ log.detalle }}
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && filteredLogs.length === 0">
+        <i-lucide name="Search" class="empty-icon" size="48"></i-lucide>
+        <p style="font-size: 1.125rem; font-weight: 600; color: hsl(var(--muted-foreground));">
+          No se encontraron registros de auditoría
+        </p>
+        <p style="color: hsl(var(--muted-foreground)); margin-top: 0.5rem;">
+          Intenta ajustar los filtros de búsqueda.
+        </p>
+      </div>
+    </div>
+  </main>
+</div>

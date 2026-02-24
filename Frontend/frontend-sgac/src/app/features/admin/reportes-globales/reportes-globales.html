@@ -1,0 +1,235 @@
+<div class="report-container">
+  <!-- Header -->
+  <header class="report-header">
+    <h1 class="report-title">Centro de Reportes Globales</h1>
+    <div class="action-buttons">
+      <button class="btn-export btn-pdf" (click)="exportar('PDF')">
+        <i-lucide name="FileDown"></i-lucide>
+        Exportar PDF
+      </button>
+      <button class="btn-export btn-excel" (click)="exportar('EXCEL')">
+        <i-lucide name="Table"></i-lucide>
+        Exportar Excel
+      </button>
+    </div>
+  </header>
+
+  <!-- Filters Card -->
+  <section class="filter-card">
+    <div class="filter-grid">
+      <!-- Report Type Selector (Always visible) -->
+      <div class="filter-group">
+        <label class="filter-label">Tipo de Reporte</label>
+        <select class="filter-select" [(ngModel)]="tipoReporte" (change)="onTipoReporteChange()">
+          <option value="USUARIOS">Reporte de Usuarios</option>
+          <option value="PERSONAL">Reporte de Decanos y Coordinadores</option>
+          <option value="POSTULANTES">Reporte Global de Postulantes</option>
+          <option value="AYUDANTES">Reporte Global de Ayudantes</option>
+        </select>
+      </div>
+
+      <!-- Contextual Filters (Vista 1: Usuarios) -->
+      <ng-container *ngIf="tipoReporte === 'USUARIOS'">
+        <div class="filter-group">
+          <label class="filter-label">Rol de Usuario</label>
+          <select class="filter-select" [(ngModel)]="filtros.rol" (change)="aplicarFiltros()">
+            <option value="">Todos los Roles</option>
+            <option *ngFor="let r of listas.roles" [value]="r">{{ r }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select class="filter-select" [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option value="Activo">Activos</option>
+            <option value="Inactivo">Inactivos</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- Contextual Filters (Vista 2: Personal) -->
+      <ng-container *ngIf="tipoReporte === 'PERSONAL'">
+        <div class="filter-group">
+          <label class="filter-label">Facultad</label>
+          <select class="filter-select" [(ngModel)]="filtros.facultad" (change)="onFacultadChange()">
+            <option [value]="0">Todas las Facultades</option>
+            <option *ngFor="let f of listas.facultades" [value]="f.idFacultad">{{ f.nombreFacultad }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Carrera</label>
+          <select class="filter-select" [(ngModel)]="filtros.carrera" (change)="aplicarFiltros()">
+            <option [value]="0">Todas las Carreras</option>
+            <option *ngFor="let c of carrerasFiltradas" [value]="c.idCarrera">{{ c.nombreCarrera }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Tipo Personal</label>
+          <select class="filter-select" [(ngModel)]="filtros.tipoPersonal" (change)="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option value="Decano">Decanos</option>
+            <option value="Coordinador">Coordinadores</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- Contextual Filters (Vista 3: Postulantes) -->
+      <ng-container *ngIf="tipoReporte === 'POSTULANTES'">
+        <div class="filter-group">
+          <label class="filter-label">Asignatura</label>
+          <input type="text" class="filter-input" placeholder="Buscar asignatura..." [(ngModel)]="filtros.asignatura" (input)="aplicarFiltros()">
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Periodo Académico</label>
+          <select class="filter-select" [(ngModel)]="filtros.periodo" (change)="aplicarFiltros()">
+            <option value="">Todos los Periodos</option>
+            <option *ngFor="let p of listas.periodos" [value]="p.nombrePeriodo">{{ p.nombrePeriodo }}</option>
+          </select>
+        </div>
+      </ng-container>
+
+      <!-- Contextual Filters (Vista 4: Ayudantes) -->
+      <ng-container *ngIf="tipoReporte === 'AYUDANTES'">
+        <div class="filter-group">
+          <label class="filter-label">Facultad</label>
+          <select class="filter-select" [(ngModel)]="filtros.facultad" (change)="onFacultadChange()">
+            <option [value]="0">Todas las Facultades</option>
+            <option *ngFor="let f of listas.facultades" [value]="f.idFacultad">{{ f.nombreFacultad }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Estado</label>
+          <select class="filter-select" [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option value="ACTIVO">Activos</option>
+            <option value="FINALIZADO">Finalizados</option>
+          </select>
+        </div>
+      </ng-container>
+    </div>
+  </section>
+
+  <!-- Table Card -->
+  <main class="table-card" style="position: relative; min-height: 300px;">
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <div class="table-responsive">
+      <!-- Tabla Usuarios -->
+      <table *ngIf="tipoReporte === 'USUARIOS'">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th class="td-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filteredData">
+            <td><strong>{{ u.usuario }}</strong></td>
+            <td>{{ u.email }}</td>
+            <td>
+              <div class="roles-list">
+                <span class="role-tag" *ngFor="let r of u.roles?.split(', ') || []">{{ r }}</span>
+              </div>
+            </td>
+            <td class="td-center">
+              <span class="status-badge" [ngClass]="u.estado === 'Activo' ? 'status-active' : 'status-inactive'">
+                {{ u.estado }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Tabla Personal -->
+      <table *ngIf="tipoReporte === 'PERSONAL'">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cargo/Contexto</th>
+            <th class="td-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredData">
+            <td><strong>{{ p.nombre }}</strong></td>
+            <td>{{ p.cargoContexto }}</td>
+            <td class="td-center">
+              <span class="status-badge" [ngClass]="p.estado === 'Activo' ? 'status-active' : 'status-inactive'">
+                {{ p.estado }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Tabla Postulantes -->
+      <table *ngIf="tipoReporte === 'POSTULANTES'">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Cédula</th>
+            <th>Asignatura</th>
+            <th>Periodo</th>
+            <th class="td-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of filteredData">
+            <td><strong>{{ p.estudiante }}</strong></td>
+            <td>{{ p.cedula }}</td>
+            <td>{{ p.asignatura }}</td>
+            <td>{{ p.periodo }}</td>
+            <td class="td-center">
+              <span class="status-badge" 
+                [ngClass]="{
+                  'status-pending': p.estado === 'PENDIENTE',
+                  'status-process': p.estado?.includes('EN_'),
+                  'status-active': p.estado === 'APROBADO' || p.estado === 'SELECCIONADO',
+                  'status-inactive': p.estado === 'RECHAZADO' || p.estado === 'NO_SELECCIONADO'
+                }">
+                {{ p.estado }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Tabla Ayudantes -->
+      <table *ngIf="tipoReporte === 'AYUDANTES'">
+        <thead>
+          <tr>
+            <th>Estudiante</th>
+            <th>Asignatura</th>
+            <th>Docente</th>
+            <th class="td-right">Horas</th>
+            <th class="td-center">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of filteredData">
+            <td><strong>{{ a.estudiante }}</strong></td>
+            <td>{{ a.asignatura }}</td>
+            <td>{{ a.docente }}</td>
+            <td class="td-right"><strong>{{ (a.horas || 0) | number:'1.2-2' }}h</strong></td>
+            <td class="td-center">
+              <span class="status-badge" [ngClass]="a.estado === 'ACTIVO' ? 'status-active' : 'status-inactive'">
+                {{ a.estado }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!loading && filteredData.length === 0">
+        <i-lucide name="Search" class="empty-icon"></i-lucide>
+        <p>No hay datos que coincidan con los filtros seleccionados.</p>
+      </div>
+    </div>
+  </main>
+</div>

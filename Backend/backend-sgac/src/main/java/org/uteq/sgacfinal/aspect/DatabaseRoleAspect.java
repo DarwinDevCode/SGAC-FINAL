@@ -8,7 +8,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.Session;
 import org.springframework.stereotype.Component;
-import org.uteq.sgacfinal.config.UserContext;
+import org.uteq.sgacfinal.security.UserContext;
 
 import java.sql.Statement;
 
