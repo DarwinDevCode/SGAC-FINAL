@@ -110,7 +110,7 @@ import {
   Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
   Tag, LayoutGrid, Landmark, Square, FileSpreadsheet, Files, Globe, CloudUpload, FileCheck, FolderX, Image,
   File, HardDrive, CalendarCheck, ListOrdered, CloudCheck, Table2, AlignLeft, LoaderCircle, ClipboardX, UserCog,
-  Hourglass, UploadCloud, PieChart
+  Hourglass, UploadCloud, PieChart, FolderTree
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -239,7 +239,8 @@ export const appConfig: ApplicationConfig = {
         UserCog,
         Hourglass,
         UploadCloud,
-        PieChart
+        PieChart,
+        FolderTree
       })
     )
   ]
