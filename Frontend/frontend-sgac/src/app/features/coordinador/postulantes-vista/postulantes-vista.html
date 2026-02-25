@@ -1,64 +1,119 @@
 <div class="gestion-container">
-
-    <div class="section-header">
-        <div class="title-container">
-            <h2 class="title">Postulantes</h2>
-            <p class="subtitle">Convocatoria #{{ idConvocatoria }}</p>
-        </div>
-        <a routerLink="/coordinador/convocatorias" class="btn btn-ghost">
-            <lucide-icon name="arrow-left" size="16"></lucide-icon>
-            Volver
-        </a>
-    </div>
-
     @if (loading) {
-    <div class="info-message">
+    <div class="pv-empty">
         <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Cargando postulantes...</p>
+        <p style="margin-top:.75rem">Cargando detalles de la convocatoria...</p>
     </div>
     } @else if (errorMensaje) {
-    <div class="error-state">
-        <lucide-icon name="alert-circle" size="48"></lucide-icon>
-        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    <div class="pv-alert error">
+        <lucide-icon name="alert-circle" size="18"></lucide-icon>
+        <span>{{ errorMensaje }}</span>
+        <a routerLink="/coordinador/convocatorias" style="margin-left:auto;text-decoration:underline">Volver</a>
     </div>
     } @else {
 
-    <div class="table-card">
-        @if (postulantes.length === 0) {
-        <div class="info-message">
-            <lucide-icon name="inbox" size="40" style="opacity:.4"></lucide-icon>
-            <p style="margin-top:.75rem">No hay postulantes para esta convocatoria.</p>
+    <!-- Detalles de la Convocatoria Card -->
+    <div class="pv-details-card">
+        <div class="pv-header">
+            <h2 class="pv-title">Detalles de la Convocatoria</h2>
+            <a routerLink="/coordinador/convocatorias" class="pv-back-link">Volver a la lista &rarr;</a>
         </div>
-        } @else {
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Estudiante</th>
-                    <th>Matrícula</th>
-                    <th>Fecha Postulación</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (p of postulantes; track p.idPostulacion; let i = $index) {
-                <tr>
-                    <td style="color:#94a3b8;font-size:.8rem">{{ i + 1 }}</td>
-                    <td><span class="full-name">{{ p.nombreCompletoEstudiante }}</span></td>
-                    <td style="font-family:monospace;font-size:.85rem">{{ p.matriculaEstudiante }}</td>
-                    <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
-                    <td>
-                        <span [ngClass]="{
-              'aprobado': p.estadoPostulacion === 'APROBADO',
-              'rechazado': p.estadoPostulacion === 'RECHAZADO',
-              'pendiente': p.estadoPostulacion === 'PENDIENTE'
-            }" class="status-pill">{{ p.estadoPostulacion }}</span>
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
-        }
+
+        <div class="pv-grid">
+            <!-- Columna 1: Información Académica -->
+            <div class="pv-column">
+                <h3 class="pv-col-title">Información Académica</h3>
+                <div class="pv-col-body">
+                    <div class="pv-info">
+                        <label>Asignatura</label>
+                        <p>{{ convocatoria?.nombreAsignatura || '—' }}</p>
+                    </div>
+                    <div class="pv-info">
+                        <label>Periodo Académico</label>
+                        <p>{{ convocatoria?.nombrePeriodo || convocatoria?.idPeriodoAcademico || '—' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna 2: Estado del Concurso -->
+            <div class="pv-column">
+                <h3 class="pv-col-title">Estado del Concurso</h3>
+                <div class="pv-col-body">
+                    <div class="pv-info">
+                        <label>Estado</label>
+                        <div>
+                            <span class="pv-badge" [ngClass]="{
+                'open':   convocatoria?.estado === 'ABIERTA',
+                'eval':   convocatoria?.estado === 'EN_EVALUACION',
+                'done':   convocatoria?.estado === 'FINALIZADA' || convocatoria?.estado === 'RESUELTA' || convocatoria?.estado === 'CANCELADA',
+                'closed': convocatoria?.estado === 'CERRADA'
+              }">{{ convocatoria?.estado || '—' }}</span>
+                        </div>
+                    </div>
+                    <div class="pv-info">
+                        <label>Vacantes Disponibles</label>
+                        <p>{{ convocatoria?.cuposDisponibles || '—' }}</p>
+                    </div>
+                    <div class="pv-info-row">
+                        <div class="pv-info">
+                            <label>Fecha de Publicación</label>
+                            <p>{{ (formatFecha(convocatoria?.fechaPublicacion) | date:'yyyy-MM-dd') || '—' }}</p>
+                        </div>
+                        <div class="pv-info">
+                            <label>Fecha de Cierre</label>
+                            <p>{{ (formatFecha(convocatoria?.fechaCierre) | date:'yyyy-MM-dd') || '—' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Postulantes Inferior -->
+    <div style="margin-top: 3rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+        <h3
+            style="font-size: 1.15rem; font-weight: 700; color: #1e293b; margin-bottom: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: .5rem;">
+            Postulantes Inscritos
+        </h3>
+
+        <div class="table-card" style="box-shadow: 0 2px 10px rgba(0,0,0,.03); border: 1px solid #e5e7eb;">
+            @if (postulantes.length === 0) {
+            <div class="pv-empty" style="padding: 2.5rem 1rem">
+                <lucide-icon name="users" size="32" style="opacity:.3; margin:0 auto; display:block"></lucide-icon>
+                <p style="margin-top:.75rem">No hay estudiantes postulados todavía.</p>
+            </div>
+            } @else {
+            <table class="data-table">
+                <thead style="background: #f8fafc">
+                    <tr>
+                        <th style="font-weight:600; color:#475569">#</th>
+                        <th style="font-weight:600; color:#475569">Estudiante</th>
+                        <th style="font-weight:600; color:#475569">Matrícula</th>
+                        <th style="font-weight:600; color:#475569">Fecha</th>
+                        <th style="font-weight:600; color:#475569">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (p of postulantes; track p.idPostulacion; let i = $index) {
+                    <tr>
+                        <td style="color:#94a3b8; font-size:.8rem">{{ i + 1 }}</td>
+                        <td><span style="font-weight:600; color:#0f172a">{{ p.nombreCompletoEstudiante }}</span></td>
+                        <td style="font-family:monospace; font-size:.85rem; color:#64748b">{{ p.matriculaEstudiante }}
+                        </td>
+                        <td style="color:#475569">{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
+                        <td>
+                            <span class="pv-badge" [ngClass]="{
+                'green':  p.estadoPostulacion === 'APROBADO',
+                'red':    p.estadoPostulacion === 'RECHAZADO',
+                'yellow': p.estadoPostulacion === 'PENDIENTE' || p.estadoPostulacion === 'EVALUACION'
+              }">{{ p.estadoPostulacion }}</span>
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            }
+        </div>
     </div>
     }
 </div>

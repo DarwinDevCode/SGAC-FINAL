@@ -75,7 +75,7 @@
                 </div>
                 <div class="cv-detail-row">
                     <lucide-icon name="calendar" size="14"></lucide-icon>
-                    <span>Cierra: {{ formatFecha(c.fechaCierre) | date:'yyyy-MM-dd' }}</span>
+                    <span>Cierra: {{ (formatFecha(c.fechaCierre) | date:'yyyy-MM-dd') || '—' }}</span>
                 </div>
             </div>
 
