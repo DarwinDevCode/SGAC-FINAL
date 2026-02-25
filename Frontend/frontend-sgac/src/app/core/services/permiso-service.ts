@@ -5,6 +5,9 @@ import { environment } from '../../../environments/environment';
 import { PermisoRolDTO } from '../dto/permiso-rol-dto';
 import {GestionPermisosRequestDTO} from '../dto/gestion-permisos-request-dto';
 import {MensajeResponseDTO} from '../dto/mensaje-response-dto';
+import {ElementoBdDTO} from '../dto/elemento-bd-dto';
+import {TipoObjetoSeguridadDTO} from '../dto/tipo-objeto-seguridad-dto';
+import {PrivilegioDTO} from '../dto/privilegio-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +20,6 @@ export class PermisoService {
 
   consultarPermisos(filtros: PermisoRolDTO): Observable<PermisoRolDTO[]> {
     let params = new HttpParams();
-
     if (filtros.rolBd) params = params.set('rolBd', filtros.rolBd);
     if (filtros.esquema) params = params.set('esquema', filtros.esquema);
     if (filtros.categoria) params = params.set('categoria', filtros.categoria);
@@ -28,5 +30,24 @@ export class PermisoService {
 
   gestionarPermiso(request: GestionPermisosRequestDTO): Observable<MensajeResponseDTO> {
     return this.http.post<MensajeResponseDTO>(`${this.apiUrl}/gestionar`, request);
+  }
+
+  listarEsquemas(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/esquemas`);
+  }
+
+  listarTiposObjeto(): Observable<TipoObjetoSeguridadDTO[]> {
+    return this.http.get<TipoObjetoSeguridadDTO[]>(`${this.apiUrl}/tipos-objeto`);
+  }
+
+  listarElementos(esquema: string, tipoObjeto: string): Observable<string[]> {
+    const params = new HttpParams()
+      .set('esquema', esquema)
+      .set('tipoObjeto', tipoObjeto);
+    return this.http.get<string[]>(`${this.apiUrl}/elementos`, { params });
+  }
+
+  listarPrivilegios(idTipoObjeto: number): Observable<PrivilegioDTO[]> {
+    return this.http.get<PrivilegioDTO[]>(`${this.apiUrl}/privilegios/${idTipoObjeto}`);
   }
 }

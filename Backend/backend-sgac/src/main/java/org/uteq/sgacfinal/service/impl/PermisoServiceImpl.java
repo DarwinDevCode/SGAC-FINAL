@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.PermisoDTO;
 import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Response.PermisoRolResponseDTO;
+import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.repository.IPermisoRepository;
 import org.uteq.sgacfinal.service.IPermisoService;
 
@@ -64,4 +64,54 @@ public class PermisoServiceImpl implements IPermisoService {
                 request.getOtorgar()
         );
     }
+
+    @Override
+    public List<String> listarEsquemas() {
+        return permisoRepository.listarEsquemas();
+    }
+
+    @Override
+    public List<TipoObjetoResponseDTO> listarTiposObjeto() {
+        List<Object[]> rawData = permisoRepository.listarTiposObjetoSeguridad();
+        return rawData.stream()
+                .map(row -> new TipoObjetoResponseDTO(
+                        (Integer) row[0],
+                        (String) row[1]
+                ))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> listarElementos(String esquema, String tipoObjeto) {
+        return permisoRepository.listarElementosPorTipo(esquema, tipoObjeto.toUpperCase());
+    }
+
+    @Override
+    public List<PrivilegioResponseDTO> listarPrivilegios(Integer idTipoObjeto) {
+        List<Object[]> rawData = permisoRepository.listarPrivilegiosPorTipoObjeto(idTipoObjeto);
+        return rawData.stream()
+                .map(row -> new PrivilegioResponseDTO(
+                        (Integer) row[0],
+                        (String) row[1],
+                        (String) row[2]
+                ))
+                .collect(Collectors.toList());
+    }
+
+
+
+//    @Override
+//    @Transactional(readOnly = true)
+//    public List<ElementoBdResponseDTO> listarElementos(String esquema, String categoria) {
+//        List<String> nombres = permisoRepository.listarElementosPorFiltroRaw(esquema, categoria);
+//
+//        return nombres.stream()
+//                .map(nombre -> new ElementoBdResponseDTO(nombre))
+//                .collect(Collectors.toList());
+//    }
+
+//    @Override
+//    public List<EsquemaResponseDTO> listarEsquemas() {
+//        return permisoRepository.listarEsquemas();
+//    }
 }

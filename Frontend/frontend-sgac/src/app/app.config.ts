@@ -27,7 +27,7 @@ import {
   X,
   Shield,
   ShieldCheck,
-  Database
+  Database, Trash2, PlusCircle, Folder, ChevronRight, ChevronDown, Info, CheckCircle, AlertCircle
 } from 'lucide-angular';
 import {authInterceptor} from './core/interceptors/auth-interceptor';
 
@@ -62,7 +62,15 @@ export const appConfig: ApplicationConfig = {
         X,
         Shield,
         ShieldCheck,
-        Database
+        Database,
+        Trash2,
+        PlusCircle,
+        Folder,
+        ChevronRight,
+        ChevronDown,
+        Info,
+        CheckCircle,
+        AlertCircle
       })
     )
   ]
