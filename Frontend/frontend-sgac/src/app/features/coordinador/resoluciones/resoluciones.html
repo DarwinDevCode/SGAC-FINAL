@@ -1,0 +1,41 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Resoluciones y Actas</h2>
+            <p class="subtitle">Documentos oficiales de designación de ayudantes.</p>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>N° Resolución</th>
+                    <th>Descripción</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (r of resoluciones; track r.numero) {
+                <tr>
+                    <td><span class="id-pill" style="font-family:monospace">{{ r.numero }}</span></td>
+                    <td>{{ r.descripcion }}</td>
+                    <td style="color:hsl(var(--muted-foreground))">{{ r.fecha }}</td>
+                    <td>
+                        <span [ngClass]="r.estado === 'Firmada' ? 'firmada' : 'pendiente'" class="status-pill">
+                            {{ r.estado }}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-icon" title="Descargar PDF">
+                            <lucide-icon name="download" size="16"></lucide-icon>
+                        </button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

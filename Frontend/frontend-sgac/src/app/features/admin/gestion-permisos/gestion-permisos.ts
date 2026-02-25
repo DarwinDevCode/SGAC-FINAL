@@ -43,11 +43,11 @@ export class GestionPermisosComponent implements OnInit {
   cargarRoles(): void {
     this.loading = true;
     this.tipoRolService.obtenerRolesParaPermisos().subscribe({
-      next: (data) => {
+      next: (data: RolResumenDTO[]) => {
         this.rolesList = data;
         this.loading = false;
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al cargar la lista de roles', err);
         this.loading = false;
       }

@@ -1,0 +1,77 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Decanato</h2>
+            <p class="subtitle" *ngIf="decanoData">
+                {{ decanoData.nombreCompleto }} — {{ decanoData.nombreFacultad }}
+            </p>
+        </div>
+        <span class="badge amber">DECANO</span>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando panel...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state" style="padding:3rem 1rem">
+        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <!-- Stats -->
+    <div class="stats-grid cols-3">
+        <div class="stat-card">
+            <div class="stat-icon amber"><lucide-icon name="file-text" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ totalConvocatoriasActivas }}</div>
+                <div class="stat-label">Convocatorias Activas</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">—</div>
+                <div class="stat-label">Postulantes Evaluados</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><lucide-icon name="file-signature" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">—</div>
+                <div class="stat-label">Resoluciones Pendientes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <p class="subtitle"
+        style="font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
+        Acceso Rápido</p>
+    <div class="actions-grid cols-3">
+        <a routerLink="/decano/convocatorias" class="action-card amber">
+            <div class="action-icon amber"><lucide-icon name="file-text" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Convocatorias</div>
+                <div class="action-desc">Ver convocatorias activas</div>
+            </div>
+        </a>
+        <a routerLink="/decano/comisiones" class="action-card blue">
+            <div class="action-icon blue"><lucide-icon name="users" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Designar Comisiones</div>
+                <div class="action-desc">Asignar comisiones de selección</div>
+            </div>
+        </a>
+        <a routerLink="/decano/reportes" class="action-card green">
+            <div class="action-icon green"><lucide-icon name="bar-chart-3" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Auditoría y Reportes</div>
+                <div class="action-desc">Reportes del periodo académico</div>
+            </div>
+        </a>
+    </div>
+    }
+</div>

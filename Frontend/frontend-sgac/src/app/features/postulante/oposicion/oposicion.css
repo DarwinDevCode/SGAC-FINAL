@@ -1,0 +1,7 @@
+@import '../meritos/meritos.css';
+
+/* Sobreescritura específica para tarjetas de Oposición si fuera necesario */
+.total-score-box.flex-row {
+    flex-direction: row;
+    width: 100%;
+}

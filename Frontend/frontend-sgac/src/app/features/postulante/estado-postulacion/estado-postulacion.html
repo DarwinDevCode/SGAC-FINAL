@@ -1,0 +1,50 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Mis Postulaciones</h2>
+            <p class="subtitle">Estado de tus postulaciones a convocatorias de ayudantía.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando postulaciones...</p>
+    </div>
+    } @else if (postulaciones.length === 0) {
+    <div class="info-message" style="border:2px dashed hsl(var(--border));border-radius:var(--radius)">
+        <lucide-icon name="folder-open" size="40" style="opacity:.3"></lucide-icon>
+        <p style="margin-top:.75rem">Aún no tienes postulaciones registradas.</p>
+        <a routerLink="/postulante/convocatorias" class="btn btn-primary" style="margin-top:1rem">
+            Ver Convocatorias
+        </a>
+    </div>
+    } @else {
+    <div style="display:flex;flex-direction:column;gap:.75rem">
+        @for (p of postulaciones; track p.idPostulacion) {
+        <div
+            style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:var(--radius)">
+            <div style="display:flex;gap:1rem;align-items:flex-start">
+                <div class="stat-icon green" style="width:2.5rem;height:2.5rem;font-size:.9rem">
+                    <lucide-icon name="file-text" size="18"></lucide-icon>
+                </div>
+                <div>
+                    <p style="font-weight:600;font-size:.9rem;margin:0">{{ p.asignaturaConvocatoria }}</p>
+                    <p class="subtitle" style="margin:.2rem 0 0 0">Postulación #{{ p.idPostulacion }} · {{
+                        p.fechaPostulacion | date:'dd/MM/yyyy' }}</p>
+                    @if (p.observaciones) {
+                    <p class="subtitle" style="margin:.15rem 0 0 0;font-style:italic">"{{ p.observaciones }}"</p>
+                    }
+                </div>
+            </div>
+            <span [ngClass]="{
+        'aprobado': p.estadoPostulacion === 'APROBADO',
+        'rechazado': p.estadoPostulacion === 'RECHAZADO',
+        'pendiente': p.estadoPostulacion === 'PENDIENTE',
+        'info': p.estadoPostulacion === 'EN_EVALUACION'
+      }" class="status-pill">{{ p.estadoPostulacion }}</span>
+        </div>
+        }
+    </div>
+    }
+</div>

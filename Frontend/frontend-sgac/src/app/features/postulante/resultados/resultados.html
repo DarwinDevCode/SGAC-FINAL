@@ -1,0 +1,72 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Resultados de Evaluación</h2>
+            <p class="subtitle">Consulta los puntajes y la resolución final de tus postulaciones.</p>
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Convocatoria</th>
+                    <th>Desglose de Calificación</th>
+                    <th>Puntaje Total</th>
+                    <th>Resultado Final</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (loading) {
+                <tr>
+                    <td colspan="4">Calculando resultados...</td>
+                </tr>
+                } @else {
+                @for (postulacion of postulaciones; track postulacion.idPostulacion) {
+                <tr>
+                    <td>
+                        <div class="conv-info">
+                            <div class="conv-title">{{ postulacion.asignaturaConvocatoria || 'Convocatoria #' +
+                                postulacion.idConvocatoria }}</div>
+                            <div class="user-email text-xs">ID Postulación: {{ postulacion.idPostulacion }}</div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="actions-links">
+                            <a [routerLink]="['/postulante/meritos', postulacion.idPostulacion]" class="link-action">
+                                <lucide-icon name="award" size="14"></lucide-icon> Ver Méritos
+                            </a>
+                            <a [routerLink]="['/postulante/oposicion', postulacion.idPostulacion]" class="link-action">
+                                <lucide-icon name="presentation" size="14"></lucide-icon> Ver Oposición
+                            </a>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="score-display">
+                            <span class="pending-text text-sm italic text-gray-400">Ver detalles</span>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="status-pill"
+                            [class.active]="postulacion.estadoPostulacion === 'APROBADO' || postulacion.estadoPostulacion === 'ACEPTADO'"
+                            [class.inactive]="postulacion.estadoPostulacion === 'RECHAZADO' || postulacion.estadoPostulacion === 'ANULADO'"
+                            [class.pending]="postulacion.estadoPostulacion === 'PENDIENTE' || postulacion.estadoPostulacion === 'EN_REVISION' || !postulacion.estadoPostulacion">
+                            {{ postulacion.estadoPostulacion || 'Pendiente' }}
+                        </span>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="4" class="empty-state">
+                        No hay resultados disponibles en este momento.
+                    </td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

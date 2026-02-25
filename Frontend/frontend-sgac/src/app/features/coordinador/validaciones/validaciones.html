@@ -1,0 +1,64 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Validar Postulantes</h2>
+            <p class="subtitle">Postulaciones en estado pendiente de revisión.</p>
+        </div>
+    </div>
+
+    @if (successMensaje) {
+    <div class="alert-banner success">
+        <lucide-icon name="check-circle" size="18"></lucide-icon>
+        {{ successMensaje }}
+    </div>
+    }
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando postulaciones...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="alert-circle" size="48"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <div class="table-card">
+        @if (postulantes.length === 0) {
+        <div class="info-message">
+            <lucide-icon name="check-circle" size="40" style="color:hsl(var(--primary));opacity:.6"></lucide-icon>
+            <p style="margin-top:.75rem">No hay postulantes pendientes de validación.</p>
+        </div>
+        } @else {
+        <div class="alert-banner warning" style="margin:1rem 1rem 0 1rem;border-radius:var(--radius)">
+            <lucide-icon name="clock" size="16"></lucide-icon>
+            {{ postulantes.length }} postulación(es) pendiente(s) de revisión
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Matrícula</th>
+                    <th>Convocatoria</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of postulantes; track p.idPostulacion) {
+                <tr>
+                    <td><span class="full-name">{{ p.nombreCompletoEstudiante }}</span></td>
+                    <td style="font-family:monospace;font-size:.85rem">{{ p.matriculaEstudiante }}</td>
+                    <td>{{ p.asignaturaConvocatoria }}</td>
+                    <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
+                    <td><span class="status-pill pendiente">{{ p.estadoPostulacion }}</span></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+    }
+</div>

@@ -1,0 +1,46 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Notificaciones</h2>
+            <p class="subtitle">Alertas y avisos del sistema SGAC.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando notificaciones...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state" style="padding:3rem 1rem">
+        <lucide-icon name="bell-off" size="48" style="opacity:.3"></lucide-icon>
+        <p style="margin-top:.75rem">{{ errorMensaje }}</p>
+    </div>
+    } @else if (notificaciones.length === 0) {
+    <div class="info-message" style="border:2px dashed hsl(var(--border));border-radius:var(--radius)">
+        <lucide-icon name="bell" size="40" style="opacity:.3"></lucide-icon>
+        <p style="margin-top:.75rem">No tienes notificaciones nuevas.</p>
+    </div>
+    } @else {
+    <div style="display:flex;flex-direction:column;gap:.625rem">
+        @for (n of notificaciones; track n.idNotificacion) {
+        <div [class]="n.leida ? 'notif-item' : 'notif-item unread'">
+            <div [class]="n.leida ? 'notif-dot' : 'notif-dot unread'">
+                <lucide-icon name="bell" size="16"></lucide-icon>
+            </div>
+            <div style="flex:1;min-width:0">
+                <p style="font-size:.875rem;margin:0" [style.fontWeight]="n.leida ? '400' : '600'">{{ n.mensaje }}</p>
+                <p class="subtitle" style="margin:.25rem 0 0 0;font-size:.75rem">{{ n.fechaEnvio | date:'dd/MM/yyyy
+                    HH:mm' }}</p>
+            </div>
+            @if (!n.leida) {
+            <button (click)="marcarLeida(n.idNotificacion)" class="btn btn-secondary"
+                style="font-size:.75rem;padding:.35rem .75rem">
+                Marcar leída
+            </button>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>

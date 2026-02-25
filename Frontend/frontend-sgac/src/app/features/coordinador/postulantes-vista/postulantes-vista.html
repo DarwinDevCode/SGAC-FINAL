@@ -1,0 +1,64 @@
+<div class="gestion-container">
+
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Postulantes</h2>
+            <p class="subtitle">Convocatoria #{{ idConvocatoria }}</p>
+        </div>
+        <a routerLink="/coordinador/convocatorias" class="btn btn-ghost">
+            <lucide-icon name="arrow-left" size="16"></lucide-icon>
+            Volver
+        </a>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando postulantes...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="alert-circle" size="48"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <div class="table-card">
+        @if (postulantes.length === 0) {
+        <div class="info-message">
+            <lucide-icon name="inbox" size="40" style="opacity:.4"></lucide-icon>
+            <p style="margin-top:.75rem">No hay postulantes para esta convocatoria.</p>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Estudiante</th>
+                    <th>Matrícula</th>
+                    <th>Fecha Postulación</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of postulantes; track p.idPostulacion; let i = $index) {
+                <tr>
+                    <td style="color:#94a3b8;font-size:.8rem">{{ i + 1 }}</td>
+                    <td><span class="full-name">{{ p.nombreCompletoEstudiante }}</span></td>
+                    <td style="font-family:monospace;font-size:.85rem">{{ p.matriculaEstudiante }}</td>
+                    <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                        <span [ngClass]="{
+              'aprobado': p.estadoPostulacion === 'APROBADO',
+              'rechazado': p.estadoPostulacion === 'RECHAZADO',
+              'pendiente': p.estadoPostulacion === 'PENDIENTE'
+            }" class="status-pill">{{ p.estadoPostulacion }}</span>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+    }
+</div>

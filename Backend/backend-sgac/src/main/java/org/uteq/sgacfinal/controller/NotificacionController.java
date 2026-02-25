@@ -9,7 +9,7 @@ import org.uteq.sgacfinal.service.INotificacionService;
 @RestController
 @RequestMapping("/api/notificaciones")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:4200")
 public class NotificacionController {
 
     private final INotificacionService notificacionService;

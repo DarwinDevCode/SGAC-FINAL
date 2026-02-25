@@ -1,0 +1,85 @@
+<div class="gestion-container">
+
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Gestión de Carrera</h2>
+            <p class="subtitle" *ngIf="coordinadorData">
+                {{ coordinadorData.nombreCompletoUsuario }} — {{ coordinadorData.nombreCarrera }}
+            </p>
+        </div>
+        <span class="badge green">COORDINADOR</span>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando panel...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="alert-circle" size="48"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <!-- Stats -->
+    <div class="stats-grid cols-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><lucide-icon name="file-text" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ totalConvocatoriasCarrera }}</div>
+                <div class="stat-label">Convocatorias Activas</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">—</div>
+                <div class="stat-label">Postulantes Pendientes</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon violet"><lucide-icon name="graduation-cap" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">—</div>
+                <div class="stat-label">Ayudantes Activos</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <p class="subtitle"
+        style="font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
+        Acceso Rápido</p>
+    <div class="actions-grid cols-4">
+        <a routerLink="/coordinador/convocatorias" class="action-card green">
+            <div class="action-icon green"><lucide-icon name="file-text" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Convocatorias</div>
+                <div class="action-desc">Ver y gestionar convocatorias</div>
+            </div>
+        </a>
+        <a routerLink="/coordinador/validaciones" class="action-card blue">
+            <div class="action-icon blue"><lucide-icon name="check-square" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Validar Postulantes</div>
+                <div class="action-desc">Revisar postulaciones</div>
+            </div>
+        </a>
+        <a routerLink="/coordinador/seguimiento" class="action-card violet">
+            <div class="action-icon violet"><lucide-icon name="bar-chart-3" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Seguimiento</div>
+                <div class="action-desc">Monitoreo mensual</div>
+            </div>
+        </a>
+        <a routerLink="/coordinador/resoluciones" class="action-card amber">
+            <div class="action-icon amber"><lucide-icon name="file-signature" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Resoluciones</div>
+                <div class="action-desc">Actas y documentos</div>
+            </div>
+        </a>
+    </div>
+    }
+</div>

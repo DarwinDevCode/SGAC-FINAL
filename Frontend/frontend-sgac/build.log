@@ -1,0 +1,246 @@
+
+> frontend-sgac@0.0.0 build
+> ng build
+
+[33m❯[39m Building...
+[32m✔[39m Building...
+Application bundle generation failed. [4.041 seconds] - 2026-02-25T02:49:27.444Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../dto/postulacion"' has no exported member 'TipoRequisitoPostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/postulante-service.ts:5:9:
+[37m      5 │ import { [32mTipoRequisitoPostulacionResponseDTO[37m, PostulacionResponseDT...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../dto/postulacion"' has no exported member 'PostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/postulante-service.ts:5:46:
+[37m      5 │ ...tulacionResponseDTO, [32mPostulacionResponseDTO[37m } from '../dto/postu...
+        ╵                         [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../dto/notificacion"' has no exported member 'NotificacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/services/postulante-service.ts:7:9:
+[37m      7 │ import { [32mNotificacionResponseDTO[37m } from '../dto/notificacion';
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'obtenerCoordinadorPorUsuario' does not exist on type 'CoordinadorService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/convocatorias-vista/convocatorias-vista.component.ts:45:36:
+[37m      45 │ ...oordinadorService.[32mobtenerCoordinadorPorUsuario[37m(user.idUsuario)....
+         ╵                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'coord' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/convocatorias-vista/convocatorias-vista.component.ts:46:23:
+[37m      46 │                 next: ([32mcoord[37m) => {
+         ╵                        [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'listarConvocatoriasPorCarrera' does not exist on type 'CoordinadorService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/convocatorias-vista/convocatorias-vista.component.ts:48:48:
+[37m      48 │ ...ordinadorService.[32mlistarConvocatoriasPorCarrera[37m(coord.idCarrera)...
+         ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'lista' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/convocatorias-vista/convocatorias-vista.component.ts:49:35:
+[37m      49 │                             next: ([32mlista[37m) => {
+         ╵                                    [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/coordinador"' has no exported member 'CoordinadorResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/dashboard/dashboard.component.ts:8:9:
+[37m      8 │ import { [32mCoordinadorResponseDTO[37m } from '../../../core/dto/coordinad...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'obtenerCoordinadorPorUsuario' does not exist on type 'CoordinadorService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/dashboard/dashboard.component.ts:47:30:
+[37m      47 │ ...oordinadorService.[32mobtenerCoordinadorPorUsuario[37m(user.idUsuario)....
+         ╵                      [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'coord' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/dashboard/dashboard.component.ts:48:15:
+[37m      48 │         next: ([32mcoord[37m) => {
+         ╵                [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'listarConvocatoriasPorCarrera' does not exist on type 'CoordinadorService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/dashboard/dashboard.component.ts:52:36:
+[37m      52 │ ...ordinadorService.[32mlistarConvocatoriasPorCarrera[37m(coord.idCarrera)...
+         ╵                     [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'convocatorias' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/dashboard/dashboard.component.ts:53:21:
+[37m      53 │               next: ([32mconvocatorias[37m) => {
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'err' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/dashboard/dashboard.component.ts:65:16:
+[37m      65 │         error: ([32merr[37m) => {
+         ╵                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/postulacion"' has no exported member 'PostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/postulantes-vista/postulantes-vista.component.ts:7:9:
+[37m      7 │ import { [32mPostulacionResponseDTO[37m } from '../../../core/dto/postulaci...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'listarPostulacionesPorConvocatoria' does not exist on type 'CoordinadorService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/postulantes-vista/postulantes-vista.component.ts:48:36:
+[37m      48 │ ...rdinadorService.[32mlistarPostulacionesPorConvocatoria[37m(id).subscribe({
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'lista' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/coordinador/postulantes-vista/postulantes-vista.component.ts:49:23:
+[37m      49 │                 next: ([32mlista[37m) => {
+         ╵                        [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'obtenerDecanoPorUsuario' does not exist on type 'DecanoService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/convocatorias-vista/convocatorias-vista.component.ts:45:31:
+[37m      45 │ ... this.decanoService.[32mobtenerDecanoPorUsuario[37m(user.idUsuario).sub...
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'decano' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/convocatorias-vista/convocatorias-vista.component.ts:46:23:
+[37m      46 │                 next: ([32mdecano[37m) => {
+         ╵                        [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'listarConvocatoriasActivas' does not exist on type 'DecanoService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/convocatorias-vista/convocatorias-vista.component.ts:48:43:
+[37m      48 │ ...       this.decanoService.[32mlistarConvocatoriasActivas[37m().subscribe({
+         ╵                              [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'lista' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/convocatorias-vista/convocatorias-vista.component.ts:49:35:
+[37m      49 │                             next: ([32mlista[37m) => {
+         ╵                                    [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/decano"' has no exported member 'DecanoResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/dashboard/dashboard.component.ts:8:9:
+[37m      8 │ import { [32mDecanoResponseDTO[37m } from '../../../core/dto/decano';
+        ╵          [32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'obtenerDecanoPorUsuario' does not exist on type 'DecanoService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/dashboard/dashboard.component.ts:48:25:
+[37m      48 │ ... this.decanoService.[32mobtenerDecanoPorUsuario[37m(user.idUsuario).sub...
+         ╵                        [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'decano' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/dashboard/dashboard.component.ts:49:15:
+[37m      49 │         next: ([32mdecano[37m) => {
+         ╵                [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'listarConvocatoriasActivas' does not exist on type 'DecanoService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/dashboard/dashboard.component.ts:54:31:
+[37m      54 │ ...       this.decanoService.[32mlistarConvocatoriasActivas[37m().subscribe({
+         ╵                              [32m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'convocatorias' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/dashboard/dashboard.component.ts:55:21:
+[37m      55 │               next: ([32mconvocatorias[37m) => {
+         ╵                      [32m~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'err' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/dashboard/dashboard.component.ts:63:16:
+[37m      63 │         error: ([32merr[37m) => {
+         ╵                 [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/postulacion"' has no exported member 'PostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/postulantes-vista/postulantes-vista.component.ts:7:9:
+[37m      7 │ import { [32mPostulacionResponseDTO[37m } from '../../../core/dto/postulaci...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'listarPostulacionesPorConvocatoria' does not exist on type 'DecanoService'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/postulantes-vista/postulantes-vista.component.ts:48:31:
+[37m      48 │ ...s.decanoService.[32mlistarPostulacionesPorConvocatoria[37m(id).subscribe({
+         ╵                    [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'lista' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/postulantes-vista/postulantes-vista.component.ts:49:23:
+[37m      49 │                 next: ([32mlista[37m) => {
+         ╵                        [32m~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS7006: Parameter 'err' implicitly has an 'any' type.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/decano/postulantes-vista/postulantes-vista.component.ts:53:24:
+[37m      53 │                 error: ([32merr[37m) => {
+         ╵                         [32m~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/postulacion"' has no exported member 'TipoRequisitoPostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/postulante/convocatorias/convocatorias.component.ts:9:9:
+[37m      9 │ import { [32mTipoRequisitoPostulacionResponseDTO[37m } from '../../../core/...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/postulacion"' has no exported member 'PostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/postulante/estado-postulacion/estado-postulacion.component.ts:7:9:
+[37m      7 │ import { [32mPostulacionResponseDTO[37m } from '../../../core/dto/postulaci...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/notificacion"' has no exported member 'NotificacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/postulante/notificaciones/notificaciones.component.ts:7:9:
+[37m      7 │ import { [32mNotificacionResponseDTO[37m } from '../../../core/dto/notifica...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2305: Module '"../../../core/dto/postulacion"' has no exported member 'PostulacionResponseDTO'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/postulante/resultados/resultados.component.ts:8:9:
+[37m      8 │ import { [32mPostulacionResponseDTO[37m } from '../../../core/dto/postulaci...
+        ╵          [32m~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

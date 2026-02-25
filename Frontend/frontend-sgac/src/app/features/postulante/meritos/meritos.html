@@ -1,0 +1,83 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <div class="flex-title">
+                <a routerLink="/postulante/resultados" class="back-link">
+                    <lucide-icon name="arrow-left" size="20"></lucide-icon>
+                </a>
+                <h2 class="title">Detalle de Méritos</h2>
+            </div>
+            <p class="subtitle mt-2">Revisa el desglose de tu calificación en la evaluación de carpeta.</p>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        @if (loading) {
+        <div class="info-message">Cargando detalles de evaluación...</div>
+        } @else if (errorMensaje) {
+        <div class="error-state">
+            <lucide-icon name="alert-circle" size="48" class="error-icon"></lucide-icon>
+            <h3>No disponible</h3>
+            <p>{{ errorMensaje }}</p>
+            <a routerLink="/postulante/resultados" class="btn-primary mt-4 inline-flex">Volver a Resultados</a>
+        </div>
+        } @else if (evaluacion) {
+
+        <div class="score-summary-card">
+            <div class="total-score-box">
+                <span class="total-label">Puntaje Total Méritos</span>
+                <div class="total-value">
+                    <span class="number">{{ getTotal() | number:'1.2-2' }}</span><span class="max">/ 100</span>
+                </div>
+                <span class="fecha-eval">Evaluado el: {{ evaluacion.fechaEvaluacion }}</span>
+            </div>
+        </div>
+
+        <div class="table-card mt-6">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Criterio Evaluado</th>
+                        <th class="text-right">Puntaje Asignado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="criterio-title"><lucide-icon name="book-open" size="16"></lucide-icon> Nota de
+                                la Asignatura</div>
+                            <div class="criterio-desc">Rendimiento académico en la materia específica.</div>
+                        </td>
+                        <td class="text-right font-semibold">{{ evaluacion.notaAsignatura | number:'1.2-2' }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterio-title"><lucide-icon name="layers" size="16"></lucide-icon> Semestres
+                                Aprobados</div>
+                            <div class="criterio-desc">Nivel de avance en la carrera.</div>
+                        </td>
+                        <td class="text-right font-semibold">{{ evaluacion.notaSemestres | number:'1.2-2' }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterio-title"><lucide-icon name="award" size="16"></lucide-icon> Eventos /
+                                Seminarios</div>
+                            <div class="criterio-desc">Participación en eventos académicos certificados.</div>
+                        </td>
+                        <td class="text-right font-semibold">{{ evaluacion.notaEventos | number:'1.2-2' }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterio-title"><lucide-icon name="briefcase" size="16"></lucide-icon>
+                                Experiencia Previa</div>
+                            <div class="criterio-desc">Experiencia como ayudante o afines.</div>
+                        </td>
+                        <td class="text-right font-semibold">{{ evaluacion.notaExperiencia | number:'1.2-2' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        }
+    </div>
+</div>

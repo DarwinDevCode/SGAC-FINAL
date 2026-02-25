@@ -1,0 +1,74 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <div class="flex-title">
+                <a routerLink="/postulante/resultados" class="back-link">
+                    <lucide-icon name="arrow-left" size="20"></lucide-icon>
+                </a>
+                <h2 class="title">Detalle de Prueba de Oposición</h2>
+            </div>
+            <p class="subtitle mt-2">Revisa la información sobre tu evaluación práctica o teórica.</p>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        @if (loading) {
+        <div class="info-message">Buscando registro de evaluación...</div>
+        } @else if (errorMensaje) {
+        <div class="error-state">
+            <lucide-icon name="alert-triangle" size="48" class="error-icon text-yellow-500"></lucide-icon>
+            <h3 class="text-yellow-700">Pendiente</h3>
+            <p class="text-yellow-600">{{ errorMensaje }}</p>
+            <a routerLink="/postulante/resultados" class="btn-primary mt-4 inline-flex">Volver a Resultados</a>
+        </div>
+        } @else if (evaluacion) {
+
+        <div class="score-summary-card">
+            <div class="total-score-box w-full max-w-2xl text-left flex-row justify-between items-center">
+                <div>
+                    <span class="total-label block mb-1">Estado de Oposición</span>
+                    <span class="status-pill text-sm" [class.active]="evaluacion.estado === 'APROBADO'"
+                        [class.inactive]="evaluacion.estado === 'RECHAZADO'"
+                        [class.pending]="evaluacion.estado !== 'APROBADO' && evaluacion.estado !== 'RECHAZADO'">
+                        {{ evaluacion.estado }}
+                    </span>
+                </div>
+                <div class="text-right">
+                    <span class="fecha-eval block text-sm">Fecha: <strong class="text-slate-800">{{
+                            evaluacion.fechaEvaluacion }}</strong></span>
+                    <span class="fecha-eval block text-sm">Horario: <strong class="text-slate-800">{{
+                            evaluacion.horaInicio }} - {{ evaluacion.horaFin }}</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card mt-6">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Detalle</th>
+                        <th>Información</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="w-1/3">
+                            <div class="criterio-title"><lucide-icon name="book-open" size="16"></lucide-icon> Tema de
+                                Exposición</div>
+                        </td>
+                        <td class="font-medium text-slate-700">{{ evaluacion.temaExposicion || 'No especificado' }}</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="criterio-title"><lucide-icon name="map-pin" size="16"></lucide-icon> Lugar
+                                sugerido</div>
+                        </td>
+                        <td class="font-medium text-slate-700">{{ evaluacion.lugar || 'No especificado' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        }
+    </div>
+</div>

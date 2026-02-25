@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/postulaciones")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PostulacionController {
     private final IPostulacionService postulacionService;
     private final ITipoRequisitoPostulacionService requisitoService;

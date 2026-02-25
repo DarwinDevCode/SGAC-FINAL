@@ -1,0 +1,74 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Convocatorias de Carrera</h2>
+            <p class="subtitle">Convocatorias activas asignadas a tu carrera.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando convocatorias...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="info-message">
+        <lucide-icon name="alert-circle" size="48" style="color:#dc2626;margin:0 auto;display:block"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600;color:#dc2626">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <div class="conv-grid">
+        @for (conv of convocatorias; track conv.idConvocatoria) {
+        <div class="conv-card">
+
+            <div class="conv-card-body">
+                <div class="conv-card-meta">
+                    <span class="id-pill">#{{ conv.idConvocatoria }}</span>
+                    @if (conv.activo) {
+                    <span class="badge green">Activa</span>
+                    } @else {
+                    <span class="badge red">Inactiva</span>
+                    }
+                </div>
+
+                <h3 class="conv-title">{{ conv.nombreAsignatura }}</h3>
+
+                <div>
+                    <div class="conv-detail-row">
+                        <span class="conv-detail-label">Periodo</span>
+                        <span class="conv-detail-value">{{ conv.nombrePeriodo || '—' }}</span>
+                    </div>
+                    <div class="conv-detail-row">
+                        <span class="conv-detail-label">Cupos</span>
+                        <span class="conv-detail-value">{{ conv.cuposDisponibles ?? '—' }}</span>
+                    </div>
+                    @if (conv.estado) {
+                    <div class="conv-detail-row" style="border-bottom:none">
+                        <span class="conv-detail-label">Estado</span>
+                        <span [ngClass]="{
+              'aprobado': conv.estado === 'ABIERTA',
+              'pendiente': conv.estado === 'CERRADA',
+              'info': conv.estado === 'EN_EVALUACION'
+            }" class="status-pill">{{ conv.estado }}</span>
+                    </div>
+                    }
+                </div>
+            </div>
+
+            <div class="conv-card-footer">
+                <a [routerLink]="['/coordinador/postulantes', conv.idConvocatoria]" class="btn-primary">
+                    <lucide-icon name="users" size="16"></lucide-icon>
+                    Ver Postulantes
+                </a>
+            </div>
+        </div>
+        } @empty {
+        <div class="info-message" style="grid-column:1/-1;border:2px dashed #e2e8f0;border-radius:.75rem">
+            <lucide-icon name="inbox" size="40" style="display:block;margin:0 auto;opacity:.3"></lucide-icon>
+            <p style="margin-top:.75rem">No se encontraron convocatorias para esta carrera.</p>
+        </div>
+        }
+    </div>
+    }
+</div>
