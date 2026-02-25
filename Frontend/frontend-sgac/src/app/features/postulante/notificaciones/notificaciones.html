@@ -12,33 +12,45 @@
         <p style="margin-top:.75rem">Cargando notificaciones...</p>
     </div>
     } @else if (errorMensaje) {
-    <div class="error-state" style="padding:3rem 1rem">
-        <lucide-icon name="bell-off" size="48" style="opacity:.3"></lucide-icon>
-        <p style="margin-top:.75rem">{{ errorMensaje }}</p>
+    <div class="error-state">
+        <lucide-icon name="bell-off" size="48" class="text-slate-300 mx-auto"></lucide-icon>
+        <p class="mt-4 font-medium text-slate-600">{{ errorMensaje }}</p>
     </div>
     } @else if (notificaciones.length === 0) {
-    <div class="info-message" style="border:2px dashed hsl(var(--border));border-radius:var(--radius)">
-        <lucide-icon name="bell" size="40" style="opacity:.3"></lucide-icon>
-        <p style="margin-top:.75rem">No tienes notificaciones nuevas.</p>
+    <div class="empty-state">
+        <lucide-icon name="bell" size="48" class="text-slate-300 mx-auto"></lucide-icon>
+        <p class="mt-4 font-medium text-slate-600">No tienes notificaciones nuevas.</p>
+        <p class="text-sm text-slate-500 mt-1">Cuando haya actualizaciones en tus postulaciones aparecerán aquí.</p>
     </div>
     } @else {
-    <div style="display:flex;flex-direction:column;gap:.625rem">
+    <div class="notifications-list">
         @for (n of notificaciones; track n.idNotificacion) {
-        <div [class]="n.leida ? 'notif-item' : 'notif-item unread'">
-            <div [class]="n.leida ? 'notif-dot' : 'notif-dot unread'">
-                <lucide-icon name="bell" size="16"></lucide-icon>
+        <div class="notif-card" [class.unread]="!n.leida">
+            <div class="notif-icon-wrapper" [class.unread-icon]="!n.leida">
+                <lucide-icon name="bell" size="20"></lucide-icon>
             </div>
-            <div style="flex:1;min-width:0">
-                <p style="font-size:.875rem;margin:0" [style.fontWeight]="n.leida ? '400' : '600'">{{ n.mensaje }}</p>
-                <p class="subtitle" style="margin:.25rem 0 0 0;font-size:.75rem">{{ n.fechaEnvio | date:'dd/MM/yyyy
-                    HH:mm' }}</p>
+
+            <div class="notif-content">
+                <p class="notif-message">{{ n.mensaje }}</p>
+                <p class="notif-date">
+                    <lucide-icon name="calendar" size="12" class="inline-mr"></lucide-icon>
+                    {{ n.fechaEnvio | date:'dd/MM/yyyy • HH:mm' }}
+                </p>
             </div>
-            @if (!n.leida) {
-            <button (click)="marcarLeida(n.idNotificacion)" class="btn btn-secondary"
-                style="font-size:.75rem;padding:.35rem .75rem">
-                Marcar leída
-            </button>
-            }
+
+            <div class="notif-actions">
+                @if (!n.leida) {
+                <button (click)="marcarLeida(n.idNotificacion)" class="btn-mark-read" title="Marcar como leída">
+                    <lucide-icon name="check" size="16" class="inline-mr"></lucide-icon>
+                    Leída
+                </button>
+                } @else {
+                <span class="status-read">
+                    <lucide-icon name="check-check" size="16" class="inline-mr"></lucide-icon>
+                    Leída
+                </span>
+                }
+            </div>
         </div>
         }
     </div>

@@ -20,52 +20,39 @@
     margin-top: 0.25rem;
 }
 
-/* Tabla */
-.table-card {
-    background: white;
-    border-radius: var(--radius);
+/* Postulación Card Styling */
+.postulacion-card {
+    background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
-    overflow: hidden;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
+.postulacion-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
 }
 
-.data-table th {
-    background: hsl(var(--muted) / 0.3);
-    padding: 1rem;
-    text-align: left;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: hsl(var(--muted-foreground));
-    border-bottom: 1px solid hsl(var(--border));
-}
-
-.data-table td {
-    padding: 1rem;
-    border-bottom: 1px solid hsl(var(--border));
-    vertical-align: middle;
-}
-
-.conv-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #1e293b;
-}
-
-.user-email {
-    font-size: 0.8rem;
-    color: hsl(var(--muted-foreground));
-}
-
-.fecha-item {
+.card-header {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
+    justify-content: space-between;
+}
+
+.observations {
+    margin: 0.5rem 0 0 0;
+    font-style: italic;
     color: #64748b;
+    font-size: 0.85rem;
+    background: #f8fafc;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    border-left: 3px solid #cbd5e1;
 }
 
 .status-pill {
@@ -77,36 +64,166 @@
     text-align: center;
 }
 
+.status-pill.big {
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+}
+
 /* Aprobado */
-.status-pill.active {
+.status-pill.aprobado, .status-pill.active {
     background: #dcfce7;
     color: #15803d;
 }
 
 /* Rechazado */
-.status-pill.inactive {
+.status-pill.rechazado, .status-pill.inactive {
     background: #fee2e2;
     color: #b91c1c;
 }
 
-/* Pendiente / En Revisión */
-.status-pill.pending {
+/* Pendiente */
+.status-pill.pendiente, .status-pill.pending {
     background: #fef08a;
     color: #854d0e;
 }
 
-.observaciones-text {
-    font-size: 0.85rem;
-    color: #475569;
-    margin: 0;
-    max-width: 300px;
-    line-height: 1.4;
+/* En Evaluación / Info */
+.status-pill.info {
+    background: #e0f2fe;
+    color: #0369a1;
 }
 
-.empty-state {
-    text-align: center;
-    color: #94a3b8;
-    padding: 3rem;
-    font-style: italic;
-    font-size: 0.9rem;
+/* Stepper Component */
+.stepper-container {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 1rem 0;
+    background: #f8fafc;
+    border-radius: 0.5rem;
+    border: 1px dashed hsl(var(--border));
+}
+
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0 2rem;
+    margin: 0;
+}
+
+.stepper li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.stepper li .step-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border: 3px solid white;
+    box-shadow: 0 0 0 1px #cbd5e1;
+    transition: all 0.3s ease;
+}
+
+.stepper li .step-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.3s ease;
+}
+
+.stepper-line {
+    flex: 1;
+    height: 3px;
+    background: #e2e8f0;
+    margin: 0 1rem;
+    margin-bottom: 1.5rem; /* Align generally with the circles */
+    transition: all 0.3s ease;
+    z-index: 1;
+}
+
+/* Active State */
+.stepper li.active .step-icon {
+    background: white;
+    color: #0f172a;
+    box-shadow: 0 0 0 2px #0f172a;
+}
+
+.stepper li.active .step-label {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Completed State */
+.stepper li.completed .step-icon {
+    background: #10b981;
+    color: white;
+    box-shadow: 0 0 0 2px #10b981;
+}
+
+.stepper li.completed .step-label {
+    color: #10b981;
+}
+
+/* Line Active */
+.stepper-line.active-line {
+    background: #10b981;
+}
+
+
+/* Actions */
+.card-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    border-top: 1px solid hsl(var(--border));
+    padding-top: 1rem;
+}
+
+.btn-secondary-small {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.btn-secondary-small:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #94a3b8;
+}
+
+/* Icons styling */
+.stat-icon {
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-icon.green {
+    background: #dcfce7;
+    color: #16a34a;
 }

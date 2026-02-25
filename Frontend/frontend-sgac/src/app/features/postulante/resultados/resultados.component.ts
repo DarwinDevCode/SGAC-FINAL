@@ -98,4 +98,14 @@ export class ResultadosComponent implements OnInit, OnDestroy {
       });
     });
   }
+
+  getPhase(estado: string | undefined): number {
+    if (!estado) return 1;
+    const e = estado.toUpperCase();
+    if (e === 'PENDIENTE') return 1;
+    if (e === 'EN_EVALUACION' || e === 'MERITOS_EVALUADOS') return 2;
+    if (e === 'OPOSICION_EVALUADA') return 3;
+    if (e === 'APROBADO' || e === 'RECHAZADO') return 4;
+    return 1;
+  }
 }

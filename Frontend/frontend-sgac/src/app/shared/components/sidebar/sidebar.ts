@@ -19,12 +19,11 @@ export class SidebarComponent {
 
   menus: Record<string, any[]> = {
     ESTUDIANTE: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/student/dashboard' },
-      { label: 'Convocatorias', icon: 'FileText', route: '/student/convocatorias' },
-      { label: 'Mis Postulaciones', icon: 'FolderOpen', route: '/student/mis-postulaciones' },
-      { label: 'Mis Ayudantías', icon: 'FolderOpen', route: '/student/mis-ayudantias' },
-      { label: 'Mis Certificados', icon: 'Award', route: '/student/certificados' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/student/notifications' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/postulante/dashboard' },
+      { label: 'Convocatorias', icon: 'FileText', route: '/postulante/convocatorias' },
+      { label: 'Mis Postulaciones', icon: 'FolderOpen', route: '/postulante/mis-postulaciones' },
+      { label: 'Ver Resultados', icon: 'Award', route: '/postulante/resultados' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/postulante/notificaciones' },
     ],
     AYUDANTE_CATEDRA: [
       { label: 'Mi Gestión', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },

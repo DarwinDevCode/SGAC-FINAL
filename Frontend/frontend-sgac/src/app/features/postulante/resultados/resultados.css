@@ -1,133 +1,57 @@
-/* --- Heredado del patrón Admin --- */
-.gestion-container {
-    padding: 1rem;
-}
+@import '../estado-postulacion/estado-postulacion.css';
 
-.section-header {
-    margin-bottom: 2rem;
-}
-
-.title-container .title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: hsl(var(--foreground));
-    margin: 0;
-}
-
-.title-container .subtitle {
-    font-size: 0.9rem;
-    color: hsl(var(--muted-foreground));
-    margin-top: 0.25rem;
-}
-
-.table-card {
-    background: white;
-    border-radius: var(--radius);
-    border: 1px solid hsl(var(--border));
-    overflow: hidden;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.data-table th {
-    background: hsl(var(--muted) / 0.3);
-    padding: 1rem;
-    text-align: left;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    color: hsl(var(--muted-foreground));
-    border-bottom: 1px solid hsl(var(--border));
-}
-
-.data-table td {
-    padding: 1rem;
-    border-bottom: 1px solid hsl(var(--border));
-    vertical-align: middle;
-}
-
-.conv-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #1e293b;
-}
-
-.user-email {
-    font-size: 0.8rem;
-    color: hsl(var(--muted-foreground));
-}
-
-/* Nuevos estilos específicos para Resultados */
-.actions-links {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.link-action {
+/* Custom extensions for Resultados */
+.results-footer {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    justify-content: space-between;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    margin: 0 -1.5rem -1.5rem -1.5rem;
+    padding: 1rem 1.5rem;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+}
+
+.score-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.score-label {
     font-size: 0.8rem;
-    color: hsl(var(--primary));
-    text-decoration: none;
-    font-weight: 500;
-    transition: opacity 0.2s;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
 }
 
-.link-action:hover {
-    opacity: 0.7;
-    text-decoration: underline;
-}
-
-.score-display {
+.score-value-container {
     display: flex;
     align-items: baseline;
     gap: 0.2rem;
 }
 
 .score-number {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 1.5rem;
+    font-weight: 800;
     color: #0f172a;
 }
 
 .score-max {
-    font-size: 0.8rem;
-    color: #94a3b8;
-    font-weight: 500;
-}
-
-.status-pill {
-    padding: 0.25rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: inline-block;
-    text-align: center;
-}
-
-.status-pill.active {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.status-pill.inactive {
-    background: #fee2e2;
-    color: #b91c1c;
-}
-
-.status-pill.pending {
-    background: #fef08a;
-    color: #854d0e;
-}
-
-.empty-state {
-    text-align: center;
-    color: #94a3b8;
-    padding: 3rem;
-    font-style: italic;
     font-size: 0.9rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.score-pending {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #94a3b8;
+}
+
+.card-actions {
+    border-top: none;
+    padding-top: 0;
 }

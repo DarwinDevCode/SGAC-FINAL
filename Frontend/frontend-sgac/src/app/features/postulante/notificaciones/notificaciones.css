@@ -22,15 +22,170 @@
 
 .info-message {
     text-align: center;
-    padding: 3rem;
+    padding: 4rem;
     color: #64748b;
-    font-style: italic;
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .empty-state {
     text-align: center;
     color: #94a3b8;
     padding: 4rem 2rem;
+    background: #f8fafc;
+    border: 2px dashed #e2e8f0;
+    border-radius: 0.75rem;
 }
 
-/* El resto de las clases están escritas en Tailwind in-line en el HTML para aprovechar el utilitario de espacios y colores de la notificación (ya que en este componente puntual es más fácil de alinear). */
+.error-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: #fffbfa;
+    border: 1px dashed #fecdd3;
+    border-radius: 0.75rem;
+}
+
+/* Notifications List */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.notif-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    background: white;
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    padding: 1.25rem 1.5rem;
+    transition: all 0.2s;
+}
+
+.notif-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.notif-card.unread {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+    border-left: 4px solid #0ea5e9;
+}
+
+.notif-icon-wrapper {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f1f5f9;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.notif-icon-wrapper.unread-icon {
+    background: #e0f2fe;
+    color: #0284c7;
+}
+
+.notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-message {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.notif-card.unread .notif-message {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.notif-date {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.75rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+}
+
+.notif-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-mark-read {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    background: white;
+    color: #0ea5e9;
+    border: 1px solid #7dd3fc;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-mark-read:hover {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+    color: #0284c7;
+}
+
+.status-read {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.inline-mr {
+    margin-right: 0.25rem;
+}
+
+.mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mt-1 {
+    margin-top: 0.25rem;
+}
+
+.text-slate-300 {
+    color: #cbd5e1;
+}
+
+.text-slate-500 {
+    color: #64748b;
+}
+
+.text-slate-600 {
+    color: #475569;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.text-sm {
+    font-size: 0.875rem;
+}
