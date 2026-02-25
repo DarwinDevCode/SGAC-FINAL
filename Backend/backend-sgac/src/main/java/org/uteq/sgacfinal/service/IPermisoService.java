@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.service;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.PermisoDTO;
 import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
@@ -18,4 +19,6 @@ public interface IPermisoService {
     List<TipoObjetoResponseDTO> listarTiposObjeto();
     List<String> listarElementos(String esquema, String tipoObjeto);
     List<PrivilegioResponseDTO> listarPrivilegios(Integer idTipoObjeto);
+
+    ResultadoMasivoResponseDTO gestionarPermisosMasivo(List<GestionPermisosRequestDTO> permisos);
 }

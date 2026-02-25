@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Observable, tap} from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PermisoRolDTO } from '../dto/permiso-rol-dto';
 import {GestionPermisosRequestDTO} from '../dto/gestion-permisos-request-dto';
@@ -8,6 +8,8 @@ import {MensajeResponseDTO} from '../dto/mensaje-response-dto';
 import {ElementoBdDTO} from '../dto/elemento-bd-dto';
 import {TipoObjetoSeguridadDTO} from '../dto/tipo-objeto-seguridad-dto';
 import {PrivilegioDTO} from '../dto/privilegio-dto';
+import {GestionPermisosMasivoRequestDTO} from '../dto/gestion-permisos-masivo-request-dto';
+import {ResultadoMasivoResponseDTO} from '../dto/resultado-masivo-response-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -49,5 +51,21 @@ export class PermisoService {
 
   listarPrivilegios(idTipoObjeto: number): Observable<PrivilegioDTO[]> {
     return this.http.get<PrivilegioDTO[]>(`${this.apiUrl}/privilegios/${idTipoObjeto}`);
+  }
+
+  //gestionarPermisosMasivo(request: GestionPermisosMasivoRequestDTO): Observable<ResultadoMasivoResponseDTO> {
+  //  return this.http.post<ResultadoMasivoResponseDTO>(`${this.apiUrl}/gestionar-masivo`, request);
+  //}
+
+
+  gestionarPermisosMasivo(request: GestionPermisosMasivoRequestDTO): Observable<ResultadoMasivoResponseDTO> {
+    console.log('Enviando solicitud masiva al backend:', request);
+    if (request.permisos)
+      console.table(request.permisos);
+
+    return this.http.post<ResultadoMasivoResponseDTO>(`${this.apiUrl}/gestionar-masivo`, request)
+      .pipe(
+        tap(respuesta => console.log('Respuesta del servidor:', respuesta))
+      );
   }
 }

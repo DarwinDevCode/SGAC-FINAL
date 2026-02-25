@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Plus, Edit, Power, X } from 'lucide-angular';
-
 import { CatalogosService } from '../../../core/services/catalogos-service';
 import { TipoRolDTO } from '../../../core/dto/tipo-rol';
 import { FacultadDTO } from '../../../core/dto/facultad';
@@ -276,6 +275,9 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
           alert(`${nombreEntidad} ${this.isEditMode ? 'actualizado(a)' : 'registrado(a)'} correctamente.`);
           this.mostrarModal = false;
           this.cargarDatosActivos();
+
+          if (nombreEntidad === 'Rol')
+            this.catalogosService.rolActualizado$.next();
         },
         error: (err: HttpErrorResponse) => {
           console.error(err);

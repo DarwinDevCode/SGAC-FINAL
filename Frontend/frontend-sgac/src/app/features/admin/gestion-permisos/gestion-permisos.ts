@@ -2,15 +2,17 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import {forkJoin, of, Subscription} from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 import { TipoRolService } from '../../../core/services/tipo-rol-service';
 import { RolResumenDTO } from '../../../core/dto/rol-resumen-dto';
-import {PermisoService} from '../../../core/services/permiso-service';
+import { PermisoService } from '../../../core/services/permiso-service';
 import { TipoObjetoSeguridadDTO } from '../../../core/dto/tipo-objeto-seguridad-dto';
 import { PrivilegioDTO } from '../../../core/dto/privilegio-dto';
 import { PermisoRolDTO } from '../../../core/dto/permiso-rol-dto';
 import { GestionPermisosRequestDTO } from '../../../core/dto/gestion-permisos-request-dto';
+import { GestionPermisosMasivoRequestDTO } from '../../../core/dto/gestion-permisos-masivo-request-dto';
+import {CatalogosService} from '../../../core/services/catalogos-service';
 
 
 @Component({
@@ -24,53 +26,65 @@ export class GestionPermisosComponent implements OnInit {
 
   private tipoRolService = inject(TipoRolService);
   private permisoService = inject(PermisoService);
+  private catalogosService = inject(CatalogosService);
+  private subs = new Subscription();
+
 
   rolesList: RolResumenDTO[] = [];
   loading = false;
   procesandoEnvio = false;
 
-  // Feedback y Notificaciones
   notificacion: { mensaje: string; exito: boolean } | null = null;
+  resultadoOperacion: any = null;
 
-  // Estado de Modales
   mostrarModalVer = false;
   mostrarModalOtorgar = false;
   rolSeleccionado: RolResumenDTO | null = null;
 
-  // --- Listas Dinámicas (Alimentadas por BD) ---
   esquemasDisponibles: string[] = [];
   tiposObjetoDisponibles: TipoObjetoSeguridadDTO[] = [];
   elementosBdList: string[] = [];
   privilegiosPorTipo: PrivilegioDTO[] = [];
 
-  // --- Modal 1: Consulta ---
   permisosList: PermisoRolDTO[] = [];
   permisosListFiltrados: PermisoRolDTO[] = [];
   loadingPermisos = false;
   terminoBusqueda: string = '';
   filtros = { esquema: 'todo', categoria: 'todo', privilegio: 'todo' };
 
-  // --- Modal 2: Navegación Jerárquica ---
   esquemaSeleccionado: string | null = null;
   categoriaSeleccionada: TipoObjetoSeguridadDTO | null = null;
   loadingElementos = false;
   seleccionPendiente: GestionPermisosRequestDTO[] = [];
 
-  ngOnInit(): void { this.cargarRoles(); }
+  ngOnInit(): void {
+    this.cargarRoles();
+
+    this.subs.add(
+      this.catalogosService.rolActualizado$.subscribe(() => {
+        this.cargarRoles();
+      })
+    );
+  }
 
   cargarRoles(): void {
     this.loading = true;
     this.tipoRolService.obtenerRolesParaPermisos().subscribe({
-      next: (data) => { this.rolesList = data; this.loading = false; },
+      next: (data) => {
+        this.rolesList = data;
+        this.loading = false;
+      },
       error: () => this.loading = false
     });
   }
 
-  // --- Gestión de Modales ---
   abrirModalVerPermisos(rol: RolResumenDTO): void {
     this.rolSeleccionado = rol;
     this.mostrarModalVer = true;
-    this.cargarListasIniciales();
+    this.terminoBusqueda = '';
+    this.filtros = { esquema: 'todo', categoria: 'todo', privilegio: 'todo' };
+
+    this.cargarCatalogosIniciales();
     this.cargarPermisos();
   }
 
@@ -79,33 +93,43 @@ export class GestionPermisosComponent implements OnInit {
     this.mostrarModalOtorgar = true;
     this.esquemaSeleccionado = null;
     this.categoriaSeleccionada = null;
+    this.elementosBdList = [];
     this.seleccionPendiente = [];
-    this.cargarListasIniciales();
+
+    this.cargarCatalogosIniciales();
   }
 
-  private cargarListasIniciales(): void {
-    // Paso 1 y 2: Esquemas y Categorías de la BD
-    this.permisoService.listarEsquemas().subscribe(data => this.esquemasDisponibles = data);
-    this.permisoService.listarTiposObjeto().subscribe(data => this.tiposObjetoDisponibles = data);
+  private cargarCatalogosIniciales(): void {
+    forkJoin({
+      esquemas: this.permisoService.listarEsquemas().pipe(catchError(() => of([]))),
+      tipos: this.permisoService.listarTiposObjeto().pipe(catchError(() => of([])))
+    }).subscribe(res => {
+      this.esquemasDisponibles = res.esquemas;
+      this.tiposObjetoDisponibles = res.tipos;
+    });
   }
 
   cerrarModales(): void {
     this.mostrarModalVer = false;
     this.mostrarModalOtorgar = false;
+    this.rolSeleccionado = null;
     this.notificacion = null;
+    this.resultadoOperacion = null;
     this.seleccionPendiente = [];
   }
 
-  // --- Navegación del Menú ---
   toggleEsquema(esc: string) {
     this.esquemaSeleccionado = (this.esquemaSeleccionado === esc) ? null : esc;
     this.categoriaSeleccionada = null;
     this.elementosBdList = [];
+    this.privilegiosPorTipo = [];
   }
 
   toggleCategoria(tipo: TipoObjetoSeguridadDTO) {
     if (this.categoriaSeleccionada?.idTipoObjetoSeguridad === tipo.idTipoObjetoSeguridad) {
       this.categoriaSeleccionada = null;
+      this.elementosBdList = [];
+      this.privilegiosPorTipo = [];
     } else {
       this.categoriaSeleccionada = tipo;
       this.cargarNivelElementosYPrivilegios();
@@ -114,18 +138,18 @@ export class GestionPermisosComponent implements OnInit {
 
   private cargarNivelElementosYPrivilegios() {
     if (!this.esquemaSeleccionado || !this.categoriaSeleccionada) return;
+
     this.loadingElementos = true;
+    this.elementosBdList = [];
 
     forkJoin({
-      elementos: this.permisoService.listarElementos(this.esquemaSeleccionado, this.categoriaSeleccionada.nombreTipoObjeto),
-      privilegios: this.permisoService.listarPrivilegios(this.categoriaSeleccionada.idTipoObjetoSeguridad)
-    }).subscribe({
-      next: (res) => {
-        this.elementosBdList = res.elementos;
-        this.privilegiosPorTipo = res.privilegios;
-        this.loadingElementos = false;
-      },
-      error: () => this.loadingElementos = false
+      elementos: this.permisoService.listarElementos(this.esquemaSeleccionado, this.categoriaSeleccionada.nombreTipoObjeto).pipe(catchError(() => of([]))),
+      privilegios: this.permisoService.listarPrivilegios(this.categoriaSeleccionada.idTipoObjetoSeguridad).pipe(catchError(() => of([])))
+    }).pipe(
+      finalize(() => this.loadingElementos = false)
+    ).subscribe(res => {
+      this.elementosBdList = res.elementos;
+      this.privilegiosPorTipo = res.privilegios;
     });
   }
 
@@ -157,25 +181,69 @@ export class GestionPermisosComponent implements OnInit {
 
   otorgarPermisosMasivo() {
     if (this.seleccionPendiente.length === 0) return;
-    if (!confirm(`¿Confirmar el otorgamiento de ${this.seleccionPendiente.length} permisos?`)) return;
+
+    if (!confirm(`¿Desea aplicar estos ${this.seleccionPendiente.length} permisos de forma atómica?`)) return;
 
     this.procesandoEnvio = true;
-    const peticiones = this.seleccionPendiente.map(p =>
-      this.permisoService.gestionarPermiso(p).pipe(
-        catchError(err => of({ mensaje: `Error en ${p.elemento}: ${err.error?.mensaje}`, exito: false }))
-      )
-    );
+    this.resultadoOperacion = null;
 
-    forkJoin(peticiones).subscribe(resultados => {
-      this.procesandoEnvio = false;
-      const fallidos = resultados.filter(r => !r.exito);
-      if (fallidos.length === 0) {
-        this.mostrarFeedback(`Éxito: ${resultados.length} permisos otorgados.`, true);
-        this.seleccionPendiente = [];
-      } else {
-        this.mostrarFeedback(`Completado con ${fallidos.length} errores.`, false);
+    const requestMasivo: GestionPermisosMasivoRequestDTO = {
+      permisos: [...this.seleccionPendiente]
+    };
+
+    this.permisoService.gestionarPermisosMasivo(requestMasivo).subscribe({
+      next: (res) => {
+        this.procesandoEnvio = false;
+        this.resultadoOperacion = res;
+        if (res.exito) {
+          this.mostrarFeedback(res.mensaje, true);
+          this.seleccionPendiente = [];
+        }
+      },
+      error: (err) => {
+        this.procesandoEnvio = false;
+        this.resultadoOperacion = err.error;
+        this.mostrarFeedback(err.error?.mensaje || 'Error en la transacción.', false);
       }
     });
+  }
+
+  cargarPermisos(): void {
+    if (!this.rolSeleccionado?.nombreRolBd) return;
+
+    this.loadingPermisos = true;
+    const params: PermisoRolDTO = {
+      rolBd: this.rolSeleccionado.nombreRolBd,
+      esquema: this.filtros.esquema === 'todo' ? undefined : this.filtros.esquema,
+      categoria: this.filtros.categoria === 'todo' ? undefined : this.filtros.categoria,
+      privilegio: this.filtros.privilegio === 'todo' ? undefined : this.filtros.privilegio
+    };
+
+    this.permisoService.consultarPermisos(params).pipe(
+      finalize(() => this.loadingPermisos = false)
+    ).subscribe({
+      next: (data) => {
+        this.permisosList = data;
+        this.filtrarPermisosRapido();
+      },
+      error: (err) => {
+        console.error(err);
+        this.permisosList = [];
+        this.permisosListFiltrados = [];
+      }
+    });
+  }
+
+  filtrarPermisosRapido(): void {
+    const term = this.terminoBusqueda.toLowerCase().trim();
+    if (!term) {
+      this.permisosListFiltrados = [...this.permisosList];
+    } else {
+      this.permisosListFiltrados = this.permisosList.filter(p =>
+        (p.elemento?.toLowerCase().includes(term)) ||
+        (p.privilegio?.toLowerCase().includes(term))
+      );
+    }
   }
 
   confirmarRevocarPermiso(p: PermisoRolDTO): void {
@@ -204,38 +272,14 @@ export class GestionPermisosComponent implements OnInit {
     setTimeout(() => this.notificacion = null, 6000);
   }
 
-  cargarPermisos(): void {
-    if (!this.rolSeleccionado?.nombreRolBd) return;
-    this.loadingPermisos = true;
-    this.permisoService.consultarPermisos({
-      rolBd: this.rolSeleccionado.nombreRolBd,
-      esquema: this.filtros.esquema === 'todo' ? undefined : this.filtros.esquema,
-      categoria: this.filtros.categoria === 'todo' ? undefined : this.filtros.categoria,
-      privilegio: this.filtros.privilegio === 'todo' ? undefined : this.filtros.privilegio
-    }).subscribe({
-      next: (data) => {
-        this.permisosList = data;
-        this.filtrarPermisosRapido();
-        this.loadingPermisos = false;
-      },
-      error: () => this.loadingPermisos = false
-    });
-  }
-
-  filtrarPermisosRapido(): void {
-    const term = this.terminoBusqueda.toLowerCase();
-    this.permisosListFiltrados = this.permisosList.filter(p => (p.elemento?.toLowerCase() || '').includes(term));
-  }
-
   getPrivilegioColor(privilegio: string | undefined): any {
-    switch (privilegio?.toUpperCase()) {
-      case 'SELECT': return { 'background-color': '#dbeafe', 'color': '#1e40af' };
-      case 'INSERT': return { 'background-color': '#dcfce7', 'color': '#166534' };
-      case 'UPDATE': return { 'background-color': '#fef9c3', 'color': '#9a3412' };
-      case 'DELETE': return { 'background-color': '#fee2e2', 'color': '#991b1b' };
-      case 'EXECUTE': return { 'background-color': '#f3e8ff', 'color': '#6b21a8' };
-      case 'USAGE': return { 'background-color': '#e0f2fe', 'color': '#0369a1' };
-      default: return { 'background-color': '#f1f5f9', 'color': '#475569' };
-    }
+    const p = privilegio?.toUpperCase();
+    if (p === 'SELECT') return { 'background-color': '#dbeafe', 'color': '#1e40af' };
+    if (p === 'INSERT') return { 'background-color': '#dcfce7', 'color': '#166534' };
+    if (p === 'UPDATE') return { 'background-color': '#fef9c3', 'color': '#9a3412' };
+    if (p === 'DELETE') return { 'background-color': '#fee2e2', 'color': '#991b1b' };
+    if (p === 'EXECUTE') return { 'background-color': '#f3e8ff', 'color': '#6b21a8' };
+    if (p === 'USAGE') return { 'background-color': '#e0f2fe', 'color': '#0369a1' };
+    return { 'background-color': '#f1f5f9', 'color': '#475569' };
   }
 }

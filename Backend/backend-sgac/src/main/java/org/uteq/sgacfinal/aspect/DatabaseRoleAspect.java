@@ -7,6 +7,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.Session;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.uteq.sgacfinal.config.UserContext;
 
@@ -14,12 +15,14 @@ import java.sql.Statement;
 
 @Aspect
 @Component
+@Order(2)
 @RequiredArgsConstructor
 @Slf4j
 public class DatabaseRoleAspect {
     private final EntityManager entityManager;
 
-    @Around("execution(* org.uteq.sgacfinal.repository.*.*(..))")
+    //@Around("execution(* org.uteq.sgacfinal.repository.*.*(..))")
+    @Around("execution(* org.uteq.sgacfinal.service.*.*(..))")
     public Object applyDatabaseRole(ProceedingJoinPoint joinPoint) throws Throwable {
         String appRole = UserContext.getAppRole();
         boolean roleChanged = false;

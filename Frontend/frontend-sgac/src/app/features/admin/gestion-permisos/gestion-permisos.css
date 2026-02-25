@@ -193,3 +193,44 @@
 .btn-ghost { padding: 0.6rem 1.25rem; color: #64748b; }
 .btn-icon { padding: 0.5rem; border-radius: 0.5rem; color: #64748b; transition: all 0.2s; }
 .btn-icon:hover { background: #f1f5f9; color: hsl(var(--primary)); }
+
+/* Botones de acción para la tabla de roles */
+.btn-action-view {
+  background-color: transparent;
+  color: #1d4ed8; /* Azul profundo */
+  border: 1px solid #93c5fd; /* Borde azul suave */
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action-view:hover {
+  background-color: #eff6ff;
+  border-color: #60a5fa; /* Borde se oscurece al pasar el mouse */
+}
+
+.btn-action-grant {
+  background-color: transparent;
+  color: #1b5e20; /* Verde institucional de tu app */
+  border: 1px solid #a5d6a7; /* Borde verde suave */
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action-grant:hover {
+  background-color: #e8f5e9;
+  border-color: #81c784;
+}

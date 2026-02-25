@@ -21,14 +21,15 @@
         @for (rol of rolesList; track rol.idTipoRol) {
           <tr>
             <td>{{ rol.idTipoRol }}</td>
-            <td style="font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ rol.nombreLogico }}</td>
-            <td><span class="status-pill" style="font-family: monospace; background: #f1f5f9;">{{ rol.nombreRolBd }}</span></td>
+            <td style="font-weight: 500;">{{ rol.nombreLogico }}</td>
+            <td><span class="status-pill" style="font-family: monospace; background: #f1f5f9; font-size: 0.9rem;">{{ rol.nombreRolBd }}</span></td>
             <td><span class="status-pill" [class.active]="rol.activo" [class.inactive]="!rol.activo">{{ rol.activo ? 'Activo' : 'Inactivo' }}</span></td>
-            <td class="text-right">
-              <button class="btn-primary" style="background-color: #64748b; margin-right: 8px;" (click)="abrirModalVerPermisos(rol)">
+            <td class="text-right" style="display: flex; gap: 8px; justify-content: flex-end;">
+              <button class="btn-action-view" (click)="abrirModalVerPermisos(rol)">
                 <lucide-icon name="Eye" size="14"></lucide-icon> Ver Permisos
               </button>
-              <button class="btn-primary" (click)="abrirModalOtorgarPermisos(rol)">
+
+              <button class="btn-action-grant" (click)="abrirModalOtorgarPermisos(rol)">
                 <lucide-icon name="Plus" size="14"></lucide-icon> Otorgar
               </button>
             </td>
@@ -60,7 +61,7 @@
           </div>
         }
 
-        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex: 1; min-height: 0;">
+        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex: 1;">
           <div class="filter-bar" style="display: flex; gap: 12px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; align-items: flex-end;">
             <div class="form-group" style="flex: 1; margin: 0;"><label style="font-size: 0.7rem; font-weight: 700;">ESQUEMA</label>
               <select class="input-field" [(ngModel)]="filtros.esquema" (change)="cargarPermisos()">
@@ -100,7 +101,7 @@
                     <td class="text-right"><button class="btn-icon" style="color: #ef4444;" (click)="confirmarRevocarPermiso(p)"><lucide-icon name="Trash2" size="16"></lucide-icon></button></td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="5" style="text-align: center; padding: 50px; color: #94a3b8;"><p>No se encontraron privilegios con los filtros aplicados.</p></td></tr>
+                  <tr><td colspan="5" style="text-align: center; padding: 50px; color: #94a3b8;"><p>No se encontraron privilegios registrados.</p></td></tr>
                 }
               </tbody>
             </table>
@@ -129,13 +130,21 @@
         @if (notificacion) {
           <div [style.background-color]="notificacion.exito ? '#dcfce7' : '#fee2e2'"
                [style.color]="notificacion.exito ? '#166534' : '#991b1b'"
-               style="margin: 10px 20px; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 700;">
+               style="margin: 10px 20px; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 700;">
             <lucide-icon [name]="notificacion.exito ? 'CheckCircle' : 'AlertCircle'" size="20"></lucide-icon>
             <span>{{ notificacion.mensaje }}</span>
           </div>
         }
 
-        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex: 1; min-height: 0;">
+        @if (resultadoOperacion) {
+          <div [style.background-color]="resultadoOperacion.exito ? '#f0fdf4' : '#fef2f2'"
+               style="margin: 0 20px 10px 20px; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0; font-size: 0.85rem;">
+            <strong>Resultado:</strong> {{ resultadoOperacion.mensaje }}
+            (Procesados: {{ resultadoOperacion.totalProcesados }}, Éxitos: {{ resultadoOperacion.exitosos }})
+          </div>
+        }
+
+        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex: 1;">
           <div class="menu-jerarquico-container" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
             @for (esc of esquemasDisponibles; track esc) {
               <div class="esquema-row">
@@ -155,7 +164,7 @@
 
                       @if (categoriaSeleccionada?.idTipoObjetoSeguridad === tipo.idTipoObjetoSeguridad) {
                         <div style="padding: 10px 20px 10px 45px; background: #fff;">
-                          @if (loadingElementos) { <p style="font-size: 0.8rem; color: #2563eb; padding: 10px;">Consultando catálogo...</p> }
+                          @if (loadingElementos) { <p style="font-size: 0.8rem; color: #2563eb;">Consultando catálogo...</p> }
 
                           @for (el of elementosBdList; track el) {
                             <div style="padding: 10px 0; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
@@ -171,10 +180,6 @@
                                 }
                               </div>
                             </div>
-                          } @empty {
-                            @if (!loadingElementos) {
-                              <p style="font-size: 0.85rem; color: #94a3b8; padding: 10px; border: 1px dashed #e2e8f0; border-radius: 6px;">No se encontraron objetos físicos en esta categoría.</p>
-                            }
                           }
                         </div>
                       }
@@ -187,11 +192,13 @@
         </div>
 
         <div class="form-footer" style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; background: white;">
-          <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;">Pendientes: <span style="color: #2563eb; font-size: 1rem;">{{ seleccionPendiente.length }}</span> cambios marcados</span>
+          <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;">
+            Pendientes: <span style="color: #2563eb; font-size: 1rem;">{{ seleccionPendiente.length }}</span> cambios marcados
+          </span>
           <div style="display: flex; gap: 10px;">
             <button class="btn-ghost" (click)="cerrarModales()">Cancelar</button>
-            <button class="btn-primary" [disabled]="seleccionPendiente.length === 0 || procesandoEnvio" style="padding: 10px 25px;" (click)="otorgarPermisosMasivo()">
-              {{ procesandoEnvio ? 'Procesando...' : 'Otorgar Permisos' }}
+            <button class="btn-primary" [disabled]="seleccionPendiente.length === 0 || procesandoEnvio" (click)="otorgarPermisosMasivo()">
+              {{ procesandoEnvio ? 'Aplicando Transacción...' : 'Otorgar Permisos' }}
             </button>
           </div>
         </div>

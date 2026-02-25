@@ -2,10 +2,12 @@ package org.uteq.sgacfinal.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.PermisoDTO;
 import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.Request.GestionPermisosMasivoRequestDTO;
 import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.service.IPermisoService;
@@ -18,6 +20,7 @@ import java.util.List;
 public class PermisoController {
 
     private final IPermisoService permisoService;
+
 
     @GetMapping
     public ResponseEntity<List<PermisoDTO>> permisosActuales() {
@@ -68,6 +71,43 @@ public class PermisoController {
             @PathVariable Integer idTipoObjeto) {
         return ResponseEntity.ok(permisoService.listarPrivilegios(idTipoObjeto));
     }
+
+
+    @PostMapping("/gestionar-masivo")
+    public ResponseEntity<ResultadoMasivoResponseDTO> gestionarPermisosMasivo(
+            @Valid @RequestBody GestionPermisosMasivoRequestDTO request) {
+        try {
+            ResultadoMasivoResponseDTO resultado = permisoService.gestionarPermisosMasivo(request.getPermisos());
+            return ResponseEntity.ok(resultado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    ResultadoMasivoResponseDTO.builder()
+                            .exito(false)
+                            .mensaje(e.getMessage())
+                            .totalProcesados(request.getPermisos().size())
+                            .exitosos(0)
+                            .fallidos(request.getPermisos().size())
+                            .build()
+            );
+        }
+    }
+
+
+
+
+
+
+
+
+
+//    @PostMapping("/gestionar-masivo")
+//    public ResponseEntity<ResultadoMasivoResponseDTO> gestionarPermisosMasivo(
+//            @Valid @RequestBody GestionPermisosMasivoRequestDTO request) {
+//        ResultadoMasivoResponseDTO resultado = permisoService.gestionarPermisosMasivo(request.getPermisos());
+//        return ResponseEntity.ok(resultado);
+//    }
+
+
 
 
 

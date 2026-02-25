@@ -3,5 +3,6 @@
   <component name="DataSourcePerFileMappings">
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/java/org/uteq/sgacfinal/repository/IPermisoRepository.java" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V2__vistas.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
   </component>
 </project>

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {FacultadDTO} from '../dto/facultad';
 import {CarreraDTO} from '../dto/carrera';
@@ -19,6 +19,7 @@ export class CatalogosService {
   private http = inject(HttpClient);
   private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
   private readonly API = `${this.baseUrl}/admin/catalogos`;
+  public rolActualizado$ = new Subject<void>();
 
 
   getFacultades(): Observable<FacultadDTO[]> {
