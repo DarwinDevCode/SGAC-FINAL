@@ -52,9 +52,9 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   convocatoriaEditId: number | null = null;
 
   form: FormGroup = this.fb.group({
-    idAsignatura: ['', Validators.required],
-    idDocente: ['', Validators.required],
-    idPeriodoAcademico: [{ value: '', disabled: true }],
+    idAsignatura: [null, Validators.required],
+    idDocente: [null, Validators.required],
+    idPeriodoAcademico: [{ value: null, disabled: true }],
     cuposDisponibles: [1, [Validators.required, Validators.min(1)]],
     fechaPublicacion: ['', Validators.required],
     fechaCierre: ['', Validators.required],
@@ -124,7 +124,9 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     this.modoEdicion = false;
     this.convocatoriaEditId = null;
     this.form.reset({
-      idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? '',
+      idAsignatura: null,
+      idDocente: null,
+      idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? null,
       cuposDisponibles: 1,
       estado: 'ABIERTA',
       activo: true,
@@ -135,10 +137,15 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   abrirModalEditar(conv: ConvocatoriaDTO) {
     this.modoEdicion = true;
     this.convocatoriaEditId = conv.idConvocatoria ?? null;
+
+    if (conv.idPeriodoAcademico && conv.nombrePeriodo && !this.periodosMap.has(conv.idPeriodoAcademico)) {
+      this.periodosMap.set(conv.idPeriodoAcademico, conv.nombrePeriodo);
+    }
+
     this.form.patchValue({
-      idAsignatura: conv.idAsignatura ?? '',
-      idDocente: (conv as any).idDocente ?? '',
-      idPeriodoAcademico: conv.idPeriodoAcademico ?? this.periodoActivo?.idPeriodoAcademico ?? '',
+      idAsignatura: conv.idAsignatura ?? null,
+      idDocente: conv.idDocente ?? null,
+      idPeriodoAcademico: conv.idPeriodoAcademico ?? this.periodoActivo?.idPeriodoAcademico ?? null,
       cuposDisponibles: conv.cuposDisponibles ?? 1,
       fechaPublicacion: this.formatFechaInput(conv.fechaPublicacion),
       fechaCierre: this.formatFechaInput(conv.fechaCierre),

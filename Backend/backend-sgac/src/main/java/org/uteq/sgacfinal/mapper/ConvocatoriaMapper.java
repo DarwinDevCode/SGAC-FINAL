@@ -10,7 +10,7 @@ public class ConvocatoriaMapper {
 
         return ConvocatoriaResponseDTO.builder()
                 .idConvocatoria(entity.getIdConvocatoria())
-                .nombrePeriodo(entity.getPeriodoAcademico() != null ? entity.getPeriodoAcademico().getIdPeriodoAcademico().toString() : "N/A")
+                .nombrePeriodo(entity.getPeriodoAcademico() != null ? entity.getPeriodoAcademico().getNombrePeriodo() : "N/A")
                 .nombreAsignatura(entity.getAsignatura() != null ? entity.getAsignatura().getNombreAsignatura() : "N/A")
                 .cuposDisponibles(entity.getCuposDisponibles())
                 .fechaPublicacion(entity.getFechaPublicacion())
