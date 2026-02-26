@@ -19,7 +19,9 @@ import java.sql.Statement;
 public class DatabaseRoleAspect {
     private final EntityManager entityManager;
 
-    @Around("execution(* org.uteq.sgacfinal.repository.*.*(..))")
+    @Around("execution(* org.uteq.sgacfinal.repository.*.*(..)) " +
+            "&& !execution(* org.uteq.sgacfinal.repository.NotificacionRepository.*(..)) " +
+            "&& !execution(* org.uteq.sgacfinal.repository.IUsuariosRepository.*(..))")
     public Object applyDatabaseRole(ProceedingJoinPoint joinPoint) throws Throwable {
         String appRole = UserContext.getAppRole();
         boolean roleChanged = false;

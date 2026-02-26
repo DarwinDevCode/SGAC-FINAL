@@ -104,7 +104,20 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
         postulacion.setEstadoPostulacion(nuevoEstado);
         postulacion.setObservaciones(observacion);
-        postulacionRepository.save(postulacion);
+        
+        try {
+            System.out.println("Intentando actualizar postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
+            Integer resultado = postulacionRepository.actualizarPostulacion(idPostulacion, nuevoEstado, observacion);
+            System.out.println("Resultado de sp_actualizar_postulacion: " + resultado);
+            
+            if (resultado == null || resultado == -1) {
+                throw new RuntimeException("El SP actualizarPostulacion devolvió " + resultado);
+            }
+        } catch (Exception ex) {
+            System.err.println("Error al ejecutar actualizarPostulacion: " + ex.getMessage());
+            ex.printStackTrace();
+            throw new RuntimeException("Error al actualizar el estado de la postulación en la base de datos: " + ex.getMessage(), ex);
+        }
 
         if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
             String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
@@ -144,7 +157,6 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 .idPostulacion((Integer) obj[0])
                 .idConvocatoria((Integer) obj[1])
                 .estadoPostulacion((String) obj[3])
-                // Resto de campos nulos porque el SP no los devuelve
                 .build();
     }
 
@@ -154,11 +166,8 @@ public class PostulacionServiceImpl implements IPostulacionService {
     @Transactional
     public String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito) {
         try {
-            // El frontend envía idUsuario, resolvemos el idEstudiante real
             Estudiante estudiante = estudianteRepository.findByUsuario_IdUsuario(request.getIdEstudiante())
                     .orElseThrow(() -> new RuntimeException("Estudiante no encontrado para el usuario con ID: " + request.getIdEstudiante()));
-
-            // Validar que el estudiante no tenga ya una postulación activa
             long postulacionesActivas = postulacionRepository.contarPostulacionesActivasPorEstudiante(estudiante.getIdEstudiante());
             if (postulacionesActivas > 0) {
                 throw new RuntimeException("Ya tienes una postulación activa. No puedes postularte a más de una convocatoria a la vez.");
