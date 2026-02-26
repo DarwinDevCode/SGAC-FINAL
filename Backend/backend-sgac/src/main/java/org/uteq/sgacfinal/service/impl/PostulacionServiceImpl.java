@@ -30,36 +30,12 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
     @Override
     public PostulacionResponseDTO crear(PostulacionRequestDTO request) {
-//        Integer idGenerado = postulacionRepository.registrarPostulacion(
-//                request.getIdConvocatoria(),
-//                request.getIdEstudiante(),
-//                request.getIdPlazoActividad(),
-//                request.getFechaPostulacion(),
-//                request.getEstadoPostulacion(),
-//                request.getObservaciones()
-//        );
-//
-//        if (idGenerado == -1) {
-//            throw new RuntimeException("Error al registrar postulación.");
-//        }
-//
-//        return buscarPorId(idGenerado);
+
         return null;
     }
 
     @Override
     public PostulacionResponseDTO actualizar(Integer id, PostulacionRequestDTO request) {
-//        Integer resultado = postulacionRepository.actualizarPostulacion(
-//                id,
-//                request.getEstadoPostulacion(),
-//                request.getObservaciones()
-//        );
-//
-//        if (resultado == -1) {
-//            throw new RuntimeException("Error al actualizar postulación.");
-//        }
-
-//        return buscarPorId(id);
 
         return null;
     }
@@ -83,7 +59,6 @@ public class PostulacionServiceImpl implements IPostulacionService {
     @Override
     @Transactional(readOnly = true)
     public List<PostulacionResponseDTO> listarPorEstudiante(Integer idUsuario) {
-        // Si el usuario no tiene registro de estudiante, devolver lista vacía
         Optional<Estudiante> estudianteOpt = estudianteRepository.findByUsuario_IdUsuario(idUsuario);
         if (estudianteOpt.isEmpty()) {
             return List.of();
@@ -183,6 +158,12 @@ public class PostulacionServiceImpl implements IPostulacionService {
             Estudiante estudiante = estudianteRepository.findByUsuario_IdUsuario(request.getIdEstudiante())
                     .orElseThrow(() -> new RuntimeException("Estudiante no encontrado para el usuario con ID: " + request.getIdEstudiante()));
 
+            // Validar que el estudiante no tenga ya una postulación activa
+            long postulacionesActivas = postulacionRepository.contarPostulacionesActivasPorEstudiante(estudiante.getIdEstudiante());
+            if (postulacionesActivas > 0) {
+                throw new RuntimeException("Ya tienes una postulación activa. No puedes postularte a más de una convocatoria a la vez.");
+            }
+
             Integer idPostulacion = postulacionRepository.crearPostulacion(
                     request.getIdConvocatoria(),
                     estudiante.getIdEstudiante(),
@@ -198,16 +179,25 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 Integer idTipoReq = tiposRequisito.get(i);
 
                 if (!archivo.isEmpty()) {
-                    Integer idRequisito = postulacionRepository.crearRequisitoAdjunto(
-                            idPostulacion,
-                            idTipoReq,
-                            1,
-                            archivo.getBytes(),
-                            archivo.getOriginalFilename(),
-                            new java.sql.Date(System.currentTimeMillis()));
+                    try {
+                        System.out.println("Intentando guardar archivo: " + archivo.getOriginalFilename() + " para req ID: " + idTipoReq);
+                        Integer idRequisito = postulacionRepository.crearRequisitoAdjunto(
+                                idPostulacion,
+                                idTipoReq,
+                                1, // idTipoEstadoRequisito = 1 (PENDIENTE/ENTREGADO)
+                                archivo.getBytes(),
+                                archivo.getOriginalFilename(),
+                                new java.sql.Date(System.currentTimeMillis()));
 
-                    if (idRequisito == null || idRequisito == -1)
-                        throw new RuntimeException("Error al guardar el archivo: " + archivo.getOriginalFilename());
+                        System.out.println("Resultado sp_crear_requisito_adjunto: " + idRequisito);
+                        if (idRequisito == null || idRequisito == -1) {
+                            throw new RuntimeException("El SP sp_crear_requisito_adjunto devolvió " + idRequisito + " para archivo: " + archivo.getOriginalFilename());
+                        }
+                    } catch (Exception ex) {
+                        System.err.println("Error interno al guardar archivo " + archivo.getOriginalFilename() + ": " + ex.getMessage());
+                        ex.printStackTrace();
+                        throw new RuntimeException("Error al guardar el archivo: " + archivo.getOriginalFilename(), ex);
+                    }
                 }
             }
 

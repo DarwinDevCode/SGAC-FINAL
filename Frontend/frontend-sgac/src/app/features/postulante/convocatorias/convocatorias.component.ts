@@ -31,6 +31,7 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
   mostrarModal = false;
   busqueda = '';
   convocatoriaSeleccionada: ConvocatoriaDTO | null = null;
+  yaPostulado = false;
 
   // Form State
   idEstudianteBase = 0;
@@ -42,9 +43,23 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     const user = this.authService.getUser();
     if (user) {
       this.idEstudianteBase = user.idUsuario;
+      this.checkPostulacionActiva();
     }
     this.listarConvocatorias();
     this.cargarRequisitos();
+  }
+
+  checkPostulacionActiva() {
+    this.subs.add(
+      this.postulanteService.misPostulaciones(this.idEstudianteBase).subscribe({
+        next: (postulaciones) => {
+          // Si tiene al menos una postulación en estado que no sea RECHAZADO, se considera postulado
+          const activas = (postulaciones || []).filter(p => p.estadoPostulacion !== 'RECHAZADO');
+          this.yaPostulado = activas.length > 0;
+        },
+        error: (err) => console.error('Error al verificar postulaciones activas', err)
+      })
+    );
   }
 
   ngOnDestroy(): void {

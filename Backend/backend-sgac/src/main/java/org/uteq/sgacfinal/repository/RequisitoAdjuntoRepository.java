@@ -28,4 +28,6 @@ public interface RequisitoAdjuntoRepository extends JpaRepository<RequisitoAdjun
 
     @Query(value = "SELECT * FROM public.sp_obtener_requisitos_postulacion(:idPostulacion)", nativeQuery = true)
     List<Object[]> obtenerRequisitosPorPostulacionSP(@Param("idPostulacion") Integer idPostulacion);
+
+    List<RequisitoAdjunto> findByPostulacion_IdPostulacion(Integer idPostulacion);
 }

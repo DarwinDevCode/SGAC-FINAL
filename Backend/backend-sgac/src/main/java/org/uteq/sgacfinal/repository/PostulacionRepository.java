@@ -23,7 +23,14 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     @Query(value = "SELECT * FROM public.sp_listar_postulaciones_por_estudiante(:idEstudiante)", nativeQuery = true)
     List<Object[]> listarPostulacionesPorEstudianteSP(@Param("idEstudiante") Integer idEstudiante);
 
+    @Query("SELECT p FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante")
+    List<Postulacion> findByEstudiante_IdEstudiante(@Param("idEstudiante") Integer idEstudiante);
+
     List<Postulacion> findByConvocatoria_IdConvocatoria(Integer idConvocatoria);
+
+    @Query("SELECT COUNT(p) FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante AND p.activo = true AND p.estadoPostulacion NOT IN ('RECHAZADO')")
+    long contarPostulacionesActivasPorEstudiante(@Param("idEstudiante") Integer idEstudiante);
+
 
     Postulacion findByIdPostulacion(Integer idPostulacion);
 

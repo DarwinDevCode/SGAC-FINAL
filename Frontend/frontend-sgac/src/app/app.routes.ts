@@ -42,6 +42,7 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       // Admin
+      { path: 'admin/dashboard', redirectTo: 'admin/usuarios', pathMatch: 'full' },
       { path: 'admin/usuarios', component: GestionUsuarios },
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
       { path: 'admin/rol-permiso', component: GestionPermisosComponent },

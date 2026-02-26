@@ -55,7 +55,9 @@
                         </span>
                     </td>
                     <td class="text-right">
-                        <button type="button" class="btn-primary-small" (click)="abrirModalPostulacion(conv)">
+                        <button type="button" class="btn-primary-small" [disabled]="yaPostulado"
+                            [title]="yaPostulado ? 'Ya tienes una postulación activa en curso' : ''"
+                            [class.disabled-btn]="yaPostulado" (click)="abrirModalPostulacion(conv)">
                             Postular
                             <lucide-icon name="arrow-right" size="16"></lucide-icon>
                         </button>

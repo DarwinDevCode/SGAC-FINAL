@@ -65,10 +65,9 @@ public class RequisitoAdjuntoServiceImpl implements IRequisitoAdjuntoService {
     @Override
     @Transactional(readOnly = true)
     public List<RequisitoAdjuntoResponseDTO> listarPorPostulacion(Integer idPostulacion) {
-        List<Object[]> resultados = requisitoRepository.obtenerRequisitosPorPostulacionSP(idPostulacion);
-
-        return resultados.stream()
-                .map(this::mapearDesdeObjectArray)
+        return requisitoRepository.findByPostulacion_IdPostulacion(idPostulacion)
+                .stream()
+                .map(this::mapearADTO)
                 .collect(Collectors.toList());
     }
 
