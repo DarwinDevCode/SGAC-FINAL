@@ -1,0 +1,78 @@
+<div class="gestion-container max-w-6xl mx-auto">
+    <div class="section-header flex justify-between items-end">
+        <div class="title-container">
+            <h2 class="title">Convocatorias de la Facultad</h2>
+            <p class="subtitle mt-2">Revisa y supervisa las convocatorias activas bajo tu administración.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin mx-auto mb-2" size="32"></lucide-icon>
+        Cargando convocatorias...
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="shield-alert" size="48" class="error-icon text-red-500"></lucide-icon>
+        <h3 class="text-red-700 font-bold mt-4">No autorizado</h3>
+        <p class="text-red-600 mt-2">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+        @for (conv of convocatorias; track conv.idConvocatoria) {
+        <div
+            class="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all flex flex-col h-full shadow-sm">
+
+            <div class="p-6 flex-grow">
+                <!-- Header Badge -->
+                <div class="flex justify-between items-start mb-4">
+                    <span
+                        class="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                        Id: #{{ conv.idConvocatoria }}
+                    </span>
+                    <span
+                        class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                        {{ conv.activo ? 'Vigente' : 'Inactiva' }}
+                    </span>
+                </div>
+
+                <!-- Titles -->
+                <h3 class="font-bold text-lg text-slate-800 leading-tight mb-2">{{ conv.nombreAsignatura }}</h3>
+                <div class="text-sm text-slate-500 mb-4 flex items-center gap-1.5">
+                    <lucide-icon name="building-2" size="14"></lucide-icon>
+                    ID Docente Asignado: {{ conv.idDocente || 'N/A' }}
+                </div>
+
+                <!-- Important Info -->
+                <div class="space-y-3 bg-slate-50 p-4 rounded-lg">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-slate-500">Postulantes:</span>
+                        <span class="font-bold text-slate-700">{{ conv.cuposDisponibles }} permitidos</span>
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-slate-500">Periodo Académico:</span>
+                        <span class="font-medium text-slate-700 text-right">{{ conv.nombrePeriodo }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-100 mt-auto">
+                <a [routerLink]="['/decano/postulantes', conv.idConvocatoria]"
+                    class="w-full flex justify-center items-center gap-2 bg-white text-slate-700 border border-slate-300 px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-100 transition-colors decoration-none">
+                    <lucide-icon name="users" size="16"></lucide-icon>
+                    Supervisar Postulantes
+                </a>
+            </div>
+
+        </div>
+        } @empty {
+        <div class="col-span-full info-message border border-dashed border-slate-300 rounded-lg">
+            <lucide-icon name="folder-open" size="48" class="text-slate-300 mb-4 mx-auto"></lucide-icon>
+            <p class="text-lg">No hay convocatorias activas en tu facultad de momento.</p>
+        </div>
+        }
+    </div>
+    }
+</div>

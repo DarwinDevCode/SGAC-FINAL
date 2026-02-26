@@ -1,0 +1,6 @@
+@import '../dashboard/dashboard.css';
+
+/* Tabla estilos adicionales */
+.table-container {
+    overflow-x: auto;
+}

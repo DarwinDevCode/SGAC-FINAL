@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -22,6 +23,7 @@ public class Docente {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
+    @JsonIgnoreProperties({"docentes", "estudiantes", "roles"})
     private Usuario usuario;
 
     @Column(name = "fecha_inicio")
@@ -34,8 +36,10 @@ public class Docente {
     private Boolean activo;
 
     @OneToMany(mappedBy = "docente", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("docente")
     private List<DocenteAsignatura> docenteAsignaturas = new ArrayList<>();
 
     @OneToMany(mappedBy = "docente", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("docente")
     private List<Convocatoria> convocatorias = new ArrayList<>();
 }

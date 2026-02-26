@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -47,11 +48,14 @@ public class Usuario {
     private Boolean activo;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("usuario")
     private List<UsuarioTipoRol> roles = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario")
+    @JsonIgnoreProperties("usuario")
     private List<Estudiante> estudiantes = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario")
+    @JsonIgnoreProperties("usuario")
     private List<Docente> docentes = new ArrayList<>();
 }

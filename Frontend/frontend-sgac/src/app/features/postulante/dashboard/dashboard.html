@@ -1,0 +1,42 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Dashboard Postulante</h2>
+            <p class="subtitle">Bienvenido a tu panel de control de selección de ayudantías.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="loading-state">Cargando información del panel...</div>
+    } @else {
+    <div class="dashboard-grid">
+        <!-- Tarjeta Convocatorias -->
+        <div class="stat-card">
+            <div class="stat-icon calls-icon">
+                <lucide-icon name="briefcase" size="24"></lucide-icon>
+            </div>
+            <div class="stat-info">
+                <h3 class="stat-title">Convocatorias Abiertas</h3>
+                <p class="stat-value">{{ totalConvocatorias }}</p>
+            </div>
+            <a routerLink="/postulante/convocatorias" class="stat-link">
+                Ver Plazas <lucide-icon name="arrow-right" size="16"></lucide-icon>
+            </a>
+        </div>
+
+        <!-- Tarjeta Mis Postulaciones -->
+        <div class="stat-card">
+            <div class="stat-icon apps-icon">
+                <lucide-icon name="file-text" size="24"></lucide-icon>
+            </div>
+            <div class="stat-info">
+                <h3 class="stat-title">Mis Postulaciones Activas</h3>
+                <p class="stat-value">{{ totalPostulaciones }}</p>
+            </div>
+            <a routerLink="/postulante/mis-postulaciones" class="stat-link">
+                Revisar Estado <lucide-icon name="arrow-right" size="16"></lucide-icon>
+            </a>
+        </div>
+    </div>
+    }
+</div>

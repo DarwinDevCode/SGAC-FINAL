@@ -1,0 +1,213 @@
+<div class="gestion-container">
+
+    <div class="cv-header">
+        <div>
+            <h2 class="cv-title">Gestión de Convocatorias</h2>
+            <p class="cv-subtitle">Administre la oferta de ayudantías de la facultad.</p>
+        </div>
+        <button (click)="abrirModalCrear()" class="cv-btn-new">
+            <lucide-icon name="plus-circle" size="18"></lucide-icon>
+            Nueva Convocatoria
+        </button>
+    </div>
+
+    <!-- Buscador -->
+    <div class="cv-search-wrap">
+        <lucide-icon name="search" size="16" class="cv-search-icon"></lucide-icon>
+        <input [(ngModel)]="textoBusqueda" class="cv-search-input" placeholder="Buscar por asignatura o docente...">
+    </div>
+
+    <!-- Alertas -->
+    @if (successMensaje) {
+    <div class="cv-alert success">{{ successMensaje }}</div>
+    }
+    @if (errorMensaje) {
+    <div class="cv-alert error">{{ errorMensaje }}</div>
+    }
+
+    <!-- Carga -->
+    @if (loading) {
+    <div class="cv-empty">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p>Cargando convocatorias...</p>
+    </div>
+    } @else if (convocatoriasFiltradas.length === 0) {
+    <div class="cv-empty" style="border:2px dashed #e2e8f0;border-radius:.75rem;margin-top:.5rem">
+        <lucide-icon name="inbox" size="40" style="opacity:.3"></lucide-icon>
+        <p>No se encontraron convocatorias.</p>
+    </div>
+    } @else {
+
+    <!-- Grid de cards -->
+    <div class="cv-grid">
+        @for (c of convocatoriasFiltradas; track c.idConvocatoria) {
+        <div class="cv-card">
+
+            <!-- Estado + acciones -->
+            <div class="cv-card-top">
+                <span [ngClass]="{
+          'cv-badge-open':    c.estado === 'ABIERTA',
+          'cv-badge-eval':    c.estado === 'EN_EVALUACION',
+          'cv-badge-closed':  c.estado === 'CERRADA',
+          'cv-badge-done':    c.estado === 'FINALIZADA' || c.estado === 'RESUELTA' || c.estado === 'CANCELADA'
+        }" class="cv-badge">{{ c.estado }}</span>
+
+                <div class="cv-card-actions">
+                    <button (click)="abrirModalEditar(c)" class="cv-icon-btn" title="Editar">
+                        <lucide-icon name="pencil" size="15"></lucide-icon>
+                    </button>
+                    <button (click)="eliminar(c)" class="cv-icon-btn danger" title="Eliminar">
+                        <lucide-icon name="trash-2" size="15"></lucide-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Título -->
+            <h3 class="cv-card-title">{{ c.nombreAsignatura }}</h3>
+
+            <!-- Detalles -->
+            <div class="cv-card-details">
+                <div class="cv-detail-row">
+                    <lucide-icon name="users" size="14"></lucide-icon>
+                    <span>{{ c.cuposDisponibles ?? '—' }} Vacante{{ c.cuposDisponibles !== 1 ? 's' : '' }} disponible{{
+                        c.cuposDisponibles !== 1 ? 's' : '' }}</span>
+                </div>
+                <div class="cv-detail-row">
+                    <lucide-icon name="calendar" size="14"></lucide-icon>
+                    <span>Cierra: {{ (formatFecha(c.fechaCierre) | date:'yyyy-MM-dd') || '—' }}</span>
+                </div>
+            </div>
+
+            <!-- Footer link -->
+            <div class="cv-card-footer">
+                <a [routerLink]="['/coordinador/postulantes', c.idConvocatoria]" class="cv-link">
+                    Ver Detalles →
+                </a>
+            </div>
+
+        </div>
+        }
+    </div>
+    }
+</div>
+
+@if (mostrarModal) {
+<div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-box" style="max-width:560px" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <div>
+                <h3 style="margin:0;font-size:1.1rem;font-weight:700;color:hsl(var(--foreground))">
+                    {{ modoEdicion ? 'Editar Convocatoria' : 'Nueva Convocatoria' }}
+                </h3>
+                <p style="margin:.2rem 0 0;font-size:.8rem;color:hsl(var(--muted-foreground))">
+                    Complete la información requerida para el concurso.
+                </p>
+            </div>
+            <button (click)="cerrarModal()" class="btn-icon">
+                <lucide-icon name="x" size="20"></lucide-icon>
+            </button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="guardar()"
+            style="padding:1.5rem;display:flex;flex-direction:column;gap:1.1rem">
+
+            <!-- Periodo + Docente -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div class="form-group" style="margin:0">
+                    <label>Periodo Académico</label>
+                    <div class="input-field"
+                        style="background:#f0fdf4;border-color:#86efac;color:#15803d;display:flex;align-items:center;justify-content:space-between;cursor:not-allowed">
+                        <span
+                            style="font-weight:600;font-size:.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                            getPeriodoNombre(form.get('idPeriodoAcademico')?.value) !== '—' ? getPeriodoNombre(form.get('idPeriodoAcademico')?.value) : 'Sin periodo activo' }}</span>
+                        <lucide-icon name="lock" size="13"
+                            style="color:#86efac;flex-shrink:0;margin-left:.5rem"></lucide-icon>
+                    </div>
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Docente Responsable</label>
+                    <select formControlName="idDocente" class="input-field">
+                        <option [ngValue]="null">— Seleccionar —</option>
+                        @for (d of docentes; track d.idDocente) {
+                        <option [ngValue]="d.idDocente">{{ d.nombreCompletoUsuario }}</option>
+                        }
+                    </select>
+                    @if (form.get('idDocente')?.invalid && form.get('idDocente')?.touched) {
+                    <span style="font-size:.72rem;color:hsl(var(--destructive))">Requerido</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Asignatura -->
+            <div class="form-group" style="margin:0">
+                <label>Asignatura / Cátedra</label>
+                <select formControlName="idAsignatura" class="input-field">
+                    <option [ngValue]="null">— Seleccionar —</option>
+                    @for (a of asignaturas; track a.idAsignatura) {
+                    <option [ngValue]="a.idAsignatura">{{ a.nombreAsignatura }}</option>
+                    }
+                </select>
+                @if (form.get('idAsignatura')?.invalid && form.get('idAsignatura')?.touched) {
+                <span style="font-size:.72rem;color:hsl(var(--destructive))">Requerido</span>
+                }
+            </div>
+
+            <!-- Vacantes + Fechas -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+                <div class="form-group" style="margin:0">
+                    <label>Vacantes</label>
+                    <input formControlName="cuposDisponibles" type="number" min="1" class="input-field">
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Fecha Inicio</label>
+                    <input formControlName="fechaPublicacion" type="date" class="input-field">
+                    @if (form.get('fechaPublicacion')?.invalid && form.get('fechaPublicacion')?.touched) {
+                    <span style="font-size:.72rem;color:hsl(var(--destructive))">Requerido</span>
+                    }
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label>Fecha Cierre</label>
+                    <input formControlName="fechaCierre" type="date" class="input-field">
+                    @if (form.get('fechaCierre')?.invalid && form.get('fechaCierre')?.touched) {
+                    <span style="font-size:.72rem;color:hsl(var(--destructive))">Requerido</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Estado + Activo -->
+            <div style="display:grid;grid-template-columns:1fr auto;gap:1rem;align-items:center">
+                <div class="form-group" style="margin:0">
+                    <label>Estado</label>
+                    <select formControlName="estado" class="input-field">
+                        @for (op of estadoOpcion; track op) {
+                        <option [value]="op">{{ op | titlecase }}</option>
+                        }
+                    </select>
+                </div>
+                <div style="display:flex;align-items:center;gap:.5rem;padding-top:1.4rem">
+                    <input formControlName="activo" type="checkbox" id="chkActivo"
+                        style="width:1rem;height:1rem;accent-color:hsl(var(--primary));cursor:pointer">
+                    <label for="chkActivo" style="font-size:.875rem;font-weight:500;cursor:pointer;margin:0">Activo /
+                        Visible</label>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div
+                style="display:flex;justify-content:flex-end;gap:.75rem;padding-top:.5rem;border-top:1px solid hsl(var(--border))">
+                <button type="button" (click)="cerrarModal()" class="btn btn-ghost">Cancelar</button>
+                <button type="submit" class="btn btn-primary" [disabled]="loadingForm">
+                    @if (loadingForm) {
+                    <lucide-icon name="loader-2" class="animate-spin" size="16"></lucide-icon>
+                    } @else {
+                    <lucide-icon name="save" size="16"></lucide-icon>
+                    }
+                    Guardar Convocatoria
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+}

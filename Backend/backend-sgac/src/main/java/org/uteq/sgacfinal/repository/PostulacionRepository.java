@@ -23,9 +23,26 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     @Query(value = "SELECT * FROM public.sp_listar_postulaciones_por_estudiante(:idEstudiante)", nativeQuery = true)
     List<Object[]> listarPostulacionesPorEstudianteSP(@Param("idEstudiante") Integer idEstudiante);
 
+    @Query("SELECT p FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante")
+    List<Postulacion> findByEstudiante_IdEstudiante(@Param("idEstudiante") Integer idEstudiante);
+
     List<Postulacion> findByConvocatoria_IdConvocatoria(Integer idConvocatoria);
 
+    @Query("SELECT COUNT(p) FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante AND p.activo = true AND p.estadoPostulacion NOT IN ('RECHAZADO')")
+    long contarPostulacionesActivasPorEstudiante(@Param("idEstudiante") Integer idEstudiante);
+
+
     Postulacion findByIdPostulacion(Integer idPostulacion);
+
+    // Lista postulaciones por estado filtradas por carrera de la convocatoria
+    @Query("SELECT p FROM Postulacion p WHERE p.estadoPostulacion = :estado " +
+           "AND p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
+    List<Postulacion> findByEstadoAndCarrera(@Param("estado") String estado,
+                                             @Param("idCarrera") Integer idCarrera);
+
+    // Lista todas las postulaciones de una carrera
+    @Query("SELECT p FROM Postulacion p WHERE p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
+    List<Postulacion> findByCarrera(@Param("idCarrera") Integer idCarrera);
 
 
     @Query(value = "SELECT public.sp_crear_postulacion(:idConv, :idEst, :fecha, :estado, :obs)", nativeQuery = true)

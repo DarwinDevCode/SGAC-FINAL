@@ -1,0 +1,49 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Seguimiento Mensual</h2>
+            <p class="subtitle">Monitoreo de actividades y horas de los ayudantes activos.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando ayudantes...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state" style="padding:3rem 1rem">
+        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600;color:hsl(var(--foreground))">{{ errorMensaje }}</p>
+        <p class="subtitle" style="margin-top:.25rem">El endpoint puede requerir permisos adicionales.</p>
+    </div>
+    } @else if (ayudantes.length === 0) {
+    <div class="info-message">
+        <lucide-icon name="users" size="40" style="opacity:.3"></lucide-icon>
+        <p style="margin-top:.75rem">No hay ayudantes activos en este periodo.</p>
+    </div>
+    } @else {
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Ayudante</th>
+                    <th>Asignatura</th>
+                    <th>Horas Asignadas</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (a of ayudantes; track $index) {
+                <tr>
+                    <td><span class="full-name">{{ a.nombreCompletoUsuario || a.nombres }}</span></td>
+                    <td>{{ a.asignatura || '—' }}</td>
+                    <td>{{ a.horasAyudante || '—' }}</td>
+                    <td><span class="status-pill aprobado">Activo</span></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

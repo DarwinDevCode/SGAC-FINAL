@@ -30,4 +30,7 @@ public interface IPeriodoAcademicoRepository extends JpaRepository<PeriodoAcadem
     Integer desactivarPeriodo(@Param("id") Integer idPeriodo);
 
     List<PeriodoAcademico> findByEstado(String estado);
+
+
+    Optional<PeriodoAcademico> findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc(String estado);
 }

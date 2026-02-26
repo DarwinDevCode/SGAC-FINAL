@@ -1,8 +1,8 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
-import {environment} from '../../../environments/environment';
-import {PostulacionDTO} from '../dto/postulacion';
-import {Observable} from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { PostulacionRequestDTO, PostulacionResponseDTO } from '../dto/postulacion';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +12,7 @@ export class PostulacionService {
   private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
   private apiUrl = `${this.baseUrl}/postulaciones`;
 
-  registrar(request: PostulacionDTO, files: File[], tiposRequisito: number[]): Observable<any> {
+  registrar(request: PostulacionRequestDTO, files: File[], tiposRequisito: number[]): Observable<any> {
     const formData = new FormData();
 
     formData.append('datos', JSON.stringify(request));
@@ -31,12 +31,12 @@ export class PostulacionService {
     return this.http.post(`${this.apiUrl}/registrar`, formData, { params });
   }
 
-  listarPorEstudiante(idEstudiante: number): Observable<PostulacionDTO[]> {
-    return this.http.get<PostulacionDTO[]>(`${this.apiUrl}/mis-postulaciones/${idEstudiante}`);
+  listarPorEstudiante(idEstudiante: number): Observable<PostulacionResponseDTO[]> {
+    return this.http.get<PostulacionResponseDTO[]>(`${this.apiUrl}/mis-postulaciones/${idEstudiante}`);
   }
 
-  listarPorConvocatoria(idConvocatoria: number): Observable<PostulacionDTO[]> {
-    return this.http.get<PostulacionDTO[]>(`${this.apiUrl}/convocatoria/${idConvocatoria}`);
+  listarPorConvocatoria(idConvocatoria: number): Observable<PostulacionResponseDTO[]> {
+    return this.http.get<PostulacionResponseDTO[]>(`${this.apiUrl}/convocatoria/${idConvocatoria}`);
   }
 
   cambiarEstado(idPostulacion: number, estado: string, observacion: string): Observable<any> {

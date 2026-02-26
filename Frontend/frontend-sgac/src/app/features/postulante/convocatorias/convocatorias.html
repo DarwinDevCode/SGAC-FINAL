@@ -1,0 +1,128 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Convocatorias Abiertas</h2>
+            <p class="subtitle">Encuentra y postula a tu próxima posición de ayudantía.</p>
+        </div>
+    </div>
+
+    <div class="search-card">
+        <div class="search-wrapper">
+            <lucide-icon class="search-icon" name="search" size="18"></lucide-icon>
+            <input type="text" [(ngModel)]="busqueda" (ngModelChange)="filtrarConvocatorias($event)"
+                placeholder="Buscar por asignatura o periodo..." class="input-field search-input" />
+        </div>
+    </div>
+
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Asignatura</th>
+                    <th>Periodo Académico</th>
+                    <th>Fechas</th>
+                    <th>Cupos</th>
+                    <th class="text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (loading) {
+                <tr>
+                    <td colspan="5">Cargando convocatorias...</td>
+                </tr>
+                } @else {
+                @for (conv of convocatoriasFiltradas; track conv.idConvocatoria) {
+                <tr>
+                    <td>
+                        <div class="conv-info">
+                            <div class="conv-title">{{ conv.nombreAsignatura }}</div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="periodo-badge">{{ conv.nombrePeriodo }}</span>
+                    </td>
+                    <td>
+                        <div class="fechas-info">
+                            <span class="fecha-item"><lucide-icon name="calendar" size="14"></lucide-icon> Publicada: {{
+                                conv.fechaPublicacion }}</span>
+                            <span class="fecha-item cierre"><lucide-icon name="clock" size="14"></lucide-icon> Cierra:
+                                {{ conv.fechaCierre }}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="cupos-indicator" [class.few]="(conv.cuposDisponibles || 0) <= 2">
+                            {{ conv.cuposDisponibles }} plazas
+                        </span>
+                    </td>
+                    <td class="text-right">
+                        <button type="button" class="btn-primary-small" [disabled]="yaPostulado"
+                            [title]="yaPostulado ? 'Ya tienes una postulación activa en curso' : ''"
+                            [class.disabled-btn]="yaPostulado" (click)="abrirModalPostulacion(conv)">
+                            Postular
+                            <lucide-icon name="arrow-right" size="16"></lucide-icon>
+                        </button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="5" class="empty-state">No hay convocatorias disponibles en este momento.</td>
+                </tr>
+                }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Component -->
+    @if (mostrarModal && convocatoriaSeleccionada) {
+    <div class="modal-backdrop">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div>
+                    <h3>Formulario de Postulación</h3>
+                    <p class="subtitle-modal">{{ convocatoriaSeleccionada.nombreAsignatura }}</p>
+                </div>
+                <button type="button" class="btn-icon" (click)="cerrarModal()">
+                    <lucide-icon name="x" size="18"></lucide-icon>
+                </button>
+            </div>
+
+            <form class="user-form" (submit)="enviarPostulacion(); $event.preventDefault()">
+
+                <div class="form-divider full-width">Requisitos Obligatorios</div>
+                <p class="help-text full-width">Por favor, adjunte los documentos requeridos en formato PDF
+                    correspondiente a cada requisito.</p>
+
+                @for (req of tiposRequisito; track req.idTipoRequisitoPostulacion) {
+                <div class="form-group full-width requisito-card">
+                    <div class="requisito-header">
+                        <label>{{ req.nombreRequisito }}</label>
+                        <span class="requisito-desc">{{ req.descripcion }}</span>
+                    </div>
+                    <input type="file" class="input-file"
+                        (change)="onFileChange($event, req.idTipoRequisitoPostulacion)" accept=".pdf,.doc,.docx"
+                        required />
+                </div>
+                }
+
+                <div class="form-divider full-width">Información Adicional</div>
+                <div class="form-group full-width">
+                    <label>Observaciones (Opcional)</label>
+                    <textarea [(ngModel)]="observacionesGenerales" name="observaciones"
+                        class="input-field textarea-field"
+                        placeholder="Añade algún comentario o información extra sobre tu perfil..." rows="3">
+            </textarea>
+                </div>
+
+                <div class="form-footer full-width">
+                    <button type="button" class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-primary">
+                        <lucide-icon name="send" size="18"></lucide-icon>
+                        Enviar Postulación
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+</div>

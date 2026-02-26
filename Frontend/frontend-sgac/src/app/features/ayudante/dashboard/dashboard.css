@@ -1,0 +1,77 @@
+.gestion-container {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-header {
+    margin-bottom: 2.5rem;
+}
+
+.title {
+    font-size: 1.875rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.welcome-banner {
+    min-height: 240px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.quick-action-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-action-card:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.action-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.action-title {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1.05rem;
+}
+
+.action-desc {
+    font-size: 0.8rem;
+}
+
+.info-message {
+    text-align: center;
+    padding: 5rem 0;
+    color: #64748b;
+    font-weight: 500;
+}

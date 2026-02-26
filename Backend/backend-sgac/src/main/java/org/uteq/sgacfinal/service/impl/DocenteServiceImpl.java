@@ -82,7 +82,7 @@ public class DocenteServiceImpl implements IDocenteService {
 
     @Override
     public List<DocenteResponseDTO> listarDocentesActivos() {
-        return docenteRepository.findAllActive().stream()
+        return docenteRepository.findAll().stream()
                 .map(this::mapearADTO)
                 .collect(Collectors.toList());
     }

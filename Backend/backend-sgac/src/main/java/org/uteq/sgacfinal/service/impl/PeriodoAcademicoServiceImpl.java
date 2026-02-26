@@ -77,8 +77,11 @@ public class PeriodoAcademicoServiceImpl implements IPeriodoAcademicoService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PeriodoAcademicoResponseDTO obtenerPeriodoActivo() {
-        return null;
+        return periodoRepository.findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc("ACTIVO")
+                .map(this::mapearADTO)
+                .orElse(null);
     }
 
 

@@ -1,0 +1,116 @@
+<div class="gestion-container">
+    <div class="header-with-back">
+        <a routerLink="/postulante/mis-postulaciones" class="back-link" title="Volver a Mis Postulaciones">
+            <lucide-icon name="arrow-left" size="20"></lucide-icon>
+        </a>
+        <div class="title-container">
+            <h2 class="title">Evaluación de Méritos</h2>
+            <p class="subtitle">Detalles de calificación para la Postulación #{{ idPostulacion }}</p>
+        </div>
+    </div>
+
+    <!-- Stepper (Fixed at Phase 2: Méritos) -->
+    <div class="stepper-container">
+        <ul class="stepper">
+            <li class="completed">
+                <div class="step-icon"><lucide-icon name="clipboard-check" size="16"></lucide-icon></div>
+                <div class="step-label">Postulación</div>
+            </li>
+            <li class="stepper-line active-line"></li>
+            <li class="active">
+                <div class="step-icon"><lucide-icon name="award" size="16"></lucide-icon></div>
+                <div class="step-label">Méritos</div>
+            </li>
+            <li class="stepper-line"></li>
+            <li>
+                <div class="step-icon"><lucide-icon name="users" size="16"></lucide-icon></div>
+                <div class="step-label">Oposición</div>
+            </li>
+            <li class="stepper-line"></li>
+            <li>
+                <div class="step-icon"><lucide-icon name="flag" size="16"></lucide-icon></div>
+                <div class="step-label">Resultados</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content-body">
+        @if (loading) {
+        <div class="info-message">
+            <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+            <p style="margin-top:.75rem">Cargando detalles de méritos...</p>
+        </div>
+        } @else if (errorMensaje) {
+        <div class="info-message warning-state">
+            <lucide-icon name="alert-circle" size="40"></lucide-icon>
+            <p style="margin-top:.75rem; font-weight: 500;">{{ errorMensaje }}</p>
+            <p class="subtitle mt-2">Esta fase puede estar pendiente de revisión por parte de la comisión evaluadora.
+            </p>
+        </div>
+        } @else if (evaluacion) {
+        <div class="evaluacion-grid">
+
+            <div class="summary-card">
+                <div class="score-circle">
+                    <span class="score-value">{{ getTotal() | number:'1.2-2' }}</span>
+                    <span class="score-max">/ 100</span>
+                </div>
+                <h3 class="score-title">Puntaje Total de Méritos</h3>
+                <p class="score-desc">Calificación consolidada por el tribunal evaluador.</p>
+                <div class="score-date">Evaluado el: {{ evaluacion.fechaEvaluacion | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+            <div class="details-card">
+                <h3 class="details-title">Desglose de Calificaciones</h3>
+
+                <div class="score-row">
+                    <div class="score-label">
+                        <lucide-icon name="book-open" size="18" class="text-blue"></lucide-icon>
+                        <div>
+                            <strong>Nota Asignatura</strong>
+                            <p>Promedio en la materia a la que postula</p>
+                        </div>
+                    </div>
+                    <div class="score-points">{{ evaluacion.notaAsignatura | number:'1.2-2' }}</div>
+                </div>
+
+                <div class="score-row">
+                    <div class="score-label">
+                        <lucide-icon name="layers" size="18" class="text-purple"></lucide-icon>
+                        <div>
+                            <strong>Nota Semestres</strong>
+                            <p>Promedio general acumulado</p>
+                        </div>
+                    </div>
+                    <div class="score-points">{{ evaluacion.notaSemestres | number:'1.2-2' }}</div>
+                </div>
+
+                <div class="score-row">
+                    <div class="score-label">
+                        <lucide-icon name="calendar-check" size="18" class="text-green"></lucide-icon>
+                        <div>
+                            <strong>Eventos/Capacitaciones</strong>
+                            <p>Puntaje por seminarios o cursos afines</p>
+                        </div>
+                    </div>
+                    <div class="score-points">{{ evaluacion.notaEventos | number:'1.2-2' }}</div>
+                </div>
+
+                <div class="score-row">
+                    <div class="score-label">
+                        <lucide-icon name="briefcase" size="18" class="text-orange"></lucide-icon>
+                        <div>
+                            <strong>Experiencia Previa</strong>
+                            <p>Puntaje por ayudantías anteriores</p>
+                        </div>
+                    </div>
+                    <div class="score-points">{{ evaluacion.notaExperiencia | number:'1.2-2' }}</div>
+                </div>
+
+
+            </div>
+
+        </div>
+        }
+    </div>
+</div>

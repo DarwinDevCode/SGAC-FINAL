@@ -1,0 +1,57 @@
+@import '../estado-postulacion/estado-postulacion.css';
+
+/* Custom extensions for Resultados */
+.results-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    margin: 0 -1.5rem -1.5rem -1.5rem;
+    padding: 1rem 1.5rem;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+}
+
+.score-summary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.score-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+    letter-spacing: 0.05em;
+}
+
+.score-value-container {
+    display: flex;
+    align-items: baseline;
+    gap: 0.2rem;
+}
+
+.score-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.score-max {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.score-pending {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #94a3b8;
+}
+
+.card-actions {
+    border-top: none;
+    padding-top: 0;
+}

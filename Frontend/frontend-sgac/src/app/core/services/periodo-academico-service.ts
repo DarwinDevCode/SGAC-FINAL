@@ -1,8 +1,19 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { PeriodoAcademicoDTO } from '../dto/periodo-academico';
 
-@Injectable({
-  providedIn: 'root',
-})
+const BASE = 'http://localhost:8080/api/periodos-academicos';
+
+@Injectable({ providedIn: 'root' })
 export class PeriodoAcademicoService {
-  
+  private http = inject(HttpClient);
+
+  listarTodos(): Observable<PeriodoAcademicoDTO[]> {
+    return this.http.get<PeriodoAcademicoDTO[]>(BASE);
+  }
+
+  obtenerActivo(): Observable<PeriodoAcademicoDTO> {
+    return this.http.get<PeriodoAcademicoDTO>(`${BASE}/activo`);
+  }
 }

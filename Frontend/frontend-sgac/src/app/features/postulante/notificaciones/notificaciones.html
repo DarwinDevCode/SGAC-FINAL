@@ -1,0 +1,58 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Notificaciones</h2>
+            <p class="subtitle">Alertas y avisos del sistema SGAC.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando notificaciones...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="bell-off" size="48" class="text-slate-300 mx-auto"></lucide-icon>
+        <p class="mt-4 font-medium text-slate-600">{{ errorMensaje }}</p>
+    </div>
+    } @else if (notificaciones.length === 0) {
+    <div class="empty-state">
+        <lucide-icon name="bell" size="48" class="text-slate-300 mx-auto"></lucide-icon>
+        <p class="mt-4 font-medium text-slate-600">No tienes notificaciones nuevas.</p>
+        <p class="text-sm text-slate-500 mt-1">Cuando haya actualizaciones en tus postulaciones aparecerán aquí.</p>
+    </div>
+    } @else {
+    <div class="notifications-list">
+        @for (n of notificaciones; track n.idNotificacion) {
+        <div class="notif-card" [class.unread]="!n.leida">
+            <div class="notif-icon-wrapper" [class.unread-icon]="!n.leida">
+                <lucide-icon name="bell" size="20"></lucide-icon>
+            </div>
+
+            <div class="notif-content">
+                <p class="notif-message">{{ n.mensaje }}</p>
+                <p class="notif-date">
+                    <lucide-icon name="calendar" size="12" class="inline-mr"></lucide-icon>
+                    {{ n.fechaEnvio | date:'dd/MM/yyyy • HH:mm' }}
+                </p>
+            </div>
+
+            <div class="notif-actions">
+                @if (!n.leida) {
+                <button (click)="marcarLeida(n.idNotificacion)" class="btn-mark-read" title="Marcar como leída">
+                    <lucide-icon name="check" size="16" class="inline-mr"></lucide-icon>
+                    Leída
+                </button>
+                } @else {
+                <span class="status-read">
+                    <lucide-icon name="check-check" size="16" class="inline-mr"></lucide-icon>
+                    Leída
+                </span>
+                }
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>

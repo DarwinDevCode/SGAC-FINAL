@@ -48,7 +48,17 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     @Override
     @Transactional(readOnly = true)
     public List<ConvocatoriaResponseDTO> findAll() {
-        return convocatoriaRepo.findAll().stream()
+        // Encontrar el periodo académico activo actual
+        PeriodoAcademico periodoActivo = periodoRepo.findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc("ACTIVO")
+                .orElse(null);
+
+        if (periodoActivo == null) {
+            return List.of(); // Si no hay periodo activo, no hay convocatorias que mostrar
+        }
+
+        return convocatoriaRepo.findByPeriodoAcademico_IdPeriodoAcademico(periodoActivo.getIdPeriodoAcademico())
+                .stream()
+                .filter(Convocatoria::getActivo) // Solo convocatorias activas
                 .map(ConvocatoriaMapper::toDTO)
                 .collect(Collectors.toList());
     }

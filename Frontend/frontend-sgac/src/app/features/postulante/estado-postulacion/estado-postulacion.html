@@ -1,0 +1,93 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Mis Postulaciones</h2>
+            <p class="subtitle">Estado de tus postulaciones a convocatorias de ayudantía.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando postulaciones...</p>
+    </div>
+    } @else if (postulaciones.length === 0) {
+    <div class="info-message" style="border:2px dashed hsl(var(--border));border-radius:var(--radius)">
+        <lucide-icon name="folder-open" size="40" style="opacity:.3"></lucide-icon>
+        <p style="margin-top:.75rem">Aún no tienes postulaciones registradas.</p>
+        <a routerLink="/postulante/convocatorias" class="btn btn-primary" style="margin-top:1rem">
+            Ver Convocatorias
+        </a>
+    </div>
+    } @else {
+    <div style="display:flex;flex-direction:column;gap:1.5rem">
+        @for (p of postulaciones; track p.idPostulacion) {
+        <div class="postulacion-card">
+            <div class="card-header">
+                <div style="display:flex;gap:1rem;align-items:flex-start">
+                    <div class="stat-icon green" style="width:3rem;height:3rem;font-size:1.1rem">
+                        <lucide-icon name="file-text" size="24"></lucide-icon>
+                    </div>
+                    <div>
+                        <h3 style="font-weight:600;font-size:1.1rem;margin:0;color:hsl(var(--foreground))">{{
+                            p.asignaturaConvocatoria }}</h3>
+                        <p class="subtitle" style="margin:.2rem 0 0 0">Postulación #{{ p.idPostulacion }} · {{
+                            p.fechaPostulacion | date:'dd/MM/yyyy' }}</p>
+                        @if (p.observaciones) {
+                        <p class="subtitle observations">"{{ p.observaciones }}"</p>
+                        }
+                    </div>
+                </div>
+                <div class="status-container">
+                    <span [ngClass]="{
+                        'aprobado': p.estadoPostulacion === 'APROBADO',
+                        'rechazado': p.estadoPostulacion === 'RECHAZADO',
+                        'pendiente': p.estadoPostulacion === 'PENDIENTE',
+                        'info': p.estadoPostulacion === 'EN_EVALUACION' || p.estadoPostulacion === 'MERITOS_EVALUADOS' || p.estadoPostulacion === 'OPOSICION_EVALUADA'
+                    }" class="status-pill big">{{ p.estadoPostulacion }}</span>
+                </div>
+            </div>
+
+            <div class="stepper-container">
+                <ul class="stepper">
+                    <li [class.active]="getPhase(p.estadoPostulacion) >= 1"
+                        [class.completed]="getPhase(p.estadoPostulacion) > 1">
+                        <div class="step-icon"><lucide-icon name="clipboard-check" size="16"></lucide-icon></div>
+                        <div class="step-label">Postulación</div>
+                    </li>
+                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 1"></li>
+                    <li [class.active]="getPhase(p.estadoPostulacion) >= 2"
+                        [class.completed]="getPhase(p.estadoPostulacion) > 2">
+                        <div class="step-icon"><lucide-icon name="award" size="16"></lucide-icon></div>
+                        <div class="step-label">Méritos</div>
+                    </li>
+                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 2"></li>
+                    <li [class.active]="getPhase(p.estadoPostulacion) >= 3"
+                        [class.completed]="getPhase(p.estadoPostulacion) > 3">
+                        <div class="step-icon"><lucide-icon name="users" size="16"></lucide-icon></div>
+                        <div class="step-label">Oposición</div>
+                    </li>
+                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 3"></li>
+                    <li [class.active]="getPhase(p.estadoPostulacion) >= 4"
+                        [class.completed]="getPhase(p.estadoPostulacion) > 4">
+                        <div class="step-icon"><lucide-icon name="flag" size="16"></lucide-icon></div>
+                        <div class="step-label">Resultados</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card-actions">
+                <a [routerLink]="['/postulante/meritos', p.idPostulacion]" class="btn-secondary-small">
+                    <lucide-icon name="award" size="16"></lucide-icon>
+                    Ver Méritos
+                </a>
+                <a [routerLink]="['/postulante/oposicion', p.idPostulacion]" class="btn-secondary-small">
+                    <lucide-icon name="users" size="16"></lucide-icon>
+                    Ver Oposición
+                </a>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>

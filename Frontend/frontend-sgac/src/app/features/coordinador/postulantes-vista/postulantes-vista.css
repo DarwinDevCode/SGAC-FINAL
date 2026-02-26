@@ -1,0 +1,230 @@
+/* --------------------------------------------------------
+   Detalles de la Convocatoria / Postulantes View
+   -------------------------------------------------------- */
+
+:host {
+    display: block;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+.gestion-container {
+    padding: 3rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* Base Loader / Empty / Errors */
+.pv-empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    color: #94a3b8;
+    font-size: .95rem;
+}
+
+.pv-alert {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 1rem 1.25rem;
+    border-radius: .5rem;
+    font-size: .9rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Spinner */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+    display: block;
+    margin: 0 auto;
+}
+
+/* ----------------------------------
+   Details Card (from screenshot)
+   ---------------------------------- */
+.pv-details-card {
+    background: #fff;
+    border-radius: .75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, .03);
+    border: 1px solid #f1f5f9;
+    padding: 2rem 2.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Header */
+.pv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.pv-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.pv-back-link {
+    color: #2563eb;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color .15s;
+}
+
+.pv-back-link:hover {
+    text-decoration: underline;
+    color: #1d4ed8;
+}
+
+/* Grid layout */
+.pv-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3.5rem;
+}
+
+@media (max-width: 640px) {
+    .pv-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .gestion-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .pv-details-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Columns */
+.pv-column {}
+
+.pv-col-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: #334155;
+    margin: 0 0 1.25rem;
+    padding-bottom: .6rem;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.pv-col-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Info Labels */
+.pv-info label {
+    display: block;
+    font-size: .75rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: .25rem;
+}
+
+.pv-info p {
+    margin: 0;
+    font-size: .9rem;
+    color: #0f172a;
+    font-weight: 500;
+}
+
+.pv-info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Badges */
+.pv-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.pv-badge.done {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.pv-badge.open {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.pv-badge.eval {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.pv-badge.closed {
+    background: #fef9c3;
+    color: #92400e;
+}
+
+/* Table badges */
+.pv-badge.green {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.pv-badge.red {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.pv-badge.yellow {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+/* ----------------------------------
+   Table fallback styles
+   ---------------------------------- */
+.table-card {
+    background: #fff;
+    border-radius: .75rem;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+    padding: .85rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: .875rem;
+}
+
+.data-table tbody tr:hover {
+    background: #f8fafc;
+}

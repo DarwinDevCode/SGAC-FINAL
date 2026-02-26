@@ -1,0 +1,72 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Mi Gestión</h2>
+            <p class="subtitle" *ngIf="ayudanteData">
+                {{ ayudanteData.nombreCompletoUsuario }} · Ayudante de Cátedra
+            </p>
+        </div>
+        <span class="badge violet">AYUDANTE</span>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando perfil...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state" style="padding:3rem 1rem">
+        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else if (ayudanteData) {
+
+    <!-- Stats -->
+    <div class="stats-grid cols-2">
+        <div class="stat-card">
+            <div class="stat-icon violet"><lucide-icon name="clock" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ ayudanteData.horasAyudante }}</div>
+                <div class="stat-label">Horas Asignadas</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon green"><lucide-icon name="trending-up" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ porcentajeHoras }}%</div>
+                <div class="stat-label">Progreso Ayudantía</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="stat-card" style="flex-direction:column;align-items:flex-start;gap:.75rem;margin-bottom:1.5rem">
+        <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+            <span style="font-size:.875rem;font-weight:600;color:hsl(var(--foreground))">Progreso de Horas</span>
+            <span style="font-size:.875rem;font-weight:700;color:#7c3aed">{{ ayudanteData.horasAyudante }} / 160
+                hrs</span>
+        </div>
+        <div class="progress-track" style="width:100%">
+            <div class="progress-fill violet" [style.width]="porcentajeHoras + '%'"></div>
+        </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="actions-grid cols-2">
+        <a routerLink="/ayudante/actividades" class="action-card violet">
+            <div class="action-icon violet"><lucide-icon name="calendar-clock" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Registro de Actividades</div>
+                <div class="action-desc">Registrar sesiones de ayudantía</div>
+            </div>
+        </a>
+        <a routerLink="/ayudante/informes" class="action-card blue">
+            <div class="action-icon blue"><lucide-icon name="file-text" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title">Mis Informes</div>
+                <div class="action-desc">Informes mensuales de actividades</div>
+            </div>
+        </a>
+    </div>
+    }
+</div>

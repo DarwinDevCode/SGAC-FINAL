@@ -4,16 +4,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.LoginRequestDTO;
 import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.MensajeResponseDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
 import org.uteq.sgacfinal.security.JwtService;
-import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.IAuthService;
 import org.uteq.sgacfinal.service.IUsuariosService;
 
@@ -26,7 +22,6 @@ public class AuthController {
     private final IAuthService authService;
     private final IUsuariosService usuarioService;
     private final JwtService jwtService;
-    private final AuthenticationManager authenticationManager;
 
     private ResponseEntity<MensajeResponseDTO> exito(String mensaje) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -77,9 +72,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<UsuarioResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsuario(), request.getPassword())
-        );
+        // La función fn_login_sgac verifica las credenciales con pgcrypto crypt()
         UsuarioResponseDTO usuario = authService.loginUsuario(request);
         String token = jwtService.generateToken(usuario.getNombreUsuario(), usuario.getRolActual());
         usuario.setToken(token);
@@ -105,7 +98,4 @@ public class AuthController {
         usuarioService.cambiarEstadoRol(idUsuario, idRol);
         return ResponseEntity.noContent().build();
     }
-
-
-
 }
