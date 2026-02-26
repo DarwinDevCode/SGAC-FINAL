@@ -21,7 +21,6 @@ import { PostulantesVistaComponent as DecanoPostulantes } from './features/decan
 
 // Coordinador
 import { DashboardComponent as CoordinadorDashboard } from './features/coordinador/dashboard/dashboard.component';
-import { ConvocatoriasVistaComponent as CoordinadorConvocatoriasVista } from './features/coordinador/convocatorias-vista/convocatorias-vista.component';
 import { CoordinadorConvocatoriasComponent } from './features/coordinador/convocatorias/convocatorias.component';
 import { PostulantesVistaComponent as CoordinadorPostulantes } from './features/coordinador/postulantes-vista/postulantes-vista.component';
 import { ValidacionesComponent } from './features/coordinador/validaciones/validaciones.component';
@@ -69,7 +68,6 @@ export const routes: Routes = [
       // Coordinador
       { path: 'coordinador/dashboard', component: CoordinadorDashboard },
       { path: 'coordinador/convocatorias', component: CoordinadorConvocatoriasComponent },
-      { path: 'coordinador/convocatorias-vista', component: CoordinadorConvocatoriasVista },
       { path: 'coordinador/postulantes/:idConvocatoria', component: CoordinadorPostulantes },
       { path: 'coordinador/validaciones', component: ValidacionesComponent },
       { path: 'coordinador/seguimiento', component: SeguimientoComponent },
