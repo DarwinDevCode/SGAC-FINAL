@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { TipoRequisitoPostulacionResponseDTO, PostulacionResponseDTO } from '../dto/postulacion';
@@ -39,11 +39,13 @@ export class PostulanteService {
             formData.append('archivos', archivo);
         });
 
+        // tiposRequisito va como query param (@RequestParam en Spring)
+        let params = new HttpParams();
         tiposRequisito.forEach((idRequisito) => {
-            formData.append('tiposRequisito', idRequisito.toString());
+            params = params.append('tiposRequisito', idRequisito.toString());
         });
 
-        return this.http.post(`${API_POSTULACIONES}/registrar`, formData);
+        return this.http.post(`${API_POSTULACIONES}/registrar`, formData, { params, responseType: 'text' });
     }
 
     // Evaluaciones

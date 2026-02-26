@@ -45,7 +45,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   textoBusqueda = '';
   idCarreraActual: number | null = null;
 
-  // Modal
   mostrarModal = false;
   modoEdicion = false;
   loadingForm = false;
@@ -101,8 +100,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
             this.periodosMap.set(periodoActivo.idPeriodoAcademico, periodoActivo.nombrePeriodo);
             this.form.patchValue({ idPeriodoAcademico: periodoActivo.idPeriodoAcademico });
           }
-
-          // Load asignaturas BY carrera if we have idCarrera
           const asigUrl = this.idCarreraActual ? `${API_ASIG}/carrera/${this.idCarreraActual}` : `${API_ASIG}`;
           return forkJoin({
             convocatorias: this.coordinadorService.listarConvocatoriasPorCarrera(this.idCarreraActual ?? 0).pipe(catchError(() => of([]))),
@@ -160,8 +157,7 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   guardar() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loadingForm = true;
-    const payload = {
-      ...this.form.getRawValue(),
+    const payload = {...this.form.getRawValue(),
       idConvocatoria: this.modoEdicion ? this.convocatoriaEditId : undefined,
       idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? this.form.getRawValue().idPeriodoAcademico,
     };

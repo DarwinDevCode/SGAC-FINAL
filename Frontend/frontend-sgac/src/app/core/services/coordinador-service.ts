@@ -6,6 +6,14 @@ import { CoordinadorResponseDTO } from '../dto/coordinador';
 import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { PostulacionResponseDTO } from '../dto/postulacion';
 
+export interface ComisionSeleccionDTO {
+  idComisionSeleccion?: number;
+  idConvocatoria: number;
+  nombreComision: string;
+  fechaConformacion?: string;
+  activo?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -16,19 +24,48 @@ export class CoordinadorService {
   private readonly API_COORDINADORES = `${this.baseUrl}/coordinadores`;
   private readonly API_CONVOCATORIAS = `${this.baseUrl}/convocatorias`;
   private readonly API_POSTULACIONES = `${this.baseUrl}/postulaciones`;
+  private readonly API_COMISIONES = `${this.baseUrl}/comisiones`;
 
   obtenerCoordinadorPorUsuario(idUsuario: number): Observable<CoordinadorResponseDTO> {
     return this.http.get<CoordinadorResponseDTO>(`${this.API_COORDINADORES}/usuario/${idUsuario}`);
   }
 
   listarConvocatoriasPorCarrera(idCarrera: number): Observable<ConvocatoriaDTO[]> {
-    // Note: The backend ConvocatoriaController might need a specific endpoint for carrera filtering.
-    // However, looking at listing endpoints, we might have to filter manually if it doesn't exist.
-    // For now, let's use the general list and filter if needed, or assume a backend filter if available.
     return this.http.get<ConvocatoriaDTO[]>(`${this.API_CONVOCATORIAS}/listar-vista`);
   }
 
   listarPostulacionesPorConvocatoria(idConvocatoria: number): Observable<PostulacionResponseDTO[]> {
     return this.http.get<PostulacionResponseDTO[]>(`${this.API_POSTULACIONES}/convocatoria/${idConvocatoria}`);
+  }
+
+  listarPostulacionesPorCarrera(idCarrera: number): Observable<PostulacionResponseDTO[]> {
+    return this.http.get<PostulacionResponseDTO[]>(`${this.API_POSTULACIONES}/carrera/${idCarrera}`);
+  }
+
+  listarPendientesPorCarrera(idCarrera: number): Observable<PostulacionResponseDTO[]> {
+    return this.http.get<PostulacionResponseDTO[]>(`${this.API_POSTULACIONES}/pendientes/carrera/${idCarrera}`);
+  }
+
+  cambiarEstadoPostulacion(idPostulacion: number, estado: string, observacion: string): Observable<any> {
+    return this.http.put(`${this.API_POSTULACIONES}/cambiar-estado/${idPostulacion}`,
+      null, { params: { estado, observacion }, responseType: 'text' });
+  }
+
+  // Comisión de selección
+  crearComision(datos: ComisionSeleccionDTO): Observable<ComisionSeleccionDTO> {
+    return this.http.post<ComisionSeleccionDTO>(`${this.API_COMISIONES}/crear`, datos);
+  }
+
+  listarComisionesPorConvocatoria(idConvocatoria: number): Observable<ComisionSeleccionDTO[]> {
+    return this.http.get<ComisionSeleccionDTO[]>(`${this.API_COMISIONES}/convocatoria/${idConvocatoria}`);
+  }
+
+  // Requisitos adjuntos (documentos del postulante)
+  listarDocumentosPorPostulacion(idPostulacion: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/requisitos-adjuntos/postulacion/${idPostulacion}`);
+  }
+
+  getUrlDescargaDocumento(idRequisito: number): string {
+    return `${this.baseUrl}/requisitos-adjuntos/descargar/${idRequisito}`;
   }
 }

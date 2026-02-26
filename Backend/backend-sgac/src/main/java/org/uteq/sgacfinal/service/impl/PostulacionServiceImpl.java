@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
+import org.uteq.sgacfinal.entity.Estudiante;
 import org.uteq.sgacfinal.entity.Postulacion;
+import org.uteq.sgacfinal.repository.EstudianteRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IPostulacionService;
@@ -14,6 +16,7 @@ import org.uteq.sgacfinal.service.IPostulacionService;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class PostulacionServiceImpl implements IPostulacionService {
 
     private final PostulacionRepository postulacionRepository;
+    private final EstudianteRepository estudianteRepository;
     private final INotificacionService notificacionService;
 
     @Override
@@ -78,8 +82,14 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PostulacionResponseDTO> listarPorEstudiante(Integer idEstudiante) {
-        List<Object[]> resultados = postulacionRepository.listarPostulacionesPorEstudianteSP(idEstudiante);
+    public List<PostulacionResponseDTO> listarPorEstudiante(Integer idUsuario) {
+        // Si el usuario no tiene registro de estudiante, devolver lista vacía
+        Optional<Estudiante> estudianteOpt = estudianteRepository.findByUsuario_IdUsuario(idUsuario);
+        if (estudianteOpt.isEmpty()) {
+            return List.of();
+        }
+
+        List<Object[]> resultados = postulacionRepository.listarPostulacionesPorEstudianteSP(estudianteOpt.get().getIdEstudiante());
 
         return resultados.stream()
                 .map(this::mapearDesdeObjectArray)
@@ -92,6 +102,22 @@ public class PostulacionServiceImpl implements IPostulacionService {
     @Transactional(readOnly = true)
     public List<PostulacionResponseDTO> listarPorConvocatoria(Integer idConvocatoria) {
         return postulacionRepository.findByConvocatoria_IdConvocatoria(idConvocatoria).stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostulacionResponseDTO> listarPorCarrera(Integer idCarrera) {
+        return postulacionRepository.findByCarrera(idCarrera).stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostulacionResponseDTO> listarPendientesPorCarrera(Integer idCarrera) {
+        return postulacionRepository.findByEstadoAndCarrera("PENDIENTE", idCarrera).stream()
                 .map(this::mapearADTO)
                 .collect(Collectors.toList());
     }
@@ -153,14 +179,19 @@ public class PostulacionServiceImpl implements IPostulacionService {
     @Transactional
     public String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito) {
         try {
+            // El frontend envía idUsuario, resolvemos el idEstudiante real
+            Estudiante estudiante = estudianteRepository.findByUsuario_IdUsuario(request.getIdEstudiante())
+                    .orElseThrow(() -> new RuntimeException("Estudiante no encontrado para el usuario con ID: " + request.getIdEstudiante()));
+
             Integer idPostulacion = postulacionRepository.crearPostulacion(
                     request.getIdConvocatoria(),
-                    request.getIdEstudiante(),
+                    estudiante.getIdEstudiante(),
                     new java.sql.Date(System.currentTimeMillis()),
                     "PENDIENTE",
                     request.getObservaciones()
             );
-            if (idPostulacion == -1) throw new RuntimeException("Error al crear la postulación");
+            if (idPostulacion == null || idPostulacion == -1)
+                throw new RuntimeException("Error al crear la postulación — el SP devolvió -1");
 
             for (int i = 0; i < archivos.size(); i++) {
                 MultipartFile archivo = archivos.get(i);
@@ -175,7 +206,8 @@ public class PostulacionServiceImpl implements IPostulacionService {
                             archivo.getOriginalFilename(),
                             new java.sql.Date(System.currentTimeMillis()));
 
-                    if (idRequisito == -1) throw new RuntimeException("Error al guardar el archivo: " + archivo.getOriginalFilename());
+                    if (idRequisito == null || idRequisito == -1)
+                        throw new RuntimeException("Error al guardar el archivo: " + archivo.getOriginalFilename());
                 }
             }
 

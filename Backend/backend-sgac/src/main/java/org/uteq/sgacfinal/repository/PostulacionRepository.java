@@ -27,6 +27,16 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
 
     Postulacion findByIdPostulacion(Integer idPostulacion);
 
+    // Lista postulaciones por estado filtradas por carrera de la convocatoria
+    @Query("SELECT p FROM Postulacion p WHERE p.estadoPostulacion = :estado " +
+           "AND p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
+    List<Postulacion> findByEstadoAndCarrera(@Param("estado") String estado,
+                                             @Param("idCarrera") Integer idCarrera);
+
+    // Lista todas las postulaciones de una carrera
+    @Query("SELECT p FROM Postulacion p WHERE p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
+    List<Postulacion> findByCarrera(@Param("idCarrera") Integer idCarrera);
+
 
     @Query(value = "SELECT public.sp_crear_postulacion(:idConv, :idEst, :fecha, :estado, :obs)", nativeQuery = true)
     Integer crearPostulacion(

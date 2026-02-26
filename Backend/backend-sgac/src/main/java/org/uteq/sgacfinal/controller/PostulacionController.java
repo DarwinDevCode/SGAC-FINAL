@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.service.ITipoRequisitoPostulacionService;
-import tools.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -71,6 +71,24 @@ public class PostulacionController {
             return ResponseEntity.ok(postulacionService.listarPorConvocatoria(idConvocatoria));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar postulaciones: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/carrera/{idCarrera}")
+    public ResponseEntity<?> listarPorCarrera(@PathVariable Integer idCarrera) {
+        try {
+            return ResponseEntity.ok(postulacionService.listarPorCarrera(idCarrera));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/pendientes/carrera/{idCarrera}")
+    public ResponseEntity<?> listarPendientesPorCarrera(@PathVariable Integer idCarrera) {
+        try {
+            return ResponseEntity.ok(postulacionService.listarPendientesPorCarrera(idCarrera));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar pendientes: " + e.getMessage());
         }
     }
 }

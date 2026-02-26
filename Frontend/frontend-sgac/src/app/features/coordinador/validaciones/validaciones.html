@@ -13,15 +13,17 @@
     </div>
     }
 
+    @if (errorMensaje) {
+    <div class="alert-banner error">
+        <lucide-icon name="alert-circle" size="18"></lucide-icon>
+        {{ errorMensaje }}
+    </div>
+    }
+
     @if (loading) {
     <div class="info-message">
         <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
         <p style="margin-top:.75rem">Cargando postulaciones...</p>
-    </div>
-    } @else if (errorMensaje) {
-    <div class="error-state">
-        <lucide-icon name="alert-circle" size="48"></lucide-icon>
-        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
     </div>
     } @else {
 
@@ -44,6 +46,7 @@
                     <th>Convocatoria</th>
                     <th>Fecha</th>
                     <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -54,6 +57,12 @@
                     <td>{{ p.asignaturaConvocatoria }}</td>
                     <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
                     <td><span class="status-pill pendiente">{{ p.estadoPostulacion }}</span></td>
+                    <td>
+                        <button class="btn-primary btn-sm" (click)="abrirModal(p)">
+                            <lucide-icon name="check-square" size="14"></lucide-icon>
+                            Revisar
+                        </button>
+                    </td>
                 </tr>
                 }
             </tbody>
@@ -62,3 +71,88 @@
     </div>
     }
 </div>
+
+<!-- Modal de decisión — el backdrop centra el modal-box dentro de sí mismo -->
+@if (mostrarModal && postulacionSeleccionada) {
+<div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-box" style="max-width:480px" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 style="font-size:1rem;font-weight:700;margin:0">Revisar Postulación</h3>
+            <button class="btn-icon" (click)="cerrarModal()">
+                <lucide-icon name="x" size="18"></lucide-icon>
+            </button>
+        </div>
+        <div style="padding:1.5rem">
+            <p style="margin-bottom:.75rem;font-size:.9rem">
+                <strong>Estudiante:</strong> {{ postulacionSeleccionada.nombreCompletoEstudiante }}
+            </p>
+            <p style="margin-bottom:1.25rem;font-size:.9rem">
+                <strong>Convocatoria:</strong> {{ postulacionSeleccionada.asignaturaConvocatoria }}
+            </p>
+
+            <!-- Documentos adjuntos -->
+            <div style="margin-bottom:1.25rem">
+                <p style="font-size:.8rem;font-weight:600;color:#475569;margin-bottom:.6rem">
+                    Documentos adjuntos
+                </p>
+                @if (loadingDocs) {
+                <p style="font-size:.8rem;color:#94a3b8">Cargando documentos...</p>
+                } @else if (documentos.length === 0) {
+                <p style="font-size:.8rem;color:#94a3b8">Sin documentos adjuntos.</p>
+                } @else {
+                <div style="display:flex;flex-direction:column;gap:.5rem">
+                    @for (doc of documentos; track doc.idRequisitoAdjunto) {
+                    <a [href]="getUrlDescarga(doc.idRequisitoAdjunto)" target="_blank" style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;
+                               border:1px solid hsl(var(--border));border-radius:var(--radius);
+                               text-decoration:none;color:hsl(var(--foreground));font-size:.85rem;
+                               background:hsl(var(--card));transition:background .12s;"
+                        onmouseover="this.style.background='hsl(var(--secondary))'"
+                        onmouseout="this.style.background='hsl(var(--card))'">
+                        <lucide-icon name="file-text" size="16"
+                            style="color:hsl(var(--primary));flex-shrink:0"></lucide-icon>
+                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                            {{ doc.nombreArchivo || 'Documento' }}
+                        </span>
+                        <lucide-icon name="external-link" size="14" style="color:#94a3b8;flex-shrink:0"></lucide-icon>
+                    </a>
+                    }
+                </div>
+                }
+            </div>
+
+            <hr style="border:none;border-top:1px solid hsl(var(--border));margin-bottom:1.25rem">
+
+            <div class="form-group" style="margin-bottom:1rem">
+                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">
+                    Decisión
+                </label>
+                <select class="input-field" [(ngModel)]="nuevoEstado">
+                    <option value="EN_EVALUACION">Aprobar para evaluación</option>
+                    <option value="RECHAZADO">Rechazar postulación</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">
+                    Observación (opcional)
+                </label>
+                <textarea class="input-field" rows="3" [(ngModel)]="observacion"
+                    placeholder="Dejar un comentario sobre la decisión..." style="resize:vertical"></textarea>
+            </div>
+
+            <div style="display:flex;gap:.75rem;margin-top:1.5rem;justify-content:flex-end">
+                <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+                <button class="btn-primary" (click)="confirmarDecision()" [disabled]="loadingAccion"
+                    style="display:inline-flex;align-items:center;gap:.5rem">
+                    @if (loadingAccion) {
+                    <lucide-icon name="loader-2" class="animate-spin" size="14"></lucide-icon>
+                    } @else {
+                    <lucide-icon name="check" size="14"></lucide-icon>
+                    }
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}

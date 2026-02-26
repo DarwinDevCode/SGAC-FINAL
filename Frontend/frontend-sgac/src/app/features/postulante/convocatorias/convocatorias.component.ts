@@ -133,7 +133,7 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
       idConvocatoria: this.convocatoriaSeleccionada.idConvocatoria,
       idEstudiante: this.idEstudianteBase,
       observaciones: this.observacionesGenerales,
-      idTipoEstado: 1 
+      idTipoEstado: 1
     };
 
     this.subs.add(
@@ -141,11 +141,12 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
         next: () => {
           alert('Postulación registrada exitosamente');
           this.cerrarModal();
-          this.listarConvocatorias(); 
+          this.listarConvocatorias();
         },
         error: (err: HttpErrorResponse) => {
           console.error('Error al postular:', err);
-          alert(err.error || 'Error al enviar la postulación');
+          const msg = typeof err.error === 'string' ? err.error : (err.message || 'Error al enviar la postulación');
+          alert(msg);
         }
       })
     );
