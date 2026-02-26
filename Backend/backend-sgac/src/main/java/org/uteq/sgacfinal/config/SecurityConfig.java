@@ -97,6 +97,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/registro-docente", "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
                         .requestMatchers("/api/convocatorias/crear", "/api/convocatorias/editar/**").hasAnyAuthority("DOCENTE", "COORDINADOR")
                         .requestMatchers("/api/permisos/consultar", "/api/tipos-rol/resumen-permisos", "/api/permisos/gestionar", "/api/permisos/esquemas", "/api/permisos/tipos-objeto", "/api/permisos/elementos", "/api/permisos/privilegios/**", "/api/permisos/gestionar-masivo").hasAnyAuthority("ADMINISTRADOR")
+                        .requestMatchers("/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
                         .requestMatchers("/api/convocatorias/**").authenticated()
                         .anyRequest().authenticated()
                 )

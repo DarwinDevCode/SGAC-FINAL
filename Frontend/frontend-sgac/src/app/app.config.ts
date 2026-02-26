@@ -60,7 +60,7 @@ import {
   Trash2,
   TrendingUp,
   Users,
-  X
+  X, ChevronRight, Folder, ChevronDown, ExternalLink
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -128,7 +128,11 @@ export const appConfig: ApplicationConfig = {
         Trash2,
         TrendingUp,
         Users,
-        X
+        X,
+        ChevronRight,
+        Folder,
+        ChevronDown,
+        ExternalLink
       })
     )
   ]

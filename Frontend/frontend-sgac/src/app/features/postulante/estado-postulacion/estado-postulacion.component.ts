@@ -44,7 +44,7 @@ export class EstadoPostulacionComponent implements OnInit, OnDestroy {
                     this.loading = false;
                 },
                 error: (err) => {
-                    console.error('Error al cargar mis postulaciones:', err);
+                    console.error(err.error?.mensaje || err.message || 'Error al cargar postulaciones');
                     this.loading = false;
                 }
             })

@@ -51,7 +51,7 @@ export class OposicionComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: (err) => {
-          console.error('Error al cargar oposición:', err);
+          console.error(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar oposición:');
           if (err.status === 404) {
             this.errorMensaje = 'Aún no te han asignado una fecha para la evaluación de oposición, o no la has rendido.';
           } else {

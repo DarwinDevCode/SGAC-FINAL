@@ -51,7 +51,7 @@ export class MeritosComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: (err) => {
-          console.error('Error al cargar méritos:', err);
+          console.error(err.error?.message || err.message || 'Error al cargar méritos:');
           if (err.status === 404) {
             this.errorMensaje = 'Aún no se ha registrado la calificación de méritos para esta postulación.';
           } else {

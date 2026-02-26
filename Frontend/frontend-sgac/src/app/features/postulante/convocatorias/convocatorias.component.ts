@@ -57,7 +57,7 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
           const activas = (postulaciones || []).filter(p => p.estadoPostulacion !== 'RECHAZADO');
           this.yaPostulado = activas.length > 0;
         },
-        error: (err) => console.error('Error al verificar postulaciones activas', err)
+        error: (err) => console.error(err.error?.message || err.message || 'Error al verificar postulaciones activas')
       })
     );
   }

@@ -7,6 +7,7 @@ import { Subscription, switchMap } from 'rxjs';
 import { CoordinadorService } from '../../../core/services/coordinador-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { PostulacionResponseDTO } from '../../../core/dto/postulacion';
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
     selector: 'app-coordinador-validaciones',
@@ -62,7 +63,8 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
                     this.postulantes = lista;
                     this.loading = false;
                 },
-                error: () => {
+                error: (err: HttpErrorResponse) => {
+                  console.error(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar postulaciones:');
                     this.errorMensaje = 'Error al cargar postulaciones.';
                     this.loading = false;
                 }
@@ -122,7 +124,8 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
                     this.cargarPostulantes();
                     setTimeout(() => this.successMensaje = '', 4000);
                 },
-                error: () => {
+                error: (err: HttpErrorResponse) => {
+                  console.error(err.error?.data?.message || err.error?.message || err.message || 'Error al cambiar estado de postulación:');
                     this.errorMensaje = 'Error al actualizar el estado.';
                     this.loadingAccion = false;
                     setTimeout(() => this.errorMensaje = '', 4000);
