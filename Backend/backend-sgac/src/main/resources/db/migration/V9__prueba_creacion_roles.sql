@@ -10,5 +10,11 @@ BEGIN
     END IF;
 END;
 $$;
-
+--
 SELECT seguridad.fn_crear_roles_iniciales();
+--
+-- INSERT INTO seguridad.rol_bd(nombre_rol_bd, descripcion) values
+-- ('role_administrador', 'Rol físico para ADMINISTRADOR')
+
+
+
