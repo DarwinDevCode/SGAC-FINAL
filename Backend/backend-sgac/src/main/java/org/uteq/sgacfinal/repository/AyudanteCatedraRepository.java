@@ -27,4 +27,6 @@ public interface AyudanteCatedraRepository extends JpaRepository<AyudanteCatedra
     List<AyudanteCatedra> obtenerTodosSP();
 
     Optional<AyudanteCatedra> findByUsuario_IdUsuario(Integer idUsuario);
+
+
 }

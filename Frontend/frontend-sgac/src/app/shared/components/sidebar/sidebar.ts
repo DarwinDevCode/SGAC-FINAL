@@ -15,7 +15,22 @@ export class SidebarComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
+  //userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
+
+
+  private normalizeRole(rawRole?: string | null): string {
+    if (!rawRole) return 'ESTUDIANTE';
+
+    return rawRole
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase()
+      .replace(/^ROLE_/, '')
+      .replace(/[\s-]+/g, '_');
+  }
+
+  userRole = computed(() => this.normalizeRole(this.authService.getUser()?.rolActual));
 
   menus: Record<string, any[]> = {
     ESTUDIANTE: [
@@ -26,20 +41,20 @@ export class SidebarComponent {
       { label: 'Notificaciones', icon: 'Bell', route: '/postulante/notificaciones' },
     ],
     AYUDANTE_CATEDRA: [
-      { label: 'Mi Gestión', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
-      { label: 'Registro Actividades', icon: 'CalendarClock', route: '/ayudante/actividades' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
+      { label: 'Mis sesiones', icon: 'CalendarClock', route: '/ayudante/actividades' },
       { label: 'Mis Informes', icon: 'FileText', route: '/ayudante/informes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/ayudante/notifications' },
     ],
     DOCENTE: [
-      { label: 'Panel Docente', icon: 'LayoutDashboard', route: '/docente/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/docente/dashboard' },
       { label: 'Mis Ayudantes', icon: 'Users', route: '/docente/mis-ayudantes' },
       { label: 'Planificación Actividades', icon: 'CalendarClock', route: '/docente/planificacion' },
       { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/validar-informes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/docente/notifications' },
     ],
     COORDINADOR: [
-      { label: 'Gestión Carrera', icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
       { label: 'Gestionar Convocatorias', icon: 'FileText', route: '/coordinador/convocatorias' },
       { label: 'Validar Postulantes', icon: 'CheckSquare', route: '/coordinador/validaciones' },
       { label: 'Seguimiento Mensual', icon: 'BarChart3', route: '/coordinador/seguimiento' },
@@ -47,21 +62,21 @@ export class SidebarComponent {
       { label: 'Notificaciones', icon: 'Bell', route: '/coordinador/notifications' },
     ],
     COMISION_SELECCION: [
-      { label: 'Sala de Evaluación', icon: 'LayoutDashboard', route: '/comision/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/comision/dashboard' },
       { label: 'Evaluar Méritos', icon: 'FileText', route: '/comision/meritos' },
       { label: 'Evaluar Oposición', icon: 'Users', route: '/comision/oposicion' },
       { label: 'Ranking de Resultados', icon: 'BarChart3', route: '/comision/ranking' },
       { label: 'Notificaciones', icon: 'Bell', route: '/comision/notifications' },
     ],
     DECANO: [
-      { label: 'Decanato', icon: 'LayoutDashboard', route: '/decano/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/decano/dashboard' },
       { label: 'Designar Comisiones', icon: 'Users', route: '/decano/comisiones' },
       { label: 'Firma Electrónica', icon: 'FileSignature', route: '/decano/firmas' },
       { label: 'Auditoría y Reportes', icon: 'BarChart3', route: '/decano/reportes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/decano/notifications' },
     ],
     ADMINISTRADOR: [
-      { label: 'Admin Dashboard', icon: 'LayoutDashboard', route: '/admin/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/admin/dashboard' },
       { label: 'Gestión Usuarios', icon: 'Users', route: '/admin/usuarios' },
       { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
       { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },

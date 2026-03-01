@@ -94,7 +94,7 @@ public class RegistroActividadServiceImpl implements IRegistroActividadService {
                 .fecha(entidad.getFecha())
                 .numeroAsistentes(entidad.getNumeroAsistentes())
                 .horasDedicadas(entidad.getHorasDedicadas())
-                .estadoRevision(entidad.getEstadoRevision())
+                .estadoRevision(entidad.getIdTipoEstadoRegistro().getNombreEstado())
                 .build();
     }
 }

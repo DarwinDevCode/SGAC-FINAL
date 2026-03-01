@@ -1,6 +1,7 @@
 package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -41,9 +42,11 @@ public class RegistroActividad {
     @Column(name = "horas_dedicadas", precision = 5, scale = 2)
     private BigDecimal horasDedicadas;
 
-    @Column(name = "estado_revision", length = 30)
-    private String estadoRevision;
-
     @OneToMany(mappedBy = "registroActividad", cascade = CascadeType.ALL)
     private List<EvidenciaRegistroActividad> evidencias = new ArrayList<>();
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "id_tipo_estado_registro", nullable = false)
+    private TipoEstadoRegistro idTipoEstadoRegistro;
 }

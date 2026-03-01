@@ -1,72 +1,302 @@
 <div class="gestion-container">
-    <div class="section-header">
-        <div class="title-container">
-            <h2 class="title">Mi Gestión</h2>
-            <p class="subtitle" *ngIf="ayudanteData">
-                {{ ayudanteData.nombreCompletoUsuario }} · Ayudante de Cátedra
-            </p>
-        </div>
-        <span class="badge violet">AYUDANTE</span>
-    </div>
 
-    @if (loading) {
-    <div class="info-message">
-        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Cargando perfil...</p>
+  <!-- ══════════════════════════════════════════════════
+       CABECERA
+  ══════════════════════════════════════════════════ -->
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title">Mi Ayudantía</h2>
+      <p class="subtitle">Resumen general de tu progreso y actividad reciente.</p>
     </div>
-    } @else if (errorMensaje) {
-    <div class="error-state" style="padding:3rem 1rem">
-        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
-        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
-    </div>
-    } @else if (ayudanteData) {
+    <button class="btn btn-primary" routerLink="../sesiones/registrar">
+      <lucide-icon name="Plus" size="16"></lucide-icon>
+      Registrar Sesión
+    </button>
+  </div>
 
-    <!-- Stats -->
-    <div class="stats-grid cols-2">
+  <!-- Error global -->
+  @if (error) {
+    <div class="alert-banner error">
+      <lucide-icon name="AlertCircle" size="18"></lucide-icon>
+      {{ error }}
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════
+       ESTADO DE CARGA — Skeletons
+  ══════════════════════════════════════════════════ -->
+  @if (cargando) {
+
+    <div class="stats-grid cols-4">
+      @for (i of [1,2,3,4]; track i) {
         <div class="stat-card">
-            <div class="stat-icon violet"><lucide-icon name="clock" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ ayudanteData.horasAyudante }}</div>
-                <div class="stat-label">Horas Asignadas</div>
-            </div>
+          <div class="sk-circle"></div>
+          <div class="sk-lines">
+            <div class="sk-line w-50"></div>
+            <div class="sk-line w-70"></div>
+          </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><lucide-icon name="trending-up" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ porcentajeHoras }}%</div>
-                <div class="stat-label">Progreso Ayudantía</div>
-            </div>
-        </div>
+      }
     </div>
 
-    <!-- Progress bar -->
-    <div class="stat-card" style="flex-direction:column;align-items:flex-start;gap:.75rem;margin-bottom:1.5rem">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-            <span style="font-size:.875rem;font-weight:600;color:hsl(var(--foreground))">Progreso de Horas</span>
-            <span style="font-size:.875rem;font-weight:700;color:#7c3aed">{{ ayudanteData.horasAyudante }} / 160
-                hrs</span>
-        </div>
-        <div class="progress-track" style="width:100%">
-            <div class="progress-fill violet" [style.width]="porcentajeHoras + '%'"></div>
-        </div>
+    <div class="progress-section">
+      <div class="progress-card"><div class="sk-block"></div></div>
+      <div class="progress-card"><div class="sk-block"></div></div>
     </div>
 
-    <!-- Quick links -->
-    <div class="actions-grid cols-2">
-        <a routerLink="/ayudante/actividades" class="action-card violet">
-            <div class="action-icon violet"><lucide-icon name="calendar-clock" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Registro de Actividades</div>
-                <div class="action-desc">Registrar sesiones de ayudantía</div>
-            </div>
-        </a>
-        <a routerLink="/ayudante/informes" class="action-card blue">
-            <div class="action-icon blue"><lucide-icon name="file-text" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Mis Informes</div>
-                <div class="action-desc">Informes mensuales de actividades</div>
-            </div>
-        </a>
+  } @else if (progreso && controlSemanal) {
+
+    <!-- ══════════════════════════════════════════════════
+         STAT CARDS
+    ══════════════════════════════════════════════════ -->
+    <div class="stats-grid cols-4">
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <lucide-icon name="CheckCircle2" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ progreso.horasAprobadas | number:'1.1-1' }}h</div>
+          <div class="stat-label">Horas aprobadas</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <lucide-icon name="Clock" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ progreso.horasPendientes | number:'1.1-1' }}h</div>
+          <div class="stat-label">En revisión</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <lucide-icon name="BookOpen" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ progreso.totalSesiones }}</div>
+          <div class="stat-label">Sesiones registradas</div>
+        </div>
+      </div>
+
+      <div class="stat-card" [class.stat-alert]="progreso.horasObservadas > 0">
+        <div class="stat-icon" [class]="progreso.horasObservadas > 0 ? 'red' : 'green'">
+          <lucide-icon [name]="progreso.horasObservadas > 0 ? 'AlertCircle' : 'ShieldCheck'" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ progreso.horasObservadas | number:'1.1-1' }}h</div>
+          <div class="stat-label">Horas observadas</div>
+        </div>
+      </div>
+
     </div>
+
+    <!-- ══════════════════════════════════════════════════
+         PROGRESO GLOBAL + CONTROL SEMANAL
+    ══════════════════════════════════════════════════ -->
+    <div class="progress-section">
+
+      <!-- Progreso global de la ayudantía -->
+      <div class="progress-card">
+        <div class="progress-card-header">
+          <div>
+            <span class="progress-card-title">Progreso de la Ayudantía</span>
+            <span class="progress-card-sub">
+              {{ progreso.horasAprobadas | number:'1.1-1' }}h aprobadas
+              de {{ progreso.horasMaximas | number:'1.0-0' }}h totales
+            </span>
+          </div>
+          <span class="progress-badge" [class]="getColorProgreso()">
+            {{ getPorcentajeGlobal() | number:'1.1-1' }}%
+          </span>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" [class]="getColorProgreso()"
+               [style.width.%]="getPorcentajeGlobal()">
+          </div>
+        </div>
+
+        <div class="progress-footer">
+          <span>
+            <lucide-icon name="CheckCircle2" size="12" class="icon-inline green"></lucide-icon>
+            {{ progreso.sesionesAprobadas }} aprobadas
+          </span>
+          <span>
+            <lucide-icon name="Clock" size="12" class="icon-inline amber"></lucide-icon>
+            {{ progreso.sesionesPendientes }} pendientes
+          </span>
+          <span>
+            <lucide-icon name="AlertCircle" size="12" class="icon-inline red"></lucide-icon>
+            {{ progreso.sesionesObservadas }} observadas
+          </span>
+        </div>
+      </div>
+
+      <!-- Control semanal -->
+      <div class="progress-card" [class.card-warning]="controlSemanal.superaLimite">
+        <div class="progress-card-header">
+          <div>
+            <span class="progress-card-title">Control Semanal</span>
+            <span class="progress-card-sub">
+              {{ formatearFecha(controlSemanal.semanaInicio) }} —
+              {{ formatearFecha(controlSemanal.semanaFin) }}
+            </span>
+          </div>
+          @if (controlSemanal.superaLimite) {
+            <span class="progress-badge red">¡Límite superado!</span>
+          } @else {
+            <span class="progress-badge" [class]="getColorSemanal()">
+              {{ controlSemanal.horasDisponibles | number:'1.1-1' }}h disponibles
+            </span>
+          }
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" [class]="getColorSemanal()"
+               [style.width.%]="getPorcentajeSemanal()">
+          </div>
+        </div>
+
+        <div class="progress-footer">
+          <span>
+            Registradas: <strong>{{ controlSemanal.horasRegistradas | number:'1.1-1' }}h</strong>
+          </span>
+          <span>
+            Límite: <strong>{{ controlSemanal.limiteSemanal }}h</strong>
+          </span>
+          <span>
+            Sesiones: <strong>{{ controlSemanal.sesionesSemana }}</strong>
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════
+         ALERTA DE OBSERVACIONES
+    ══════════════════════════════════════════════════ -->
+    @if (sesionesConObservacion().length > 0) {
+      <div class="alert-banner warning obs-banner">
+        <lucide-icon name="AlertTriangle" size="18"></lucide-icon>
+        <div>
+          Tienes
+          <strong>{{ sesionesConObservacion().length }}
+            {{ sesionesConObservacion().length === 1 ? 'sesión' : 'sesiones' }} observada{{ sesionesConObservacion().length === 1 ? '' : 's' }}</strong>
+          que requieren corrección. Revísalas antes del cierre del periodo.
+        </div>
+        <a class="obs-link" routerLink="../sesiones" [queryParams]="{ estado: 'OBSERVADO' }">
+          Ver sesiones <lucide-icon name="ArrowRight" size="14"></lucide-icon>
+        </a>
+      </div>
     }
+
+    <!-- ══════════════════════════════════════════════════
+         ACCESOS RÁPIDOS + ÚLTIMAS SESIONES
+    ══════════════════════════════════════════════════ -->
+    <div class="bottom-grid">
+
+      <!-- Accesos rápidos -->
+      <div class="quick-access">
+        <h3 class="section-subtitle">Accesos rápidos</h3>
+        <div class="actions-grid cols-2">
+
+          <button class="action-card green" routerLink="../sesiones/registrar">
+            <div class="action-icon green">
+              <lucide-icon name="PlusCircle" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Registrar sesión</div>
+              <div class="action-desc">Añadir nueva actividad con evidencias</div>
+            </div>
+          </button>
+
+          <button class="action-card blue" routerLink="../sesiones">
+            <div class="action-icon blue">
+              <lucide-icon name="ClipboardList" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Mis sesiones</div>
+              <div class="action-desc">Ver historial completo de actividades</div>
+            </div>
+          </button>
+
+          <button class="action-card amber" routerLink="../sesiones" [queryParams]="{ estado: 'OBSERVADO' }">
+            <div class="action-icon amber">
+              <lucide-icon name="AlertCircle" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Observaciones</div>
+              <div class="action-desc">Corregir sesiones con observaciones</div>
+            </div>
+          </button>
+
+          <button class="action-card violet" routerLink="../informes">
+            <div class="action-icon violet">
+              <lucide-icon name="FileText" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Informes</div>
+              <div class="action-desc">Generar y descargar reportes mensuales</div>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Últimas 5 sesiones -->
+      <div class="ultimas-sesiones">
+        <div class="ultimas-header">
+          <h3 class="section-subtitle">Últimas actividades</h3>
+          <a class="ver-todas-link" routerLink="../sesiones">
+            Ver todas <lucide-icon name="ArrowRight" size="14"></lucide-icon>
+          </a>
+        </div>
+
+        @if (ultimasSesiones.length === 0) {
+          <div class="empty-sesiones">
+            <lucide-icon name="Inbox" size="36"></lucide-icon>
+            <p>Aún no tienes sesiones registradas.</p>
+            <button class="btn btn-primary btn-sm" routerLink="../sesiones/registrar">
+              Registrar primera sesión
+            </button>
+          </div>
+        } @else {
+          <div class="sesiones-list">
+            @for (sesion of ultimasSesiones; track sesion.idRegistro) {
+              <div class="sesion-item" [class.sesion-observada]="sesion.tieneObservacion">
+
+                <div class="sesion-fecha">
+                  <span class="fecha-dia">{{ sesion.fecha | date:'dd' }}</span>
+                  <span class="fecha-mes">{{ sesion.fecha | date:'MMM':'':'es' }}</span>
+                </div>
+
+                <div class="sesion-info">
+                  <span class="sesion-tema">
+                    {{ sesion.temaTratado }}
+                    @if (sesion.tieneObservacion) {
+                      <lucide-icon name="AlertCircle" size="13" class="obs-icon"></lucide-icon>
+                    }
+                  </span>
+                  <span class="sesion-meta">
+                    {{ sesion.horasDedicadas }}h · {{ sesion.numeroAsistentes }} asistentes · {{ sesion.totalEvidencias }} evidencia{{ sesion.totalEvidencias !== 1 ? 's' : '' }}
+                  </span>
+                </div>
+
+                <span class="status-pill" [class]="getClaseEstado(sesion.estadoRegistro.nombreEstado)">
+                  {{ sesion.estadoRegistro.nombreEstado }}
+                </span>
+
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+  }
+
 </div>

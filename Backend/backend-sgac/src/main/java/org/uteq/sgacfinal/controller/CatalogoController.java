@@ -9,29 +9,13 @@ import org.uteq.sgacfinal.dto.Request.AsignaturaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.CarreraRequestDTO;
 import org.uteq.sgacfinal.dto.Request.FacultadRequestDTO;
 import org.uteq.sgacfinal.dto.Request.PeriodoAcademicoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.AsignaturaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.CarreraResponseDTO;
-import org.uteq.sgacfinal.dto.Response.FacultadResponseDTO;
-import org.uteq.sgacfinal.dto.Response.PeriodoAcademicoResponseDTO;
-import org.uteq.sgacfinal.service.IAsignaturaService;
-import org.uteq.sgacfinal.service.ICarreraService;
-import org.uteq.sgacfinal.service.IFacultadService;
-import org.uteq.sgacfinal.service.IPeriodoAcademicoService;
+import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.service.*;
 import org.uteq.sgacfinal.dto.Request.TipoEstadoEvidenciaAyudantiaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.TipoEstadoRequisitoRequestDTO;
 import org.uteq.sgacfinal.dto.Request.TipoRequisitoPostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Request.TipoRolRequestDTO;
 import org.uteq.sgacfinal.dto.Request.TipoSancionAyudanteCatedraRequestDTO;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoEvidenciaAyudantiaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoRequisitoResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoRequisitoPostulacionResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoSancionAyudanteCatedraResponseDTO;
-import org.uteq.sgacfinal.service.ITipoEstadoEvidenciaAyudantiaService;
-import org.uteq.sgacfinal.service.ITipoEstadoRequisitoService;
-import org.uteq.sgacfinal.service.ITipoRequisitoPostulacionService;
-import org.uteq.sgacfinal.service.ITipoRolService;
-import org.uteq.sgacfinal.service.ITipoSancionAyudanteCatedraService;
 
 import java.util.List;
 
@@ -45,11 +29,11 @@ public class CatalogoController {
     private final IAsignaturaService asignaturaService;
     private final IPeriodoAcademicoService periodoAcademicoService;
 
-    private final ITipoEstadoEvidenciaAyudantiaService tipoEstadoEvidenciaService;
     private final ITipoEstadoRequisitoService tipoEstadoRequisitoService;
     private final ITipoRequisitoPostulacionService tipoRequisitoPostulacionService;
     private final ITipoRolService tipoRolService;
     private final ITipoSancionAyudanteCatedraService tipoSancionService;
+    private final ICatalogoService catalogoService;
 
 
     // Facultad
@@ -144,28 +128,28 @@ public class CatalogoController {
         return ResponseEntity.noContent().build();
     }
 
-    // Tipo Estado Evidencia Ayudantia
-    @GetMapping("/estados-evidencia")
-    public ResponseEntity<List<TipoEstadoEvidenciaAyudantiaResponseDTO>> listarEstadosEvidencia() {
-        return ResponseEntity.ok(tipoEstadoEvidenciaService.listarTodos());
-    }
-
-    @PostMapping("/estados-evidencia")
-    public ResponseEntity<TipoEstadoEvidenciaAyudantiaResponseDTO> crearEstadoEvidencia(@Valid @RequestBody TipoEstadoEvidenciaAyudantiaRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(tipoEstadoEvidenciaService.crear(request));
-    }
-
-    @PutMapping("/estados-evidencia/{id}")
-    public ResponseEntity<TipoEstadoEvidenciaAyudantiaResponseDTO> actualizarEstadoEvidencia(@PathVariable Integer id,
-                                                                                             @Valid @RequestBody TipoEstadoEvidenciaAyudantiaRequestDTO request) {
-        return ResponseEntity.ok(tipoEstadoEvidenciaService.actualizar(id, request));
-    }
-
-    @PatchMapping("/estados-evidencia/{id}/desactivar")
-    public ResponseEntity<Void> desactivarEstadoEvidencia(@PathVariable Integer id) {
-        tipoEstadoEvidenciaService.desactivar(id);
-        return ResponseEntity.noContent().build();
-    }
+//    // Tipo Estado Evidencia Ayudantia
+//    @GetMapping("/estados-evidencia")
+//    public ResponseEntity<List<TipoEstadoEvidenciaAyudantiaResponseDTO>> listarEstadosEvidencia() {
+//        return ResponseEntity.ok(tipoEstadoEvidenciaService.listarTodos());
+//    }
+//
+//    @PostMapping("/estados-evidencia")
+//    public ResponseEntity<TipoEstadoEvidenciaAyudantiaResponseDTO> crearEstadoEvidencia(@Valid @RequestBody TipoEstadoEvidenciaAyudantiaRequestDTO request) {
+//        return ResponseEntity.status(HttpStatus.CREATED).body(tipoEstadoEvidenciaService.crear(request));
+//    }
+//
+//    @PutMapping("/estados-evidencia/{id}")
+//    public ResponseEntity<TipoEstadoEvidenciaAyudantiaResponseDTO> actualizarEstadoEvidencia(@PathVariable Integer id,
+//                                                                                             @Valid @RequestBody TipoEstadoEvidenciaAyudantiaRequestDTO request) {
+//        return ResponseEntity.ok(tipoEstadoEvidenciaService.actualizar(id, request));
+//    }
+//
+//    @PatchMapping("/estados-evidencia/{id}/desactivar")
+//    public ResponseEntity<Void> desactivarEstadoEvidencia(@PathVariable Integer id) {
+//        tipoEstadoEvidenciaService.desactivar(id);
+//        return ResponseEntity.noContent().build();
+//    }
 
     // Tipo Estado Requisito
     @GetMapping("/estados-requisito")
@@ -257,5 +241,25 @@ public class CatalogoController {
     public ResponseEntity<Void> desactivarTipoSancion(@PathVariable Integer id) {
         tipoSancionService.desactivar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/estados-registro")
+    public ResponseEntity<List<TipoEstadoRegistroResponse>> estadosRegistro() {
+        return ResponseEntity.ok(catalogoService.estadosRegistro());
+    }
+
+    @GetMapping("/estados-evidencia")
+    public ResponseEntity<List<TipoEstadoEvidenciaResponse>> estadosEvidencia() {
+        return ResponseEntity.ok(catalogoService.estadosEvidencia());
+    }
+
+    @GetMapping("/tipos-evidencia")
+    public ResponseEntity<List<TipoEvidenciaResponse>> tiposEvidencia() {
+        return ResponseEntity.ok(catalogoService.tiposEvidencia());
+    }
+
+    @GetMapping("/estados-ayudantia")
+    public ResponseEntity<List<TipoEstadoAyudantiaResponse>> estadosAyudantia() {
+        return ResponseEntity.ok(catalogoService.estadosAyudantia());
     }
 }

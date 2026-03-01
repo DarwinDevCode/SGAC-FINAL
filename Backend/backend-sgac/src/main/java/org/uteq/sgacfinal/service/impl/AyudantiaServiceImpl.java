@@ -86,7 +86,7 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
 
         return AyudantiaResponseDTO.builder()
                 .idAyudantia(entidad.getIdAyudantia())
-                .nombreEstadoEvidencia(entidad.getTipoEstadoEvidenciaAyudantia().getNombreEstado())
+                .nombreEstadoEvidencia(entidad.getIdTipoEstadoAyudantia().getNombreEstado())
                 .idPostulacion(entidad.getPostulacion().getIdPostulacion())
                 .nombreEstudiante(nombreEstudiante)
                 .fechaInicio(entidad.getFechaInicio())

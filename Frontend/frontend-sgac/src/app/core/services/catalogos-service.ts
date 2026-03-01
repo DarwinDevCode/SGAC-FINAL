@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, Subject} from 'rxjs';
+import {Observable, shareReplay, Subject} from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {FacultadDTO} from '../dto/facultad';
 import {CarreraDTO} from '../dto/carrera';
@@ -11,6 +11,10 @@ import {TipoEstadoRequisitoDTO} from '../dto/tipo-estado-requisito';
 import {TipoRequisitoPostulacionDTO} from '../dto/tipo-requisito-postulacion';
 import {TipoRolDTO} from '../dto/tipo-rol';
 import {TipoSancionAyudanteCatedraDTO} from '../dto/tipo-sancion-ayudante-catedra';
+import {TipoEstadoAyudantia} from '../dto/tipo-estado-ayudantia';
+import {TipoEvidencia} from '../dto/tipo-evidencia';
+import {TipoEstadoEvidencia} from '../dto/tipo-estado-evidencia';
+import {TipoEstadoRegistro} from '../dto/tipo-estado-registro';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +25,10 @@ export class CatalogosService {
   private readonly API = `${this.baseUrl}/admin/catalogos`;
   public rolActualizado$ = new Subject<void>();
 
+  private estadosRegistro$:  Observable<TipoEstadoRegistro[]>  | null = null;
+  private estadosEvidencia$: Observable<TipoEstadoEvidencia[]> | null = null;
+  private tiposEvidencia$:   Observable<TipoEvidencia[]>       | null = null;
+  private estadosAyudantia$: Observable<TipoEstadoAyudantia[]> | null = null;
 
   getFacultades(): Observable<FacultadDTO[]> {
     return this.http.get<FacultadDTO[]>(`${this.API}/facultades`);
@@ -98,23 +106,23 @@ export class CatalogosService {
   }
 
 
-  getEstadosEvidencia(): Observable<TipoEstadoEvidenciaAyudantiaDTO[]> {
-    return this.http.get<TipoEstadoEvidenciaAyudantiaDTO[]>(`${this.API}/estados-evidencia`);
-  }
+  //getEstadosEvidencia(): Observable<TipoEstadoEvidenciaAyudantiaDTO[]> {
+  //  return this.http.get<TipoEstadoEvidenciaAyudantiaDTO[]>(`${this.API}/estados-evidencia`);
+  //}
 
-  postEstadoEvidencia(estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
-    const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
-    return this.http.post<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia`, requestBody);
-  }
+  //postEstadoEvidencia(estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
+  //  const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
+  //   return this.http.post<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia`, requestBody);
+  //}
 
-  putEstadoEvidencia(id: number, estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
-    const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
-    return this.http.put<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia/${id}`, requestBody);
-  }
+  //putEstadoEvidencia(id: number, estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
+  //  const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
+  //  return this.http.put<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia/${id}`, requestBody);
+  //}
 
-  desactivarEstadoEvidencia(id: number): Observable<void> {
-    return this.http.patch<void>(`${this.API}/estados-evidencia/${id}/desactivar`, {});
-  }
+  //desactivarEstadoEvidencia(id: number): Observable<void> {
+  //  return this.http.patch<void>(`${this.API}/estados-evidencia/${id}/desactivar`, {});
+  //}
 
 
   getEstadosRequisito(): Observable<TipoEstadoRequisitoDTO[]> {
@@ -190,5 +198,50 @@ export class CatalogosService {
 
   desactivarTipoSancion(id: number): Observable<void> {
     return this.http.patch<void>(`${this.API}/tipos-sancion/${id}/desactivar`, {});
+  }
+
+  //Servicios creados para cachear los catálogos que se usan frecuentemente en la aplicación
+
+  getEstadosRegistro(): Observable<TipoEstadoRegistro[]> {
+    if (!this.estadosRegistro$) {
+      this.estadosRegistro$ = this.http
+        .get<TipoEstadoRegistro[]>(`${this.API}/estados-registro`)
+        .pipe(shareReplay(1));
+    }
+    return this.estadosRegistro$;
+  }
+
+  getEstadosEvidencia(): Observable<TipoEstadoEvidencia[]> {
+    if (!this.estadosEvidencia$) {
+      this.estadosEvidencia$ = this.http
+        .get<TipoEstadoEvidencia[]>(`${this.API}/estados-evidencia`)
+        .pipe(shareReplay(1));
+    }
+    return this.estadosEvidencia$;
+  }
+
+  getTiposEvidencia(): Observable<TipoEvidencia[]> {
+    if (!this.tiposEvidencia$) {
+      this.tiposEvidencia$ = this.http
+        .get<TipoEvidencia[]>(`${this.API}/tipos-evidencia`)
+        .pipe(shareReplay(1));
+    }
+    return this.tiposEvidencia$;
+  }
+
+  getEstadosAyudantia(): Observable<TipoEstadoAyudantia[]> {
+    if (!this.estadosAyudantia$) {
+      this.estadosAyudantia$ = this.http
+        .get<TipoEstadoAyudantia[]>(`${this.API}/estados-ayudantia`)
+        .pipe(shareReplay(1));
+    }
+    return this.estadosAyudantia$;
+  }
+
+  limpiarCache(): void {
+    this.estadosRegistro$ = null;
+    this.estadosEvidencia$ = null;
+    this.tiposEvidencia$ = null;
+    this.estadosAyudantia$ = null;
   }
 }
