@@ -38,7 +38,7 @@ export class ConvocatoriaService {
 
 
   getPeriodoActivo(): Observable<PeriodoAcademicoDTO[]> {
-    return this.http.get<PeriodoAcademicoDTO[]>(`${this.baseUrl}/api/recursos/periodos`)
+    return this.http.get<PeriodoAcademicoDTO[]>(`${this.baseUrl}/recursos/periodos`)
   }
 
   getAsignaturas(): Observable<AsignaturaDTO[]> {

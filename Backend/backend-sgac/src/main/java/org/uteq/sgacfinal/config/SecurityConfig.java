@@ -92,21 +92,23 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/registro-estudiante").permitAll()
-                        .requestMatchers("/api/auth/registro-admin", "/api/auth/registro-decano", "/api/auth/registro-coordinador").hasAuthority("ADMINISTRADOR")
-                        .requestMatchers("/api/auth/registro-docente", "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
-                        .requestMatchers("/api/convocatorias/crear", "/api/convocatorias/editar/**").hasAnyAuthority("DOCENTE", "COORDINADOR")
-                        .requestMatchers("/api/permisos/consultar",
-                                "/api/tipos-rol/resumen-permisos",
-                                "/api/permisos/gestionar",
-                                "/api/permisos/esquemas",
-                                "/api/permisos/tipos-objeto",
-                                "/api/permisos/elementos",
-                                "/api/permisos/privilegios/**",
-                                "/api/permisos/gestionar-masivo").hasAnyAuthority("ADMINISTRADOR")
-                        .requestMatchers("/api/sesiones/**").hasAuthority("AYUDANTE_CATEDRA")
-                        .requestMatchers("/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
-                        .requestMatchers("/api/convocatorias/**").authenticated()
+                        .requestMatchers(
+                                "/api/auth/login").permitAll()
+                        .requestMatchers(
+                                "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
+                        .requestMatchers(
+                                "/api/convocatorias/crear",
+                                "/api/convocatorias/editar/**").hasAnyAuthority("DECANO", "COORDINADOR")
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/tipos-rol/**",
+                                "/api/permisos/**").hasAnyAuthority("ADMINISTRADOR")
+                        .requestMatchers(
+                                "/api/sesiones/**").hasAuthority("AYUDANTE_CATEDRA")
+                        .requestMatchers(
+                                "/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
+                        .requestMatchers(
+                                "/api/convocatorias/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
