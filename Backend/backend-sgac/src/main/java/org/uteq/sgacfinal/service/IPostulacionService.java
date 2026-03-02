@@ -15,6 +15,10 @@ public interface IPostulacionService {
     List<PostulacionResponseDTO> listarPorConvocatoria(Integer idConvocatoria);
     List<PostulacionResponseDTO> listarPorCarrera(Integer idCarrera);
     List<PostulacionResponseDTO> listarPendientesPorCarrera(Integer idCarrera);
+    List<PostulacionResponseDTO> listarEnEvaluacionPorCarrera(Integer idCarrera);
     String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito);
     void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion);
+
+    /** Verifica si un estudiante ya tiene postulación activa para una convocatoria específica */
+    boolean existePostulacion(Integer idEstudiante, Integer idConvocatoria);
 }

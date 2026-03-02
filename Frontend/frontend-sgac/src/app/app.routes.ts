@@ -4,6 +4,8 @@ import { MainLayoutComponent } from './layouts/main-layout/main-layout';
 import { GestionUsuarios } from './features/admin/gestion-usuarios/gestion-usuarios';
 import { GestionCatalogosComponent } from './features/admin/gestion-catalogos/gestion-catalogos';
 import { GestionPermisosComponent } from './features/admin/gestion-permisos/gestion-permisos';
+import { GestionPeriodosComponent } from './features/admin/gestion-periodos/gestion-periodos.component';
+import { DashboardComponent as AdminDashboard } from './features/admin/dashboard/dashboard';
 
 // Postulante
 import { DashboardComponent as PostulanteDashboard } from './features/postulante/dashboard/dashboard.component';
@@ -18,6 +20,9 @@ import { NotificacionesComponent as PostulanteNotificaciones } from './features/
 import { DashboardComponent as DecanoDashboard } from './features/decano/dashboard/dashboard.component';
 import { ConvocatoriasVistaComponent as DecanoConvocatorias } from './features/decano/convocatorias-vista/convocatorias-vista.component';
 import { PostulantesVistaComponent as DecanoPostulantes } from './features/decano/postulantes-vista/postulantes-vista.component';
+import { ComisionesDecanoComponent } from './features/decano/comisiones/comisiones.component';
+import { AuditoriaComponent as DecanoAuditoria } from './features/decano/auditoria/auditoria';
+// DecanoNotificaciones stub removido porque usaremos el global
 
 // Coordinador
 import { DashboardComponent as CoordinadorDashboard } from './features/coordinador/dashboard/dashboard.component';
@@ -26,6 +31,7 @@ import { PostulantesVistaComponent as CoordinadorPostulantes } from './features/
 import { ValidacionesComponent } from './features/coordinador/validaciones/validaciones.component';
 import { SeguimientoComponent } from './features/coordinador/seguimiento/seguimiento.component';
 import { ResolucionesComponent } from './features/coordinador/resoluciones/resoluciones.component';
+import { EvaluacionesComponent } from './features/coordinador/evaluaciones/evaluaciones.component';
 
 // Ayudante
 import { DashboardComponent as AyudanteDashboard } from './features/ayudante/dashboard/dashboard.component';
@@ -41,10 +47,12 @@ export const routes: Routes = [
     component: MainLayoutComponent,
     children: [
       // Admin
-      { path: 'admin/dashboard', redirectTo: 'admin/usuarios', pathMatch: 'full' },
+      { path: 'admin/dashboard', component: AdminDashboard },
       { path: 'admin/usuarios', component: GestionUsuarios },
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
       { path: 'admin/rol-permiso', component: GestionPermisosComponent },
+      { path: 'admin/periodos', component: GestionPeriodosComponent },
+      { path: 'admin/notifications', component: PostulanteNotificaciones },
 
       // Postulante / Estudiante (routes for ESTUDIANTE role sidebar)
       { path: 'postulante/dashboard', component: PostulanteDashboard },
@@ -59,11 +67,9 @@ export const routes: Routes = [
       { path: 'decano/dashboard', component: DecanoDashboard },
       { path: 'decano/convocatorias', component: DecanoConvocatorias },
       { path: 'decano/postulantes/:idConvocatoria', component: DecanoPostulantes },
-      // Sidbar links for decano: comisiones, firmas, reportes, notifications
-      { path: 'decano/comisiones', component: DecanoDashboard },  // stub → dashboard
-      { path: 'decano/firmas', component: DecanoDashboard },      // stub → dashboard
-      { path: 'decano/reportes', component: DecanoDashboard },    // stub → dashboard
-      { path: 'decano/notifications', component: DecanoDashboard },
+      { path: 'decano/comisiones', component: ComisionesDecanoComponent },
+      { path: 'decano/reportes', component: DecanoAuditoria },
+      { path: 'decano/notifications', component: PostulanteNotificaciones },
 
       // Coordinador
       { path: 'coordinador/dashboard', component: CoordinadorDashboard },
@@ -72,6 +78,7 @@ export const routes: Routes = [
       { path: 'coordinador/validaciones', component: ValidacionesComponent },
       { path: 'coordinador/seguimiento', component: SeguimientoComponent },
       { path: 'coordinador/resoluciones', component: ResolucionesComponent },
+      { path: 'coordinador/evaluaciones', component: EvaluacionesComponent }, // P13 (ítem 15)
       { path: 'coordinador/notifications', component: PostulanteNotificaciones },
 
       // Ayudante

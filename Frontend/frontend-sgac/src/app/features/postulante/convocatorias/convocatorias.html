@@ -55,12 +55,20 @@
                         </span>
                     </td>
                     <td class="text-right">
-                        <button type="button" class="btn-primary-small" [disabled]="yaPostulado"
-                            [title]="yaPostulado ? 'Ya tienes una postulación activa en curso' : ''"
-                            [class.disabled-btn]="yaPostulado" (click)="abrirModalPostulacion(conv)">
-                            Postular
-                            <lucide-icon name="arrow-right" size="16"></lucide-icon>
-                        </button>
+                        <ng-container *ngIf="postulacionPorConvocatoria[conv.idConvocatoria!] === true; else btnActivo">
+                            <button type="button" class="btn-ya-postulado" disabled
+                                title="Ya te postulaste a esta convocatoria">
+                                <lucide-icon name="check-circle" size="16"></lucide-icon>
+                                Ya Postulado
+                            </button>
+                        </ng-container>
+                        <ng-template #btnActivo>
+                            <button type="button" class="btn-primary-small" (click)="abrirModalPostulacion(conv)"
+                                title="Postularme a esta convocatoria">
+                                Postular
+                                <lucide-icon name="arrow-right" size="16"></lucide-icon>
+                            </button>
+                        </ng-template>
                     </td>
                 </tr>
                 } @empty {
@@ -90,18 +98,24 @@
             <form class="user-form" (submit)="enviarPostulacion(); $event.preventDefault()">
 
                 <div class="form-divider full-width">Requisitos Obligatorios</div>
-                <p class="help-text full-width">Por favor, adjunte los documentos requeridos en formato PDF
-                    correspondiente a cada requisito.</p>
+                <p class="help-text full-width">Por favor, adjunte los documentos requeridos en los formatos permitidos
+                    para cada requisito.</p>
 
                 @for (req of tiposRequisito; track req.idTipoRequisitoPostulacion) {
                 <div class="form-group full-width requisito-card">
                     <div class="requisito-header">
-                        <label>{{ req.nombreRequisito }}</label>
+                        <label style="display: flex; justify-content: space-between; align-items: center;">
+                            {{ req.nombreRequisito }}
+                            <span class="status-pill active" style="font-size: 0.75rem; padding: 2px 6px;"
+                                *ngIf="req.tipoDocumentoPermitido">
+                                {{ req.tipoDocumentoPermitido }}
+                            </span>
+                        </label>
                         <span class="requisito-desc">{{ req.descripcion }}</span>
                     </div>
                     <input type="file" class="input-file"
-                        (change)="onFileChange($event, req.idTipoRequisitoPostulacion)" accept=".pdf,.doc,.docx"
-                        required />
+                        (change)="onFileChange($event, req.idTipoRequisitoPostulacion)"
+                        [accept]="req.tipoDocumentoPermitido || '*/*'" required />
                 </div>
                 }
 

@@ -88,7 +88,7 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     this.subs.add(
       forkJoin({
         coordinador: this.coordinadorService.obtenerCoordinadorPorUsuario(user.idUsuario),
-        periodoActivo: this.periodoService.obtenerActivo().pipe(catchError(() => of(null))),
+        periodoActivo: this.periodoService.obtenerActivo().pipe(catchError((e) => { console.error('Error fetching active period:', e); return of(null); })),
         docentes: this.http.get<DocenteDTO[]>(API_DOC).pipe(catchError(() => of([]))),
       }).pipe(
         switchMap(({ coordinador, periodoActivo, docentes }) => {
@@ -157,7 +157,8 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   guardar() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loadingForm = true;
-    const payload = {...this.form.getRawValue(),
+    const payload = {
+      ...this.form.getRawValue(),
       idConvocatoria: this.modoEdicion ? this.convocatoriaEditId : undefined,
       idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? this.form.getRawValue().idPeriodoAcademico,
     };

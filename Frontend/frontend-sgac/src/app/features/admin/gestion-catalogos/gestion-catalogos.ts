@@ -93,7 +93,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       }));
     } else if (this.activeTab === 'estadoEvidencias') {
       this.subs.add(this.catalogosService.getEstadosEvidencia().subscribe({
-        next: (data) => { this.estadoEvidenciasAyudantiasList = data || []; this.loading = false; console.log(this.estadoEvidenciasAyudantiasList)},
+        next: (data) => { this.estadoEvidenciasAyudantiasList = data || []; this.loading = false; console.log(this.estadoEvidenciasAyudantiasList) },
         error: (err: HttpErrorResponse) => { alert(err.error?.message || 'Error al cargar estados'); this.loading = false; }
       }));
     }
@@ -218,7 +218,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   abrirModalNuevoRequisito() {
     this.isEditMode = false;
     // @ts-ignore - Ajusta el nombre del campo si tu DTO varía
-    this.formRequisito = { nombreRequisito: '', activo: true };
+    this.formRequisito = { nombreRequisito: '', activo: true, tipoDocumentoPermitido: '' };
     this.mostrarModal = true;
   }
   abrirModalEditarRequisito(r: TipoRequisitoPostulacionDTO) {

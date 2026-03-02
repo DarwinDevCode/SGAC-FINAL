@@ -28,7 +28,7 @@ public class UsuarioComision {
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_evaluacion_oposicion", nullable = false)
+    @JoinColumn(name = "id_evaluacion_oposicion", nullable = true)
     private EvaluacionOposicion evaluacionOposicion;
 
     @Column(name = "rol_integrante", length = 50)

@@ -18,6 +18,10 @@ export class DecanoService {
   private readonly API_POSTULACIONES = `${this.baseUrl}/postulaciones`;
 
   // --- Decanos API ---
+  listarActivos(): Observable<DecanoResponseDTO[]> {
+    return this.http.get<DecanoResponseDTO[]>(`${this.API_DECANOS}`);
+  }
+
   obtenerDecanoPorUsuario(idUsuario: number): Observable<DecanoResponseDTO> {
     return this.http.get<DecanoResponseDTO>(`${this.API_DECANOS}/usuario/${idUsuario}`);
   }

@@ -16,5 +16,13 @@ public interface IPeriodoAcademicoService {
 
     List<PeriodoAcademicoResponseDTO> listarTodos();
     PeriodoAcademicoResponseDTO obtenerPeriodoActivo();
-    //List<PeriodoAcademicoResponseDTO> listarPorEstado(String estado);
+
+    /** Activa manualmente un período (accesible desde el controlador) */
+    void activar(Integer id);
+
+    /** Inactiva todos los períodos cuya fecha_fin ya pasó (llamado por @Scheduled) */
+    int inactivarVencidos();
+
+    /** Copia los requisitos activos del período fuente al destino */
+    int importarRequisitos(Integer idDestino, Integer idFuente);
 }

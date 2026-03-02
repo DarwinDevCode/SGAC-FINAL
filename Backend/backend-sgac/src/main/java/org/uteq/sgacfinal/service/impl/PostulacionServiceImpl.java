@@ -98,6 +98,14 @@ public class PostulacionServiceImpl implements IPostulacionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PostulacionResponseDTO> listarEnEvaluacionPorCarrera(Integer idCarrera) {
+        return postulacionRepository.findByEstadoAndCarrera("EN_EVALUACION", idCarrera).stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion) {
         Postulacion postulacion = postulacionRepository.findById(idPostulacion)
                 .orElseThrow(() -> new RuntimeException("Postulación no encontrada"));
@@ -106,15 +114,10 @@ public class PostulacionServiceImpl implements IPostulacionService {
         postulacion.setObservaciones(observacion);
         
         try {
-            System.out.println("Intentando actualizar postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
-            Integer resultado = postulacionRepository.actualizarPostulacion(idPostulacion, nuevoEstado, observacion);
-            System.out.println("Resultado de sp_actualizar_postulacion: " + resultado);
-            
-            if (resultado == null || resultado == -1) {
-                throw new RuntimeException("El SP actualizarPostulacion devolvió " + resultado);
-            }
+            System.out.println("Actualizando postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
+            postulacionRepository.save(postulacion);
         } catch (Exception ex) {
-            System.err.println("Error al ejecutar actualizarPostulacion: " + ex.getMessage());
+            System.err.println("Error al guardar postulación: " + ex.getMessage());
             ex.printStackTrace();
             throw new RuntimeException("Error al actualizar el estado de la postulación en la base de datos: " + ex.getMessage(), ex);
         }
@@ -149,6 +152,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 .estadoPostulacion(entidad.getEstadoPostulacion())
                 .observaciones(entidad.getObservaciones())
                 .activo(entidad.getActivo())
+                .comisionAsignada(entidad.getEvaluacionesOposicion() != null && !entidad.getEvaluacionesOposicion().isEmpty())
                 .build();
     }
 
@@ -216,5 +220,14 @@ public class PostulacionServiceImpl implements IPostulacionService {
             e.printStackTrace();
             throw new RuntimeException("Error en el proceso: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existePostulacion(Integer idUsuario, Integer idConvocatoria) {
+        // El idUsuario viene del JWT; hay que resolver al id_estudiante real
+        return estudianteRepository.findByUsuario_IdUsuario(idUsuario)
+                .map(est -> postulacionRepository.existePostulacionActiva(est.getIdEstudiante(), idConvocatoria))
+                .orElse(false);
     }
 }
