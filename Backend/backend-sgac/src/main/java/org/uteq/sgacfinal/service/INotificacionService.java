@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface INotificacionService {
 
-    NotificacionResponseDTO enviarNotificacion(Long idUsuario, NotificationRequest request);
+    NotificacionResponseDTO enviarNotificacion(Integer idUsuario, NotificationRequest request);
 
     List<NotificacionResponseDTO> listarUltimas10DelUsuarioAutenticado();
 

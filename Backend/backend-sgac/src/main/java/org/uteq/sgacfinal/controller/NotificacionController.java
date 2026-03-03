@@ -42,7 +42,7 @@ public class NotificacionController {
      * Puedes restringirlo por rol si lo vas a usar en producción.
      */
     @PostMapping("/enviar/{idUsuario}")
-    public ResponseEntity<NotificacionResponseDTO> enviar(@PathVariable Long idUsuario,
+    public ResponseEntity<NotificacionResponseDTO> enviar(@PathVariable Integer idUsuario,
                                                           @Valid @RequestBody NotificationRequest request) {
         return ResponseEntity.ok(notificacionService.enviarNotificacion(idUsuario, request));
     }
@@ -75,14 +75,5 @@ public class NotificacionController {
         }
     }
 
-    @PutMapping("/marcar-leida/{id}")
-    public ResponseEntity<?> marcarComoLeida(@PathVariable Integer id) {
-        try {
-            notificacionService.marcarcomoLeida(id);
-            return ResponseEntity.ok(java.util.Map.of("mensaje", "Notificación marcada como leída."));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(java.util.Map.of("error", e.getMessage()));
-        }
-    }
+
 }

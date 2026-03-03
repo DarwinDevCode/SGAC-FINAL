@@ -41,7 +41,7 @@ public class Notificacion {
 
     @Size(max = 30)
     @NotNull
-    @Column(name = "tipo", nullable = false, length = 30)
+    @Column(name = "tipo", nullable = false, length = 50)
     private String tipo;
 
     @Column(name = "id_referencia")
@@ -61,8 +61,6 @@ public class Notificacion {
     @Column(name = "fecha_lectura")
     private Instant fechaLectura;
 
-    @Column(name = "tipo", length = 50)
-    private String tipo;
 
     /** P10 — clasificación de notificación: INDIVIDUAL | MASIVA_ROL | MASIVA_TODOS */
     @Column(name = "tipo_notificacion", length = 30)

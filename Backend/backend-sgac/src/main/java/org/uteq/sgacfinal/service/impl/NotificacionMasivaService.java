@@ -52,7 +52,7 @@ public class NotificacionMasivaService {
         Usuario u = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + idUsuario));
         Notificacion n = Notificacion.builder()
-                .usuarioDestino(u)
+                .usuario(u)
                 .mensaje(mensaje)
                 .tipo(tipo)
                 .tipoNotificacion("INDIVIDUAL")

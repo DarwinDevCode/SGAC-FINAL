@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.uteq.sgacfinal.dto.Request.NotificationRequest;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
 import org.uteq.sgacfinal.entity.Estudiante;
@@ -124,10 +125,14 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
         if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
             String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
+
+
+        NotificationRequest notificationRequest = new NotificationRequest();
+
+
             notificacionService.enviarNotificacion(
                     postulacion.getEstudiante().getUsuario().getIdUsuario(),
-                    mensaje,
-                    "ESTADO_POSTULACION"
+                    notificationRequest
             );
         }
     }

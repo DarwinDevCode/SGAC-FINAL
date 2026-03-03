@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.service.impl;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -27,13 +28,12 @@ public class NotificacionServiceImpl implements INotificacionService {
     private final NotificacionRepository notificacionRepository;
     private final IUsuariosRepository usuarioRepository;
     private final SimpMessagingTemplate messagingTemplate;
-
+    private final EntityManager entityManager;
 
 
     @Override
     public Notificacion enviarNotificacion(Integer idUsuarioDestino, String mensaje, String tipo) {
-        // Elevate privileges for this transaction to bypass DatabaseRoleAspect restrictions
-        // Coordinators don't have SELECT on seguridad.usuario by default
+
         try {
             org.hibernate.Session session = entityManager.unwrap(org.hibernate.Session.class);
             session.doWork(connection -> {
