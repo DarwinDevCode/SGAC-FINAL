@@ -20,7 +20,6 @@ public class EvidenciaRequest {
     @Size(max = 150)
     private String nombreArchivo;
 
-    @NotBlank(message = "La ruta del archivo es obligatoria")
     @Size(max = 500)
     private String rutaArchivo;
 

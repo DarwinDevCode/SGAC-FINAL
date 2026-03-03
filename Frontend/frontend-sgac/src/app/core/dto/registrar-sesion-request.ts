@@ -1,10 +1,21 @@
-import {EvidenciaRequest} from './evidencia-request';
+import { EvidenciaRequest } from './evidencia-request';
 
 export interface RegistrarSesionRequest {
-  fecha:                string;
-  temaTratado:          string;
+  /**
+   * El backend lo valida como obligatorio.
+   * Si el backend lo calcula a partir de idUsuario, puede enviarse 0 como placeholder.
+   */
+  idAyudantia: number;
+
   descripcionActividad: string;
-  numeroAsistentes:     number;
-  horasDedicadas:       number;
-  evidencias:           EvidenciaRequest[];
+  temaTratado: string;
+
+  /** Fecha en formato ISO (yyyy-MM-dd) */
+  fecha: string;
+
+  numeroAsistentes: number;
+  horasDedicadas: number;
+
+  /** Debe tener la misma longitud e índice que el arreglo de archivos adjuntos */
+  evidencias: EvidenciaRequest[];
 }

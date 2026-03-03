@@ -1,0 +1,376 @@
+<div class="gestion-container">
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title">Mis sesiones</h2>
+      <p class="subtitle">Revisa tus sesiones registradas y sus evidencias.</p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="action-btn" type="button" (click)="abrirModalRegistro()">
+        <lucide-icon name="plus" size="16"></lucide-icon>
+        Registrar actividad
+      </button>
+
+      <button class="action-btn secondary" (click)="cargarSesiones()" [disabled]="isLoading" type="button">
+        <lucide-icon name="refresh-cw" size="16"></lucide-icon>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-banner error">
+      <lucide-icon name="alert-triangle" size="18"></lucide-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  <!-- Loading: skeleton -->
+  @if (isLoading) {
+    <div class="table-card">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  }
+
+  @if (!isLoading && !errorMessage && sesiones.length === 0) {
+    <div class="info-message">
+      <lucide-icon name="calendar-x" size="48" class="text-muted-foreground"></lucide-icon>
+      <p style="margin-top: .75rem" class="font-medium">Aún no has registrado sesiones</p>
+      <p class="text-sm" style="margin-top: .25rem">
+        Cuando registres una sesión, aparecerá aquí con sus evidencias.
+      </p>
+    </div>
+  }
+
+  @if (!isLoading && sesiones.length > 0) {
+    <div class="sesiones-layout">
+      <!-- LISTADO -->
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Actividad</th>
+              <th>Horas</th>
+              <th>Estado</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of sesiones; track trackById($index, s)) {
+              <tr
+                class="row-click"
+                [class.row-active]="sesionSeleccionada?.idRegistroActividad === s.idRegistroActividad"
+                (click)="verDetalle(s.idRegistroActividad)"
+              >
+                <td>
+                  <div class="user-info-cell">
+                    <span class="full-name">{{ s.fecha | date:'dd/MM/yyyy' }}</span>
+                    <span class="user-email">{{ s.fecha | date:'EEEE' }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="actividad-cell">
+                    <div class="font-medium">{{ s.temaTratado || 'Sesión' }}</div>
+                    <div class="text-xs text-muted-foreground actividad-desc">{{ s.descripcionActividad }}</div>
+                  </div>
+                </td>
+
+                <td>{{s.horasDedicadas}}</td>
+
+                <td>
+                  @let estado = getEstadoSesion(s);
+                  <span
+                    class="badge"
+                    [ngClass]="statusClass(estado)"
+                    [attr.title]="estado === 'OBSERVADO' ? tooltipObservado() : null"
+                  >
+                    {{ estado || 'EN EVALUACIÓN' }}
+                  </span>
+                </td>
+
+                <td class="text-right">
+                  <div class="actions-right">
+                    <button
+                      class="btn-ghost-inline"
+                      type="button"
+                      (click)="$event.stopPropagation(); verDetalle(s.idRegistroActividad)"
+                    >
+                      <lucide-icon name="paperclip" size="16"></lucide-icon>
+                      Ver evidencias
+                    </button>
+
+                    @if (puedeEditarSesion(s)) {
+                      <button
+                        class="btn-ghost-inline warning"
+                        type="button"
+                        (click)="$event.stopPropagation(); editarSesion(s)"
+                        title="Editar (solo disponible durante 24h)"
+                      >
+                        <lucide-icon name="pencil" size="16"></lucide-icon>
+                        Editar
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DETALLE / EVIDENCIAS -->
+      <div class="detail-card" [class.detail-hidden]="!sesionSeleccionada">
+        @if (!sesionSeleccionada) {
+          <div class="info-message" style="padding: 1.75rem 1rem;">
+            <lucide-icon name="mouse-pointer-click" size="34" class="text-muted-foreground"></lucide-icon>
+            <p style="margin-top:.75rem" class="text-sm">Selecciona una sesión para ver sus evidencias.</p>
+          </div>
+        } @else {
+          <div class="detail-header">
+            <div class="title-container">
+              <h3 class="title" style="font-size: 1.1rem;">Evidencias</h3>
+              <p class="subtitle" style="margin-top: .2rem;">
+                {{ sesionSeleccionada.fecha | date:'dd/MM/yyyy' }} • {{ sesionSeleccionada.temaTratado || 'Sesión' }}
+              </p>
+            </div>
+
+            <button class="btn-icon" type="button" (click)="cerrarDetalle()" title="Cerrar">
+              <lucide-icon name="x" size="18"></lucide-icon>
+            </button>
+          </div>
+
+          <!-- Observación de la actividad -->
+          @if (sesionSeleccionada.observacionDocente && sesionSeleccionada.observacionDocente !== 'Sin observaciones') {
+            <div class="callout info">
+              <div class="callout-title">
+                <lucide-icon name="info" size="16"></lucide-icon>
+                <span>Observación de la actividad</span>
+                @if (sesionSeleccionada.fechaObservacion) {
+                  <span class="callout-date">{{ sesionSeleccionada.fechaObservacion | date:'dd/MM/yyyy' }}</span>
+                }
+              </div>
+              <div class="callout-body">
+                {{ sesionSeleccionada.observacionDocente }}
+              </div>
+            </div>
+          }
+
+          @if (isDetailLoading) {
+            <div class="detail-body">
+              @for (_ of [1,2,3,4]; track $index) {
+                <div class="skeleton-card"></div>
+              }
+            </div>
+          } @else if ((sesionSeleccionada.evidencias.length || 0) === 0) {
+            <div class="info-message" style="padding: 1.75rem 1rem;">
+              <lucide-icon name="file-x" size="40" class="text-muted-foreground"></lucide-icon>
+              <p style="margin-top:.75rem" class="font-medium">No hay evidencias adjuntas</p>
+              <p class="text-sm" style="margin-top:.25rem">Esta sesión no tiene archivos cargados.</p>
+            </div>
+          } @else {
+            <div class="detail-body">
+              <div class="evidencias-grid">
+                @for (ev of sesionSeleccionada.evidencias; track ev.idEvidenciaRegistroActividad) {
+                  <div class="evidencia-card">
+                    <button
+                      class="evidencia-item"
+                      type="button"
+                      (click)="abrirEvidencia(ev)"
+                      title="Abrir evidencia"
+                    >
+                      @if (esImagen(ev)) {
+                        <img class="evidencia-thumb" [src]="ev.rutaArchivo" [alt]="ev.nombreArchivo" />
+                      } @else {
+                        <div class="evidencia-icon">
+                          <lucide-icon [name]="iconoEvidencia(ev)" size="22"></lucide-icon>
+                        </div>
+                      }
+
+                      <div class="evidencia-meta">
+                        <div class="evidencia-name">{{ ev.nombreArchivo }}</div>
+                        <div class="text-xs text-muted-foreground">
+                          {{ ev.mimeType }} • {{ ev.fechaSubida | date:'dd/MM/yyyy' }}
+                        </div>
+                      </div>
+
+                      <div class="evidencia-right">
+                        @let estEv = getEstadoEvidencia(ev);
+                        <span
+                          class="badge"
+                          [ngClass]="statusClass(estEv)"
+                          [attr.title]="estEv === 'OBSERVADO' ? tooltipObservado() : null"
+                        >
+                          {{ estEv || 'SUBIDO' }}
+                        </span>
+                      </div>
+                    </button>
+
+                    @if (ev.observacionDocente && ev.observacionDocente !== 'Sin observaciones') {
+                      <div class="callout warn">
+                        <div class="callout-title">
+                          <lucide-icon name="info" size="16"></lucide-icon>
+                          <span>Observación</span>
+                          @if (ev.fechaObservacion) {
+                            <span class="callout-date">{{ ev.fechaObservacion | date:'dd/MM/yyyy' }}</span>
+                          }
+                        </div>
+                        <div class="callout-body">{{ ev.observacionDocente }}</div>
+                      </div>
+                    }
+
+                    @if (puedeEditarEvidencia(ev)) {
+                      <div class="evidencia-actions">
+                        <button class="btn-ghost-inline warning" type="button" (click)="editarEvidencia(ev)">
+                          <lucide-icon name="pencil" size="16"></lucide-icon>
+                          Editar evidencia
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- MODAL REGISTRAR ACTIVIDAD -->
+  @if (isModalOpen) {
+    <div class="modal-overlay" (click)="cerrarModalRegistro()">
+      <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="title-container">
+            <h3 class="title" style="font-size: 1.15rem;">Registrar actividad</h3>
+            <p class="subtitle">Completa los datos y adjunta tus evidencias (máx. 5 archivos).</p>
+          </div>
+
+          <button class="btn-icon" type="button" (click)="cerrarModalRegistro()" [disabled]="isSubmitting" title="Cerrar">
+            <lucide-icon name="x" size="18"></lucide-icon>
+          </button>
+        </div>
+
+        <form class="modal-form" [formGroup]="form" (ngSubmit)="submitRegistro()">
+          <div class="modal-scroll">
+            @if (formError) {
+              <div class="inline-error">
+                <lucide-icon name="alert-triangle" size="16"></lucide-icon>
+                <span>{{ formError }}</span>
+              </div>
+            }
+
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label">Fecha</label>
+                <input class="field-input" type="date" formControlName="fecha" />
+                @if (form.controls.fecha.touched && form.controls.fecha.invalid) {
+                  <div class="field-hint text-destructive text-xs">La fecha es obligatoria.</div>
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label">Tema tratado</label>
+                <input class="field-input" type="text" formControlName="temaTratado" placeholder="Ej: Tutoría de laboratorio" />
+                @if (form.controls.temaTratado.touched && form.controls.temaTratado.invalid) {
+                  <div class="field-hint text-destructive text-xs">El tema es obligatorio.</div>
+                }
+              </div>
+
+              <div class="field full">
+                <label class="field-label">Descripción de la actividad</label>
+                <textarea class="field-input" rows="3" formControlName="descripcionActividad" placeholder="Describe brevemente lo realizado..."></textarea>
+                @if (form.controls.descripcionActividad.touched && form.controls.descripcionActividad.invalid) {
+                  <div class="field-hint text-destructive text-xs">La descripción es obligatoria.</div>
+                }
+              </div>
+
+              <div class="field">
+                <label class="field-label">N° asistentes</label>
+                <input class="field-input" type="number" min="0" formControlName="numeroAsistentes" />
+              </div>
+
+              <div class="field">
+                <label class="field-label">Horas dedicadas</label>
+                <input class="field-input" type="number" min="0" step="0.5" formControlName="horasDedicadas" />
+                @if (form.controls.horasDedicadas.touched && form.controls.horasDedicadas.invalid) {
+                  <div class="field-hint text-destructive text-xs">Ingresa un valor mayor a 0.</div>
+                }
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="field">
+              <label class="field-label">Evidencias</label>
+
+              <div class="dropzone">
+                <input
+                  class="dropzone-input"
+                  type="file"
+                  multiple
+                  (change)="onFilesSelected($any($event.target).files)"
+                  [disabled]="isSubmitting"
+                />
+
+                <div class="dropzone-content">
+                  <lucide-icon name="upload" size="18"></lucide-icon>
+                  <div>
+                    <div class="font-medium">Arrastra tus archivos aquí o haz clic para adjuntar</div>
+                    <div class="text-xs text-muted-foreground">PDF, imágenes u otros. Máx. {{ maxFiles }} archivos.</div>
+                  </div>
+                </div>
+              </div>
+
+              @if (selectedFiles.length > 0) {
+                <div class="files-list scroll-area">
+                  @for (f of selectedFiles; track f.name + '-' + $index) {
+                    <div class="file-item">
+                      <div class="file-left">
+                        <lucide-icon name="paperclip" size="16"></lucide-icon>
+                        <div class="file-meta">
+                          <div class="file-name">{{ f.name }}</div>
+                          <div class="text-xs text-muted-foreground">{{ (f.size / 1024) | number:'1.0-0' }} KB</div>
+                        </div>
+                      </div>
+
+                      <button class="btn-icon" type="button" (click)="removeFile($index)" [disabled]="isSubmitting" title="Quitar">
+                        <lucide-icon name="trash-2" size="16"></lucide-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+
+              @if (selectedFiles.length === 0) {
+                <div class="field-hint text-xs text-muted-foreground" style="margin-top: .5rem;">
+                  Debes adjuntar al menos 1 archivo para poder guardar.
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="modal-footer sticky-footer">
+            <button class="action-btn secondary" type="button" (click)="cerrarModalRegistro()" [disabled]="isSubmitting">
+              Cancelar
+            </button>
+
+            <button class="action-btn" type="submit" [disabled]="!canSubmit">
+              @if (isSubmitting) {
+                <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon>
+                Guardando...
+              } @else {
+                <lucide-icon name="save" size="16"></lucide-icon>
+                Guardar
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

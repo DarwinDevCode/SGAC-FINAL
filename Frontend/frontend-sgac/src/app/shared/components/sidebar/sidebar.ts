@@ -42,7 +42,7 @@ export class SidebarComponent {
     ],
     AYUDANTE_CATEDRA: [
       { label: 'Inicio', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
-      { label: 'Mis sesiones', icon: 'CalendarClock', route: '/ayudante/actividades' },
+      { label: 'Mis sesiones', icon: 'CalendarClock', route: '/ayudante/sesiones' },
       { label: 'Mis Informes', icon: 'FileText', route: '/ayudante/informes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/ayudante/notifications' },
     ],

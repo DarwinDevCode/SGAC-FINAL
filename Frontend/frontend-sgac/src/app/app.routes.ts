@@ -32,6 +32,7 @@ import { DashboardComponent as AyudanteDashboard } from './features/ayudante/das
 import { ActividadesComponent as AyudanteActividades } from './features/ayudante/actividades/actividades.component';
 import { InformesComponent as AyudanteInformes } from './features/ayudante/informes/informes.component';
 import { AyudanteNotificacionesComponent } from './features/ayudante/notificaciones/notificaciones.component';
+import {SesionesComponent} from './features/ayudante/sesiones/sesiones';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -79,6 +80,8 @@ export const routes: Routes = [
       { path: 'ayudante/actividades', component: AyudanteActividades },
       { path: 'ayudante/informes', component: AyudanteInformes },
       { path: 'ayudante/notifications', component: AyudanteNotificacionesComponent },
+      { path: 'ayudante/sesiones', component: SesionesComponent },
+
 
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]

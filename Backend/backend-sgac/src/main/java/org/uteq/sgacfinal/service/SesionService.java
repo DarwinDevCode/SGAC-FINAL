@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.service;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.RegistrarSesionRequest;
 import org.uteq.sgacfinal.dto.Response.*;
 
@@ -19,5 +20,6 @@ public interface SesionService {
     List<EvidenciaResponse> evidenciasSesion(Integer idUsuario, Integer idRegistro);
     ProgresoGeneralResponse progresoGeneral(Integer idUsuario);
     ControlSemanalResponse controlSemanal(Integer idUsuario);
-    RegistrarSesionResponse registrarSesion(Integer idUsuario, RegistrarSesionRequest request);
+    RegistrarSesionResponse registrarSesion(Integer idUsuario, RegistrarSesionRequest request, List<MultipartFile> archivos);
+
 }

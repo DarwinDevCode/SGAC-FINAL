@@ -93,6 +93,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/ws-sgac/**").permitAll()
+                        .requestMatchers(
                                 "/api/auth/login").permitAll()
                         .requestMatchers(
                                 "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
@@ -105,6 +107,8 @@ public class SecurityConfig {
                                 "/api/permisos/**").hasAnyAuthority("ADMINISTRADOR")
                         .requestMatchers(
                                 "/api/sesiones/**").hasAuthority("AYUDANTE_CATEDRA")
+                        .requestMatchers(
+                                "/api/notificaciones/**").authenticated()
                         .requestMatchers(
                                 "/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
                         .requestMatchers(

@@ -1,15 +1,22 @@
 package org.uteq.sgacfinal.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.NotificationRequest;
+import org.uteq.sgacfinal.dto.Response.NotificacionResponseDTO;
 import org.uteq.sgacfinal.entity.Notificacion;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
 import org.uteq.sgacfinal.repository.NotificacionRepository;
 import org.uteq.sgacfinal.service.INotificacionService;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -19,34 +26,108 @@ public class NotificacionServiceImpl implements INotificacionService {
 
     private final NotificacionRepository notificacionRepository;
     private final IUsuariosRepository usuarioRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
-    public Notificacion enviarNotificacion(Integer idUsuarioDestino, String mensaje, String tipo) {
-        Usuario usuario = usuarioRepository.findById(idUsuarioDestino)
+    public NotificacionResponseDTO enviarNotificacion(Long idUsuario, NotificationRequest request) {
+        Usuario usuario = usuarioRepository.findById(idUsuario.intValue())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Notificacion notificacion = Notificacion.builder()
-                .usuarioDestino(usuario)
-                .mensaje(mensaje)
-                .tipo(tipo)
-                .fechaEnvio(LocalDateTime.now())
+                .usuario(usuario)
+                .titulo(request.getTitulo())
+                .mensaje(request.getMensaje())
+                .tipo(request.getTipo())
+                .idReferencia(request.getIdReferencia())
                 .leido(false)
+                .fechaCreacion(Instant.now())
                 .build();
 
-        return notificacionRepository.save(notificacion);
+        Notificacion saved = notificacionRepository.save(notificacion);
+
+        NotificacionResponseDTO payload = mapToDto(saved);
+
+        // Envío en tiempo real (privado por usuario)
+        messagingTemplate.convertAndSend("/queue/notificaciones/" + idUsuario, payload);
+
+        return payload;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Notificacion> listarPorUsuario(Integer idUsuario) {
-        return notificacionRepository.findByUsuarioDestino_IdUsuarioOrderByFechaEnvioDesc(idUsuario);
+    public List<NotificacionResponseDTO> listarUltimas10DelUsuarioAutenticado() {
+        Integer idUsuario = getIdUsuarioAutenticado();
+
+        return notificacionRepository
+                .findByUsuario_IdUsuarioOrderByFechaCreacionDesc(idUsuario, PageRequest.of(0, 10))
+                .stream()
+                .map(this::mapToDto)
+                .toList();
     }
 
     @Override
-    public void marcarcomoLeida(Integer idNotificacion) {
+    public void marcarComoLeida(Integer idNotificacion) {
+        Integer idUsuario = getIdUsuarioAutenticado();
+
         Notificacion notificacion = notificacionRepository.findById(idNotificacion)
                 .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
+
+        // Validar ownership
+        if (notificacion.getUsuario() == null || notificacion.getUsuario().getIdUsuario() == null
+                || !notificacion.getUsuario().getIdUsuario().equals(idUsuario)) {
+            throw new RuntimeException("No autorizado para modificar esta notificación");
+        }
+
+        if (Boolean.TRUE.equals(notificacion.getLeido())) {
+            return;
+        }
+
         notificacion.setLeido(true);
+        notificacion.setFechaLectura(Instant.now());
         notificacionRepository.save(notificacion);
+    }
+
+    private Integer getIdUsuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new RuntimeException("No hay usuario autenticado");
+        }
+
+        Object principal = authentication.getPrincipal();
+
+        // Caso normal de este proyecto: UsuarioPrincipal envuelve Usuario pero no expone getter.
+        if (principal instanceof org.uteq.sgacfinal.security.UsuarioPrincipal usuarioPrincipal) {
+            try {
+                java.lang.reflect.Field f = org.uteq.sgacfinal.security.UsuarioPrincipal.class.getDeclaredField("usuario");
+                f.setAccessible(true);
+                Usuario u = (Usuario) f.get(usuarioPrincipal);
+                if (u != null && u.getIdUsuario() != null) {
+                    return u.getIdUsuario();
+                }
+            } catch (Exception ignored) {
+                // fallback abajo
+            }
+        }
+
+        if (principal instanceof UserDetails userDetails) {
+            return usuarioRepository.findByNombreUsuarioWithRolesAndTipoRol(userDetails.getUsername())
+                    .map(Usuario::getIdUsuario)
+                    .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
+        }
+
+        throw new RuntimeException("No hay usuario autenticado");
+    }
+
+    private NotificacionResponseDTO mapToDto(Notificacion n) {
+        return NotificacionResponseDTO.builder()
+                .idNotificacion(n.getIdNotificacion())
+                .titulo(n.getTitulo())
+                .mensaje(n.getMensaje())
+                .tipo(n.getTipo())
+                .idReferencia(n.getIdReferencia())
+                .leido(n.getLeido())
+                .fechaCreacion(n.getFechaCreacion())
+                .fechaLectura(n.getFechaLectura())
+                .build();
     }
 }

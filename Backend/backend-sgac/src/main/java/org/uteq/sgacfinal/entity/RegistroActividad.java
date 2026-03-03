@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -49,4 +50,12 @@ public class RegistroActividad {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_tipo_estado_registro", nullable = false)
     private TipoEstadoRegistro idTipoEstadoRegistro;
+
+    @Size(max = 500)
+    @Column(name = "observaciones", length = 500)
+    private String observaciones;
+
+    @Column(name = "fecha_observacion")
+    private LocalDate fechaObservacion;
+
 }

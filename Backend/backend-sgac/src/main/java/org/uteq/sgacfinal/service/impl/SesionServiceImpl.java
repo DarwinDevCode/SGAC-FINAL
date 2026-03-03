@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.EvidenciaRequest;
 import org.uteq.sgacfinal.dto.Request.RegistrarSesionRequest;
 import org.uteq.sgacfinal.dto.Response.*;
@@ -15,6 +16,7 @@ import org.uteq.sgacfinal.repository.AyudantiaRepository;
 import org.uteq.sgacfinal.repository.EvidenciaRegistroActividadRepository;
 import org.uteq.sgacfinal.repository.ProgresoRepository;
 import org.uteq.sgacfinal.repository.RegistroActividadRepository;
+import org.uteq.sgacfinal.service.IUploadService;
 import org.uteq.sgacfinal.service.SesionService;
 
 import java.math.BigDecimal;
@@ -32,6 +34,7 @@ public class SesionServiceImpl implements SesionService {
     private final AyudantiaRepository ayudantiaRepository;
     private final ProgresoRepository progresoRepository;
     private final ObjectMapper objectMapper;
+    private final IUploadService uploadService;
 
     @Override
     @Transactional
@@ -116,17 +119,52 @@ public class SesionServiceImpl implements SesionService {
     @Override
     @Transactional
     public RegistrarSesionResponse registrarSesion(
-            Integer idUsuario, RegistrarSesionRequest request) {
+            Integer idUsuario, RegistrarSesionRequest request, List<MultipartFile> archivos) {
 
+        // 1) Obtención automática del ID de la ayudantía activa para el usuario
         Integer idAyudantia = ayudantiaRepository
                 .findIdAyudantiaActivaByUsuario(idUsuario)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No se encontró ayudantía activa para el usuario."
+                        "No se encontró una ayudantía activa (EN_PROGRESO) para el usuario con ID: " + idUsuario
                 ));
 
+        // Validaciones de archivos y coherencia (se mantienen tus reglas)
+        if (archivos == null || archivos.isEmpty()) {
+            throw new IllegalArgumentException("Debe adjuntar al menos un archivo de evidencia.");
+        }
+        if (request.getEvidencias() == null || request.getEvidencias().isEmpty()) {
+            throw new IllegalArgumentException("Debe incluir la información de las evidencias en el request.");
+        }
+        if (request.getEvidencias().size() != archivos.size()) {
+            throw new IllegalArgumentException("La cantidad de metadatos de evidencias y archivos físicos no coincide.");
+        }
+
+        // 2) Subida a Cloudinary
+        for (int i = 0; i < archivos.size(); i++) {
+            MultipartFile file = archivos.get(i);
+            Map<String, Object> subida = uploadService.upload(file);
+
+            EvidenciaRequest evidencia = request.getEvidencias().get(i);
+            evidencia.setRutaArchivo((String) subida.get("url"));
+            evidencia.setMimeType((String) subida.getOrDefault("mimeType", ""));
+
+            Object sizeObj = subida.get("tamanioBytes");
+            if (sizeObj instanceof Number n) {
+                evidencia.setTamanioBytes(n.intValue());
+            } else if (sizeObj != null) {
+                evidencia.setTamanioBytes(Integer.parseInt(sizeObj.toString()));
+            }
+
+            if (evidencia.getNombreArchivo() == null || evidencia.getNombreArchivo().isBlank()) {
+                evidencia.setNombreArchivo(file.getOriginalFilename());
+            }
+        }
+
+        // 3) Persistencia mediante la función de PostgreSQL
         String evidenciasJson = serializarEvidencias(request.getEvidencias());
 
-        Object[] resultado = registroActividadRepository.registrarActividad(
+        // Capturamos como Lista para evitar el ClassCastException
+        List<Object[]> resultados = registroActividadRepository.registrarActividad(
                 idUsuario,
                 idAyudantia,
                 request.getDescripcionActividad(),
@@ -137,10 +175,17 @@ public class SesionServiceImpl implements SesionService {
                 evidenciasJson
         );
 
+        // 4) Procesamiento del resultado de la función
+        if (resultados == null || resultados.isEmpty()) {
+            throw new IllegalStateException("Error crítico: La base de datos no devolvió respuesta al procesar la actividad.");
+        }
+
+        Object[] fila = resultados.get(0); // Obtenemos la primera (y única) fila
+
         return RegistrarSesionResponse.builder()
-                .exito((Boolean) resultado[0])
-                .mensaje((String) resultado[1])
-                .idRegistroCreado(resultado[2] != null ? (Integer) resultado[2] : null)
+                .exito((Boolean) fila[0])
+                .mensaje((String) fila[1])
+                .idRegistroCreado(fila[2] != null ? (Integer) fila[2] : null)
                 .build();
     }
 

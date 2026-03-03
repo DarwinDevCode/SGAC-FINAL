@@ -1,18 +1,19 @@
-import {TipoEstadoRegistro} from './tipo-estado-registro';
 import {Evidencia} from './evidencia';
 
 export interface SesionDetalle {
   idRegistro:        number;
+  idAyudantia:       number;
   fecha:             string;
   temaTratado:       string;
-  descripcion:       string;
-  numeroAsistentes:  number;
+  descripcionActividad:       string;
   horasDedicadas:    number;
+  numeroAsistentes:  number;
   estado:    string;
-
-  nombreAsignatura:  string;
-  nombreDocente:     string;
-  nombrePeriodo:     string;
+  observacion?: string
+  fechaRegistro: string;
+  //nombreAsignatura:  string;
+  //nombreDocente:     string;
+  //nombrePeriodo:     string;
 
   evidencias:        Evidencia[];
 }

@@ -4,10 +4,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.RegistrarSesionRequest;
 import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.service.IAyudantiaService;
 import org.uteq.sgacfinal.service.SesionService;
 
 import java.time.LocalDate;
@@ -18,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SesionController {
     private final SesionService sesionService;
+    private final IAyudantiaService ayudantiaService;
 
     @GetMapping
     public ResponseEntity<List<SesionListadoResponse>> listarSesiones(
@@ -59,13 +64,40 @@ public class SesionController {
         return ResponseEntity.ok(sesionService.controlSemanal(idUsuario));
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<RegistrarSesionResponse> registrarSesion(
             @RequestParam Integer idUsuario,
-            @RequestBody @Valid RegistrarSesionRequest request) {
-        RegistrarSesionResponse response = sesionService.registrarSesion(idUsuario, request);
+            @RequestPart("request") @Valid RegistrarSesionRequest request,
+            @RequestPart("archivos") List<MultipartFile> archivos) {
+
+        RegistrarSesionResponse response = sesionService.registrarSesion(idUsuario, request, archivos);
         if (!response.getExito())
             return ResponseEntity.badRequest().body(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * Módulo "Mis Sesiones" para AYUDANTE_CATEDRA.
+     * Lista todas las sesiones/actividades registradas por el ayudante (idUsuario).
+     */
+    @GetMapping("/mis-sesiones")
+    @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
+    public ResponseEntity<List<SesionResponseDTO>> listarMisSesiones(@RequestParam Integer idAyudante) {
+        return ResponseEntity.ok(ayudantiaService.listarSesionesPorAyudante(idAyudante));
+    }
+
+    /**
+     * Módulo "Mis Sesiones" para AYUDANTE_CATEDRA.
+     * Detalle de una sesión específica (incluye evidencias).
+     */
+    @GetMapping("/mis-sesiones/{idRegistroActividad}")
+    @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
+    public ResponseEntity<SesionResponseDTO> detalleMiSesion(
+            @RequestParam Integer idAyudante,
+            @PathVariable Integer idRegistroActividad) {
+
+        return ayudantiaService.obtenerDetalleSesionConEvidencias(idAyudante, idRegistroActividad)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

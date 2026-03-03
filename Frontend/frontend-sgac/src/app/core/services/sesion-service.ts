@@ -10,6 +10,7 @@ import {ControlSemanal} from '../dto/control-semanal';
 import {RegistrarSesionResponse} from '../dto/registrar-sesion-response';
 import {RegistrarSesionRequest} from '../dto/registrar-sesion-request';
 import {FiltrosSesionRequest} from '../dto/filtros-sesion-request';
+import { SesionResponseDTO } from '../dto/sesion-response-dto';
 
 @Injectable({
   providedIn: 'root'
@@ -17,7 +18,6 @@ import {FiltrosSesionRequest} from '../dto/filtros-sesion-request';
 export class SesionService {
 
   private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-
 
   private readonly URL = `${this.baseUrl}/sesiones`;
 
@@ -68,10 +68,39 @@ export class SesionService {
 
   registrarSesion(
     idUsuario: number,
-    request: RegistrarSesionRequest
+    request: RegistrarSesionRequest,
+    files: File[]
   ): Observable<RegistrarSesionResponse> {
 
     const params = new HttpParams().set('idUsuario', idUsuario);
-    return this.http.post<RegistrarSesionResponse>(this.URL, request, { params });
+
+    const formData = new FormData();
+
+    // El backend espera @RequestPart("request") como JSON
+    const jsonBlob = new Blob([JSON.stringify(request)], { type: 'application/json' });
+    formData.append('request', jsonBlob);
+
+    // El backend espera @RequestPart("archivos")
+    (files || []).forEach((file) => {
+      formData.append('archivos', file, file.name);
+    });
+
+    return this.http.post<RegistrarSesionResponse>(this.URL, formData, { params });
+  }
+
+  listarMisSesiones(idAyudante: number): Observable<SesionResponseDTO[]> {
+    const params = new HttpParams().set('idAyudante', idAyudante);
+    return this.http.get<SesionResponseDTO[]>(`${this.URL}/mis-sesiones`, { params });
+  }
+
+  obtenerDetalleMiSesion(
+    idAyudante: number,
+    idRegistroActividad: number
+  ): Observable<SesionResponseDTO> {
+    const params = new HttpParams().set('idAyudante', idAyudante);
+    return this.http.get<SesionResponseDTO>(
+      `${this.URL}/mis-sesiones/${idRegistroActividad}`,
+      { params }
+    );
   }
 }

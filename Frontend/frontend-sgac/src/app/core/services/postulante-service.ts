@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { TipoRequisitoPostulacionResponseDTO, PostulacionResponseDTO } from '../dto/postulacion';
 import { EvaluacionMeritosResponseDTO, EvaluacionOposicionResponseDTO } from '../dto/evaluacion';
@@ -59,10 +59,18 @@ export class PostulanteService {
 
     // Notificaciones
     listarNotificaciones(idUsuario: number): Observable<NotificacionResponseDTO[]> {
-        return this.http.get<NotificacionResponseDTO[]>(`${API_NOTIFICACIONES}/mis-notificaciones/${idUsuario}`);
+        // Endpoint nuevo recomendado: /api/notificaciones/ultimas (usa usuario autenticado)
+        return this.http.get<NotificacionResponseDTO[]>(`${API_NOTIFICACIONES}/ultimas`).pipe(
+            // Fallback por si aún existe el endpoint anterior
+            catchError(() => this.http.get<NotificacionResponseDTO[]>(`${API_NOTIFICACIONES}/mis-notificaciones/${idUsuario}`))
+        );
     }
 
     marcarNotificacionLeida(idNotificacion: number): Observable<any> {
-        return this.http.put(`${API_NOTIFICACIONES}/marcar-leida/${idNotificacion}`, {});
+        // Endpoint nuevo recomendado: /api/notificaciones/{id}/leida
+        return this.http.put(`${API_NOTIFICACIONES}/${idNotificacion}/leida`, {}).pipe(
+            // Fallback endpoint anterior
+            catchError(() => this.http.put(`${API_NOTIFICACIONES}/marcar-leida/${idNotificacion}`, {}))
+        );
     }
 }

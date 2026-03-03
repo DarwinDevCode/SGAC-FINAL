@@ -25,8 +25,8 @@
     } @else {
     <div class="notifications-list">
         @for (n of notificaciones; track n.idNotificacion) {
-        <div class="notif-card" [class.unread]="!n.leida">
-            <div class="notif-icon-wrapper" [class.unread-icon]="!n.leida">
+        <div class="notif-card" [class.unread]="!n.leido">
+            <div class="notif-icon-wrapper" [class.unread-icon]="!n.leido">
                 <lucide-icon name="bell" size="20"></lucide-icon>
             </div>
 
@@ -34,12 +34,12 @@
                 <p class="notif-message">{{ n.mensaje }}</p>
                 <p class="notif-date">
                     <lucide-icon name="calendar" size="12" class="inline-mr"></lucide-icon>
-                    {{ n.fechaEnvio | date:'dd/MM/yyyy • HH:mm' }}
+                    {{ n.fechaCreacion | date:'dd/MM/yyyy • HH:mm' }}
                 </p>
             </div>
 
             <div class="notif-actions">
-                @if (!n.leida) {
+                @if (!n.leido) {
                 <button (click)="marcarLeida(n.idNotificacion)" class="btn-mark-read" title="Marcar como leída">
                     <lucide-icon name="check" size="16" class="inline-mr"></lucide-icon>
                     Leída

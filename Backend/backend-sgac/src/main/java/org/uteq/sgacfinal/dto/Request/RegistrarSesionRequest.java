@@ -15,17 +15,19 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class RegistrarSesionRequest {
+    @NotNull(message = "El id de la ayudantía es obligatorio")
+    private Integer idAyudantia;
 
-    @NotNull(message = "La fecha es obligatoria")
-    @PastOrPresent(message = "La fecha no puede ser futura")
-    private LocalDate fecha;
+    @NotBlank(message = "La descripción es obligatoria")
+    private String descripcionActividad;
 
     @NotBlank(message = "El tema tratado es obligatorio")
     @Size(max = 200)
     private String temaTratado;
 
-    @NotBlank(message = "La descripción es obligatoria")
-    private String descripcionActividad;
+    @NotNull(message = "La fecha es obligatoria")
+    @PastOrPresent(message = "La fecha no puede ser futura")
+    private LocalDate fecha;
 
     @NotNull(message = "El número de asistentes es obligatorio")
     @Min(value = 0, message = "El número de asistentes no puede ser negativo")

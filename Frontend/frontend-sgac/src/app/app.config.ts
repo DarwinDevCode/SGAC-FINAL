@@ -60,7 +60,8 @@ import {
   Trash2,
   TrendingUp,
   Users,
-  X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList
+  X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
+  MousePointerClick, RefreshCw, FileX, Upload, Info
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -134,7 +135,15 @@ export const appConfig: ApplicationConfig = {
         ChevronDown,
         ExternalLink,
         CheckCircle2,
-        ClipboardList
+        ClipboardList,
+        RefreshCcw,
+        Paperclip,
+        MousePointerClick,
+        RefreshCw,
+        FileX,
+        Upload,
+        Info,
+
       })
     )
   ]

@@ -1,23 +1,36 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter, map } from 'rxjs/operators';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/services/auth-service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { NotificationBellComponent } from '../notification-bell/notification-bell';
+import { NotificacionService } from '../../../core/services/notificacion-service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, NotificationBellComponent],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
 export class HeaderComponent {
   private router = inject(Router);
   private authService = inject(AuthService);
+  private notificacionService = inject(NotificacionService);
 
   user = computed(() => this.authService.getUser());
+
+  constructor() {
+    // Conectar WS en cuanto tengamos usuario logeado.
+    effect(() => {
+      const u = this.user();
+      if (u?.idUsuario) {
+        this.notificacionService.conectar(u.idUsuario);
+      }
+    });
+  }
 
   private urlEvents = toSignal(
     this.router.events.pipe(

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.uteq.sgacfinal.dto.Request.NotificationRequest;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
 import org.uteq.sgacfinal.entity.Estudiante;
@@ -104,12 +105,12 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
         postulacion.setEstadoPostulacion(nuevoEstado);
         postulacion.setObservaciones(observacion);
-        
+
         try {
             System.out.println("Intentando actualizar postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
             Integer resultado = postulacionRepository.actualizarPostulacion(idPostulacion, nuevoEstado, observacion);
             System.out.println("Resultado de sp_actualizar_postulacion: " + resultado);
-            
+
             if (resultado == null || resultado == -1) {
                 throw new RuntimeException("El SP actualizarPostulacion devolvió " + resultado);
             }
@@ -121,10 +122,17 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
         if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
             String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
+
+            NotificationRequest req = NotificationRequest.builder()
+                    .titulo("Actualización de postulación")
+                    .mensaje(mensaje)
+                    .tipo("ESTADO_POSTULACION")
+                    .idReferencia(idPostulacion)
+                    .build();
+
             notificacionService.enviarNotificacion(
-                    postulacion.getEstudiante().getUsuario().getIdUsuario(),
-                    mensaje,
-                    "ESTADO_POSTULACION"
+                    postulacion.getEstudiante().getUsuario().getIdUsuario().longValue(),
+                    req
             );
         }
     }
@@ -218,3 +226,4 @@ public class PostulacionServiceImpl implements IPostulacionService {
         }
     }
 }
+

@@ -56,4 +56,11 @@ public class EvidenciaRegistroActividad {
     @Column(name = "tamanio_bytes")
     private Integer tamanioBytes;
 
+    @Size(max = 500)
+    @Column(name = "observaciones", length = 500)
+    private String observaciones;
+
+    @Column(name = "fecha_observacion")
+    private LocalDate fechaObservacion;
+
 }

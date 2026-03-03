@@ -4,10 +4,9 @@ export interface SesionListado {
   idRegistro:        number;
   fecha:             string;
   temaTratado:       string;
-  descripcion:       string;
-  numeroAsistentes:  number;
   horasDedicadas:    number;
+  numeroAsistentes:  number;
   estado:    string;
-  totalEvidencias:   number;
   tieneObservacion:  boolean;
+  totalEvidencias:   number;
 }

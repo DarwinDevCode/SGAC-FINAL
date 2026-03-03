@@ -33,7 +33,7 @@ export class NotificacionesComponent implements OnInit {
     this.postulanteService.marcarNotificacionLeida(id).subscribe({
       next: () => {
         const n = this.notificaciones.find(n => n.idNotificacion === id);
-        if (n) n.leida = true;
+        if (n) n.leido = true;
       }
     });
   }

@@ -63,7 +63,7 @@ public interface RegistroActividadRepository extends JpaRepository<RegistroActiv
             :fecha, :asistentes, :horas, CAST(:evidencias AS jsonb)
         )
         """, nativeQuery = true)
-    Object[] registrarActividad(
+    List<Object[]> registrarActividad(
             @Param("idUsuario")   Integer idUsuario,
             @Param("idAyudantia") Integer idAyudantia,
             @Param("descripcion") String descripcion,
