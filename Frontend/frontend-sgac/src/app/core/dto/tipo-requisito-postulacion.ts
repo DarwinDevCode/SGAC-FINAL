@@ -3,4 +3,5 @@ export interface TipoRequisitoPostulacionDTO {
   nombreRequisito: string;
   descripcion?: string;
   activo?: boolean;
+  tipoDocumentoPermitido?: string;
 }

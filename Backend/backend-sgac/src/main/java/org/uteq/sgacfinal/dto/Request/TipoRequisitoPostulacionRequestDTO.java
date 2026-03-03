@@ -13,4 +13,5 @@ public class TipoRequisitoPostulacionRequestDTO {
     private String nombreRequisito;
     private String descripcion;
     private Boolean activo;
+    private String tipoDocumentoPermitido;
 }

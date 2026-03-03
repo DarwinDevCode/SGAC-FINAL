@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/services/auth-service';
+import { PostulanteService } from '../../../core/services/postulante-service';
 
 @Component({
   selector: 'app-sidebar',
@@ -14,10 +15,9 @@ import { AuthService } from '../../../core/services/auth-service';
 export class SidebarComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
-
+  public postulanteService = inject(PostulanteService);
   //userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
-
-
+  
   private normalizeRole(rawRole?: string | null): string {
     if (!rawRole) return 'ESTUDIANTE';
 
@@ -31,6 +31,7 @@ export class SidebarComponent {
   }
 
   userRole = computed(() => this.normalizeRole(this.authService.getUser()?.rolActual));
+
 
   menus: Record<string, any[]> = {
     ESTUDIANTE: [
@@ -71,7 +72,6 @@ export class SidebarComponent {
     DECANO: [
       { label: 'Inicio', icon: 'LayoutDashboard', route: '/decano/dashboard' },
       { label: 'Designar Comisiones', icon: 'Users', route: '/decano/comisiones' },
-      { label: 'Firma Electrónica', icon: 'FileSignature', route: '/decano/firmas' },
       { label: 'Auditoría y Reportes', icon: 'BarChart3', route: '/decano/reportes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/decano/notifications' },
     ],

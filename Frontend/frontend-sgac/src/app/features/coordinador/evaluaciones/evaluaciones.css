@@ -1,0 +1,274 @@
+.gestion-container {
+    padding: 1rem;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #64748b;
+}
+
+/* Alertas */
+.alert-success,
+.alert-error {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    border-radius: .5rem;
+    font-size: .875rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.alert-error {
+    background: #fff1f2;
+    color: #dc2626;
+    border: 1px solid #fecdd3;
+}
+
+/* Filter bar */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+    padding: .75rem 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: .5rem;
+}
+
+.filter-label {
+    font-size: .8rem;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+}
+
+/* Table */
+.table-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: .75rem;
+    overflow: hidden;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .875rem;
+}
+
+.data-table th {
+    background: #f8fafc;
+    padding: .75rem 1rem;
+    text-align: left;
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table td {
+    padding: .65rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+
+/* Ranking rows */
+.row-gold {
+    background: #fffbeb;
+}
+
+.row-silver {
+    background: #f8fafc;
+}
+
+.row-bronze {
+    background: #fff7ed;
+}
+
+.medal {
+    font-size: 1.2rem;
+}
+
+.pos-num {
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: .75rem;
+    font-weight: 700;
+    line-height: 26px;
+    text-align: center;
+}
+
+/* Puntaje cell */
+.puntaje-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+}
+
+.puntaje-val {
+    font-weight: 600;
+    color: #0f172a;
+    min-width: 48px;
+    text-align: right;
+}
+
+.input-mini {
+    width: 70px;
+    padding: .25rem .4rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .3rem;
+    font-size: .78rem;
+    text-align: center;
+}
+
+.btn-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: .3rem;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.btn-mini:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.btn-mini:hover:not(:disabled) {
+    background: #0284c7;
+}
+
+.total-val {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.text-muted {
+    color: #94a3b8;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: .2rem .6rem;
+    border-radius: .3rem;
+    font-size: .72rem;
+    font-weight: 700;
+}
+
+.badge-green {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.badge-gray {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+/* States */
+.info-message,
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.text-slate-300 {
+    color: #cbd5e1;
+}
+
+.text-slate-500 {
+    color: #64748b;
+}
+
+.text-slate-600 {
+    color: #475569;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mt-1 {
+    margin-top: .25rem;
+}
+
+.mx-auto {
+    margin: 0 auto;
+}
+
+/* Inputs */
+.input-field {
+    padding: .45rem .75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .375rem;
+    font-size: .875rem;
+    outline: none;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .45rem .85rem;
+    background: white;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+    border-radius: .375rem;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: #f8fafc;
+}
+
+.btn-secondary:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}

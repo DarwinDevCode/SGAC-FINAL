@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError } from 'rxjs';
+import { Observable, BehaviorSubject, catchError } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ConvocatoriaDTO } from '../dto/convocatoria';
-import { TipoRequisitoPostulacionResponseDTO, PostulacionResponseDTO } from '../dto/postulacion';
+import { TipoRequisitoPostulacionResponseDTO, PostulacionResponseDTO, RequisitoAdjuntoResponseDTO } from '../dto/postulacion';
 import { EvaluacionMeritosResponseDTO, EvaluacionOposicionResponseDTO } from '../dto/evaluacion';
 import { NotificacionResponseDTO } from '../dto/notificacion';
 
@@ -10,12 +11,16 @@ const API_CONVOCATORIAS = 'http://localhost:8080/api/convocatorias';
 const API_POSTULACIONES = 'http://localhost:8080/api/postulaciones';
 const API_EVALUACIONES = 'http://localhost:8080/api/evaluaciones';
 const API_NOTIFICACIONES = 'http://localhost:8080/api/notificaciones';
+const API_REQUISITOS = 'http://localhost:8080/api/requisitos-adjuntos';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PostulanteService {
     private http = inject(HttpClient);
+
+    // Estado reactivo para el sidebar u otros componentes
+    public tienePostulacionActiva$ = new BehaviorSubject<boolean>(false);
 
     // Convocatorias
     listarConvocatoriasActivas(): Observable<ConvocatoriaDTO[]> {
@@ -29,6 +34,24 @@ export class PostulanteService {
 
     misPostulaciones(idEstudiante: number): Observable<PostulacionResponseDTO[]> {
         return this.http.get<PostulacionResponseDTO[]>(`${API_POSTULACIONES}/mis-postulaciones/${idEstudiante}`);
+    }
+
+    /** Actualiza el estado global de postulación */
+    verificarEstadoGlobalPostulacion(idEstudiante: number) {
+        this.misPostulaciones(idEstudiante).subscribe({
+            next: (postulaciones) => {
+                const activas = (postulaciones || []).filter(p => p.estadoPostulacion !== 'RECHAZADO');
+                this.tienePostulacionActiva$.next(activas.length > 0);
+            },
+            error: () => this.tienePostulacionActiva$.next(false)
+        });
+    }
+
+    /** Verifica si el estudiante ya se postuló a una convocatoria específica */
+    existePostulacion(idEstudiante: number, idConvocatoria: number): Observable<boolean> {
+        return this.http.get<boolean>(`${API_POSTULACIONES}/existe`, {
+            params: { idEstudiante: idEstudiante.toString(), idConvocatoria: idConvocatoria.toString() }
+        });
     }
 
     registrarPostulacion(datos: any, archivos: File[], tiposRequisito: number[]): Observable<any> {
@@ -72,5 +95,24 @@ export class PostulanteService {
             // Fallback endpoint anterior
             catchError(() => this.http.put(`${API_NOTIFICACIONES}/marcar-leida/${idNotificacion}`, {}))
         );
+    }
+
+    // --- Documentos adjuntos (Ítems 2 y 8) ---
+
+    /** Lista los documentos adjuntos de una postulación */
+    listarDocumentosPostulacion(idPostulacion: number): Observable<RequisitoAdjuntoResponseDTO[]> {
+        return this.http.get<RequisitoAdjuntoResponseDTO[]>(`${API_REQUISITOS}/postulacion/${idPostulacion}`);
+    }
+
+    /** URL de visualización/descarga de un documento (inline) */
+    urlVisualizarDocumento(idRequisito: number): string {
+        return `${API_REQUISITOS}/descargar/${idRequisito}`;
+    }
+
+    /** Reemplaza un documento observado por uno nuevo (ítem 8) */
+    reemplazarDocumento(idAdjunto: number, archivo: File): Observable<RequisitoAdjuntoResponseDTO> {
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+        return this.http.put<RequisitoAdjuntoResponseDTO>(`${API_REQUISITOS}/reemplazar/${idAdjunto}`, formData);
     }
 }

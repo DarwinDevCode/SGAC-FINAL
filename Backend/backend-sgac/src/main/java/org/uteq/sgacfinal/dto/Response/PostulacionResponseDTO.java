@@ -20,4 +20,5 @@ public class PostulacionResponseDTO {
     private String estadoPostulacion;
     private String observaciones;
     private Boolean activo;
+    private Boolean comisionAsignada;
 }

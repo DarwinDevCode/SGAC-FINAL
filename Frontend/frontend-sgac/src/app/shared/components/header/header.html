@@ -19,7 +19,57 @@
       <input type="search" placeholder="Buscar..." class="search-input" />
     </div>
 
+
     <app-notification-bell></app-notification-bell>
+    <!-- Botón de notificaciones con dropdown -->
+    <div class="notif-wrapper">
+      <button class="notification-btn" (click)="toggleDropdown()">
+        <lucide-icon name="Bell" size="20"></lucide-icon>
+        @if (noLeidas > 0) {
+        <span class="notif-badge">{{ noLeidas > 9 ? '9+' : noLeidas }}</span>
+        }
+      </button>
+
+      @if (dropdownAbierto()) {
+      <div class="notif-dropdown">
+        <div class="notif-dropdown-header">
+          <span>Notificaciones</span>
+          @if (noLeidas > 0) {
+          <span class="notif-count-chip">{{ noLeidas }} nuevas</span>
+          }
+        </div>
+
+        @if (cargando()) {
+        <div class="notif-empty">
+          <lucide-icon name="Loader2" size="20" class="animate-spin"></lucide-icon>
+          <span>Cargando...</span>
+        </div>
+        } @else if (notificaciones().length === 0) {
+        <div class="notif-empty">
+          <lucide-icon name="BellOff" size="28"></lucide-icon>
+          <span>No hay notificaciones</span>
+        </div>
+        } @else {
+        <ul class="notif-list">
+          @for (n of notificaciones(); track n.idNotificacion) {
+          <li class="notif-item" [class.notif-no-leida]="!n.leida" (click)="marcarLeida(n, $event)">
+            <div class="notif-item-icon">
+              <lucide-icon [name]="n.leida ? 'Bell' : 'Bell'" size="16"></lucide-icon>
+            </div>
+            <div class="notif-item-body">
+              <p class="notif-msg">{{ truncar(n.mensaje) }}</p>
+              <span class="notif-fecha">{{ n.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            @if (!n.leida) {
+            <span class="notif-dot"></span>
+            }
+          </li>
+          }
+        </ul>
+        }
+      </div>
+      }
+    </div>
 
     <div class="user-container">
       <div class="user-info">

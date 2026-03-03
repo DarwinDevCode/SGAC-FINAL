@@ -6,6 +6,34 @@
         </div>
     </div>
 
+    <!-- Barra de filtros / tabs -->
+    <div class="notif-toolbar">
+        <div class="notif-tabs">
+            <button class="notif-tab" [class.active]="filtroActivo === 'todas'" (click)="setFiltro('todas')">
+                Todas
+                <span class="notif-chip all">{{ todasNotificaciones.length }}</span>
+            </button>
+            <button class="notif-tab" [class.active]="filtroActivo === 'no_leidas'" (click)="setFiltro('no_leidas')">
+                No leídas
+                @if (countNoLeidas > 0) {
+                <span class="notif-chip unread">{{ countNoLeidas }}</span>
+                }
+            </button>
+            <button class="notif-tab" [class.active]="filtroActivo === 'leidas'" (click)="setFiltro('leidas')">
+                Leídas
+                @if (countLeidas > 0) {
+                <span class="notif-chip read">{{ countLeidas }}</span>
+                }
+            </button>
+        </div>
+        @if (countNoLeidas > 0) {
+        <button class="btn-mark-all" (click)="marcarTodasLeidas()">
+            <lucide-icon name="check-check" size="14"></lucide-icon>
+            Marcar todas leídas
+        </button>
+        }
+    </div>
+
     @if (loading) {
     <div class="info-message">
         <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
@@ -19,8 +47,14 @@
     } @else if (notificaciones.length === 0) {
     <div class="empty-state">
         <lucide-icon name="bell" size="48" class="text-slate-300 mx-auto"></lucide-icon>
+        @if (filtroActivo === 'no_leidas') {
+        <p class="mt-4 font-medium text-slate-600">¡Todo al día! No tienes notificaciones sin leer.</p>
+        } @else if (filtroActivo === 'leidas') {
+        <p class="mt-4 font-medium text-slate-600">No tienes notificaciones leídas todavía.</p>
+        } @else {
         <p class="mt-4 font-medium text-slate-600">No tienes notificaciones nuevas.</p>
         <p class="text-sm text-slate-500 mt-1">Cuando haya actualizaciones en tus postulaciones aparecerán aquí.</p>
+        }
     </div>
     } @else {
     <div class="notifications-list">

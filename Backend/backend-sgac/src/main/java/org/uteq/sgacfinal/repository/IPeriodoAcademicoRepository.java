@@ -29,8 +29,19 @@ public interface IPeriodoAcademicoRepository extends JpaRepository<PeriodoAcadem
     @Query(value = "SELECT public.fn_desactivar_periodo_academico(:id)", nativeQuery = true)
     Integer desactivarPeriodo(@Param("id") Integer idPeriodo);
 
+    /** Inactiva automáticamente todos los períodos cuya fecha_fin ya pasó (usado por @Scheduled) */
+    @Query(value = "SELECT public.fn_inactivar_periodos_vencidos()", nativeQuery = true)
+    Integer inactivarPeriodosVencidos();
+
+    /** Activa manualmente un período dado su ID */
+    @Query(value = "SELECT public.fn_activar_periodo_academico(:id)", nativeQuery = true)
+    Integer activarPeriodo(@Param("id") Integer idPeriodo);
+
     List<PeriodoAcademico> findByEstado(String estado);
 
-
     Optional<PeriodoAcademico> findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc(String estado);
+
+    /** Importar requisitos de un período anterior */
+    @Query(value = "SELECT public.sp_importar_requisitos_periodo(:origen, :destino)", nativeQuery = true)
+    Integer importarRequisitosPeriodo(@Param("origen") Integer origen, @Param("destino") Integer destino);
 }

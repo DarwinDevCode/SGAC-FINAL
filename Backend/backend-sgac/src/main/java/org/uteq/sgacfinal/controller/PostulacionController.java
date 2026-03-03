@@ -91,4 +91,30 @@ public class PostulacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar pendientes: " + e.getMessage());
         }
     }
+
+    @GetMapping("/en-evaluacion/carrera/{idCarrera}")
+    public ResponseEntity<?> listarEnEvaluacionPorCarrera(@PathVariable Integer idCarrera) {
+        try {
+            return ResponseEntity.ok(postulacionService.listarEnEvaluacionPorCarrera(idCarrera));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar en evaluación: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Verifica si un estudiante (por su idUsuario) ya se postuló a una convocatoria específica.
+     * GET /api/postulaciones/existe?idEstudiante={idUsuario}&idConvocatoria={id}
+     */
+    @GetMapping("/existe")
+    public ResponseEntity<?> existe(
+            @RequestParam Integer idEstudiante,
+            @RequestParam Integer idConvocatoria) {
+        try {
+            boolean resultado = postulacionService.existePostulacion(idEstudiante, idConvocatoria);
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al verificar postulación: " + e.getMessage());
+        }
+    }
 }

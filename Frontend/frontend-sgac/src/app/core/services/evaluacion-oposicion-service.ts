@@ -1,8 +1,18 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {environment} from '../../../environments/environment';
-import {Observable} from 'rxjs';
-import {EvaluacionOposicionDTO} from '../dto/evaluacion-oposicion';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { Observable } from 'rxjs';
+import { EvaluacionOposicionDTO } from '../dto/evaluacion-oposicion';
+
+export interface AsignarComisionRequest {
+  idPostulacion: number;
+  idComisionSeleccion: number;
+  temaExposicion: string;
+  fechaEvaluacion: string;
+  horaInicio: string;
+  horaFin: string;
+  lugar: string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -13,6 +23,10 @@ export class EvaluacionOposicionService {
   private readonly apiUrl = `${this.baseUrl}/evaluaciones`;
 
   obtenerOposicionPorPostulacion(idPostulacion: number): Observable<EvaluacionOposicionDTO> {
-    return this.http.get<EvaluacionOposicionDTO>(`${this.apiUrl}/oposicion/postulacion/${idPostulacion}`);
+    return this.http.get<EvaluacionOposicionDTO>(`${this.apiUrl}/postulacion/${idPostulacion}`);
+  }
+
+  asignarComision(request: AsignarComisionRequest): Observable<EvaluacionOposicionDTO> {
+    return this.http.post<EvaluacionOposicionDTO>(`${this.apiUrl}/asignar`, request);
   }
 }

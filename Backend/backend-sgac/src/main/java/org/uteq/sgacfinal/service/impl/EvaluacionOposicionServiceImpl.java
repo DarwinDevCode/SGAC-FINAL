@@ -3,10 +3,14 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.uteq.sgacfinal.dto.Request.AsignarComisionRequestDTO;
 import org.uteq.sgacfinal.dto.Request.EvaluacionOposicionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.EvaluacionOposicionResponseDTO;
 import org.uteq.sgacfinal.entity.EvaluacionOposicion;
+import org.uteq.sgacfinal.entity.UsuarioComision;
+import org.uteq.sgacfinal.repository.ComisionSeleccionRepository;
 import org.uteq.sgacfinal.repository.EvaluacionOposicionRepository;
+import org.uteq.sgacfinal.repository.UsuarioComisionRepository;
 import org.uteq.sgacfinal.service.IEvaluacionOposicionService;
 
 import java.sql.Date;
@@ -20,6 +24,8 @@ import java.util.stream.Collectors;
 public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionService {
 
     private final EvaluacionOposicionRepository evaluacionOposicionRepository;
+    private final UsuarioComisionRepository usuarioComisionRepository;
+    private final ComisionSeleccionRepository comisionSeleccionRepository;
 
     @Override
     public EvaluacionOposicionResponseDTO crear(EvaluacionOposicionRequestDTO request) {
@@ -105,5 +111,48 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
                 .fechaEvaluacion(obj[2] != null ? ((Date) obj[2]).toLocalDate() : null)
                 .estado((String) obj[3])
                 .build();
+    }
+
+    @Override
+    public EvaluacionOposicionResponseDTO asignarComisionAPostulacion(AsignarComisionRequestDTO request) {
+        // 1. Verify commission exists
+        comisionSeleccionRepository.findById(request.getIdComisionSeleccion())
+                .orElseThrow(() -> new RuntimeException("Comisión no encontrada con ID: " + request.getIdComisionSeleccion()));
+
+        // 2. Create the EvaluacionOposicion record via the stored procedure
+        Integer idEvaluacion = evaluacionOposicionRepository.registrarEvaluacionOposicion(
+                request.getIdPostulacion(),
+                request.getTemaExposicion(),
+                request.getFechaEvaluacion(),
+                request.getHoraInicio(),
+                request.getHoraFin(),
+                request.getLugar(),
+                "PROGRAMADA"
+        );
+
+        if (idEvaluacion == null || idEvaluacion == -1) {
+            throw new RuntimeException("Error al crear la evaluación de oposición.");
+        }
+
+        // 3. Fetch commission members (Decano, Coordinador, Docente)
+        List<UsuarioComision> miembros = usuarioComisionRepository
+                .findByComisionSeleccion_IdComisionSeleccion(request.getIdComisionSeleccion());
+
+        // 4. Link each member to this evaluation
+        for (UsuarioComision miembro : miembros) {
+            Integer resultado = usuarioComisionRepository.registrarUsuarioComision(
+                    request.getIdComisionSeleccion(),
+                    miembro.getUsuario().getIdUsuario(),
+                    idEvaluacion,
+                    miembro.getRolIntegrante(),
+                    null, null, null,
+                    request.getFechaEvaluacion()
+            );
+            if (resultado == null || resultado == -1) {
+                throw new RuntimeException("Error al asignar miembro " + miembro.getUsuario().getIdUsuario() + " a la evaluación.");
+            }
+        }
+
+        return buscarPorId(idEvaluacion);
     }
 }

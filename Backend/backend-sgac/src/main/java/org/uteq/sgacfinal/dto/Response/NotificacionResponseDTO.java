@@ -1,5 +1,4 @@
 package org.uteq.sgacfinal.dto.Response;
-
 import lombok.*;
 
 import java.time.Instant;
@@ -19,4 +18,3 @@ public class NotificacionResponseDTO {
     private Instant fechaCreacion;
     private Instant fechaLectura;
 }
-

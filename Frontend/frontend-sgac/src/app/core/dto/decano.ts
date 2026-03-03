@@ -1,10 +1,10 @@
 export interface DecanoResponseDTO {
     idDecano: number;
     idUsuario: number;
-    nombreCompleto: string; // As mapped by backend
+    nombreCompletoUsuario: string;
     idFacultad: number;
-    nombreFacultad: string; // As mapped by backend 
-    fechaInicio: string;
-    fechaFin: string;
+    nombreFacultad: string;
+    fechaInicioGestion: string;
+    fechaFinGestion: string;
     activo: boolean;
 }

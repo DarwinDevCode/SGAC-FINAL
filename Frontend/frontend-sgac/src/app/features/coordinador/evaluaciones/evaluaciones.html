@@ -1,0 +1,125 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Evaluación y Ranking</h2>
+            <p class="subtitle">Ingresa puntajes de méritos y oposición para generar el ranking final.</p>
+        </div>
+    </div>
+
+    @if (successMsg) {
+    <div class="alert-success">
+        <lucide-icon name="check-circle" size="16"></lucide-icon> {{ successMsg }}
+    </div>
+    }
+    @if (errorMsg) {
+    <div class="alert-error">
+        <lucide-icon name="x-circle" size="16"></lucide-icon> {{ errorMsg }}
+    </div>
+    }
+
+    <!-- Selector de convocatoria -->
+    <div class="filter-bar">
+        <label class="filter-label">Convocatoria</label>
+        @if (loadingConv) {
+        <span class="text-muted">Cargando...</span>
+        } @else {
+        <select class="input-field" [(ngModel)]="idConvSeleccionada" (change)="cargarRanking()" style="min-width:280px">
+            <option [value]="0" disabled>— Seleccione una convocatoria —</option>
+            @for (c of convocatorias; track c.idConvocatoria) {
+            <option [value]="c.idConvocatoria">{{ c.tituloConvocatoria }}</option>
+            }
+        </select>
+        }
+        <button class="btn-secondary" (click)="cargarRanking()" [disabled]="!idConvSeleccionada || loadingRanking">
+            <lucide-icon name="refresh-cw" size="14"></lucide-icon>
+            Actualizar
+        </button>
+    </div>
+
+    <!-- Ranking -->
+    @if (loadingRanking) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Calculando ranking...</p>
+    </div>
+    } @else if (ranking.length === 0 && idConvSeleccionada) {
+    <div class="empty-state">
+        <lucide-icon name="bar-chart-3" size="48" class="text-slate-300 mx-auto"></lucide-icon>
+        <p class="mt-4 font-medium text-slate-600">No hay postulaciones evaluadas todavía.</p>
+        <p class="text-sm text-slate-500 mt-1">Ingresa puntajes de méritos y oposición para generar el ranking.</p>
+    </div>
+    } @else if (ranking.length > 0) {
+    <div class="table-card">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th class="text-center">Pos.</th>
+                    <th>Estudiante</th>
+                    <th>Matrícula</th>
+                    <th class="text-center">Méritos</th>
+                    <th class="text-center">Oposición</th>
+                    <th class="text-center">Total</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (r of ranking; track r.idPostulacion) {
+                <tr [class.row-gold]="r.posicion === 1" [class.row-silver]="r.posicion === 2"
+                    [class.row-bronze]="r.posicion === 3">
+                    <td class="text-center">
+                        @if (r.posicion === 1) {
+                        <span class="medal gold">🥇</span>
+                        } @else if (r.posicion === 2) {
+                        <span class="medal silver">🥈</span>
+                        } @else if (r.posicion === 3) {
+                        <span class="medal bronze">🥉</span>
+                        } @else {
+                        <span class="pos-num">{{ r.posicion }}</span>
+                        }
+                    </td>
+                    <td class="font-medium">{{ r.nombreEstudiante }}</td>
+                    <td class="text-muted">{{ r.matricula }}</td>
+
+                    <!-- Méritos -->
+                    <td class="text-center">
+                        <div class="puntaje-cell">
+                            <span class="puntaje-val">{{ r.puntajeMeritos | number:'1.2-2' }}</span>
+                            <input type="number" min="0" max="100" step="0.01" class="input-mini"
+                                [(ngModel)]="puntajesMeritos[r.idPostulacion]" placeholder="Nuevo">
+                            <button class="btn-mini" (click)="guardarMeritos(r.idPostulacion)"
+                                [disabled]="puntajesMeritos[r.idPostulacion] == null || guardandoPuntaje[r.idPostulacion]">
+                                <lucide-icon name="save" size="12"></lucide-icon>
+                            </button>
+                        </div>
+                    </td>
+
+                    <!-- Oposición -->
+                    <td class="text-center">
+                        <div class="puntaje-cell">
+                            <span class="puntaje-val">{{ r.puntajeOposicion | number:'1.2-2' }}</span>
+                            <input type="number" min="0" max="100" step="0.01" class="input-mini"
+                                [(ngModel)]="puntajesOposicion[r.idPostulacion]" placeholder="Nuevo">
+                            <button class="btn-mini" (click)="guardarOposicion(r.idPostulacion)"
+                                [disabled]="puntajesOposicion[r.idPostulacion] == null || guardandoPuntaje[r.idPostulacion]">
+                                <lucide-icon name="save" size="12"></lucide-icon>
+                            </button>
+                        </div>
+                    </td>
+
+                    <!-- Total -->
+                    <td class="text-center">
+                        <strong class="total-val">{{ r.puntajeTotal | number:'1.2-2' }}</strong>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="badge" [class]="r.posicion === 1 ? 'badge-green' : 'badge-gray'">
+                            {{ r.posicion === 1 ? 'Ganador' : '#' + r.posicion }}
+                        </span>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    }
+</div>

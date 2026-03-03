@@ -326,3 +326,24 @@
     background: #f1f5f9;
     color: hsl(var(--primary));
 }
+
+/* Botón "Ya Postulado" — estado deshabilitado visual con color ambar */
+.btn-ya-postulado {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: var(--radius);
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #fef3c7;
+    color: #92400e;
+    cursor: not-allowed;
+    opacity: 0.85;
+    transition: none;
+}
+
+.btn-ya-postulado:hover {
+    opacity: 0.85;
+}

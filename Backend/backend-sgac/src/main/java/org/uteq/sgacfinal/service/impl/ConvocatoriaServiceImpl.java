@@ -49,7 +49,7 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     @Transactional(readOnly = true)
     public List<ConvocatoriaResponseDTO> findAll() {
         // Encontrar el periodo académico activo actual
-        PeriodoAcademico periodoActivo = periodoRepo.findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc("ACTIVO")
+        PeriodoAcademico periodoActivo = periodoRepo.findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc("EN PROCESO")
                 .orElse(null);
 
         if (periodoActivo == null) {
