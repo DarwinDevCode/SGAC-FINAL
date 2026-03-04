@@ -11,7 +11,6 @@ import { CarreraDTO } from '../../../core/dto/carrera';
 import { AsignaturaDTO } from '../../../core/dto/asignatura';
 import { TipoRequisitoPostulacionDTO } from '../../../core/dto/tipo-requisito-postulacion';
 import { TipoEstadoEvidenciaAyudantiaDTO } from '../../../core/dto/tipo-estado-evidencia-ayudantia';
-import {TipoEstadoEvidencia} from '../../../core/dto/tipo-estado-evidencia';
 
 @Component({
   selector: 'app-gestion-catalogos',
@@ -38,7 +37,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   carrerasList: CarreraDTO[] = [];
   asignaturasList: AsignaturaDTO[] = [];
   requisitosPostulacionList: TipoRequisitoPostulacionDTO[] = [];
-  estadoEvidenciasAyudantiasList: TipoEstadoEvidencia[] = [];
+  estadoEvidenciasAyudantiasList: TipoEstadoEvidenciaAyudantiaDTO[] = [];
 
   loading = false;
   mostrarModal = false;
