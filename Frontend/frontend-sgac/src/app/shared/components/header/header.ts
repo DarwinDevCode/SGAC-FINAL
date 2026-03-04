@@ -41,7 +41,7 @@ export class HeaderComponent implements OnInit {
   cargando = signal(false);
 
   get noLeidas(): number {
-    return this.notificaciones().filter(n => !n.leida).length;
+    return this.notificaciones().filter(n => !n.leido).length;
   }
 
   private urlEvents = toSignal(
@@ -88,7 +88,7 @@ export class HeaderComponent implements OnInit {
 
   marcarLeida(notif: NotificacionResponseDTO, event: Event): void {
     event.stopPropagation();
-    if (notif.leida) return;
+    if (notif.leido) return;
     this.notifService.marcarComoLeida(notif.idNotificacion).subscribe(() => {
       this.notificaciones.update(list =>
         list.map(n => n.idNotificacion === notif.idNotificacion ? { ...n, leida: true } : n)

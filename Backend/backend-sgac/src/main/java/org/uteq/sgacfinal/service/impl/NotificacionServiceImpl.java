@@ -30,24 +30,10 @@ public class NotificacionServiceImpl implements INotificacionService {
     private final SimpMessagingTemplate messagingTemplate;
     private final EntityManager entityManager;
 
-
     @Override
-    public Notificacion enviarNotificacion(Integer idUsuarioDestino, String mensaje, String tipo) {
-
-        try {
-            org.hibernate.Session session = entityManager.unwrap(org.hibernate.Session.class);
-            session.doWork(connection -> {
-                try (java.sql.Statement statement = connection.createStatement()) {
-                    statement.execute("RESET ROLE");
-                }
-            });
-        } catch (Exception e) {
-            // Log and continue, might fail if no active transaction
-            System.err.println("Error bypassing role for notification: " + e.getMessage());
-        }
-
-        Usuario usuario = usuarioRepository.findById(idUsuarioDestino)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado para notificacion"));
+    public NotificacionResponseDTO enviarNotificacion(Integer idUsuario, NotificationRequest request) {
+        Usuario usuario = usuarioRepository.findById(idUsuario.intValue())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         Notificacion notificacion = Notificacion.builder()
                 .usuario(usuario)
@@ -63,11 +49,15 @@ public class NotificacionServiceImpl implements INotificacionService {
 
         NotificacionResponseDTO payload = mapToDto(saved);
 
-        // Envío en tiempo real (privado por usuario)
         messagingTemplate.convertAndSend("/queue/notificaciones/" + idUsuario, payload);
 
         return payload;
     }
+
+
+
+
+
 
     @Override
     @Transactional(readOnly = true)

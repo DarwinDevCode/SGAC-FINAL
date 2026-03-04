@@ -14,6 +14,7 @@ public class ConvocatoriaResponseDTO {
     private Integer idPeriodoAcademico;
     private Integer idAsignatura;
     private Integer idDocente;
+    private String nombreDocente;
     private Integer idUsuarioDocente;
     private Integer idUsuarioCoordinador;
     private Integer cuposDisponibles;

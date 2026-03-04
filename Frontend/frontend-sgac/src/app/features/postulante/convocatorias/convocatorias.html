@@ -20,6 +20,7 @@
                 <tr>
                     <th>Asignatura</th>
                     <th>Periodo Académico</th>
+                    <th>Docente</th>
                     <th>Fechas</th>
                     <th>Cupos</th>
                     <th class="text-right">Acciones</th>
@@ -41,6 +42,9 @@
                     <td>
                         <span class="periodo-badge">{{ conv.nombrePeriodo }}</span>
                     </td>
+                  <td>
+                    <span class="periodo-badge">{{ conv.nombreDocente }}</span>
+                  </td>
                     <td>
                         <div class="fechas-info">
                             <span class="fecha-item"><lucide-icon name="calendar" size="14"></lucide-icon> Publicada: {{

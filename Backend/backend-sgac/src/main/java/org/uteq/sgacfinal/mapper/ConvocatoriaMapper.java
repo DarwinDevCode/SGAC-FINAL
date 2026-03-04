@@ -29,6 +29,8 @@ public class ConvocatoriaMapper {
                 .idPeriodoAcademico(entity.getPeriodoAcademico().getIdPeriodoAcademico())
                 .idAsignatura(entity.getAsignatura().getIdAsignatura())
                 .idDocente(entity.getDocente().getIdDocente())
+                .nombreDocente(entity.getDocente().getUsuario().getNombres() + " " + entity.getDocente().getUsuario().getApellidos())
+                .idConvocatoria(entity.getIdConvocatoria())
                 .idUsuarioDocente(idUsuarioDoc)
                 .idUsuarioCoordinador(idUsuarioCoord)
                 .fechaCierre(entity.getFechaCierre())

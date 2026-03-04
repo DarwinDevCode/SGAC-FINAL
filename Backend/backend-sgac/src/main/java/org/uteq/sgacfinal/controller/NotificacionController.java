@@ -48,32 +48,7 @@ public class NotificacionController {
     }
 
 
-    @GetMapping("/mis-notificaciones/{idUsuario}")
-    public ResponseEntity<?> listarMisNotificaciones(@PathVariable Integer idUsuario) {
-        try {
-            List<NotificacionResponseDTO> response = notificacionService
-                    .listarPorUsuario(idUsuario)
-                    .stream()
-                    .map(n -> NotificacionResponseDTO.builder()
-                            .idNotificacion(n.getIdNotificacion())
-                            .idUsuario(n.getUsuarioDestino() != null
-                                    ? n.getUsuarioDestino().getIdUsuario()
-                                    : idUsuario)
-                            .mensaje(n.getMensaje())
-                            .fechaEnvio(n.getFechaEnvio())
-                            .leida(Boolean.TRUE.equals(n.getLeido()))
-                            .tipo(n.getTipo())
-                            .tipoNotificacion(n.getTipoNotificacion())
-                            .idConvocatoria(n.getIdConvocatoria())
-                            .build())
-                    .collect(Collectors.toList());
 
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al listar notificaciones: " + e.getMessage());
-        }
-    }
 
 
 }
