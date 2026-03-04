@@ -111,7 +111,7 @@ export const routes: Routes = [
       //{ path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
       { path: 'docente/aprobar-informes', component: MisAyudantesComponent },
       { path: 'docente/mis-ayudantes/:idAyudantia/actividades', component: ActividadesAyudanteComponent },
-      //{ path: 'docente/notifications', component: PostulanteNotificaciones },
+      { path: 'docente/notifications', component: PostulanteNotificaciones },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NotificationWSService } from '../../core/services/notification-ws-service';
@@ -12,7 +12,10 @@ import { Notificacion } from '../../core/dto/notificacion';
   templateUrl: './notificaciones-page.html',
   styleUrl: './notificaciones-page.css'
 })
-export class NotificacionesPageComponent {
+export class NotificacionesPageComponent implements OnInit{
+  ngOnInit(): void {
+    this.notifications.obtenerNotificaciones().subscribe();
+  }
   private readonly notifications = inject(NotificationWSService);
 
   readonly notificaciones = toSignal(this.notifications.notificaciones$, { initialValue: [] });
