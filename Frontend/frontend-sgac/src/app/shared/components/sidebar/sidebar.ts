@@ -17,7 +17,7 @@ export class SidebarComponent {
   private router = inject(Router);
   public postulanteService = inject(PostulanteService);
   //userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
-  
+
   private normalizeRole(rawRole?: string | null): string {
     if (!rawRole) return 'ESTUDIANTE';
 
@@ -50,8 +50,7 @@ export class SidebarComponent {
     DOCENTE: [
       { label: 'Inicio', icon: 'LayoutDashboard', route: '/docente/dashboard' },
       { label: 'Mis Ayudantes', icon: 'Users', route: '/docente/mis-ayudantes' },
-      { label: 'Planificación Actividades', icon: 'CalendarClock', route: '/docente/planificacion' },
-      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/validar-informes' },
+      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/aprobar-informes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/docente/notifications' },
     ],
     COORDINADOR: [

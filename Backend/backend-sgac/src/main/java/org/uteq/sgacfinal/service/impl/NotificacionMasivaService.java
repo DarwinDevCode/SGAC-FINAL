@@ -53,6 +53,7 @@ public class NotificacionMasivaService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + idUsuario));
         Notificacion n = Notificacion.builder()
                 .usuario(u)
+                .titulo(tipo)
                 .mensaje(mensaje)
                 .tipo(tipo)
                 .tipoNotificacion("INDIVIDUAL")

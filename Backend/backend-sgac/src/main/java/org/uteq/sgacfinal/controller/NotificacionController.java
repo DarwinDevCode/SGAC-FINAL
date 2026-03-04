@@ -9,7 +9,6 @@ import org.uteq.sgacfinal.dto.Response.NotificacionResponseDTO;
 import org.uteq.sgacfinal.service.INotificacionService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notificaciones")

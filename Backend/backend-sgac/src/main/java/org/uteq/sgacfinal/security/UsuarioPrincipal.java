@@ -46,4 +46,8 @@ public class UsuarioPrincipal implements UserDetails {
                 .map(utr -> new SimpleGrantedAuthority(utr.getTipoRol().getNombreTipoRol()))
                 .collect(Collectors.toList());
     }
+
+    public Integer getIdUsuario() {
+        return usuario.getIdUsuario();
+    }
 }

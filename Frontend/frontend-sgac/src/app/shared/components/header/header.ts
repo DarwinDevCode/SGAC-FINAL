@@ -75,8 +75,8 @@ export class HeaderComponent implements OnInit {
     const user = this.authService.getUser();
     if (!user?.idUsuario) return;
     this.cargando.set(true);
-    this.notifService.listarMisNotificaciones(user.idUsuario).subscribe({
-      next: (data) => { this.notificaciones.set(data); this.cargando.set(false); },
+    this.notifService.obtenerNotificaciones().subscribe({
+      next: (data: NotificacionResponseDTO[]) => { this.notificaciones.set(data); this.cargando.set(false); },
       error: () => { this.cargando.set(false); }
     });
   }
@@ -91,7 +91,7 @@ export class HeaderComponent implements OnInit {
     if (notif.leido) return;
     this.notifService.marcarComoLeida(notif.idNotificacion).subscribe(() => {
       this.notificaciones.update(list =>
-        list.map(n => n.idNotificacion === notif.idNotificacion ? { ...n, leida: true } : n)
+        list.map(n => n.idNotificacion === notif.idNotificacion ? { ...n, leido: true } : n)
       );
     });
   }
