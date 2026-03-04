@@ -12,8 +12,7 @@ import java.util.List;
 public interface NotificacionRepository extends JpaRepository<Notificacion, Integer> {
     List<Notificacion> findByUsuario_IdUsuarioAndLeidoFalseOrderByFechaCreacionDesc(Integer idUsuario);
     List<Notificacion> findByUsuario_IdUsuarioOrderByFechaCreacionDesc(Integer idUsuario, Pageable pageable);
-    @EntityGraph(attributePaths = {"usuarioDestino"})
-    List<Notificacion> findByUsuarioDestino_IdUsuarioOrderByFechaEnvioDesc(Integer idUsuario);
-    @EntityGraph(attributePaths = {"usuarioDestino"})
-    List<Notificacion> findByUsuarioDestino_IdUsuarioAndLeidoFalse(Integer idUsuario);
+    List<Notificacion> findByUsuario_IdUsuarioOrderByFechaCreacionDesc(Integer idUsuario);
+    List<Notificacion> findByUsuario_IdUsuarioAndLeidoFalse(Integer idUsuario);
 }
+

@@ -34,13 +34,13 @@ export class NotificacionesComponent implements OnInit {
   }
 
   get notificaciones(): NotificacionResponseDTO[] {
-    if (this.filtroActivo === 'no_leidas') return this.todasNotificaciones.filter(n => !n.leida);
-    if (this.filtroActivo === 'leidas') return this.todasNotificaciones.filter(n => n.leida);
+    if (this.filtroActivo === 'no_leidas') return this.todasNotificaciones.filter(n => !n.leido);
+    if (this.filtroActivo === 'leidas') return this.todasNotificaciones.filter(n => n.leido);
     return this.todasNotificaciones;
   }
 
-  get countNoLeidas(): number { return this.todasNotificaciones.filter(n => !n.leida).length; }
-  get countLeidas(): number { return this.todasNotificaciones.filter(n => n.leida).length; }
+  get countNoLeidas(): number { return this.todasNotificaciones.filter(n => !n.leido).length; }
+  get countLeidas(): number { return this.todasNotificaciones.filter(n => n.leido).length; }
 
   setFiltro(f: 'todas' | 'no_leidas' | 'leidas') { this.filtroActivo = f; }
 
@@ -54,7 +54,7 @@ export class NotificacionesComponent implements OnInit {
   }
 
   marcarTodasLeidas() {
-    const noLeidas = this.todasNotificaciones.filter(n => !n.leida);
+    const noLeidas = this.todasNotificaciones.filter(n => !n.leido);
     noLeidas.forEach(n => this.marcarLeida(n.idNotificacion));
   }
 }

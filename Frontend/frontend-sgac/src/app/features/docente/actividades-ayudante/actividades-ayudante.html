@@ -1,0 +1,134 @@
+<div class="act-container">
+    <!-- Cabecera -->
+    <div class="act-header">
+        <button class="btn-back" (click)="volver()">
+            <lucide-icon name="arrow-left" [size]="16"></lucide-icon> Volver
+        </button>
+        <h1 class="act-title">Actividades del Ayudante</h1>
+    </div>
+
+    @if (loading) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando actividades...</p>
+    </div>
+    }
+
+    @if (!loading && actividades.length === 0) {
+    <div class="empty-state">
+        <lucide-icon name="file-text" [size]="48"></lucide-icon>
+        <p>Este ayudante no tiene actividades registradas aún.</p>
+    </div>
+    }
+
+    @if (!loading) {
+    <div class="actividades-list">
+        @for (act of actividades; track act.idRegistroActividad) {
+        <div class="act-card">
+            <!-- Cabecera de la actividad -->
+            <div class="act-card-header" (click)="toggleActividad(act)">
+                <div class="act-card-left">
+                    <lucide-icon [name]="getEstadoIcon(act.estadoRevision)" [size]="20"
+                        [class]="getEstadoClass(act.estadoRevision)"></lucide-icon>
+                    <div class="act-card-info">
+                        <span class="act-desc">{{ act.descripcionActividad }}</span>
+                        <span class="act-meta">{{ act.fecha | date:'dd/MM/yyyy' }} · {{ act.horasDedicadas }}h · {{
+                            act.numeroAsistentes }} asistentes</span>
+                    </div>
+                </div>
+                <div class="act-card-right">
+                    <span class="estado-badge" [ngClass]="getEstadoClass(act.estadoRevision)">{{ act.estadoRevision
+                        }}</span>
+                    <button class="btn-estado"
+                        (click)="iniciarCambioActividad(act.idRegistroActividad, act.estadoRevision); $event.stopPropagation()">
+                        Cambiar estado
+                    </button>
+                    <lucide-icon [name]="act.expandido ? 'chevron-up' : 'chevron-down'" [size]="18"></lucide-icon>
+                </div>
+            </div>
+
+            <!-- Observación existente -->
+            @if (act.observaciones) {
+            <div class="obs-banner">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                <span><strong>Observación:</strong> {{ act.observaciones }}</span>
+                <span class="obs-fecha">{{ act.fechaObservacion | date:'dd/MM/yyyy' }}</span>
+            </div>
+            }
+
+            <!-- Evidencias expandidas -->
+            @if (act.expandido) {
+            <div class="evidencias-panel">
+                <h4 class="ev-title">Evidencias ({{ act.evidencias.length }})</h4>
+
+                @if (!act.evidencias || act.evidencias.length === 0) {
+                <p class="ev-empty">Sin evidencias registradas.</p>
+                }
+
+                @for (ev of act.evidencias; track ev.idEvidencia) {
+                <div class="ev-row">
+                    <div class="ev-info">
+                        <lucide-icon name="file-text" [size]="16"></lucide-icon>
+                        <div>
+                            <span class="ev-nombre">{{ ev.nombreArchivo }}</span>
+                            <span class="ev-tipo">{{ ev.tipoEvidencia }} · {{ ev.fechaSubida | date:'dd/MM/yyyy'
+                                }}</span>
+                        </div>
+                    </div>
+                    <div class="ev-actions">
+                        <span class="estado-badge-sm" [ngClass]="getEstadoClass(ev.estadoEvidencia)">{{
+                            ev.estadoEvidencia }}</span>
+                        @if (ev.rutaArchivo) {
+                        <a [href]="ev.rutaArchivo" target="_blank" class="btn-ver">Ver</a>
+                        }
+                        <button class="btn-estado-sm"
+                            (click)="iniciarCambioEvidencia(ev.idEvidencia, ev.estadoEvidencia)">
+                            Cambiar
+                        </button>
+                    </div>
+                    @if (ev.observaciones) {
+                    <div class="ev-obs">
+                        <lucide-icon name="eye" [size]="12"></lucide-icon> {{ ev.observaciones }}
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<!-- Modal cambio de estado -->
+@if (modalVisible) {
+<div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">{{ modalTipo === 'actividad' ? 'Estado de Actividad' : 'Estado de Evidencia' }}</h3>
+
+        <label class="modal-label">Nuevo Estado</label>
+        <div class="estado-options">
+            @for (e of ESTADOS; track e) {
+            <button class="estado-opt" [class.active]="modalEstado === e" (click)="modalEstado = e">{{ e }}</button>
+            }
+        </div>
+
+        @if (modalEstado === 'OBSERVADO') {
+        <label class="modal-label">Observación <span class="req">*</span></label>
+        <textarea class="modal-textarea" rows="4" placeholder="Escribe la observación para el ayudante..."
+            [(ngModel)]="modalObservacion"></textarea>
+        <p class="modal-hint">Esta observación se enviará al ayudante en tiempo real.</p>
+        }
+
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+            <button class="btn-confirm" (click)="confirmarCambio()" [disabled]="guardando">
+                @if (guardando) { <span>Guardando...</span> } @else {
+                <lucide-icon name="send" [size]="14"></lucide-icon> Confirmar
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}

@@ -1,20 +1,20 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Observable, shareReplay, Subject} from 'rxjs';
+import { Observable, shareReplay, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import {FacultadDTO} from '../dto/facultad';
-import {CarreraDTO} from '../dto/carrera';
-import {AsignaturaDTO} from '../dto/asignatura';
-import {PeriodoAcademicoDTO} from '../dto/periodo-academico';
-import {TipoEstadoEvidenciaAyudantiaDTO} from '../dto/tipo-estado-evidencia-ayudantia';
-import {TipoEstadoRequisitoDTO} from '../dto/tipo-estado-requisito';
-import {TipoRequisitoPostulacionDTO} from '../dto/tipo-requisito-postulacion';
-import {TipoRolDTO} from '../dto/tipo-rol';
-import {TipoSancionAyudanteCatedraDTO} from '../dto/tipo-sancion-ayudante-catedra';
-import {TipoEstadoAyudantia} from '../dto/tipo-estado-ayudantia';
-import {TipoEvidencia} from '../dto/tipo-evidencia';
-import {TipoEstadoEvidencia} from '../dto/tipo-estado-evidencia';
-import {TipoEstadoRegistro} from '../dto/tipo-estado-registro';
+import { FacultadDTO } from '../dto/facultad';
+import { CarreraDTO } from '../dto/carrera';
+import { AsignaturaDTO } from '../dto/asignatura';
+import { PeriodoAcademicoDTO } from '../dto/periodo-academico';
+import { TipoEstadoEvidenciaAyudantiaDTO } from '../dto/tipo-estado-evidencia-ayudantia';
+import { TipoEstadoRequisitoDTO } from '../dto/tipo-estado-requisito';
+import { TipoRequisitoPostulacionDTO } from '../dto/tipo-requisito-postulacion';
+import { TipoRolDTO } from '../dto/tipo-rol';
+import { TipoSancionAyudanteCatedraDTO } from '../dto/tipo-sancion-ayudante-catedra';
+import { TipoEstadoAyudantia } from '../dto/tipo-estado-ayudantia';
+import { TipoEvidencia } from '../dto/tipo-evidencia';
+import { TipoEstadoEvidencia } from '../dto/tipo-estado-evidencia';
+import { TipoEstadoRegistro } from '../dto/tipo-estado-registro';
 
 @Injectable({
   providedIn: 'root',
@@ -25,9 +25,10 @@ export class CatalogosService {
   private readonly API = `${this.baseUrl}/admin/catalogos`;
   public rolActualizado$ = new Subject<void>();
 
-  private estadosRegistro$:  Observable<TipoEstadoRegistro[]>  | null = null;
+  private estadosRegistro$: Observable<TipoEstadoRegistro[]> | null = null;
   private estadosEvidencia$: Observable<TipoEstadoEvidencia[]> | null = null;
-  private tiposEvidencia$:   Observable<TipoEvidencia[]>       | null = null;
+  private estadosEvidenciaAyudantia$: Observable<TipoEstadoEvidenciaAyudantiaDTO[]> | null = null;
+  private tiposEvidencia$: Observable<TipoEvidencia[]> | null = null;
   private estadosAyudantia$: Observable<TipoEstadoAyudantia[]> | null = null;
 
   getFacultades(): Observable<FacultadDTO[]> {
@@ -106,23 +107,28 @@ export class CatalogosService {
   }
 
 
-  //getEstadosEvidencia(): Observable<TipoEstadoEvidenciaAyudantiaDTO[]> {
-  //  return this.http.get<TipoEstadoEvidenciaAyudantiaDTO[]>(`${this.API}/estados-evidencia`);
-  //}
+  getEstadosEvidenciaAyudantia(): Observable<TipoEstadoEvidenciaAyudantiaDTO[]> {
+    if (!this.estadosEvidenciaAyudantia$) {
+      this.estadosEvidenciaAyudantia$ = this.http
+        .get<TipoEstadoEvidenciaAyudantiaDTO[]>(`${this.API}/estados-evidencia-ayudantia`)
+        .pipe(shareReplay(1));
+    }
+    return this.estadosEvidenciaAyudantia$;
+  }
 
-  //postEstadoEvidencia(estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
-  //  const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
-  //   return this.http.post<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia`, requestBody);
-  //}
+  postEstadoEvidenciaAyudantia(estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
+    const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
+    return this.http.post<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia-ayudantia`, requestBody);
+  }
 
-  //putEstadoEvidencia(id: number, estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
-  //  const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
-  //  return this.http.put<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia/${id}`, requestBody);
-  //}
+  putEstadoEvidenciaAyudantia(id: number, estado: TipoEstadoEvidenciaAyudantiaDTO): Observable<TipoEstadoEvidenciaAyudantiaDTO> {
+    const { idTipoEstadoEvidenciaAyudantia, ...requestBody } = estado;
+    return this.http.put<TipoEstadoEvidenciaAyudantiaDTO>(`${this.API}/estados-evidencia-ayudantia/${id}`, requestBody);
+  }
 
-  //desactivarEstadoEvidencia(id: number): Observable<void> {
-  //  return this.http.patch<void>(`${this.API}/estados-evidencia/${id}/desactivar`, {});
-  //}
+  desactivarEstadoEvidenciaAyudantia(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.API}/estados-evidencia-ayudantia/${id}/desactivar`, {});
+  }
 
 
   getEstadosRequisito(): Observable<TipoEstadoRequisitoDTO[]> {
@@ -241,6 +247,7 @@ export class CatalogosService {
   limpiarCache(): void {
     this.estadosRegistro$ = null;
     this.estadosEvidencia$ = null;
+    this.estadosEvidenciaAyudantia$ = null;
     this.tiposEvidencia$ = null;
     this.estadosAyudantia$ = null;
   }

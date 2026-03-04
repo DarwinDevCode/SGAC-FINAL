@@ -6,11 +6,16 @@
 
   <div class="tabs-container" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
     <button class="btn-ghost" [class.highlight]="activeTab === 'roles'" (click)="setTab('roles')">Tipos de Rol</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'facultades'" (click)="setTab('facultades')">Facultades</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'carreras'" (click)="setTab('carreras')">Carreras</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'asignaturas'" (click)="setTab('asignaturas')">Asignaturas</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'requisitosPostulacion'" (click)="setTab('requisitosPostulacion')">Req. Postulación</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'estadoEvidencias'" (click)="setTab('estadoEvidencias')">Est. Evidencias</button>
+    <button class="btn-ghost" [class.highlight]="activeTab === 'facultades'"
+      (click)="setTab('facultades')">Facultades</button>
+    <button class="btn-ghost" [class.highlight]="activeTab === 'carreras'"
+      (click)="setTab('carreras')">Carreras</button>
+    <button class="btn-ghost" [class.highlight]="activeTab === 'asignaturas'"
+      (click)="setTab('asignaturas')">Asignaturas</button>
+    <button class="btn-ghost" [class.highlight]="activeTab === 'requisitosPostulacion'"
+      (click)="setTab('requisitosPostulacion')">Req. Postulación</button>
+    <button class="btn-ghost" [class.highlight]="activeTab === 'estadoEvidencias'"
+      (click)="setTab('estadoEvidencias')">Est. Evidencias</button>
   </div>
 
   @if (activeTab === 'roles') {
@@ -401,7 +406,6 @@
   }
 
 
-</div>
   @if (activeTab === 'estadoEvidencias') {
   <div class="section-header">
     <h3>Estados de Evidencia de Ayudantía</h3>

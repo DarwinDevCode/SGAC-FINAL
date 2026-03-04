@@ -32,7 +32,7 @@ public class NotificacionServiceImpl implements INotificacionService {
 
 
     @Override
-    public Notificacion enviarNotificacion(Integer idUsuarioDestino, String mensaje, String tipo) {
+    public NotificacionResponseDTO enviarNotificacion(Integer idUsuario, NotificationRequest request) {
 
         try {
             org.hibernate.Session session = entityManager.unwrap(org.hibernate.Session.class);
@@ -42,11 +42,10 @@ public class NotificacionServiceImpl implements INotificacionService {
                 }
             });
         } catch (Exception e) {
-            // Log and continue, might fail if no active transaction
             System.err.println("Error bypassing role for notification: " + e.getMessage());
         }
 
-        Usuario usuario = usuarioRepository.findById(idUsuarioDestino)
+        Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado para notificacion"));
 
         Notificacion notificacion = Notificacion.builder()

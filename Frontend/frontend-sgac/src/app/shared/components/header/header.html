@@ -52,15 +52,15 @@
         } @else {
         <ul class="notif-list">
           @for (n of notificaciones(); track n.idNotificacion) {
-          <li class="notif-item" [class.notif-no-leida]="!n.leida" (click)="marcarLeida(n, $event)">
+          <li class="notif-item" [class.notif-no-leida]="!n.leido" (click)="marcarLeida(n, $event)">
             <div class="notif-item-icon">
-              <lucide-icon [name]="n.leida ? 'Bell' : 'Bell'" size="16"></lucide-icon>
+              <lucide-icon [name]="n.leido ? 'Bell' : 'Bell'" size="16"></lucide-icon>
             </div>
             <div class="notif-item-body">
               <p class="notif-msg">{{ truncar(n.mensaje) }}</p>
-              <span class="notif-fecha">{{ n.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}</span>
+              <span class="notif-fecha">{{ n.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
-            @if (!n.leida) {
+            @if (!n.leido) {
             <span class="notif-dot"></span>
             }
           </li>

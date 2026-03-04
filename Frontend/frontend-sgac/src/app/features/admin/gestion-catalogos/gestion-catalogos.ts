@@ -93,7 +93,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
       }));
 
     } else if (this.activeTab === 'estadoEvidencias') {
-      this.subs.add(this.catalogosService.getEstadosEvidencia().subscribe({
+      this.subs.add(this.catalogosService.getEstadosEvidenciaAyudantia().subscribe({
         next: (data) => { this.estadoEvidenciasAyudantiasList = data || []; this.loading = false; console.log(this.estadoEvidenciasAyudantiasList) },
         error: (err: HttpErrorResponse) => { alert(err.error?.message || 'Error al cargar estados'); this.loading = false; }
       }));
@@ -238,6 +238,34 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     if (!confirm(`¿Desea cambiar el estado de este requisito?`)) return;
     this.subs.add(this.catalogosService.desactivarTipoRequisito(r.idTipoRequisitoPostulacion).subscribe({
       next: () => r.activo = !r.activo,
+      error: (err: HttpErrorResponse) => alert(err.error?.message || 'Error al cambiar estado')
+    }));
+  }
+
+
+
+
+  abrirModalNuevoEstado() {
+    this.isEditMode = false;
+    this.formEstado = { nombreEstado: '', activo: true };
+    this.mostrarModal = true;
+  }
+  abrirModalEditarEstado(e: TipoEstadoEvidenciaAyudantiaDTO) {
+    this.isEditMode = true;
+    this.formEstado = { ...e };
+    this.mostrarModal = true;
+  }
+  guardarEstado() {
+    const peticion = this.isEditMode && this.formEstado.idTipoEstadoEvidenciaAyudantia
+      ? this.catalogosService.putEstadoEvidenciaAyudantia(this.formEstado.idTipoEstadoEvidenciaAyudantia, this.formEstado as TipoEstadoEvidenciaAyudantiaDTO)
+      : this.catalogosService.postEstadoEvidenciaAyudantia(this.formEstado as TipoEstadoEvidenciaAyudantiaDTO);
+    this.procesarGuardado(peticion, 'Estado de Evidencia');
+  }
+  toggleEstadoEvidencia(e: TipoEstadoEvidenciaAyudantiaDTO) {
+    if (!e.idTipoEstadoEvidenciaAyudantia) return;
+    if (!confirm(`¿Desea cambiar el estado de ${e.nombreEstado}?`)) return;
+    this.subs.add(this.catalogosService.desactivarEstadoEvidenciaAyudantia(e.idTipoEstadoEvidenciaAyudantia).subscribe({
+      next: () => e.activo = !e.activo,
       error: (err: HttpErrorResponse) => alert(err.error?.message || 'Error al cambiar estado')
     }));
   }

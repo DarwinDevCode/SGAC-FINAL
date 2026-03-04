@@ -49,4 +49,19 @@ public interface EvidenciaRegistroActividadRepository extends JpaRepository<Evid
 //        WHERE id_evidencia_registro_actividad = :idEvidencia
 //        """, nativeQuery = true)
 //    void desactivarEvidencia(@Param("idEvidencia") Integer idEvidencia);
+
+    @Modifying
+    @Query(value = """
+        UPDATE ayudantia.evidencia_registro_actividad
+        SET id_tipo_estado_evidencia = (
+            SELECT id_tipo_estado_evidencia FROM ayudantia.tipo_estado_evidencia
+            WHERE UPPER(nombre_estado) = UPPER(:estado) LIMIT 1
+        ),
+        observaciones      = :observaciones,
+        fecha_observacion  = CURRENT_DATE
+        WHERE id_evidencia_registro_actividad = :idEvidencia
+        """, nativeQuery = true)
+    void actualizarEstadoEvidencia(@Param("idEvidencia") Integer idEvidencia,
+                                   @Param("estado") String estado,
+                                   @Param("observaciones") String observaciones);
 }
