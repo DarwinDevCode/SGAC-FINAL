@@ -30,7 +30,6 @@ public class NotificacionServiceImpl implements INotificacionService {
     private final SimpMessagingTemplate messagingTemplate;
     private final EntityManager entityManager;
 
-
     @Override
     public NotificacionResponseDTO enviarNotificacion(Integer idUsuario, NotificationRequest request) {
 
@@ -48,6 +47,7 @@ public class NotificacionServiceImpl implements INotificacionService {
         Usuario usuario = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado para notificacion"));
 
+
         Notificacion notificacion = Notificacion.builder()
                 .usuario(usuario)
                 .titulo(request.getTitulo())
@@ -62,11 +62,15 @@ public class NotificacionServiceImpl implements INotificacionService {
 
         NotificacionResponseDTO payload = mapToDto(saved);
 
-        // Envío en tiempo real (privado por usuario)
         messagingTemplate.convertAndSend("/queue/notificaciones/" + idUsuario, payload);
 
         return payload;
     }
+
+
+
+
+
 
     @Override
     @Transactional(readOnly = true)

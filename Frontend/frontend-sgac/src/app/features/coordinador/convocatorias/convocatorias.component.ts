@@ -77,7 +77,8 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     return this.periodosMap.get(id) || String(id);
   }
 
-  ngOnInit(): void { this.cargarDatos(); }
+  ngOnInit(): void { this.cargarDatos();     console.log("Periodo activo: " + this.periodoActivo);
+  }
   ngOnDestroy(): void { this.subs.unsubscribe(); }
 
   cargarDatos() {
@@ -115,6 +116,7 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
         error: () => { this.errorMensaje = 'Error al cargar datos.'; this.loading = false; }
       })
     );
+
   }
 
   abrirModalCrear() {

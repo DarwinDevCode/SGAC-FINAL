@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { BehaviorSubject, Observable, catchError, of, tap } from 'rxjs';
-import { Notificacion } from '../dto/notificacion';
+import {Notificacion, NotificacionResponseDTO} from '../dto/notificacion';
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
@@ -122,5 +122,9 @@ export class NotificacionService {
     const current = this.notificacionesSubject.getValue();
     const next = current.map((n) => (n.idNotificacion === idNotificacion ? { ...n, leido: true } : n));
     this.setNotificaciones(next);
+  }
+
+  listarMisNotificaciones(idUsuario: number): Observable<NotificacionResponseDTO[]> {
+    return this.http.get<NotificacionResponseDTO[]>(`${this.apiUrl}/mis-notificaciones/${idUsuario}`);
   }
 }
