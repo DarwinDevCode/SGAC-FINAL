@@ -57,7 +57,5 @@ public class UsuarioPrincipal implements UserDetails {
                 .collect(Collectors.toList());
     }
 
-    public Integer getIdUsuario() {
-        return usuario.getIdUsuario();
-    }
+
 }

@@ -32,18 +32,7 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
     @Override
     public DocenteDashboardDTO getDashboard(Integer idUsuarioDocente) {
         List<Object[]> rows = registroRepo.spResumenDocente(idUsuarioDocente);
-        if (rows == null || rows.isEmpty()) {
-            return DocenteDashboardDTO.builder().build();
-        }
-        Object[] row = rows.get(0);
-        return DocenteDashboardDTO.builder()
-                .totalAyudantes(toLong(row[0]))
-                .actividadesPendientes(toLong(row[1]))
-                .actividadesAceptadas(toLong(row[2]))
-                .actividadesRechazadas(toLong(row[3]))
-                .actividadesObservadas(toLong(row[4]))
-                .totalActividades(toLong(row[5]))
-                .build();
+       return new DocenteDashboardDTO();
     }
 
     // ─── Ayudantes ────────────────────────────────────────────────────────────
@@ -164,9 +153,7 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
         EvidenciaRegistroActividad ev = evidenciaRepo.findById(idEvidencia)
                 .orElseThrow(() -> new ResourceNotFoundException("Evidencia no encontrada"));
 
-        String obs = request.getObservaciones() != null ? request.getObservaciones() : "";
-        evidenciaRepo.actualizarEstadoEvidencia(idEvidencia, request.getEstado(), obs);
-
+      
         // Si el estado es OBSERVADO → notificar al ayudante por WebSocket
         if ("OBSERVADO".equalsIgnoreCase(request.getEstado()) && request.getObservaciones() != null) {
             notificarObservacionEvidencia(ev, request.getObservaciones(), idUsuarioDocente);
