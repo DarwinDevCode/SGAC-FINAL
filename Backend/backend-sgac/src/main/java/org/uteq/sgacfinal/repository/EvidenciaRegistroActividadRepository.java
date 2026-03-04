@@ -35,12 +35,14 @@ public interface EvidenciaRegistroActividadRepository extends JpaRepository<Evid
 
 
     @Query(value = """
-        SELECT * FROM ayudantia.fn_evidencias_sesion(:idUsuario, :idRegistro)
+
+            SELECT * FROM ayudantia.fn_evidencias_sesion(:idUsuario, :idRegistro)
         """, nativeQuery = true)
     List<Object[]> evidenciasSesion(
             @Param("idUsuario")  Integer idUsuario,
             @Param("idRegistro") Integer idRegistro
     );
+
 
     @Query(value = """
         SELECT COUNT(*) > 0
@@ -59,6 +61,7 @@ public interface EvidenciaRegistroActividadRepository extends JpaRepository<Evid
     boolean evidenciaPerteneceAlDocente(@Param("idEvidencia") Integer idEvidencia,
                                        @Param("idUsuario") Integer idUsuario);
 
+
     @Modifying
     @Query(value = """
         UPDATE ayudantia.evidencia_registro_actividad
@@ -72,5 +75,5 @@ public interface EvidenciaRegistroActividadRepository extends JpaRepository<Evid
                          @Param("observaciones") String observaciones,
                          @Param("fechaObservacion") java.time.LocalDate fechaObservacion);
 
-}
 
+}

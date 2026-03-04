@@ -72,6 +72,7 @@ public class NotificacionServiceImpl implements INotificacionService {
         return payload;
     }
 
+
     @Override
     @Transactional(readOnly = true)
     public List<NotificacionResponseDTO> listarUltimas10DelUsuarioAutenticado() {

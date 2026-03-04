@@ -30,6 +30,30 @@ public interface RegistroActividadRepository extends JpaRepository<RegistroActiv
                                 @Param("horas") BigDecimal horasDedicadas,
                                 @Param("estado") String estadoRevision);
 
+    /**
+     * SP: sp_resumen_docente — KPIs del dashboard del docente.
+     */
+    @Query(value = "SELECT * FROM public.sp_resumen_docente(:idUsuarioDocente)", nativeQuery = true)
+    List<Object[]> spResumenDocente(@Param("idUsuarioDocente") Integer idUsuarioDocente);
+
+    /**
+     * SP: sp_listar_ayudantes_docente — ayudantes con resumen de actividades.
+     */
+    @Query(value = "SELECT * FROM public.sp_listar_ayudantes_docente(:idUsuarioDocente)", nativeQuery = true)
+    List<Object[]> spListarAyudantesDocente(@Param("idUsuarioDocente") Integer idUsuarioDocente);
+
+    /**
+     * SP: sp_actividades_ayudante_docente — actividades de un ayudante para revisión.
+     */
+    @Query(value = "SELECT * FROM public.sp_actividades_ayudante_docente(:idAyudantia)", nativeQuery = true)
+    List<Object[]> spActividadesAyudanteDocente(@Param("idAyudantia") Integer idAyudantia);
+
+    /**
+     * SP: sp_evidencias_actividad_docente — evidencias de una actividad para revisión.
+     */
+    @Query(value = "SELECT * FROM public.sp_evidencias_actividad_docente(:idRegistro)", nativeQuery = true)
+    List<Object[]> spEvidenciasActividadDocente(@Param("idRegistro") Integer idRegistro);
+
     @Query(value = "SELECT * FROM public.sp_listar_actividades_ayudantia(:idAyudantia)", nativeQuery = true)
     List<RegistroActividad> listarActividadesPorAyudantiaSP(@Param("idAyudantia") Integer idAyudantia);
 

@@ -8,3 +8,4 @@ package org.uteq.sgacfinal.repository;
 @Deprecated
 public interface NotificacionRepository {
 }
+

@@ -1,0 +1,72 @@
+<div class="ayudantes-container">
+    <div class="page-header">
+        <h1 class="page-title">Mis Ayudantes de Cátedra</h1>
+        <p class="page-subtitle">Gestiona y revisa las actividades de tus ayudantes</p>
+    </div>
+
+    <!-- Búsqueda -->
+    <div class="search-bar">
+        <lucide-icon name="search" [size]="18" class="search-icon"></lucide-icon>
+        <input type="text" placeholder="Buscar por nombre o asignatura..." [(ngModel)]="busqueda"
+            (ngModelChange)="filtrar()" class="search-input" />
+    </div>
+
+    @if (loading) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando ayudantes...</p>
+    </div>
+    }
+
+    @if (!loading && filtrados.length === 0) {
+    <div class="empty-state">
+        <lucide-icon name="user" [size]="48"></lucide-icon>
+        <p>No se encontraron ayudantes</p>
+    </div>
+    }
+
+    @if (!loading && filtrados.length > 0) {
+    <div class="ayudantes-grid">
+        @for (a of filtrados; track a.idAyudantia) {
+        <div class="ayudante-card" (click)="verActividades(a.idAyudantia)">
+            <div class="card-top">
+                <div class="avatar">{{ a.nombreCompleto.charAt(0) }}</div>
+                <div class="card-info">
+                    <h4 class="card-nombre">{{ a.nombreCompleto }}</h4>
+                    <span class="card-correo">{{ a.correo }}</span>
+                </div>
+                <span class="badge" [ngClass]="getEstadoBadge(a.estadoAyudantia)">{{ a.estadoAyudantia }}</span>
+            </div>
+
+            <div class="card-meta">
+                <div class="meta-item">
+                    <lucide-icon name="book-open" [size]="14"></lucide-icon>
+                    <span>{{ a.nombreAsignatura }}</span>
+                </div>
+                <div class="meta-item">
+                    <lucide-icon name="clock" [size]="14"></lucide-icon>
+                    <span>{{ a.horasCumplidas }}h cumplidas</span>
+                </div>
+            </div>
+
+            <div class="card-stats">
+                <div class="stat">
+                    <span class="stat-val">{{ a.actividadesTotal }}</span>
+                    <span class="stat-lbl">Actividades</span>
+                </div>
+                <div class="stat" [class.stat-alert]="a.actividadesPendientes > 0">
+                    <span class="stat-val">{{ a.actividadesPendientes }}</span>
+                    <span class="stat-lbl">Pendientes</span>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <span class="ver-actividades">
+                    Ver actividades <lucide-icon name="chevron-right" [size]="14"></lucide-icon>
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>

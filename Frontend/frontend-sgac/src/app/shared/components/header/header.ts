@@ -57,5 +57,8 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     // no-op: la campana maneja su propio estado; el WS se conecta en el effect.
+    //this.cargarNotificaciones();
   }
+
+
 }

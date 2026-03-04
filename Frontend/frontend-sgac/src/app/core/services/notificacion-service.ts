@@ -44,7 +44,7 @@ export class NotificacionService {
       webSocketFactory: () => sock as any,
       reconnectDelay: 4000,
       connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
-      debug: () => {},
+      debug: () => { },
     });
 
     client.onConnect = () => {
@@ -53,7 +53,7 @@ export class NotificacionService {
       });
     };
 
-    client.onStompError = (frame) => {
+    client.onStompError = (frame: import('@stomp/stompjs').IFrame) => {
       // eslint-disable-next-line no-console
       console.error('STOMP error', frame.headers, frame.body);
     };

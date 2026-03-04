@@ -53,7 +53,7 @@ export class SidebarComponent {
       { label: 'Inicio', icon: 'LayoutDashboard', route: '/docente/dashboard' },
       { label: 'Mis Ayudantes', icon: 'Users', route: '/docente/mis-ayudantes' },
       { label: 'Planificación Actividades', icon: 'CalendarClock', route: '/docente/planificacion' },
-      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/validar-informes' },
+      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/aprobar-informes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     COORDINADOR: [

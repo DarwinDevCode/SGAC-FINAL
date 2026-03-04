@@ -38,10 +38,16 @@ import { DashboardComponent as AyudanteDashboard } from './features/ayudante/das
 import { ActividadesComponent as AyudanteActividades } from './features/ayudante/actividades/actividades.component';
 import { InformesComponent as AyudanteInformes } from './features/ayudante/informes/informes.component';
 import { AyudanteNotificacionesComponent } from './features/ayudante/notificaciones/notificaciones.component';
+
+
+
+
 import {SesionesComponent} from './features/ayudante/sesiones/sesiones';
 import { NotificacionesPageComponent } from './features/notificaciones/notificaciones-page.component';
 import { DocenteDashboardComponent } from './features/docente/dashboard/docente-dashboard.component';
 import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayudantes.component';
+// Docente
+import { ActividadesAyudanteComponent } from './features/docente/actividades-ayudante/actividades-ayudante';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -99,6 +105,13 @@ export const routes: Routes = [
       { path: 'docente/dashboard', component: DocenteDashboardComponent },
       { path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
 
+
+      // Docente
+      //{ path: 'docente/dashboard', component: DocenteDashboardComponent },
+      //{ path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
+      { path: 'docente/aprobar-informes', component: MisAyudantesComponent },
+      { path: 'docente/mis-ayudantes/:idAyudantia/actividades', component: ActividadesAyudanteComponent },
+      //{ path: 'docente/notifications', component: PostulanteNotificaciones },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]

@@ -31,4 +31,3 @@ public class DocenteDashboardDTO {
         private Integer idRegistro;
     }
 }
-

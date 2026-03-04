@@ -50,13 +50,11 @@ public class NotificacionMasivaService {
     public void enviarIndividual(Integer idUsuario, String mensaje, String tipo) {
         Usuario u = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + idUsuario));
-
         NotificacionW n = new NotificacionW();
         n.setIdUsuario(u);
         n.setMensaje(mensaje);
         n.setTipo(tipo);
         n.setLeido(false);
-
         notificacionRepository.save(n);
     }
 
