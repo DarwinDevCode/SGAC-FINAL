@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.ConvocatoriaRequestDTO;
@@ -10,6 +11,7 @@ import org.uteq.sgacfinal.entity.Asignatura;
 import org.uteq.sgacfinal.entity.Convocatoria;
 import org.uteq.sgacfinal.entity.Docente;
 import org.uteq.sgacfinal.entity.PeriodoAcademico;
+import org.uteq.sgacfinal.event.ConvocatoriaCreadaEvent;
 import org.uteq.sgacfinal.mapper.ConvocatoriaMapper;
 import org.uteq.sgacfinal.repository.DocenteRepository;
 import org.uteq.sgacfinal.repository.IAsignaturaRepository;
@@ -28,13 +30,24 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     private final IPeriodoAcademicoRepository periodoRepo;
     private final IAsignaturaRepository asignaturaRepo;
     private final DocenteRepository docenteRepo;
+
+    private final ApplicationEventPublisher eventPublisher;
+
     @Override
     @Transactional
     public ConvocatoriaResponseDTO create(ConvocatoriaRequestDTO dto) {
         Convocatoria convocatoria = new Convocatoria();
         mapDtoToEntity(dto, convocatoria);
-        return ConvocatoriaMapper.toDTO(convocatoriaRepo.save(convocatoria));
+
+        Convocatoria saved = convocatoriaRepo.save(convocatoria);
+
+        // Publicar evento: notificaciones se envían AFTER_COMMIT
+        eventPublisher.publishEvent(new ConvocatoriaCreadaEvent(saved));
+
+        return ConvocatoriaMapper.toDTO(saved);
     }
+
+    // El envío de notificaciones se movió a ConvocatoriaNotificacionListener (AFTER_COMMIT)
 
     @Override
     @Transactional

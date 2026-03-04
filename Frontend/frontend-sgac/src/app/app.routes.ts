@@ -39,6 +39,9 @@ import { ActividadesComponent as AyudanteActividades } from './features/ayudante
 import { InformesComponent as AyudanteInformes } from './features/ayudante/informes/informes.component';
 import { AyudanteNotificacionesComponent } from './features/ayudante/notificaciones/notificaciones.component';
 import {SesionesComponent} from './features/ayudante/sesiones/sesiones';
+import { NotificacionesPageComponent } from './features/notificaciones/notificaciones-page.component';
+import { DocenteDashboardComponent } from './features/docente/dashboard/docente-dashboard.component';
+import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayudantes.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -47,6 +50,9 @@ export const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
+      // Global
+      { path: 'notificaciones', component: NotificacionesPageComponent },
+
       // Admin
       { path: 'admin/dashboard', component: AdminDashboard },
       { path: 'admin/usuarios', component: GestionUsuarios },
@@ -88,6 +94,10 @@ export const routes: Routes = [
       { path: 'ayudante/informes', component: AyudanteInformes },
       { path: 'ayudante/notifications', component: AyudanteNotificacionesComponent },
       { path: 'ayudante/sesiones', component: SesionesComponent },
+
+      // Docente
+      { path: 'docente/dashboard', component: DocenteDashboardComponent },
+      { path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
 
 
       { path: '', redirectTo: 'login', pathMatch: 'full' }

@@ -1,6 +1,18 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Users, UserCheck, Shield, CalendarClock, Activity, HardDrive } from 'lucide-angular';
+import {
+    LucideAngularModule,
+    LUCIDE_ICONS,
+    LucideIconProvider,
+    Users,
+    UserCheck,
+    Shield,
+    CalendarClock,
+    Activity,
+    HardDrive,
+    ChevronRight,
+    Inbox
+} from 'lucide-angular';
 import { UsuarioService } from '../../../core/services/usuario-service';
 import { PeriodoAcademicoService } from '../../../core/services/periodo-academico-service';
 import { UsuarioDTO } from '../../../core/dto/usuario';
@@ -18,7 +30,16 @@ import { RouterLink } from '@angular/router';
         {
             provide: LUCIDE_ICONS,
             multi: true,
-            useValue: new LucideIconProvider({ Users, UserCheck, Shield, CalendarClock, Activity, HardDrive })
+            useValue: new LucideIconProvider({
+                Users,
+                UserCheck,
+                Shield,
+                CalendarClock,
+                Activity,
+                HardDrive,
+                ChevronRight,
+                Inbox
+            })
         }
     ]
 })

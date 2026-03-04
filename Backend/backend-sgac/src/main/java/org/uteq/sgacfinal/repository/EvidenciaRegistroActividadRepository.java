@@ -42,11 +42,35 @@ public interface EvidenciaRegistroActividadRepository extends JpaRepository<Evid
             @Param("idRegistro") Integer idRegistro
     );
 
-//    @Modifying
-//    @Query(value = """
-//        UPDATE ayudantia.evidencia_registro_actividad
-//        SET activo = false
-//        WHERE id_evidencia_registro_actividad = :idEvidencia
-//        """, nativeQuery = true)
-//    void desactivarEvidencia(@Param("idEvidencia") Integer idEvidencia);
+    @Query(value = """
+        SELECT COUNT(*) > 0
+        FROM ayudantia.evidencia_registro_actividad ev
+        JOIN ayudantia.registro_actividad ra ON ra.id_registro_actividad = ev.id_registro_actividad
+        JOIN ayudantia.ayudantia a ON a.id_ayudantia = ra.id_ayudantia
+        JOIN postulacion.postulacion p ON p.id_postulacion = a.id_postulacion
+        JOIN convocatoria.convocatoria c ON c.id_convocatoria = p.id_convocatoria
+        JOIN academico.docente d ON d.id_docente = c.id_docente
+        JOIN academico.periodo_academico pa ON pa.id_periodo_academico = c.id_periodo_academico
+        WHERE ev.id_evidencia_registro_actividad = :idEvidencia
+          AND d.id_usuario = :idUsuario
+          AND pa.estado = 'EN PROCESO'
+          AND pa.activo = true
+        """, nativeQuery = true)
+    boolean evidenciaPerteneceAlDocente(@Param("idEvidencia") Integer idEvidencia,
+                                       @Param("idUsuario") Integer idUsuario);
+
+    @Modifying
+    @Query(value = """
+        UPDATE ayudantia.evidencia_registro_actividad
+        SET id_tipo_estado_evidencia = :idEstado,
+            observaciones = :observaciones,
+            fecha_observacion = :fechaObservacion
+        WHERE id_evidencia_registro_actividad = :idEvidencia
+        """, nativeQuery = true)
+    int evaluarEvidencia(@Param("idEvidencia") Integer idEvidencia,
+                         @Param("idEstado") Integer idTipoEstadoEvidencia,
+                         @Param("observaciones") String observaciones,
+                         @Param("fechaObservacion") java.time.LocalDate fechaObservacion);
+
 }
+

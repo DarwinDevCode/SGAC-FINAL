@@ -5,12 +5,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Response.MetricasConvocatoriaDTO;
-import org.uteq.sgacfinal.entity.Notificacion;
+import org.uteq.sgacfinal.entity.NotificacionW;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
-import org.uteq.sgacfinal.repository.NotificacionRepository;
+import org.uteq.sgacfinal.repository.NotificacionWRepository;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,7 +21,7 @@ import java.util.Map;
 @Transactional
 public class NotificacionMasivaService {
 
-    private final NotificacionRepository notificacionRepository;
+    private final NotificacionWRepository notificacionRepository;
     private final IUsuariosRepository usuarioRepository;
     private final JdbcTemplate jdbcTemplate;
 
@@ -51,13 +50,13 @@ public class NotificacionMasivaService {
     public void enviarIndividual(Integer idUsuario, String mensaje, String tipo) {
         Usuario u = usuarioRepository.findById(idUsuario)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + idUsuario));
-        Notificacion n = Notificacion.builder()
-                .usuario(u)
-                .mensaje(mensaje)
-                .tipo(tipo)
-                .tipoNotificacion("INDIVIDUAL")
-                .leido(false)
-                .build();
+
+        NotificacionW n = new NotificacionW();
+        n.setIdUsuario(u);
+        n.setMensaje(mensaje);
+        n.setTipo(tipo);
+        n.setLeido(false);
+
         notificacionRepository.save(n);
     }
 

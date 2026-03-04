@@ -1,21 +1,10 @@
 package org.uteq.sgacfinal.repository;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-import org.uteq.sgacfinal.entity.Notificacion;
-
-import java.util.List;
-
-@Repository
-public interface NotificacionRepository extends JpaRepository<Notificacion, Integer> {
-    List<Notificacion> findByUsuario_IdUsuarioAndLeidoFalseOrderByFechaCreacionDesc(Integer idUsuario);
-    List<Notificacion> findByUsuario_IdUsuarioOrderByFechaCreacionDesc(Integer idUsuario, Pageable pageable);
-
-    //@EntityGraph(attributePaths = {"usuarioDestino"})
-    //List<Notificacion> findByUsuarioDestino_IdUsuarioOrderByFechaEnvioDesc(Integer idUsuario);
-
-    //@EntityGraph(attributePaths = {"usuarioDestino"})
-    //List<Notificacion> findByUsuarioDestino_IdUsuarioAndLeidoFalse(Integer idUsuario);
+/**
+ * @deprecated Entidad duplicada `Notificacion` fuera de uso. Usar {@link NotificacionWRepository}.
+ *
+ * Este archivo se deja intencionalmente sin implementación para evitar inyecciones/uso accidental.
+ */
+@Deprecated
+public interface NotificacionRepository {
 }

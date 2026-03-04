@@ -9,7 +9,6 @@ import org.uteq.sgacfinal.dto.Response.NotificacionResponseDTO;
 import org.uteq.sgacfinal.service.INotificacionService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notificaciones")
@@ -47,8 +46,16 @@ public class NotificacionController {
         return ResponseEntity.ok(notificacionService.enviarNotificacion(idUsuario, request));
     }
 
-
-
-
+    /**
+     * Lista notificaciones NO leídas del usuario autenticado.
+     *
+     * Ej: GET /api/notificaciones/no-leidas?limit=50
+     */
+    @GetMapping("/no-leidas")
+    public ResponseEntity<List<NotificacionResponseDTO>> listarNoLeidas(
+            @RequestParam(name = "limit", required = false) Integer limit
+    ) {
+        return ResponseEntity.ok(notificacionService.listarNoLeidasDelUsuarioAutenticado(limit));
+    }
 
 }

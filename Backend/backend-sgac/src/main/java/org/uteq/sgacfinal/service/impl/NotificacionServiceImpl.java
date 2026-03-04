@@ -1,21 +1,21 @@
 package org.uteq.sgacfinal.service.impl;
 
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.uteq.sgacfinal.dto.Request.NotificationRequest;
 import org.uteq.sgacfinal.dto.Response.NotificacionResponseDTO;
-import org.uteq.sgacfinal.entity.Notificacion;
+import org.uteq.sgacfinal.entity.NotificacionW;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
-import org.uteq.sgacfinal.repository.NotificacionRepository;
+import org.uteq.sgacfinal.repository.NotificacionWRepository;
 import org.uteq.sgacfinal.service.INotificacionService;
+import org.uteq.sgacfinal.service.IUsuarioSesionService;
 
 import java.time.Instant;
 import java.util.List;
@@ -23,49 +23,62 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class NotificacionServiceImpl implements INotificacionService {
 
-    private final NotificacionRepository notificacionRepository;
+    private final NotificacionWRepository notificacionRepository;
     private final IUsuariosRepository usuarioRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final EntityManager entityManager;
+    private final IUsuarioSesionService usuarioSesionService;
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public NotificacionResponseDTO enviarNotificacion(Integer idUsuario, NotificationRequest request) {
+        log.info("[NOTIF-SVC] -> enviarNotificacion(idUsuario={}, tipo={}, idReferencia={}) txActive={} txName={} thread={}",
+                idUsuario,
+                request != null ? request.getTipo() : null,
+                request != null ? request.getIdReferencia() : null,
+                TransactionSynchronizationManager.isActualTransactionActive(),
+                TransactionSynchronizationManager.getCurrentTransactionName(),
+                Thread.currentThread().getName());
+
         Usuario usuario = usuarioRepository.findById(idUsuario.intValue())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        Notificacion notificacion = Notificacion.builder()
-                .usuario(usuario)
-                .titulo(request.getTitulo())
-                .mensaje(request.getMensaje())
-                .tipo(request.getTipo())
-                .idReferencia(request.getIdReferencia())
-                .leido(false)
-                .fechaCreacion(Instant.now())
-                .build();
+        NotificacionW notificacion = new NotificacionW();
+        notificacion.setIdUsuario(usuario);
+        notificacion.setTitulo(request.getTitulo());
+        notificacion.setMensaje(request.getMensaje());
+        notificacion.setTipo(request.getTipo());
+        notificacion.setIdReferencia(request.getIdReferencia());
+        notificacion.setLeido(false);
+        notificacion.setFechaCreacion(Instant.now());
 
-        Notificacion saved = notificacionRepository.save(notificacion);
+        log.info("[NOTIF-SVC] Persistiendo notificación para idUsuario={} (antes de save)", idUsuario);
+
+        NotificacionW saved = notificacionRepository.save(notificacion);
+
+        log.info("[NOTIF-SVC] Persistida notificación idNotificacion={} (después de save)", saved.getId());
+
+        boolean exists = saved.getId() != null && notificacionRepository.existsById(saved.getId());
+        log.info("[NOTIF-SVC] Verificación inmediata existsById({}) => {}", saved.getId(), exists);
 
         NotificacionResponseDTO payload = mapToDto(saved);
 
+        log.info("[NOTIF-SVC] Enviando WS destino=/queue/notificaciones/{}", idUsuario);
         messagingTemplate.convertAndSend("/queue/notificaciones/" + idUsuario, payload);
+        log.info("[NOTIF-SVC] <- enviarNotificacion OK idNotificacion={}", saved.getId());
 
         return payload;
     }
 
-
-
-
-
-
     @Override
     @Transactional(readOnly = true)
     public List<NotificacionResponseDTO> listarUltimas10DelUsuarioAutenticado() {
-        Integer idUsuario = getIdUsuarioAutenticado();
+        Integer idUsuario = usuarioSesionService.getIdUsuarioAutenticado();
 
         return notificacionRepository
-                .findByUsuario_IdUsuarioOrderByFechaCreacionDesc(idUsuario, PageRequest.of(0, 10))
+                .findByIdUsuario_IdUsuarioOrderByFechaCreacionDesc(idUsuario, PageRequest.of(0, 10))
                 .stream()
                 .map(this::mapToDto)
                 .toList();
@@ -73,14 +86,14 @@ public class NotificacionServiceImpl implements INotificacionService {
 
     @Override
     public void marcarComoLeida(Integer idNotificacion) {
-        Integer idUsuario = getIdUsuarioAutenticado();
+        Integer idUsuario = usuarioSesionService.getIdUsuarioAutenticado();
 
-        Notificacion notificacion = notificacionRepository.findById(idNotificacion)
+        NotificacionW notificacion = notificacionRepository.findById(idNotificacion)
                 .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
 
         // Validar ownership
-        if (notificacion.getUsuario() == null || notificacion.getUsuario().getIdUsuario() == null
-                || !notificacion.getUsuario().getIdUsuario().equals(idUsuario)) {
+        if (notificacion.getIdUsuario() == null || notificacion.getIdUsuario().getIdUsuario() == null
+                || !notificacion.getIdUsuario().getIdUsuario().equals(idUsuario)) {
             throw new RuntimeException("No autorizado para modificar esta notificación");
         }
 
@@ -93,40 +106,24 @@ public class NotificacionServiceImpl implements INotificacionService {
         notificacionRepository.save(notificacion);
     }
 
-    private Integer getIdUsuarioAutenticado() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null) {
-            throw new RuntimeException("No hay usuario autenticado");
+    @Override
+    @Transactional(readOnly = true)
+    public List<NotificacionResponseDTO> listarNoLeidasDelUsuarioAutenticado(Integer limit) {
+        Integer idUsuario = usuarioSesionService.getIdUsuarioAutenticado();
+
+        List<NotificacionW> list = notificacionRepository
+                .findByIdUsuario_IdUsuarioAndLeidoFalseOrderByFechaCreacionDesc(idUsuario);
+
+        if (limit != null && limit > 0 && list.size() > limit) {
+            list = list.subList(0, limit);
         }
 
-        Object principal = authentication.getPrincipal();
-
-        // Caso normal de este proyecto: UsuarioPrincipal envuelve Usuario pero no expone getter.
-        if (principal instanceof org.uteq.sgacfinal.security.UsuarioPrincipal usuarioPrincipal) {
-            try {
-                java.lang.reflect.Field f = org.uteq.sgacfinal.security.UsuarioPrincipal.class.getDeclaredField("usuario");
-                f.setAccessible(true);
-                Usuario u = (Usuario) f.get(usuarioPrincipal);
-                if (u != null && u.getIdUsuario() != null) {
-                    return u.getIdUsuario();
-                }
-            } catch (Exception ignored) {
-                // fallback abajo
-            }
-        }
-
-        if (principal instanceof UserDetails userDetails) {
-            return usuarioRepository.findByNombreUsuarioWithRolesAndTipoRol(userDetails.getUsername())
-                    .map(Usuario::getIdUsuario)
-                    .orElseThrow(() -> new RuntimeException("Usuario autenticado no encontrado"));
-        }
-
-        throw new RuntimeException("No hay usuario autenticado");
+        return list.stream().map(this::mapToDto).toList();
     }
 
-    private NotificacionResponseDTO mapToDto(Notificacion n) {
+    private NotificacionResponseDTO mapToDto(NotificacionW n) {
         return NotificacionResponseDTO.builder()
-                .idNotificacion(n.getIdNotificacion())
+                .idNotificacion(n.getId())
                 .titulo(n.getTitulo())
                 .mensaje(n.getMensaje())
                 .tipo(n.getTipo())

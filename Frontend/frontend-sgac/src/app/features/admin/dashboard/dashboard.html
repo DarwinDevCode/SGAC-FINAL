@@ -1,155 +1,163 @@
 <div class="gestion-container">
-    <div class="section-header">
-        <div class="title-container">
-            <h1 class="title">Dashboard del Administrador</h1>
-            <p class="subtitle">Resumen general del estado del sistema SGAC</p>
-        </div>
-        <div class="flex items-center gap-2" *ngIf="loadingUsuarios || loadingPeriodos">
-            <lucide-icon name="Activity" class="w-5 h-5 text-primary"></lucide-icon>
-            <span class="text-sm font-medium text-primary">Sincronizando métricas...</span>
-        </div>
+  <!-- CABECERA -->
+  <div class="section-header">
+    <div class="title-container">
+      <h1 class="title">Dashboard del Administrador</h1>
+      <p class="subtitle">Resumen general del estado del sistema SGAC</p>
     </div>
 
-    <!-- Cards de Resumen -->
+    <div class="flex items-center gap-2" *ngIf="loadingUsuarios || loadingPeriodos">
+      <lucide-icon name="Activity" class="w-5 h-5 text-primary"></lucide-icon>
+      <span class="text-sm font-medium text-primary">Sincronizando métricas...</span>
+    </div>
+  </div>
+
+  <div *ngIf="loadingUsuarios || loadingPeriodos">
+    <!-- Skeleton KPI -->
     <div class="stats-grid cols-4">
-        <!-- Card Total Usuarios -->
-        <div class="stat-card">
-            <div class="stat-icon blue">
-                <lucide-icon name="Users"></lucide-icon>
-            </div>
-            <div class="flex-1">
-                <h3 class="stat-value">{{totalUsuarios}}</h3>
-                <p class="stat-label">Usuarios Registrados</p>
-            </div>
+      <div class="stat-card" *ngFor="let i of [1,2,3,4]">
+        <div class="sk-circle"></div>
+        <div class="sk-lines">
+          <div class="sk-line w-50"></div>
+          <div class="sk-line w-70"></div>
         </div>
-
-        <!-- Card Usuarios Activos -->
-        <div class="stat-card">
-            <div class="stat-icon green">
-                <lucide-icon name="UserCheck"></lucide-icon>
-            </div>
-            <div class="flex-1">
-                <div class="flex items-center gap-2">
-                    <h3 class="stat-value">{{usuariosActivos}}</h3>
-                    <span class="status-pill active" *ngIf="totalUsuarios > 0">
-                        {{((usuariosActivos / totalUsuarios) * 100).toFixed(0)}}%
-                    </span>
-                </div>
-                <p class="stat-label">Usuarios Activos (con acceso)</p>
-            </div>
-        </div>
-
-        <!-- Card Periodo Activo -->
-        <div class="stat-card">
-            <div class="stat-icon violet">
-                <lucide-icon name="CalendarClock"></lucide-icon>
-            </div>
-            <div class="flex-1">
-                <h3 class="stat-value text-sm truncate" style="max-width: 140px;"
-                    title="{{periodoActivo?.nombrePeriodo}}">
-                    {{periodoActivo ? periodoActivo.nombrePeriodo : 'Ninguno'}}
-                </h3>
-                <p class="stat-label mt-1">
-                    <span class="status-pill" [ngClass]="periodoActivo ? 'active' : 'inactive'">
-                        {{periodoActivo ? 'En curso' : 'No configurado'}}
-                    </span>
-                </p>
-            </div>
-        </div>
-
-        <!-- Card Total Periodos -->
-        <div class="stat-card">
-            <div class="stat-icon amber">
-                <lucide-icon name="HardDrive"></lucide-icon>
-            </div>
-            <div class="flex-1 flex flex-col justify-between h-full">
-                <div>
-                    <h3 class="stat-value">{{totalPeriodos}}</h3>
-                    <p class="stat-label">Historial de Períodos</p>
-                </div>
-                <button [routerLink]="['/admin/periodos']" class="btn btn-ghost text-xs cursor-pointer mt-1"
-                    style="padding: 0; display: inline-block; text-align: left;">
-                    Gestionar Períodos &rarr;
-                </button>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <!-- Seccion Inferior -->
-    <div class="stats-grid cols-3" style="margin-top: 2rem;">
-
-        <!-- Accesos Directos -->
-        <div class="table-card" style="grid-column: span 1;">
-            <div
-                style="padding: 1.25rem 1.5rem; border-bottom: 1px solid hsl(var(--border)); background: hsl(var(--muted) / 0.15);">
-                <h3 class="font-bold text-foreground flex items-center gap-2 m-0 text-sm">
-                    <lucide-icon name="Shield" class="w-4 h-4 text-muted-foreground"></lucide-icon>
-                    Accesos Rápidos
-                </h3>
-            </div>
-            <div class="flex flex-col p-4 gap-2">
-                <a [routerLink]="['/admin/usuarios']" class="action-card blue" style="padding: 1rem;">
-                    <div class="flex items-center gap-3">
-                        <div class="action-icon blue" style="width: 2rem; height: 2rem;">
-                            <lucide-icon name="Users" size="18"></lucide-icon>
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-bold text-sm">Gestión de Usuarios</p>
-                            <p class="action-desc">Crear y administrar perfiles</p>
-                        </div>
-                    </div>
-                </a>
-
-                <a [routerLink]="['/admin/configuracion']" class="action-card green" style="padding: 1rem;">
-                    <div class="flex items-center gap-3">
-                        <div class="action-icon green" style="width: 2rem; height: 2rem;">
-                            <lucide-icon name="HardDrive" size="18"></lucide-icon>
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-bold text-sm">Configuración Global</p>
-                            <p class="action-desc">Administrar catálogos y parámetros</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-
-        <!-- Distribucion Roles -->
-        <div class="table-card" style="grid-column: span 2;">
-            <div
-                style="padding: 1.25rem 1.5rem; border-bottom: 1px solid hsl(var(--border)); background: hsl(var(--muted) / 0.15);">
-                <h3 class="font-bold text-foreground flex items-center gap-2 m-0 text-sm">
-                    <lucide-icon name="Activity" class="w-4 h-4 text-muted-foreground"></lucide-icon>
-                    Distribución de Roles en el Sistema
-                </h3>
-            </div>
-
-            <div class="p-6">
-                <!-- Loader -->
-                <div *ngIf="loadingUsuarios" class="info-message">
-                    <lucide-icon name="Activity" class="animate-spin mb-2 mx-auto"></lucide-icon>
-                    <p>Cargando distribución de roles...</p>
-                </div>
-
-                <!-- Empty State -->
-                <div *ngIf="!loadingUsuarios && rolesCount.length === 0" class="info-message">
-                    No hay usuarios registrados en el sistema.
-                </div>
-
-                <!-- Grid -->
-                <div *ngIf="!loadingUsuarios && rolesCount.length > 0" class="stats-grid cols-3"
-                    style="margin-bottom: 0;">
-                    <div *ngFor="let rolStats of rolesCount" class="stat-card" style="padding: 1rem;">
-                        <div class="flex-1">
-                            <div class="flex items-center justify-between mb-2">
-                                <span [ngClass]="rolStats.color">{{rolStats.rol}}</span>
-                            </div>
-                            <h3 class="stat-value" style="font-size: 1.5rem;">{{rolStats.cuenta}}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <div class="bottom-grid">
+      <div class="table-card">
+        <div class="sk-block" style="height: 240px;"></div>
+      </div>
+      <div class="table-card">
+        <div class="sk-block" style="height: 240px;"></div>
+      </div>
     </div>
+  </div>
+  <div *ngIf="!loadingUsuarios && !loadingPeriodos">
+    <!-- KPIs -->
+    <div class="stats-grid cols-4">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <lucide-icon name="Users" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ totalUsuarios }}</div>
+          <div class="stat-label">Usuarios registrados</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <lucide-icon name="UserCheck" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <div class="stat-value">{{ usuariosActivos }}</div>
+            <span class="status-pill active" *ngIf="totalUsuarios > 0">
+              {{ ((usuariosActivos / totalUsuarios) * 100).toFixed(0) }}%
+            </span>
+          </div>
+          <div class="stat-label">Usuarios activos (con acceso)</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon violet">
+          <lucide-icon name="CalendarClock" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value text-sm truncate" style="max-width: 160px;" title="{{ periodoActivo?.nombrePeriodo }}">
+            {{ periodoActivo ? periodoActivo.nombrePeriodo : 'Ninguno' }}
+          </div>
+          <div class="stat-label">
+            <span class="status-pill" [ngClass]="periodoActivo ? 'active' : 'inactive'">
+              {{ periodoActivo ? 'En curso' : 'No configurado' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <lucide-icon name="HardDrive" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ totalPeriodos }}</div>
+          <div class="stat-label">Historial de períodos</div>
+          <a class="ver-todas-link" [routerLink]="['/admin/periodos']" style="margin-top: .35rem; display: inline-flex;">
+            Gestionar períodos <lucide-icon name="ChevronRight" size="14"></lucide-icon>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección inferior: Accesos rápidos + Distribución roles -->
+    <div class="bottom-grid">
+      <div class="quick-access">
+        <h3 class="section-subtitle">Accesos rápidos</h3>
+        <div class="actions-grid cols-2">
+          <a [routerLink]="['/admin/usuarios']" class="action-card blue">
+            <div class="action-icon blue">
+              <lucide-icon name="Users" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Gestión de usuarios</div>
+              <div class="action-desc">Crear y administrar perfiles</div>
+            </div>
+          </a>
+
+          <a [routerLink]="['/admin/configuracion']" class="action-card green">
+            <div class="action-icon green">
+              <lucide-icon name="HardDrive" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Configuración global</div>
+              <div class="action-desc">Administrar catálogos y parámetros</div>
+            </div>
+          </a>
+
+          <a [routerLink]="['/admin/rol-permiso']" class="action-card violet">
+            <div class="action-icon violet">
+              <lucide-icon name="Shield" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Roles y permisos</div>
+              <div class="action-desc">Gestionar accesos al sistema</div>
+            </div>
+          </a>
+
+          <a [routerLink]="['/notificaciones']" class="action-card amber">
+            <div class="action-icon amber">
+              <lucide-icon name="Activity" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Notificaciones</div>
+              <div class="action-desc">Revisar avisos del sistema</div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="ultimas-sesiones">
+        <div class="ultimas-header">
+          <h3 class="section-subtitle">Distribución de roles</h3>
+          <span class="text-xs text-muted-foreground">Usuarios por rol</span>
+        </div>
+
+        <div class="empty-sesiones" *ngIf="rolesCount.length === 0">
+          <lucide-icon name="Inbox" size="36"></lucide-icon>
+          <p class="m-0">No hay usuarios registrados en el sistema.</p>
+        </div>
+
+        <div class="roles-grid" *ngIf="rolesCount.length > 0">
+          <div class="role-card" *ngFor="let rolStats of rolesCount">
+            <div class="flex items-center justify-between mb-2">
+              <span [ngClass]="rolStats.color">{{ rolStats.rol }}</span>
+            </div>
+            <div class="stat-value" style="font-size: 1.5rem;">{{ rolStats.cuenta }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

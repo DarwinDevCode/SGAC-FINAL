@@ -3,7 +3,7 @@ import { Component, HostListener, inject, computed, signal } from '@angular/core
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { Notificacion } from '../../../core/dto/notificacion';
-import { NotificacionService } from '../../../core/services/notificacion-service';
+import { NotificationWSService } from '../../../core/services/notification-ws-service';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
@@ -14,7 +14,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   styleUrl: './notification-bell.css'
 })
 export class NotificationBellComponent {
-  private readonly notificacionService = inject(NotificacionService);
+  private readonly notificacionService = inject(NotificationWSService);
   private readonly router = inject(Router);
 
   readonly panelOpen = signal(false);
@@ -93,4 +93,3 @@ export class NotificationBellComponent {
     }
   }
 }
-

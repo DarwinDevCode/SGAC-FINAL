@@ -127,10 +127,10 @@
                 </div>
                 <div class="form-group" style="margin:0">
                     <label>Docente Responsable</label>
-                    <select formControlName="idDocente" class="input-field">
+                    <select formControlName="idDocente" class="input-field" (change)="onDocenteChange($event)">
                         <option [ngValue]="null">— Seleccionar —</option>
                         @for (d of docentes; track d.idDocente) {
-                        <option [ngValue]="d.idDocente">{{ d.nombreCompletoUsuario }}</option>
+                        <option [value]="d.idDocente">{{ d.nombreCompleto }}</option>
                         }
                     </select>
                     @if (form.get('idDocente')?.invalid && form.get('idDocente')?.touched) {
@@ -142,10 +142,13 @@
             <!-- Asignatura -->
             <div class="form-group" style="margin:0">
                 <label>Asignatura / Cátedra</label>
-                <select formControlName="idAsignatura" class="input-field">
+                <select
+                  formControlName="idAsignatura"
+                  class="input-field"
+                >
                     <option [ngValue]="null">— Seleccionar —</option>
                     @for (a of asignaturas; track a.idAsignatura) {
-                    <option [ngValue]="a.idAsignatura">{{ a.nombreAsignatura }}</option>
+                    <option [value]="a.idAsignatura">{{ a.nombreAsignatura }}</option>
                     }
                 </select>
                 @if (form.get('idAsignatura')?.invalid && form.get('idAsignatura')?.touched) {

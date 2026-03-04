@@ -87,4 +87,34 @@ public interface RegistroActividadRepository extends JpaRepository<RegistroActiv
             @Param("idRegistro") Integer idRegistro,
             @Param("idUsuario")  Integer idUsuario
     );
+
+    @Query(value = """
+        SELECT COUNT(*) > 0
+        FROM ayudantia.registro_actividad ra
+        JOIN ayudantia.ayudantia a ON a.id_ayudantia = ra.id_ayudantia
+        JOIN postulacion.postulacion p ON p.id_postulacion = a.id_postulacion
+        JOIN convocatoria.convocatoria c ON c.id_convocatoria = p.id_convocatoria
+        JOIN academico.docente d ON d.id_docente = c.id_docente
+        JOIN academico.periodo_academico pa ON pa.id_periodo_academico = c.id_periodo_academico
+        WHERE ra.id_registro_actividad = :idRegistro
+          AND d.id_usuario = :idUsuario
+          AND pa.estado = 'EN PROCESO'
+          AND pa.activo = true
+        """, nativeQuery = true)
+    boolean perteneceAlDocente(@Param("idRegistro") Integer idRegistro,
+                              @Param("idUsuario") Integer idUsuario);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = """
+        UPDATE ayudantia.registro_actividad
+        SET id_tipo_estado_registro = :idEstado,
+            observaciones = :observaciones,
+            fecha_observacion = :fechaObservacion
+        WHERE id_registro_actividad = :idRegistro
+        """, nativeQuery = true)
+    int evaluarActividad(@Param("idRegistro") Integer idRegistro,
+                         @Param("idEstado") Integer idTipoEstadoRegistro,
+                         @Param("observaciones") String observaciones,
+                         @Param("fechaObservacion") java.time.LocalDate fechaObservacion);
+
 }

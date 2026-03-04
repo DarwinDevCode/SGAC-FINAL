@@ -9,14 +9,12 @@ import { HttpClient } from '@angular/common/http';
 import { CoordinadorService } from '../../../core/services/coordinador-service';
 import { PeriodoAcademicoService } from '../../../core/services/periodo-academico-service';
 import { AuthService } from '../../../core/services/auth-service';
+import { ConvocatoriaService } from '../../../core/services/convocatoria-service';
 import { ConvocatoriaDTO } from '../../../core/dto/convocatoria';
 import { PeriodoAcademicoDTO } from '../../../core/dto/periodo-academico';
-import { AsignaturaDTO } from '../../../core/dto/asignatura';
-import { DocenteDTO } from '../../../core/dto/docente';
+import { AsignaturaComboDTO, DocenteComboDTO } from '../../../core/models/convocatoria.model';
 
 const API_CONV = 'http://localhost:8080/api/convocatorias';
-const API_ASIG = 'http://localhost:8080/api/asignaturas';
-const API_DOC = 'http://localhost:8080/api/docentes';
 
 @Component({
   selector: 'app-coordinador-convocatorias-crud',
@@ -32,11 +30,14 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private fb = inject(FormBuilder);
   private subs = new Subscription();
+  private convocatoriaService = inject(ConvocatoriaService);
 
   convocatorias: ConvocatoriaDTO[] = [];
   periodoActivo: PeriodoAcademicoDTO | null = null;
-  asignaturas: AsignaturaDTO[] = [];
-  docentes: DocenteDTO[] = [];
+
+  docentes: DocenteComboDTO[] = [];
+  asignaturas: AsignaturaComboDTO[] = [];
+
   periodosMap: Map<number, string> = new Map();
 
   loading = true;
@@ -51,7 +52,7 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   convocatoriaEditId: number | null = null;
 
   form: FormGroup = this.fb.group({
-    idAsignatura: [null, Validators.required],
+    idAsignatura: [{ value: null, disabled: true }, Validators.required],
     idDocente: [null, Validators.required],
     idPeriodoAcademico: [{ value: null, disabled: true }],
     cuposDisponibles: [1, [Validators.required, Validators.min(1)]],
@@ -77,7 +78,9 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     return this.periodosMap.get(id) || String(id);
   }
 
-  ngOnInit(): void { this.cargarDatos();     console.log("Periodo activo: " + this.periodoActivo);
+  ngOnInit(): void {
+    this.cargarDatos();
+    this.loadDocentes();
   }
   ngOnDestroy(): void { this.subs.unsubscribe(); }
 
@@ -90,33 +93,69 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
       forkJoin({
         coordinador: this.coordinadorService.obtenerCoordinadorPorUsuario(user.idUsuario),
         periodoActivo: this.periodoService.obtenerActivo().pipe(catchError((e) => { console.error('Error fetching active period:', e); return of(null); })),
-        docentes: this.http.get<DocenteDTO[]>(API_DOC).pipe(catchError(() => of([]))),
       }).pipe(
-        switchMap(({ coordinador, periodoActivo, docentes }) => {
+        switchMap(({ coordinador, periodoActivo }) => {
           this.periodoActivo = periodoActivo;
-          this.docentes = docentes as DocenteDTO[];
           this.idCarreraActual = (coordinador as any).idCarrera ?? null;
 
           if (periodoActivo?.idPeriodoAcademico) {
             this.periodosMap.set(periodoActivo.idPeriodoAcademico, periodoActivo.nombrePeriodo);
             this.form.patchValue({ idPeriodoAcademico: periodoActivo.idPeriodoAcademico });
           }
-          const asigUrl = this.idCarreraActual ? `${API_ASIG}/carrera/${this.idCarreraActual}` : `${API_ASIG}`;
+
           return forkJoin({
             convocatorias: this.coordinadorService.listarConvocatoriasPorCarrera(this.idCarreraActual ?? 0).pipe(catchError(() => of([]))),
-            asignaturas: this.http.get<AsignaturaDTO[]>(asigUrl).pipe(catchError(() => of([]))),
           });
         })
       ).subscribe({
-        next: ({ convocatorias, asignaturas }) => {
+        next: ({ convocatorias }) => {
           this.convocatorias = convocatorias as ConvocatoriaDTO[];
-          this.asignaturas = asignaturas as AsignaturaDTO[];
           this.loading = false;
         },
         error: () => { this.errorMensaje = 'Error al cargar datos.'; this.loading = false; }
       })
     );
 
+  }
+
+  loadDocentes() {
+    this.subs.add(
+      this.convocatoriaService.getDocentesCarrera().pipe(catchError(() => of([]))).subscribe({
+        next: (data) => {
+          this.docentes = (data || []) as DocenteComboDTO[];
+        },
+        error: () => {
+          this.docentes = [];
+        }
+      })
+    );
+  }
+
+  onDocenteChange(event: any) {
+    const rawValue = event?.target?.value;
+    const idDocente = rawValue != null && rawValue !== '' ? Number(rawValue) : null;
+
+    // limpiar asignaturas y seleccionar docente
+    this.form.patchValue({ idDocente, idAsignatura: null });
+    this.asignaturas = [];
+
+    if (!idDocente) {
+      this.form.get('idAsignatura')?.disable();
+      return;
+    }
+
+    this.form.get('idAsignatura')?.enable();
+
+    this.subs.add(
+      this.convocatoriaService.getAsignaturasPorDocente(idDocente).pipe(catchError(() => of([]))).subscribe({
+        next: (data) => {
+          this.asignaturas = (data || []) as AsignaturaComboDTO[];
+        },
+        error: () => {
+          this.asignaturas = [];
+        }
+      })
+    );
   }
 
   abrirModalCrear() {
@@ -130,6 +169,8 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
       estado: 'ABIERTA',
       activo: true,
     });
+    this.asignaturas = [];
+    this.form.get('idAsignatura')?.disable();
     this.mostrarModal = true;
   }
 
@@ -151,6 +192,22 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
       estado: conv.estado ?? 'ABIERTA',
       activo: conv.activo ?? true,
     });
+
+    const idDocente = conv.idDocente ?? null;
+    if (idDocente) {
+      this.form.get('idAsignatura')?.enable();
+      this.subs.add(
+        this.convocatoriaService.getAsignaturasPorDocente(idDocente).pipe(catchError(() => of([]))).subscribe({
+          next: (data) => {
+            this.asignaturas = (data || []) as AsignaturaComboDTO[];
+          },
+        })
+      );
+    } else {
+      this.asignaturas = [];
+      this.form.get('idAsignatura')?.disable();
+    }
+
     this.mostrarModal = true;
   }
 

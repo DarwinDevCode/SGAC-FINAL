@@ -6,6 +6,7 @@ import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { PeriodoAcademicoDTO } from '../dto/periodo-academico';
 import { AsignaturaDTO } from '../dto/asignatura';
 import { DocenteDTO } from '../dto/docente';
+import { DocenteComboDTO, AsignaturaComboDTO } from '../models/convocatoria.model';
 
 @Injectable({
   providedIn: 'root',
@@ -52,5 +53,15 @@ export class ConvocatoriaService {
 
   getDocentes(): Observable<DocenteDTO[]> {
     return this.http.get<DocenteDTO[]>(`${this.baseUrl}/recursos/docentes`);
+  }
+
+  /** Coordinador: docentes filtrados por carrera (backend resuelve el contexto por JWT). */
+  getDocentesCarrera() {
+    return this.http.get<DocenteComboDTO[]>(`${this.baseUrl}/coordinador/docentes-seleccionables`);
+  }
+
+  /** Coordinador: asignaturas activas filtradas por docente (solo relaciones activas). */
+  getAsignaturasPorDocente(idDocente: number) {
+    return this.http.get<AsignaturaComboDTO[]>(`${this.baseUrl}/coordinador/docentes/${idDocente}/asignaturas`);
   }
 }
