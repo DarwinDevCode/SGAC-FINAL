@@ -18,6 +18,16 @@ public class UsuarioPrincipal implements UserDetails {
         this.usuario = usuario;
     }
 
+    /** Acceso al Usuario autenticado (evita reflexión en servicios). */
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    /** Acceso directo al id_usuario autenticado. */
+    public Integer getIdUsuario() {
+        return usuario != null ? usuario.getIdUsuario() : null;
+    }
+
     @Override
     public String getPassword() {
         return usuario.getContraseniaUsuario();

@@ -31,7 +31,8 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
   mostrarModal = false;
   busqueda = '';
   convocatoriaSeleccionada: ConvocatoriaDTO | null = null;
-  yaPostulado = false;
+  /** Mapa: idConvocatoria → true si el estudiante ya se postuló a esa convocatoria */
+  postulacionPorConvocatoria: Record<number, boolean> = {};
 
   // Form State
   idEstudianteBase = 0;
@@ -43,23 +44,27 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     const user = this.authService.getUser();
     if (user) {
       this.idEstudianteBase = user.idUsuario;
-      this.checkPostulacionActiva();
     }
     this.listarConvocatorias();
     this.cargarRequisitos();
   }
 
-  checkPostulacionActiva() {
-    this.subs.add(
-      this.postulanteService.misPostulaciones(this.idEstudianteBase).subscribe({
-        next: (postulaciones) => {
-          // Si tiene al menos una postulación en estado que no sea RECHAZADO, se considera postulado
-          const activas = (postulaciones || []).filter(p => p.estadoPostulacion !== 'RECHAZADO');
-          this.yaPostulado = activas.length > 0;
-        },
-        error: (err) => console.error(err.error?.message || err.message || 'Error al verificar postulaciones activas')
-      })
-    );
+  checkPostulacionesGranulares() {
+    if (!this.idEstudianteBase || this.convocatoriasFiltradas.length === 0) return;
+    this.postulacionPorConvocatoria = {};
+    this.convocatoriasFiltradas.forEach(conv => {
+      if (!conv.idConvocatoria) return;
+      this.subs.add(
+        this.postulanteService.existePostulacion(this.idEstudianteBase, conv.idConvocatoria).subscribe({
+          next: (existe: boolean) => {
+            this.postulacionPorConvocatoria[conv.idConvocatoria!] = existe;
+          },
+          error: () => {
+            this.postulacionPorConvocatoria[conv.idConvocatoria!] = false;
+          }
+        })
+      );
+    });
   }
 
   ngOnDestroy(): void {
@@ -73,6 +78,8 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.convocatoriasList = data || [];
           this.aplicarFiltro(this.busqueda);
+          // Una vez cargadas las convocatorias, verificar cuáles ya tiene postulación
+          this.checkPostulacionesGranulares();
           this.loading = false;
         },
         error: () => this.loading = false

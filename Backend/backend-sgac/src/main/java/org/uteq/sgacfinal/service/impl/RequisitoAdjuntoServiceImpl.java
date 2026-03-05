@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.RequisitoAdjuntoRequestDTO;
 import org.uteq.sgacfinal.dto.Response.RequisitoAdjuntoResponseDTO;
 import org.uteq.sgacfinal.entity.RequisitoAdjunto;
@@ -10,6 +11,7 @@ import org.uteq.sgacfinal.repository.RequisitoAdjuntoRepository;
 import org.uteq.sgacfinal.service.IRequisitoAdjuntoService;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,9 +74,15 @@ public class RequisitoAdjuntoServiceImpl implements IRequisitoAdjuntoService {
     }
 
     private RequisitoAdjuntoResponseDTO mapearADTO(RequisitoAdjunto entidad) {
+        String nombreRequisito = entidad.getTipoRequisitoPostulacion() != null
+                ? entidad.getTipoRequisitoPostulacion().getNombreRequisito() : "";
+        Integer idTipoReq = entidad.getTipoRequisitoPostulacion() != null
+                ? entidad.getTipoRequisitoPostulacion().getIdTipoRequisitoPostulacion() : null;
         return RequisitoAdjuntoResponseDTO.builder()
                 .idRequisitoAdjunto(entidad.getIdRequisitoAdjunto())
                 .idPostulacion(entidad.getPostulacion().getIdPostulacion())
+                .idTipoRequisitoPostulacion(idTipoReq)
+                .nombreRequisito(nombreRequisito)
                 .nombreEstado(entidad.getTipoEstadoRequisito().getNombreEstado())
                 .nombreArchivo(entidad.getNombreArchivo())
                 .fechaSubida(entidad.getFechaSubida())
@@ -88,5 +96,21 @@ public class RequisitoAdjuntoServiceImpl implements IRequisitoAdjuntoService {
                 .nombreArchivo((String) obj[1])
                 .fechaSubida(obj[2] != null ? ((Date) obj[2]).toLocalDate() : null)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public RequisitoAdjuntoResponseDTO reemplazar(Integer idAdjunto, MultipartFile archivo) {
+        try {
+            byte[] bytes = archivo.getBytes();
+            String nombre = archivo.getOriginalFilename();
+            Integer resultado = requisitoRepository.reemplazarRequisito(idAdjunto, bytes, nombre, LocalDate.now());
+            if (resultado == null || resultado == -1) {
+                throw new RuntimeException("Error al reemplazar el documento adjunto.");
+            }
+            return buscarPorId(idAdjunto);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al procesar el archivo: " + e.getMessage(), e);
+        }
     }
 }

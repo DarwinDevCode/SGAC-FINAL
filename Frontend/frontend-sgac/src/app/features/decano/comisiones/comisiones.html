@@ -1,0 +1,240 @@
+<div class="gestion-container">
+
+    <!-- Encabezado -->
+    <div class="section-header">
+        <div class="title-container">
+            <h1 class="title">Designar Comisiones</h1>
+            <p class="subtitle">Asigna comisiones de selección a las convocatorias activas.</p>
+        </div>
+    </div>
+
+    <!-- Toast de éxito -->
+    @if (mensajeExito) {
+    <div class="toast-exito">
+        <lucide-icon name="CheckCircle2" size="16"></lucide-icon>
+        {{ mensajeExito }}
+    </div>
+    }
+
+    <!-- Selector de convocatoria -->
+    <div class="filtro-card">
+        <div class="filtro-row">
+            <div class="select-wrapper">
+                <lucide-icon name="FileText" size="16" class="select-icon"></lucide-icon>
+                @if (loadingConvocatorias) {
+                <select class="select-input" disabled>
+                    <option>Cargando convocatorias...</option>
+                </select>
+                } @else {
+                <select class="select-input" [(ngModel)]="idConvocatoriaSeleccionada"
+                    (ngModelChange)="seleccionarConvocatoria()">
+                    <option [ngValue]="null" disabled>— Selecciona una convocatoria —</option>
+                    @for (c of convocatorias; track c.idConvocatoria) {
+                    <option [ngValue]="c.idConvocatoria">{{ nombreConvocatoria(c) }}</option>
+                    }
+                </select>
+                }
+            </div>
+
+            @if (idConvocatoriaSeleccionada) {
+            <button class="btn-primary" (click)="abrirModalCrear()">
+                <lucide-icon name="Plus" size="16"></lucide-icon>
+                Nueva Comisión
+            </button>
+            }
+        </div>
+    </div>
+
+    <!-- Tabla de comisiones -->
+    @if (idConvocatoriaSeleccionada) {
+    <div class="table-card">
+        @if (loadingComisiones) {
+        <div class="loading-state">
+            <lucide-icon name="Loader2" size="20" class="spin"></lucide-icon>
+            Cargando comisiones...
+        </div>
+        } @else if (comisiones.length === 0) {
+        <div class="empty-state">
+            <lucide-icon name="Users" size="36"></lucide-icon>
+            <p>No hay comisiones para esta convocatoria.</p>
+            <span>Haz clic en <strong>Nueva Comisión</strong> para crear la primera.</span>
+        </div>
+        } @else {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre de la Comisión</th>
+                    <th>Fecha Conformación</th>
+                    <th>Estado</th>
+                    <th class="col-acciones">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (c of comisiones; track c.idComisionSeleccion; let i = $index) {
+                <tr>
+                    <td class="col-num">{{ i + 1 }}</td>
+                    <td class="col-nombre">{{ c.nombreComision }}</td>
+                    <td>{{ c.fechaConformacion | date: 'dd/MM/yyyy' }}</td>
+                    <td>
+                        <span class="badge" [class.badge-activo]="c.activo" [class.badge-inactivo]="!c.activo">
+                            {{ c.activo ? 'Activa' : 'Inactiva' }}
+                        </span>
+                    </td>
+                    <td class="col-acciones">
+                        <button class="btn-icon btn-edit" (click)="abrirModalEditar(c)" title="Editar">
+                            <lucide-icon name="Pencil" size="15"></lucide-icon>
+                        </button>
+                        @if (c.activo) {
+                        <button class="btn-icon btn-delete" (click)="confirmarDesactivar(c)" title="Desactivar">
+                            <lucide-icon name="XCircle" size="15"></lucide-icon>
+                        </button>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+    }
+
+</div>
+
+<!-- ═══ Modal Crear / Editar ═══ -->
+@if (modalAbierto) {
+<div class="modal-overlay" (click)="cerrarModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <lucide-icon [name]="modoEdicion ? 'Pencil' : 'Plus'" size="18"></lucide-icon>
+                {{ modoEdicion ? 'Editar Comisión' : 'Nueva Comisión' }}
+            </h2>
+            <button class="modal-close" (click)="cerrarModal()">
+                <lucide-icon name="X" size="18"></lucide-icon>
+            </button>
+        </div>
+
+        <div class="modal-body">
+
+            <!-- Nombre -->
+            <div class="form-group">
+                <label class="form-label">Nombre de la comisión <span class="required">*</span></label>
+                <input type="text" class="form-input" [(ngModel)]="form.nombreComision"
+                    placeholder="Ej. Comisión de Méritos 2025" maxlength="100" />
+            </div>
+
+            <!-- Fecha conformación -->
+            <div class="form-group">
+                <label class="form-label">Fecha de conformación</label>
+                <input type="date" class="form-input" [(ngModel)]="form.fechaConformacion" />
+            </div>
+
+            <!-- Estado -->
+            <div class="form-group form-group-check">
+                <label class="form-label">Estado</label>
+                <label class="toggle-label">
+                    <input type="checkbox" [(ngModel)]="form.activo" class="toggle-check" />
+                    <span class="toggle-track">
+                        <span class="toggle-thumb"></span>
+                    </span>
+                    <span class="toggle-text">{{ form.activo ? 'Activa' : 'Inactiva' }}</span>
+                </label>
+            </div>
+
+            <div class="integrantes-section" *ngIf="!modoEdicion" style="margin-top:20px;">
+                <h3 class="subsection-title">Integrantes (Evaluación de Méritos y Oposición)</h3>
+
+                <!-- Decano (Seleccionable) -->
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label class="form-label">Decano <span class="required">*</span></label>
+                    <select class="form-input" [(ngModel)]="idUsuarioDecano" style="width:100%;">
+                        <option [ngValue]="null" disabled>— Selecciona un decano —</option>
+                        @for (d of decanos; track d.idDecano) {
+                        <option [ngValue]="d.idUsuario">{{ d.nombreCompletoUsuario }}</option>
+                        }
+                    </select>
+                    @if (decanos.length === 0) {
+                    <small class="text-muted">No hay decanos activos en el sistema.</small>
+                    }
+                </div>
+
+                <!-- Coordinador y Docente (Lectura) -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                    <div class="form-group" style="margin:0;">
+                        <label class="form-label">Coordinador Principal</label>
+                        <div class="input-field"
+                            style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px 12px;color:#15803d;display:flex;align-items:center;justify-content:space-between;cursor:not-allowed">
+                            <span
+                                style="font-weight:600;font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                                getNombreCoordinadorStr() }}</span>
+                            <lucide-icon name="lock" size="14"
+                                style="color:#86efac;flex-shrink:0;margin-left:8px;"></lucide-icon>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin:0;">
+                        <label class="form-label">Docente a Cargo</label>
+                        <div class="input-field"
+                            style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px 12px;color:#15803d;display:flex;align-items:center;justify-content:space-between;cursor:not-allowed">
+                            <span
+                                style="font-weight:600;font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                                getNombreDocenteStr() }}</span>
+                            <lucide-icon name="lock" size="14"
+                                style="color:#86efac;flex-shrink:0;margin-left:8px;"></lucide-icon>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (errorModal) {
+        <p class="form-error">{{ errorModal }}</p>
+        }
+
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button class="btn-primary" [disabled]="guardando" (click)="guardar()">
+                @if (guardando) {
+                <lucide-icon name="Loader2" size="15" class="spin"></lucide-icon>
+                Guardando...
+                } @else {
+                <lucide-icon name="Save" size="15"></lucide-icon>
+                {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ═══ Modal Confirmar Desactivar ═══ -->
+@if (comisionADesactivar) {
+<div class="modal-overlay" (click)="cancelarDesactivar()">
+    <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title danger">
+                <lucide-icon name="AlertTriangle" size="18"></lucide-icon>
+                Confirmar desactivación
+            </h2>
+        </div>
+        <div class="modal-body">
+            <p>¿Deseas desactivar la comisión <strong>{{ comisionADesactivar.nombreComision }}</strong>?</p>
+            <p class="text-muted">Esta acción la marcará como inactiva en el sistema.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="cancelarDesactivar()">Cancelar</button>
+            <button class="btn-danger" [disabled]="desactivando" (click)="ejecutarDesactivar()">
+                @if (desactivando) {
+                <lucide-icon name="Loader2" size="15" class="spin"></lucide-icon>
+                Desactivando...
+                } @else {
+                <lucide-icon name="XCircle" size="15"></lucide-icon>
+                Desactivar
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}

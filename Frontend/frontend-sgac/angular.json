@@ -25,7 +25,8 @@
               }
             ],
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "src/polyfills.ts"
             ],
             "styles": [
               "src/styles.css"
@@ -42,7 +43,7 @@
                 {
                   "type": "anyComponentStyle",
                   "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumError": "12kB"
                 }
               ],
               "outputHashing": "all"

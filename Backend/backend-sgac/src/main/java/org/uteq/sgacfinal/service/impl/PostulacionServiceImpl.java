@@ -1,9 +1,9 @@
 package org.uteq.sgacfinal.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.uteq.sgacfinal.dto.Request.NotificationRequest;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
 import org.uteq.sgacfinal.entity.Estudiante;
@@ -13,20 +13,26 @@ import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IPostulacionService;
 
-
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
 public class PostulacionServiceImpl implements IPostulacionService {
 
     private final PostulacionRepository postulacionRepository;
     private final EstudianteRepository estudianteRepository;
     private final INotificacionService notificacionService;
+
+    public PostulacionServiceImpl(PostulacionRepository postulacionRepository,
+            EstudianteRepository estudianteRepository,
+            INotificacionService notificacionService) {
+        this.postulacionRepository = postulacionRepository;
+        this.estudianteRepository = estudianteRepository;
+        this.notificacionService = notificacionService;
+    }
 
     @Override
     public PostulacionResponseDTO crear(PostulacionRequestDTO request) {
@@ -64,14 +70,13 @@ public class PostulacionServiceImpl implements IPostulacionService {
             return List.of();
         }
 
-        List<Object[]> resultados = postulacionRepository.listarPostulacionesPorEstudianteSP(estudianteOpt.get().getIdEstudiante());
+        List<Object[]> resultados = postulacionRepository
+                .listarPostulacionesPorEstudianteSP(estudianteOpt.get().getIdEstudiante());
 
         return resultados.stream()
                 .map(this::mapearDesdeObjectArray)
                 .collect(Collectors.toList());
     }
-
-
 
     @Override
     @Transactional(readOnly = true)
@@ -98,34 +103,49 @@ public class PostulacionServiceImpl implements IPostulacionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<PostulacionResponseDTO> listarEnEvaluacionPorCarrera(Integer idCarrera) {
+        return postulacionRepository.findByEstadoAndCarrera("EN_EVALUACION", idCarrera).stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion) {
         Postulacion postulacion = postulacionRepository.findById(idPostulacion)
                 .orElseThrow(() -> new RuntimeException("Postulación no encontrada"));
 
         postulacion.setEstadoPostulacion(nuevoEstado);
         postulacion.setObservaciones(observacion);
-        
+
         try {
-            System.out.println("Intentando actualizar postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
-            Integer resultado = postulacionRepository.actualizarPostulacion(idPostulacion, nuevoEstado, observacion);
-            System.out.println("Resultado de sp_actualizar_postulacion: " + resultado);
-            
-            if (resultado == null || resultado == -1) {
-                throw new RuntimeException("El SP actualizarPostulacion devolvió " + resultado);
-            }
+            System.out.println("Actualizando postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
+            postulacionRepository.save(postulacion);
         } catch (Exception ex) {
-            System.err.println("Error al ejecutar actualizarPostulacion: " + ex.getMessage());
+            System.err.println("Error al guardar postulación: " + ex.getMessage());
             ex.printStackTrace();
-            throw new RuntimeException("Error al actualizar el estado de la postulación en la base de datos: " + ex.getMessage(), ex);
+            throw new RuntimeException(
+                    "Error al actualizar el estado de la postulación en la base de datos: " + ex.getMessage(), ex);
         }
 
         if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
-            String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
-            notificacionService.enviarNotificacion(
-                    postulacion.getEstudiante().getUsuario().getIdUsuario(),
-                    mensaje,
-                    "ESTADO_POSTULACION"
-            );
+            try {
+                String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
+
+                NotificationRequest notificationRequest = NotificationRequest.builder()
+                        .titulo("Actualización de postulación")
+                        .mensaje(mensaje)
+                        .tipo("POSTULACION")
+                        .idReferencia(idPostulacion)
+                        .build();
+
+                notificacionService.enviarNotificacion(
+                        postulacion.getEstudiante().getUsuario().getIdUsuario(),
+                        notificationRequest);
+            } catch (Exception notifEx) {
+                System.err
+                        .println("[NOTIFICACION] No se pudo enviar notificación (no crítico): " + notifEx.getMessage());
+            }
         }
     }
 
@@ -149,6 +169,8 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 .estadoPostulacion(entidad.getEstadoPostulacion())
                 .observaciones(entidad.getObservaciones())
                 .activo(entidad.getActivo())
+                .comisionAsignada(
+                        entidad.getEvaluacionesOposicion() != null && !entidad.getEvaluacionesOposicion().isEmpty())
                 .build();
     }
 
@@ -160,17 +182,19 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 .build();
     }
 
-
-
     @Override
     @Transactional
-    public String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito) {
+    public String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos,
+            List<Integer> tiposRequisito) {
         try {
             Estudiante estudiante = estudianteRepository.findByUsuario_IdUsuario(request.getIdEstudiante())
-                    .orElseThrow(() -> new RuntimeException("Estudiante no encontrado para el usuario con ID: " + request.getIdEstudiante()));
-            long postulacionesActivas = postulacionRepository.contarPostulacionesActivasPorEstudiante(estudiante.getIdEstudiante());
+                    .orElseThrow(() -> new RuntimeException(
+                            "Estudiante no encontrado para el usuario con ID: " + request.getIdEstudiante()));
+            long postulacionesActivas = postulacionRepository
+                    .contarPostulacionesActivasPorEstudiante(estudiante.getIdEstudiante());
             if (postulacionesActivas > 0) {
-                throw new RuntimeException("Ya tienes una postulación activa. No puedes postularte a más de una convocatoria a la vez.");
+                throw new RuntimeException(
+                        "Ya tienes una postulación activa. No puedes postularte a más de una convocatoria a la vez.");
             }
 
             Integer idPostulacion = postulacionRepository.crearPostulacion(
@@ -178,8 +202,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                     estudiante.getIdEstudiante(),
                     new java.sql.Date(System.currentTimeMillis()),
                     "PENDIENTE",
-                    request.getObservaciones()
-            );
+                    request.getObservaciones());
             if (idPostulacion == null || idPostulacion == -1)
                 throw new RuntimeException("Error al crear la postulación — el SP devolvió -1");
 
@@ -189,7 +212,8 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
                 if (!archivo.isEmpty()) {
                     try {
-                        System.out.println("Intentando guardar archivo: " + archivo.getOriginalFilename() + " para req ID: " + idTipoReq);
+                        System.out.println("Intentando guardar archivo: " + archivo.getOriginalFilename()
+                                + " para req ID: " + idTipoReq);
                         Integer idRequisito = postulacionRepository.crearRequisitoAdjunto(
                                 idPostulacion,
                                 idTipoReq,
@@ -200,10 +224,12 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
                         System.out.println("Resultado sp_crear_requisito_adjunto: " + idRequisito);
                         if (idRequisito == null || idRequisito == -1) {
-                            throw new RuntimeException("El SP sp_crear_requisito_adjunto devolvió " + idRequisito + " para archivo: " + archivo.getOriginalFilename());
+                            throw new RuntimeException("El SP sp_crear_requisito_adjunto devolvió " + idRequisito
+                                    + " para archivo: " + archivo.getOriginalFilename());
                         }
                     } catch (Exception ex) {
-                        System.err.println("Error interno al guardar archivo " + archivo.getOriginalFilename() + ": " + ex.getMessage());
+                        System.err.println("Error interno al guardar archivo " + archivo.getOriginalFilename() + ": "
+                                + ex.getMessage());
                         ex.printStackTrace();
                         throw new RuntimeException("Error al guardar el archivo: " + archivo.getOriginalFilename(), ex);
                     }
@@ -216,5 +242,14 @@ public class PostulacionServiceImpl implements IPostulacionService {
             e.printStackTrace();
             throw new RuntimeException("Error en el proceso: " + e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existePostulacion(Integer idUsuario, Integer idConvocatoria) {
+        // El idUsuario viene del JWT; hay que resolver al id_estudiante real
+        return estudianteRepository.findByUsuario_IdUsuario(idUsuario)
+                .map(est -> postulacionRepository.existePostulacionActiva(est.getIdEstudiante(), idConvocatoria))
+                .orElse(false);
     }
 }

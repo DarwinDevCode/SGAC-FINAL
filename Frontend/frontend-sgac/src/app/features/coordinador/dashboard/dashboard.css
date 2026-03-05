@@ -83,3 +83,48 @@
     border: 1px solid #e2e8f0;
     overflow: hidden;
 }
+
+/* ---- P10: Panel notificaciones masivas ---- */
+.notif-masiva-card {
+    margin-top: 2rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.25rem 1.5rem;
+}
+
+.notif-masiva-header {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .875rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+
+.notif-masiva-body {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    align-items: flex-start;
+}
+
+.resp-masiva {
+    font-size: .8rem;
+    margin: .4rem 0 0;
+}
+
+.resp-masiva.ok {
+    color: #16a34a;
+}
+
+.resp-masiva.err {
+    color: #ef4444;
+}
+
+/* Stat card rose */
+.stat-icon.rose {
+    background: #fff1f2;
+    color: #e11d48;
+}

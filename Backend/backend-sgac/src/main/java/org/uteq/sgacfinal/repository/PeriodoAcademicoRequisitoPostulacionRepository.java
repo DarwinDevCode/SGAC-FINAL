@@ -27,4 +27,17 @@ public interface PeriodoAcademicoRequisitoPostulacionRepository extends JpaRepos
 
     @Query(value = "SELECT * FROM public.sp_listar_requisitos_periodo(:idPeriodo)", nativeQuery = true)
     List<Object[]> listarRequisitosPorPeriodoSP(@Param("idPeriodo") Integer idPeriodo);
+
+    /** Ítem 5: importa los requisitos activos de un periodo de origen al destino */
+    @Query(value = "SELECT public.sp_importar_requisitos_periodo(:idOrigen, :idDestino)", nativeQuery = true)
+    Integer importarRequisitosDeOtroPeriodo(@Param("idOrigen") Integer idPeriodoOrigen,
+                                             @Param("idDestino") Integer idPeriodoDestino);
+
+    /** Lista los periodos disponibles junto con la cantidad de requisitos activos */
+    @Query(value = "SELECT pa.id_periodo_academico, pa.nombre_periodo, COUNT(parp.id_periodo_academico_requisito_postulacion) AS total_requisitos " +
+                   "FROM academico.periodo_academico pa " +
+                   "LEFT JOIN convocatoria.periodo_academico_requisito_postulacion parp ON pa.id_periodo_academico = parp.id_periodo_academico AND parp.activo = TRUE " +
+                   "GROUP BY pa.id_periodo_academico, pa.nombre_periodo " +
+                   "ORDER BY pa.id_periodo_academico DESC", nativeQuery = true)
+    List<Object[]> listarPeriodosConTotalRequisitos();
 }

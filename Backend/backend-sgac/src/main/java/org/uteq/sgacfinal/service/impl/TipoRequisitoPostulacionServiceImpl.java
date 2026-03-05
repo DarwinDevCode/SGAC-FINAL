@@ -35,7 +35,7 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
     @Override
     @Transactional
     public TipoRequisitoPostulacionResponseDTO crear(TipoRequisitoPostulacionRequestDTO request) {
-        Integer id = repository.crearTipoRequisitoPostulacion(request.getNombreRequisito(), request.getDescripcion());
+        Integer id = repository.crearTipoRequisitoPostulacion(request.getNombreRequisito(), request.getDescripcion(), request.getTipoDocumentoPermitido());
         return repository.findById(id).map(this::mapToDTO).orElseThrow();
     }
 
@@ -44,9 +44,10 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
     public TipoRequisitoPostulacionResponseDTO actualizar(Integer id, TipoRequisitoPostulacionRequestDTO request) {
         TipoRequisitoPostulacion entidad = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Requisito no encontrado con ID: " + id));
-
-        entidad.setNombreRequisito(request.getNombreRequisito());
-        entidad.setDescripcion(request.getDescripcion());
+        
+        repository.actualizarTipoRequisitoPostulacion(id, request.getNombreRequisito(), request.getDescripcion(), request.getTipoDocumentoPermitido());
+        
+        entidad = repository.findById(id).orElseThrow();
         if(request.getActivo() != null) entidad.setActivo(request.getActivo());
 
         entidad = repository.save(entidad);
@@ -76,13 +77,9 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
     @Override
     @Transactional(readOnly = true)
     public List<TipoRequisitoPostulacionResponseDTO> listarRequisitosActivos() {
-        List<TipoRequisitoPostulacion> lista = repository.findByActivoTrue();
-        return lista.stream().map(req -> TipoRequisitoPostulacionResponseDTO.builder()
-                .idTipoRequisitoPostulacion(req.getIdTipoRequisitoPostulacion())
-                .nombreRequisito(req.getNombreRequisito())
-                .descripcion(req.getDescripcion())
-                .build()
-        ).collect(Collectors.toList());
+        return repository.findByActivoTrue().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     private TipoRequisitoPostulacionResponseDTO mapToDTO(TipoRequisitoPostulacion entity) {
@@ -91,6 +88,7 @@ public class TipoRequisitoPostulacionServiceImpl implements ITipoRequisitoPostul
                 .nombreRequisito(entity.getNombreRequisito())
                 .descripcion(entity.getDescripcion())
                 .activo(entity.getActivo())
+                .tipoDocumentoPermitido(entity.getTipoDocumentoPermitido())
                 .build();
     }
 

@@ -12,14 +12,15 @@
         {{ userRole().replace('_', ' ') }}
       </div>
 
-      <a
-        *ngFor="let item of currentMenu()"
-        [routerLink]="item.route"
-        routerLinkActive="active-link"
-        class="nav-item"
-      >
+      <a *ngFor="let item of currentMenu()" [routerLink]="item.route" routerLinkActive="active-link" class="nav-item">
         <lucide-icon [name]="item.icon" class="nav-icon"></lucide-icon>
-        <span class="nav-label">{{ item.label }}</span>
+        <div class="nav-label-wrapper">
+          <span class="nav-label">{{ item.label }}</span>
+          <ng-container
+            *ngIf="item.route === '/postulante/convocatorias' && (postulanteService.tienePostulacionActiva$ | async)">
+            <span class="punto-rojo" title="Tienes una postulación en curso"></span>
+          </ng-container>
+        </div>
       </a>
     </nav>
   </div>

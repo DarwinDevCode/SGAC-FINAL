@@ -49,8 +49,10 @@
 .nav-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem; /* Un poco más de espacio entre items como en Vue */
-  padding: 0 1rem; /* Padding lateral */
+  gap: 0.5rem;
+  /* Un poco más de espacio entre items como en Vue */
+  padding: 0 1rem;
+  /* Padding lateral */
 }
 
 .role-label {
@@ -125,11 +127,31 @@
 .sidebar-content::-webkit-scrollbar {
   width: 4px;
 }
+
 .sidebar-content::-webkit-scrollbar-thumb {
   background: hsl(var(--primary-foreground) / 0.2);
   border-radius: 10px;
 }
 
+/* Clases para Item 9: Punto rojo */
+.nav-label-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.punto-rojo {
+  width: 8px;
+  height: 8px;
+  background-color: #ef4444;
+  /* Rojo */
+  border-radius: 50%;
+  margin-left: auto;
+  /* Empuja el punto rojo hacia la derecha */
+  box-shadow: 0 0 0 2px hsl(var(--primary));
+  /* Borde verde para integrarse */
+}
 
 /*:host {*/
 /*  display: block;*/

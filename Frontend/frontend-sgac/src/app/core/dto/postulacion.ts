@@ -12,6 +12,7 @@ export interface TipoRequisitoPostulacionResponseDTO {
   nombreRequisito: string;
   descripcion: string;
   activo: boolean;
+  tipoDocumentoPermitido?: string; // Ej: 'PDF', 'PDF,DOCX'
 }
 
 export interface PostulacionResponseDTO {
@@ -26,5 +27,16 @@ export interface PostulacionResponseDTO {
   estadoPostulacion: string;
   observaciones: string;
   activo: boolean;
+  comisionAsignada?: boolean;
 }
 
+export interface RequisitoAdjuntoResponseDTO {
+  idRequisitoAdjunto: number;
+  idPostulacion: number;
+  idTipoRequisitoPostulacion?: number;
+  nombreRequisito: string;
+  nombreEstado: string; // 'PENDIENTE', 'APROBADO', 'OBSERVADO'
+  nombreArchivo: string;
+  fechaSubida: string;
+  observacion?: string;
+}

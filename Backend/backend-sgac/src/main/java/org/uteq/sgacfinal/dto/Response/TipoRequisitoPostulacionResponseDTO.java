@@ -12,4 +12,5 @@ public class TipoRequisitoPostulacionResponseDTO {
     private String nombreRequisito;
     private String descripcion;
     private Boolean activo;
+    private String tipoDocumentoPermitido; // Ej: 'PDF', 'PDF,DOCX'
 }

@@ -35,4 +35,6 @@ public interface UsuarioComisionRepository extends JpaRepository<UsuarioComision
 
     @Query(value = "SELECT * FROM public.sp_listar_evaluadores_comision(:idComision)", nativeQuery = true)
     List<UsuarioComision> listarEvaluadoresPorComisionSP(@Param("idComision") Integer idComision);
+
+    List<UsuarioComision> findByComisionSeleccion_IdComisionSeleccion(Integer idComisionSeleccion);
 }

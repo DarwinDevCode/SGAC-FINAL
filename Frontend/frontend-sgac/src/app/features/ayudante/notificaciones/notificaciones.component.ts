@@ -31,13 +31,13 @@ import { NotificacionResponseDTO } from '../../../core/dto/notificacion';
       } @else {
         <div style="display:flex;flex-direction:column;gap:.625rem">
           @for (n of notificaciones; track n.idNotificacion) {
-            <div [class]="n.leida ? 'notif-item' : 'notif-item unread'">
-              <div [class]="n.leida ? 'notif-dot' : 'notif-dot unread'">
+            <div [class]="n.leido ? 'notif-item' : 'notif-item unread'">
+              <div [class]="n.leido ? 'notif-dot' : 'notif-dot unread'">
                 <lucide-icon name="bell" size="16"></lucide-icon>
               </div>
               <div style="flex:1;min-width:0">
-                <p style="font-size:.875rem;margin:0" [style.fontWeight]="n.leida ? '400' : '600'">{{ n.mensaje }}</p>
-                <p class="subtitle" style="margin:.25rem 0 0 0;font-size:.75rem">{{ n.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}</p>
+                <p style="font-size:.875rem;margin:0" [style.fontWeight]="n.leido ? '400' : '600'">{{ n.mensaje }}</p>
+                <p class="subtitle" style="margin:.25rem 0 0 0;font-size:.75rem">{{ n.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</p>
               </div>
             </div>
           }
