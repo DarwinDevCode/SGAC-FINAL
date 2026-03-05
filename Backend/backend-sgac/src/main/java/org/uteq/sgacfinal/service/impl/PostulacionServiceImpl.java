@@ -93,7 +93,18 @@ public class PostulacionServiceImpl implements IPostulacionService {
     @Override
     @Transactional(readOnly = true)
     public List<PostulacionResponseDTO> listarPendientesPorCarrera(Integer idCarrera) {
-        return postulacionRepository.findByEstadoAndCarrera("PENDIENTE", idCarrera).stream()
+        System.out.println("[DEBUG] listarPendientesPorCarrera - idCarrera=" + idCarrera);
+        var lista = postulacionRepository.findByEstadoAndCarrera("PENDIENTE", idCarrera);
+        System.out.println("[DEBUG] listarPendientesPorCarrera - resultados encontrados: " + lista.size());
+        // También buscar TODAS sin filtro de carrera para comparar
+        var todas = postulacionRepository.findAll();
+        System.out.println("[DEBUG] Total postulaciones en BD: " + todas.size());
+        todas.forEach(p -> System.out.println("[DEBUG] Postulacion id=" + p.getIdPostulacion()
+                + " estado=" + p.getEstadoPostulacion()
+                + " idCarrera=" + (p.getConvocatoria() != null && p.getConvocatoria().getAsignatura() != null
+                    && p.getConvocatoria().getAsignatura().getCarrera() != null
+                    ? p.getConvocatoria().getAsignatura().getCarrera().getIdCarrera() : "NULL")));
+        return lista.stream()
                 .map(this::mapearADTO)
                 .collect(Collectors.toList());
     }

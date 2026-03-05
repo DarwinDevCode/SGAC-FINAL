@@ -26,11 +26,11 @@ export class PeriodoAcademicoService {
   }
 
   desactivar(id: number): Observable<any> {
-    return this.http.patch(`${BASE}/${id}/desactivar`, {});
+    return this.http.patch(`${BASE}/${id}/desactivar`, {}, { responseType: 'text' });
   }
 
   activar(id: number): Observable<any> {
-    return this.http.patch(`${BASE}/${id}/activar`, {});
+    return this.http.patch(`${BASE}/${id}/activar`, {}, { responseType: 'text' });
   }
 
   importarRequisitos(idDestino: number, idFuente: number): Observable<any> {
