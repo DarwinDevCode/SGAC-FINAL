@@ -1,5 +1,4 @@
 package org.uteq.sgacfinal.config;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -9,11 +8,12 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.uteq.sgacfinal.security.AuthChannelInterceptor;
 
+import java.io.Console;
+
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-
     private final AuthChannelInterceptor authChannelInterceptor;
 
     @Override
