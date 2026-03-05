@@ -19,10 +19,7 @@ public class ConvocatoriaNotificacionAsyncService {
     private final EstudianteNotificacionRepository estudianteNotificacionRepository;
     private final INotificacionService notificacionService;
 
-    /**
-     * Envío asíncrono de notificaciones a estudiantes por carrera.
-     * Se ejecuta fuera del thread de la request para no bloquear la respuesta.
-     */
+
     @Async
     @Transactional(readOnly = true)
     public void notificarEstudiantesNuevaConvocatoria(Integer idCarrera, String nombreAsignatura, Integer idConvocatoria) {
@@ -44,7 +41,6 @@ public class ConvocatoriaNotificacionAsyncService {
                 .idReferencia(idConvocatoria)
                 .build();
 
-        // envío individual (WebSocket + persistencia) por cada usuario
         for (Integer idUsuario : idsUsuario) {
             if (idUsuario == null) continue;
             try {

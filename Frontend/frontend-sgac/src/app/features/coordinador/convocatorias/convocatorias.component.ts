@@ -74,6 +74,7 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   }
 
   getPeriodoNombre(id?: number): string {
+
     if (!id) return '—';
     return this.periodosMap.get(id) || String(id);
   }

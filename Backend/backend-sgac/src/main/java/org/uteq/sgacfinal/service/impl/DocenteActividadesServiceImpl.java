@@ -27,14 +27,10 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
     private final TipoEstadoRegistroRepository estadoRegistroRepo;
     private final SimpMessagingTemplate messagingTemplate;
 
-    // ─── Dashboard ────────────────────────────────────────────────────────────
-
     @Override
     public DocenteDashboardDTO getDashboard(Integer idUsuarioDocente) {
        return  new DocenteDashboardDTO();
     }
-
-    // ─── Ayudantes ────────────────────────────────────────────────────────────
 
     @Override
     public List<AyudanteResumenDTO> listarAyudantes(Integer idUsuarioDocente) {
@@ -52,8 +48,6 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
                 .build()
         ).collect(Collectors.toList());
     }
-
-    // ─── Actividades ──────────────────────────────────────────────────────────
 
     @Override
     public List<RegistroActividadDocenteDTO> listarActividadesAyudante(Integer idAyudantia) {
@@ -114,8 +108,6 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
         ).collect(Collectors.toList());
     }
 
-    // ─── Cambiar estado actividad ─────────────────────────────────────────────
-
     @Override
     @Transactional
     public void cambiarEstadoActividad(Integer idRegistroActividad,
@@ -135,28 +127,21 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
         ra.setFechaObservacion(LocalDate.now());
         registroRepo.save(ra);
 
-        // Si el estado es OBSERVADO → notificar al ayudante por WebSocket
         if ("OBSERVADO".equalsIgnoreCase(request.getEstado()) && request.getObservaciones() != null) {
             notificarObservacionActividad(ra, request.getObservaciones(), idUsuarioDocente);
         }
     }
-
-    // ─── Cambiar estado evidencia ─────────────────────────────────────────────
 
     @Override
     @Transactional
     public void cambiarEstadoEvidencia(Integer idEvidencia,
                                        CambiarEstadoEvidenciaRequest request,
                                        Integer idUsuarioDocente) {
-
         return;
     }
 
-    // ─── WebSocket helpers ────────────────────────────────────────────────────
-
     private void notificarObservacionActividad(RegistroActividad ra, String obs, Integer idDocente) {
         try {
-            // Obtiene el id_usuario del ayudante via la cadena: ayudantia -> postulacion -> estudiante -> usuario
             Integer idUsuarioAyudante = ra.getAyudantia()
                     .getPostulacion().getEstudiante().getUsuario().getIdUsuario();
 
@@ -206,8 +191,6 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
             // No bloquear si falla el WS
         }
     }
-
-    // ─── Helpers de conversión ────────────────────────────────────────────────
 
     private long toLong(Object o) { return o == null ? 0L : ((Number) o).longValue(); }
     private int toInt(Object o) { return o == null ? 0 : ((Number) o).intValue(); }
