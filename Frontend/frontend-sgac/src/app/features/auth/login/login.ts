@@ -41,6 +41,7 @@ export class LoginComponent {
       next: (res: AuthUser) => {
         const role = res.rolActual;
         this.redirectByRole(role);
+        console.log(role || "Sin rol asignado");
       },
       error: (err: any) => {
         this.loading = false;
@@ -64,6 +65,8 @@ export class LoginComponent {
       'DECANO': '/decano/dashboard',
       'AYUDANTE_CATEDRA': '/ayudante/dashboard'
     };
+
+    //console.log(this.authService.getUser())
 
     const target = roleRoutes[role];
     if (target) {

@@ -22,12 +22,51 @@
     </div>
     } @else {
 
-    <!-- Stats -->
+    <!-- Stats con KPIs reales del SP -->
+    @if (kpis) {
     <div class="stats-grid cols-3">
         <div class="stat-card">
             <div class="stat-icon green"><lucide-icon name="file-text" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">{{ totalConvocatoriasCarrera }}</div>
+                <div class="stat-value">{{ kpis.convocatoriasActivas }}</div>
+                <div class="stat-label">Convocatorias Activas</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ kpis.postulacionesPendientes }}</div>
+                <div class="stat-label">Postulantes Pendientes</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon violet"><lucide-icon name="graduation-cap" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ kpis.postulacionesAprobadas }}</div>
+                <div class="stat-label">Postulaciones Aprobadas</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon amber"><lucide-icon name="layers" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ kpis.totalConvocatorias }}</div>
+                <div class="stat-label">Total Convocatorias</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon rose"><lucide-icon name="bar-chart-3" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ kpis.totalPostulaciones }}</div>
+                <div class="stat-label">Total Postulaciones</div>
+            </div>
+        </div>
+    </div>
+    } @else {
+    <div class="stats-grid cols-3">
+        <div class="stat-card">
+            <div class="stat-icon green"><lucide-icon name="file-text" size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">—</div>
                 <div class="stat-label">Convocatorias Activas</div>
             </div>
         </div>
@@ -42,10 +81,11 @@
             <div class="stat-icon violet"><lucide-icon name="graduation-cap" size="22"></lucide-icon></div>
             <div>
                 <div class="stat-value">—</div>
-                <div class="stat-label">Ayudantes Activos</div>
+                <div class="stat-label">Postulaciones Aprobadas</div>
             </div>
         </div>
     </div>
+    }
 
     <!-- Quick Actions -->
     <p class="subtitle"
@@ -80,6 +120,32 @@
                 <div class="action-desc">Actas y documentos</div>
             </div>
         </a>
+    </div>
+
+    <!-- P10: Panel notificaciones masivas -->
+    <div class="notif-masiva-card">
+        <div class="notif-masiva-header">
+            <lucide-icon name="megaphone" size="18"></lucide-icon>
+            <span>Enviar Notificación Masiva</span>
+        </div>
+        <div class="notif-masiva-body">
+            <select class="input-field" [(ngModel)]="tipoMasivo" style="width:auto;min-width:180px">
+                <option value="CONVOCATORIA">Convocatoria</option>
+                <option value="GENERAL">General</option>
+                <option value="OBSERVACION">Observación</option>
+            </select>
+            <textarea class="input-field" rows="2" [(ngModel)]="msgMasivo"
+                placeholder="Escribe el mensaje para todos los usuarios activos..."
+                style="flex:1;resize:none"></textarea>
+            <button class="btn-primary" (click)="enviarNotifMasiva()" [disabled]="!msgMasivo.trim() || enviandoMasivo"
+                style="display:inline-flex;align-items:center;gap:.5rem">
+                <lucide-icon name="send" size="14"></lucide-icon>
+                {{ enviandoMasivo ? 'Enviando...' : 'Enviar' }}
+            </button>
+        </div>
+        @if (respuestaMasiva) {
+        <p [class]="enviadoMasivo ? 'resp-masiva ok' : 'resp-masiva err'">{{ respuestaMasiva }}</p>
+        }
     </div>
     }
 </div>

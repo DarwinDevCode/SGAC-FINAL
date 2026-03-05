@@ -49,4 +49,24 @@ public class PeriodoAcademicoController {
         periodoAcademicoService.desactivar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/activar")
+    public ResponseEntity<?> activar(@PathVariable Integer id) {
+        try {
+            periodoAcademicoService.activar(id);
+            return ResponseEntity.ok("Período activado correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{id}/importar-requisitos")
+    public ResponseEntity<?> importarRequisitos(@PathVariable Integer id, @RequestParam Integer fuentePeriodoId) {
+        try {
+            int cantidad = periodoAcademicoService.importarRequisitos(id, fuentePeriodoId);
+            return ResponseEntity.ok(java.util.Map.of("mensaje", "Se importaron " + cantidad + " requisitos exitosamente."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
+        }
+    }
 }

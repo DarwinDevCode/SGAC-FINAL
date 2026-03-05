@@ -15,4 +15,7 @@ public interface IPeriodoAcademicoRequisitoPostulacionService {
     PeriodoAcademicoRequisitoPostulacionResponseDTO buscarPorId(Integer id);
 
     //List<PeriodoAcademicoRequisitoPostulacionResponseDTO> listarPorPeriodo(Integer idPeriodo);
+
+    /** Ítem 5: importa los requisitos de un periodo origen al destino. Retorna cantidad importada */
+    int importarDeOtroPeriodo(Integer idPeriodoOrigen, Integer idPeriodoDestino);
 }

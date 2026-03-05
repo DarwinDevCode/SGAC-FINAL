@@ -1,11 +1,12 @@
-import {inject, Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable, of} from 'rxjs';
-import {environment} from '../../../environments/environment';
-import {ConvocatoriaDTO} from '../dto/convocatoria';
-import {PeriodoAcademicoDTO} from '../dto/periodo-academico';
-import {AsignaturaDTO} from '../dto/asignatura';
-import {DocenteDTO} from '../dto/docente';
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { environment } from '../../../environments/environment';
+import { ConvocatoriaDTO } from '../dto/convocatoria';
+import { PeriodoAcademicoDTO } from '../dto/periodo-academico';
+import { AsignaturaDTO } from '../dto/asignatura';
+import { DocenteDTO } from '../dto/docente';
+import { DocenteComboDTO, AsignaturaComboDTO } from '../models/convocatoria.model';
 
 @Injectable({
   providedIn: 'root',
@@ -38,8 +39,13 @@ export class ConvocatoriaService {
 
 
   getPeriodoActivo(): Observable<PeriodoAcademicoDTO[]> {
-    return this.http.get<PeriodoAcademicoDTO[]>(`${this.baseUrl}/api/recursos/periodos`)
+    return this.http.get<PeriodoAcademicoDTO[]>(`${this.baseUrl}/recursos/periodos`)
   }
+
+  getPeriodoActivo2(): Observable<PeriodoAcademicoDTO> {
+    return this.http.get<PeriodoAcademicoDTO>(`${this.baseUrl}/periodos-academicos/activo`);
+  }
+
 
   getAsignaturas(): Observable<AsignaturaDTO[]> {
     return this.http.get<AsignaturaDTO[]>(`${this.baseUrl}/admin/catalogos/asignaturas`);
@@ -47,5 +53,15 @@ export class ConvocatoriaService {
 
   getDocentes(): Observable<DocenteDTO[]> {
     return this.http.get<DocenteDTO[]>(`${this.baseUrl}/recursos/docentes`);
+  }
+
+  /** Coordinador: docentes filtrados por carrera (backend resuelve el contexto por JWT). */
+  getDocentesCarrera() {
+    return this.http.get<DocenteComboDTO[]>(`${this.baseUrl}/coordinador/docentes-seleccionables`);
+  }
+
+  /** Coordinador: asignaturas activas filtradas por docente (solo relaciones activas). */
+  getAsignaturasPorDocente(idDocente: number) {
+    return this.http.get<AsignaturaComboDTO[]>(`${this.baseUrl}/coordinador/docentes/${idDocente}/asignaturas`);
   }
 }

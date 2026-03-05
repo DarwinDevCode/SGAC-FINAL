@@ -1,7 +1,13 @@
 export interface NotificacionResponseDTO {
   idNotificacion: number;
-  idUsuario: number;
+  titulo: string;
   mensaje: string;
-  fechaEnvio: string; // ISO String mapping LocalDatetime
-  leida: boolean;
+  tipo: string;
+  idReferencia: number | null;
+  leido: boolean;
+  fechaCreacion: string;
+  fechaLectura?: string | null;
 }
+
+// Alias más corto para el front
+export type Notificacion = NotificacionResponseDTO;

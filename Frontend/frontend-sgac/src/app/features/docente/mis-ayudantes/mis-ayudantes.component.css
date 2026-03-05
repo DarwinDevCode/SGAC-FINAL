@@ -1,0 +1,234 @@
+/* Reutilizamos grid master-detail del ayudante/sesiones */
+.sesiones-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .sesiones-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.row-click {
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.row-active {
+  background-color: hsl(var(--secondary) / 0.35);
+}
+
+/* Panel detalle (mismo patrón que sesiones) */
+.detail-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  overflow: hidden;
+
+  position: sticky;
+  top: 1rem;
+  height: calc(100vh - 2rem);
+  max-height: calc(100vh - 2rem);
+
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 1024px) {
+  .detail-card {
+    position: relative;
+    top: 0;
+    height: auto;
+    max-height: none;
+    display: block;
+  }
+}
+
+.detail-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid hsl(var(--border));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: hsl(var(--muted) / 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.detail-body {
+  padding: 1rem;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 1.25rem;
+}
+
+.detail-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.detail-body::-webkit-scrollbar-thumb {
+  background: rgba(120, 120, 120, 0.25);
+  border-radius: 999px;
+}
+
+.detail-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(120, 120, 120, 0.35);
+}
+
+/* Lista de actividades (mini cards clicables) */
+.actividad-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.actividad-item {
+  text-align: left;
+  width: 100%;
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 0.85rem;
+  background: hsl(var(--card));
+  transition: box-shadow 0.2s, transform 0.2s, background 0.2s;
+}
+
+.actividad-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  background: hsl(var(--secondary) / 0.25);
+}
+
+.actividad-active {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--secondary) / 0.35);
+}
+
+.actividad-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.actividad-desc {
+  margin-top: 0.35rem;
+  max-width: 60ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* Card evaluación */
+.eval-card {
+  margin-top: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 14px;
+  background: hsl(var(--card));
+  overflow: hidden;
+}
+
+.eval-header {
+  padding: 0.9rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: hsl(var(--muted) / 0.2);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.eval-grid {
+  padding: 0.9rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field-label {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+}
+
+.input {
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font-family: inherit;
+  background: #fff;
+}
+
+.eval-actions {
+  padding: 0 1rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Evidencias */
+.evidencias-title {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.12);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evidencias-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.evidencia-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  padding: 0.85rem;
+  background: hsl(var(--card));
+}
+
+.evidencia-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.evidencia-name {
+  font-weight: 600;
+}
+
+.evidencia-right {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Toast reutilizado (igual patrón decano) */
+.toast-exito {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+

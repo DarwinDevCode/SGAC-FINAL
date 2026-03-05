@@ -1,0 +1,279 @@
+<div class="gestion-container">
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title">Mis ayudantes</h2>
+      <p class="subtitle">Supervisa actividades y evalúa evidencias del período académico activo.</p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="action-btn secondary" type="button" (click)="cargarAyudantes()" [disabled]="isLoadingAyudantes">
+        <lucide-icon name="RefreshCw" size="16"></lucide-icon>
+        Actualizar
+      </button>
+    </div>
+  </div>
+
+  @if (mensajeExito) {
+    <div class="toast-exito">
+      <lucide-icon name="CheckCircle" size="16"></lucide-icon>
+      {{ mensajeExito }}
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div class="alert-banner error">
+      <lucide-icon name="AlertTriangle" size="18"></lucide-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  }
+
+  @if (isLoadingAyudantes) {
+    <div class="table-card">
+      @for (_ of [1,2,3,4,5]; track $index) {
+        <div class="skeleton-row"></div>
+      }
+    </div>
+  }
+
+  @if (!isLoadingAyudantes && ayudantes.length === 0) {
+    <div class="info-message">
+      <lucide-icon name="Users" size="48" class="text-muted-foreground"></lucide-icon>
+      <p style="margin-top: .75rem" class="font-medium">No tienes ayudantes asignados</p>
+      <p class="text-sm" style="margin-top: .25rem">
+        Cuando existan ayudantías activas en el período EN PROCESO, aparecerán aquí.
+      </p>
+    </div>
+  }
+
+  @if (!isLoadingAyudantes && ayudantes.length > 0) {
+    <div class="sesiones-layout">
+      <!-- PANEL IZQUIERDO: ayudantes -->
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ayudante</th>
+              <th>Asignatura</th>
+              <th>Horas</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of ayudantes; track trackByAyudantia($index, a)) {
+              <tr
+                class="row-click"
+                [class.row-active]="ayudanteSeleccionado?.idAyudantia === a.idAyudantia"
+                (click)="seleccionarAyudante(a)"
+              >
+                <td>
+                  <div class="user-info-cell">
+                    <span class="full-name">{{ nombreCompleto(a) }}</span>
+                    <span class="user-email">Periodo: {{ a.periodoAcademico }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="actividad-cell">
+                    <div class="font-medium">{{ a.asignatura }}</div>
+                    <div class="text-xs text-muted-foreground">Ayudantía #{{ a.idAyudantia }}</div>
+                  </div>
+                </td>
+                <td>
+                  {{ a.horasCumplidas ?? 0 }} / {{ a.horasMaximas ?? '—' }}
+                </td>
+                <td>
+                  <span class="badge" [ngClass]="statusClass(a.estadoAyudantia)">
+                    {{ a.estadoAyudantia }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PANEL DERECHO: detalle -->
+      <div class="detail-card" [class.detail-hidden]="!ayudanteSeleccionado">
+        @if (!ayudanteSeleccionado) {
+          <div class="info-message" style="padding: 1.75rem 1rem;">
+            <lucide-icon name="MousePointerClick" size="34" class="text-muted-foreground"></lucide-icon>
+            <p style="margin-top:.75rem" class="text-sm">Selecciona un ayudante para ver sus actividades.</p>
+          </div>
+        } @else {
+          <div class="detail-header">
+            <div class="title-container">
+              <h3 class="title" style="font-size: 1.1rem;">Actividades</h3>
+              <p class="subtitle" style="margin-top: .2rem;">
+                {{ nombreCompleto(ayudanteSeleccionado) }} • {{ ayudanteSeleccionado.asignatura }}
+              </p>
+            </div>
+          </div>
+
+          <div class="detail-body">
+            @if (isLoadingActividades) {
+              @for (_ of [1,2,3,4]; track $index) {
+                <div class="skeleton-card"></div>
+              }
+            } @else if (actividades.length === 0) {
+              <div class="info-message" style="padding: 1.75rem 1rem;">
+                <lucide-icon name="ClipboardList" size="40" class="text-muted-foreground"></lucide-icon>
+                <p style="margin-top:.75rem" class="font-medium">Sin actividades registradas</p>
+                <p class="text-sm" style="margin-top:.25rem">El ayudante aún no ha subido registros de actividad.</p>
+              </div>
+            } @else {
+              <div class="actividad-list">
+                @for (act of actividades; track trackByActividad($index, act)) {
+                  <button
+                    class="actividad-item"
+                    type="button"
+                    [class.actividad-active]="actividadSeleccionada?.idRegistroActividad === act.idRegistroActividad"
+                    (click)="seleccionarActividad(act)"
+                  >
+                    <div class="actividad-top">
+                      <div>
+                        <div class="font-medium">{{ act.temaTratado || 'Sesión' }}</div>
+                        <div class="text-xs text-muted-foreground">
+                          {{ act.fecha | date:'dd/MM/yyyy' }} • {{ act.horasDedicadas ?? '—' }}h
+                        </div>
+                      </div>
+                      <span class="badge" [ngClass]="statusClass(act.estadoRegistro)">
+                        {{ act.estadoRegistro || 'PENDIENTE' }}
+                      </span>
+                    </div>
+                    <div class="text-xs text-muted-foreground actividad-desc">
+                      {{ act.descripcionActividad || '—' }}
+                    </div>
+                  </button>
+                }
+              </div>
+
+              @if (!actividadSeleccionada) {
+                <div class="info-message" style="padding: 1.25rem 0;">
+                  <lucide-icon name="MousePointerClick" size="30" class="text-muted-foreground"></lucide-icon>
+                  <p class="text-sm" style="margin-top:.5rem">Selecciona una actividad para evaluarla.</p>
+                </div>
+              } @else {
+                <div class="eval-card">
+                  <div class="eval-header">
+                    <div class="font-medium">Evaluación de actividad</div>
+                    <span class="badge" [ngClass]="statusClass(actividadSeleccionada.estadoRegistro)">
+                      Actual: {{ actividadSeleccionada.estadoRegistro || 'PENDIENTE' }}
+                    </span>
+                  </div>
+
+                  <div class="eval-grid">
+                    <label class="field">
+                      <span class="field-label">Estado</span>
+                      <select class="input" [(ngModel)]="actividadSeleccionada._estadoSeleccionado">
+                        <option [ngValue]="1">PENDIENTE</option>
+                        <option [ngValue]="2">APROBADO</option>
+                        <option [ngValue]="3">OBSERVADO</option>
+                        <option [ngValue]="4">RECHAZADO</option>
+                      </select>
+                    </label>
+
+                    <label class="field">
+                      <span class="field-label">Observaciones</span>
+                      <textarea
+                        class="input"
+                        rows="3"
+                        placeholder="Escribe una observación para el ayudante..."
+                        [(ngModel)]="actividadSeleccionada._observacionInput"
+                      ></textarea>
+                    </label>
+                  </div>
+
+                  <div class="eval-actions">
+                    <button
+                      class="action-btn"
+                      type="button"
+                      (click)="guardarEvaluacionActividad(actividadSeleccionada)"
+                      [disabled]="!puedeGuardarActividad(actividadSeleccionada)"
+                    >
+                      <lucide-icon name="CheckCircle" size="16"></lucide-icon>
+                      Guardar evaluación
+                    </button>
+                  </div>
+
+                  <div class="evidencias-title">
+                    <div class="font-medium">Evidencias</div>
+                    <div class="text-xs text-muted-foreground">
+                      {{ actividadSeleccionada.evidencias.length || 0 }} archivo(s)
+                    </div>
+                  </div>
+
+                  @if ((actividadSeleccionada.evidencias.length || 0) === 0) {
+                    <div class="info-message" style="padding: 1rem;">
+                      <lucide-icon name="FileText" size="34" class="text-muted-foreground"></lucide-icon>
+                      <p class="text-sm" style="margin-top:.5rem">No hay evidencias adjuntas.</p>
+                    </div>
+                  } @else {
+                    <div class="evidencias-grid">
+                      @for (ev of actividadSeleccionada.evidencias; track trackByEvidencia($index, ev)) {
+                        <div class="evidencia-card">
+                          <div class="evidencia-row">
+                            <div class="evidencia-meta">
+                              <div class="evidencia-name">{{ ev.nombreArchivo }}</div>
+                              <div class="text-xs text-muted-foreground">
+                                {{ ev.mimeType || 'archivo' }} • {{ ev.fechaSubida | date:'dd/MM/yyyy' }}
+                              </div>
+                            </div>
+
+                            <div class="evidencia-right">
+                              <span class="badge" [ngClass]="statusClass(ev.estadoEvidencia)">
+                                {{ ev.estadoEvidencia || 'SUBIDO' }}
+                              </span>
+                              <button class="btn-ghost-inline" type="button" (click)="verEvidencia(ev)">
+                                <lucide-icon name="Eye" size="16"></lucide-icon>
+                                Ver
+                              </button>
+                            </div>
+                          </div>
+
+                          <div class="eval-grid" style="margin-top: .75rem;">
+                            <label class="field">
+                              <span class="field-label">Estado evidencia</span>
+                              <select class="input" [(ngModel)]="ev._estadoSeleccionado">
+                                <option [ngValue]="1">SUBIDO</option>
+                                <option [ngValue]="2">REVISADO</option>
+                                <option [ngValue]="3">APROBADO</option>
+                                <option [ngValue]="4">RECHAZADO</option>
+                                <option [ngValue]="5">OBSERVADO</option>
+                              </select>
+                            </label>
+
+                            <label class="field">
+                              <span class="field-label">Observación evidencia</span>
+                              <textarea
+                                class="input"
+                                rows="2"
+                                placeholder="Observación específica sobre este archivo..."
+                                [(ngModel)]="ev._observacionInput"
+                              ></textarea>
+                            </label>
+                          </div>
+
+                          <div class="eval-actions">
+                            <button
+                              class="action-btn secondary"
+                              type="button"
+                              (click)="guardarEvaluacionEvidencia(ev)"
+                              [disabled]="!puedeGuardarEvidencia(ev)"
+                            >
+                              <lucide-icon name="CheckCircle" size="16"></lucide-icon>
+                              Guardar evidencia
+                            </button>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+

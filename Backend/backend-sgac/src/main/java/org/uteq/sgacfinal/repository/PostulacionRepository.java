@@ -31,6 +31,15 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     @Query("SELECT COUNT(p) FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante AND p.activo = true AND p.estadoPostulacion NOT IN ('RECHAZADO')")
     long contarPostulacionesActivasPorEstudiante(@Param("idEstudiante") Integer idEstudiante);
 
+    /** Verifica si el estudiante ya se postuló a UNA convocatoria específica (granular por convocatoria) */
+    @Query("SELECT COUNT(p) > 0 FROM Postulacion p " +
+           "WHERE p.estudiante.idEstudiante = :idEstudiante " +
+           "AND p.convocatoria.idConvocatoria = :idConvocatoria " +
+           "AND p.activo = true " +
+           "AND p.estadoPostulacion NOT IN ('RECHAZADO')")
+    boolean existePostulacionActiva(@Param("idEstudiante") Integer idEstudiante,
+                                     @Param("idConvocatoria") Integer idConvocatoria);
+
 
     Postulacion findByIdPostulacion(Integer idPostulacion);
 

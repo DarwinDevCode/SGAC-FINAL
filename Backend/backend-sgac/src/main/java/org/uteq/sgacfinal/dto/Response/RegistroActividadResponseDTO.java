@@ -18,4 +18,5 @@ public class RegistroActividadResponseDTO {
     private Integer numeroAsistentes;
     private BigDecimal horasDedicadas;
     private String estadoRevision;
+    private Integer totalEvidencias;
 }

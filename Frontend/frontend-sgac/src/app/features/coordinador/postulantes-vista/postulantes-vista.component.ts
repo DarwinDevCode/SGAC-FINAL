@@ -6,7 +6,7 @@ import { Subscription, forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 import { CoordinadorService } from '../../../core/services/coordinador-service';
-import { PostulacionResponseDTO } from '../../../core/dto/postulacion';
+import { PostulacionResponseDTO, RequisitoAdjuntoResponseDTO } from '../../../core/dto/postulacion';
 import { ConvocatoriaDTO } from '../../../core/dto/convocatoria';
 
 const API_CONV = 'http://localhost:8080/api/convocatorias';
@@ -30,6 +30,11 @@ export class PostulantesVistaComponent implements OnInit, OnDestroy {
 
     loading = true;
     errorMensaje = '';
+
+    /** Mapa idPostulacion → documentos */
+    documentosPorPostulacion: Record<number, RequisitoAdjuntoResponseDTO[]> = {};
+    /** Mapa idPostulacion → expandido */
+    expandidoPostulacion: Record<number, boolean> = {};
 
     ngOnInit(): void {
         this.subs.add(
@@ -77,5 +82,35 @@ export class PostulantesVistaComponent implements OnInit, OnDestroy {
             return new Date(fecha[0], (fecha[1] ?? 1) - 1, fecha[2] ?? 1);
         }
         return fecha;
+    }
+
+    toggleDocumentos(idPostulacion: number) {
+        const yaExpandido = this.expandidoPostulacion[idPostulacion];
+        this.expandidoPostulacion[idPostulacion] = !yaExpandido;
+        if (!yaExpandido && !this.documentosPorPostulacion[idPostulacion]) {
+            this.subs.add(
+                this.coordinadorService.listarDocumentosPorPostulacion(idPostulacion).subscribe({
+                    next: (docs) => { this.documentosPorPostulacion[idPostulacion] = docs || []; },
+                    error: () => { this.documentosPorPostulacion[idPostulacion] = []; }
+                })
+            );
+        }
+    }
+
+    verDocumento(idRequisito: number) {
+        this.subs.add(
+            this.http.get(`http://localhost:8080/api/requisitos-adjuntos/descargar/${idRequisito}`, {
+                responseType: 'blob'
+            }).subscribe({
+                next: (blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                },
+                error: (err) => {
+                    console.error('Error al descargar documento:', err);
+                    alert('No tiene los permisos suficientes o el documento no existe.');
+                }
+            })
+        );
     }
 }

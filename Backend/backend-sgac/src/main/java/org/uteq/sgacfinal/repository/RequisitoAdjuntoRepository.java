@@ -30,4 +30,11 @@ public interface RequisitoAdjuntoRepository extends JpaRepository<RequisitoAdjun
     List<Object[]> obtenerRequisitosPorPostulacionSP(@Param("idPostulacion") Integer idPostulacion);
 
     List<RequisitoAdjunto> findByPostulacion_IdPostulacion(Integer idPostulacion);
+
+    /** Llama al SP que reemplaza el archivo y resetea el estado a PENDIENTE (id_estado=1) */
+    @Query(value = "SELECT public.sp_reemplazar_requisito_adjunto(:id, :archivo, :nombre, :fecha)", nativeQuery = true)
+    Integer reemplazarRequisito(@Param("id") Integer idRequisito,
+                                 @Param("archivo") byte[] archivo,
+                                 @Param("nombre") String nombreArchivo,
+                                 @Param("fecha") java.time.LocalDate fechaSubida);
 }

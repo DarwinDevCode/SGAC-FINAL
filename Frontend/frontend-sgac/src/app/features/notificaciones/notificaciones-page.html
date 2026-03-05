@@ -1,0 +1,65 @@
+<div class="notif-page">
+  <div class="notif-header">
+    <div>
+      <h2 class="title">Notificaciones</h2>
+      <p class="subtitle">Avisos y actualizaciones del sistema.</p>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="refrescar()" title="Refrescar">
+        <lucide-icon name="RefreshCcw" size="16"></lucide-icon>
+        <span>Refrescar</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="marcarTodasLeidas()"
+        [disabled]="unreadCount() === 0"
+        title="Marcar todas como leídas"
+      >
+        <lucide-icon name="CheckCheck" size="16"></lucide-icon>
+        <span>Marcar todas</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="notif-stats">
+    <span class="chip">Total: {{ notificaciones().length }}</span>
+    <span class="chip chip-danger" *ngIf="unreadCount() > 0">No leídas: {{ unreadCount() }}</span>
+  </div>
+
+  <div *ngIf="notificaciones().length === 0" class="empty">
+    <lucide-icon name="BellOff" size="36"></lucide-icon>
+    <p>No tienes notificaciones recientes.</p>
+  </div>
+
+  <div class="list" *ngIf="notificaciones().length > 0">
+    <button
+      class="item"
+      *ngFor="let n of notificaciones(); trackBy: trackById"
+      type="button"
+      [class.unread]="!n.leido"
+      (click)="marcarLeida(n)"
+    >
+      <div class="left">
+        <span class="dot" [class.dot-unread]="!n.leido"></span>
+      </div>
+
+      <div class="content">
+        <div class="row">
+          <p class="item-title">{{ n.titulo || 'Notificación' }}</p>
+          <span class="date">{{ n.fechaCreacion | date: 'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <p class="message">{{ n.mensaje }}</p>
+      </div>
+
+      <div class="right">
+        <span class="type" [class.type-obs]="n.tipo === 'OBSERVACION'" [class.type-apr]="n.tipo === 'APROBACION'">
+          {{ n.tipo }}
+        </span>
+      </div>
+    </button>
+  </div>
+</div>
+

@@ -21,7 +21,7 @@
   </div>
 
   <div class="table-card">
-    <table class="data-table">
+    <table class="data-table" role="table" aria-label="Lista de usuarios del sistema">
       <thead>
       <tr>
         <th>Usuario</th>
@@ -34,7 +34,7 @@
         @if (loading) {
           <tr><td colspan="4">Cargando datos...</td></tr>
         } @else {
-          @for (user of usuariosList; track user.idUsuario) {
+          @for (user of usuariosFiltrados; track user.idUsuario) {
             <tr>
               <td>
                 <div class="user-info-cell">

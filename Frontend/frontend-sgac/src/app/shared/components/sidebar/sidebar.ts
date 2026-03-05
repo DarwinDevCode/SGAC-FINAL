@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/services/auth-service';
+import { PostulanteService } from '../../../core/services/postulante-service';
+import { NotificationWSService } from '../../../core/services/notification-ws-service';
 
 @Component({
   selector: 'app-sidebar',
@@ -14,8 +16,24 @@ import { AuthService } from '../../../core/services/auth-service';
 export class SidebarComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private notificationWS = inject(NotificationWSService);
+  public postulanteService = inject(PostulanteService);
+  //userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
 
-  userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
+  private normalizeRole(rawRole?: string | null): string {
+    if (!rawRole) return 'ESTUDIANTE';
+
+    return rawRole
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .trim()
+      .toUpperCase()
+      .replace(/^ROLE_/, '')
+      .replace(/[\s-]+/g, '_');
+  }
+
+  userRole = computed(() => this.normalizeRole(this.authService.getUser()?.rolActual));
+
 
   menus: Record<string, any[]> = {
     ESTUDIANTE: [
@@ -23,56 +41,56 @@ export class SidebarComponent {
       { label: 'Convocatorias', icon: 'FileText', route: '/postulante/convocatorias' },
       { label: 'Mis Postulaciones', icon: 'FolderOpen', route: '/postulante/mis-postulaciones' },
       { label: 'Ver Resultados', icon: 'Award', route: '/postulante/resultados' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/postulante/notificaciones' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     AYUDANTE_CATEDRA: [
-      { label: 'Mi Gestión', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
-      { label: 'Registro Actividades', icon: 'CalendarClock', route: '/ayudante/actividades' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
+      { label: 'Mis sesiones', icon: 'CalendarClock', route: '/ayudante/sesiones' },
       { label: 'Mis Informes', icon: 'FileText', route: '/ayudante/informes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/ayudante/notifications' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     DOCENTE: [
-      { label: 'Panel Docente', icon: 'LayoutDashboard', route: '/docente/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/docente/dashboard' },
       { label: 'Mis Ayudantes', icon: 'Users', route: '/docente/mis-ayudantes' },
       { label: 'Planificación Actividades', icon: 'CalendarClock', route: '/docente/planificacion' },
-      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/validar-informes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/docente/notifications' },
+      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/aprobar-informes' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     COORDINADOR: [
-      { label: 'Gestión Carrera', icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
       { label: 'Gestionar Convocatorias', icon: 'FileText', route: '/coordinador/convocatorias' },
       { label: 'Validar Postulantes', icon: 'CheckSquare', route: '/coordinador/validaciones' },
       { label: 'Seguimiento Mensual', icon: 'BarChart3', route: '/coordinador/seguimiento' },
       { label: 'Resoluciones y Actas', icon: 'FileSignature', route: '/coordinador/resoluciones' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/coordinador/notifications' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     COMISION_SELECCION: [
-      { label: 'Sala de Evaluación', icon: 'LayoutDashboard', route: '/comision/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/comision/dashboard' },
       { label: 'Evaluar Méritos', icon: 'FileText', route: '/comision/meritos' },
       { label: 'Evaluar Oposición', icon: 'Users', route: '/comision/oposicion' },
       { label: 'Ranking de Resultados', icon: 'BarChart3', route: '/comision/ranking' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/comision/notifications' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     DECANO: [
-      { label: 'Decanato', icon: 'LayoutDashboard', route: '/decano/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/decano/dashboard' },
       { label: 'Designar Comisiones', icon: 'Users', route: '/decano/comisiones' },
-      { label: 'Firma Electrónica', icon: 'FileSignature', route: '/decano/firmas' },
       { label: 'Auditoría y Reportes', icon: 'BarChart3', route: '/decano/reportes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/decano/notifications' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     ADMINISTRADOR: [
-      { label: 'Admin Dashboard', icon: 'LayoutDashboard', route: '/admin/dashboard' },
+      { label: 'Inicio', icon: 'LayoutDashboard', route: '/admin/dashboard' },
       { label: 'Gestión Usuarios', icon: 'Users', route: '/admin/usuarios' },
       { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
       { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },
       { label: 'Roles y Permisos', icon: 'Settings', route: '/admin/rol-permiso' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/admin/notifications' },
+      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
   };
 
   currentMenu = computed(() => this.menus[this.userRole()] || []);
 
   logout() {
+    this.notificationWS.desconectar();
     this.authService.logout();
     this.router.navigate(['/login']);
   }
