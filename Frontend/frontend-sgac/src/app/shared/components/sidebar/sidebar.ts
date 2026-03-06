@@ -54,12 +54,14 @@ export class SidebarComponent {
       { label: 'Mis Ayudantes', icon: 'Users', route: '/docente/mis-ayudantes' },
       { label: 'Planificación Actividades', icon: 'CalendarClock', route: '/docente/planificacion' },
       { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/aprobar-informes' },
+      { label: 'Evaluación y Selección', icon: 'ClipboardCheck', route: '/docente/evaluaciones' },
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     COORDINADOR: [
       { label: 'Inicio', icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
       { label: 'Gestionar Convocatorias', icon: 'FileText', route: '/coordinador/convocatorias' },
       { label: 'Validar Postulantes', icon: 'CheckSquare', route: '/coordinador/validaciones' },
+      { label: 'Evaluación y Selección', icon: 'ClipboardCheck', route: '/coordinador/evaluaciones' },
       { label: 'Seguimiento Mensual', icon: 'BarChart3', route: '/coordinador/seguimiento' },
       { label: 'Resoluciones y Actas', icon: 'FileSignature', route: '/coordinador/resoluciones' },
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
@@ -74,6 +76,7 @@ export class SidebarComponent {
     DECANO: [
       { label: 'Inicio', icon: 'LayoutDashboard', route: '/decano/dashboard' },
       { label: 'Designar Comisiones', icon: 'Users', route: '/decano/comisiones' },
+      { label: 'Evaluación y Selección', icon: 'ClipboardCheck', route: '/decano/evaluaciones' },
       { label: 'Auditoría y Reportes', icon: 'BarChart3', route: '/decano/reportes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],

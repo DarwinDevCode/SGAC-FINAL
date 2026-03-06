@@ -1,20 +1,15 @@
-<div class="gestion-container">
+<div class="eval-container">
+
     <div class="section-header">
-        <div class="title-container">
-            <h2 class="title">Evaluación y Ranking</h2>
-            <p class="subtitle">Ingresa puntajes de méritos y oposición para generar el ranking final.</p>
-        </div>
+        <h2 class="title">Evaluación y Selección</h2>
+        <p class="subtitle">Módulo de concurso de méritos y oposición para designar ayudantes de cátedra.</p>
     </div>
 
     @if (successMsg) {
-    <div class="alert-success">
-        <lucide-icon name="check-circle" size="16"></lucide-icon> {{ successMsg }}
-    </div>
+    <div class="alert-success"><lucide-icon name="check-circle" size="16"></lucide-icon> {{ successMsg }}</div>
     }
     @if (errorMsg) {
-    <div class="alert-error">
-        <lucide-icon name="x-circle" size="16"></lucide-icon> {{ errorMsg }}
-    </div>
+    <div class="alert-error"><lucide-icon name="x-circle" size="16"></lucide-icon> {{ errorMsg }}</div>
     }
 
     <!-- Selector de convocatoria -->
@@ -23,103 +18,481 @@
         @if (loadingConv) {
         <span class="text-muted">Cargando...</span>
         } @else {
-        <select class="input-field" [(ngModel)]="idConvSeleccionada" (change)="cargarRanking()" style="min-width:280px">
+        <select class="input-field" [(ngModel)]="idConvSeleccionada" (change)="onConvocatoriaChange()"
+            style="min-width:300px">
             <option [value]="0" disabled>— Seleccione una convocatoria —</option>
             @for (c of convocatorias; track c.idConvocatoria) {
-            <option [value]="c.idConvocatoria">{{ c.tituloConvocatoria }}</option>
+            <option [value]="c.idConvocatoria">{{ c.tituloConvocatoria }} — {{ c.nombreAsignatura }}</option>
             }
         </select>
         }
-        <button class="btn-secondary" (click)="cargarRanking()" [disabled]="!idConvSeleccionada || loadingRanking">
-            <lucide-icon name="refresh-cw" size="14"></lucide-icon>
-            Actualizar
+    </div>
+
+    @if (!idConvSeleccionada) {
+    <div class="empty-state">
+        <lucide-icon name="search" size="48" class="icon-muted"></lucide-icon>
+        <p>Selecciona una convocatoria para comenzar la evaluación.</p>
+    </div>
+    } @else {
+
+    <!-- Tabs navegación -->
+    <div class="tabs-nav">
+        <button class="tab-btn" [class.active]="activeTab === 'meritos'" (click)="setTab('meritos')">
+            <lucide-icon name="star" size="15"></lucide-icon> Calificación de Méritos
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'oposicion'" (click)="setTab('oposicion')">
+            <lucide-icon name="mic" size="15"></lucide-icon> Calificación de Oposición
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'resultados'"
+            (click)="setTab('resultados'); cargarRanking()">
+            <lucide-icon name="trophy" size="15"></lucide-icon> Resultados / Ranking
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'actas'" (click)="setTab('actas')">
+            <lucide-icon name="file-text" size="15"></lucide-icon> Actas / Confirmar
         </button>
     </div>
 
-    <!-- Ranking -->
-    @if (loadingRanking) {
-    <div class="info-message">
-        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Calculando ranking...</p>
-    </div>
-    } @else if (ranking.length === 0 && idConvSeleccionada) {
-    <div class="empty-state">
-        <lucide-icon name="bar-chart-3" size="48" class="text-slate-300 mx-auto"></lucide-icon>
-        <p class="mt-4 font-medium text-slate-600">No hay postulaciones evaluadas todavía.</p>
-        <p class="text-sm text-slate-500 mt-1">Ingresa puntajes de méritos y oposición para generar el ranking.</p>
-    </div>
-    } @else if (ranking.length > 0) {
-    <div class="table-card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th class="text-center">Pos.</th>
-                    <th>Estudiante</th>
-                    <th>Matrícula</th>
-                    <th class="text-center">Méritos</th>
-                    <th class="text-center">Oposición</th>
-                    <th class="text-center">Total</th>
-                    <th class="text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (r of ranking; track r.idPostulacion) {
-                <tr [class.row-gold]="r.posicion === 1" [class.row-silver]="r.posicion === 2"
-                    [class.row-bronze]="r.posicion === 3">
-                    <td class="text-center">
-                        @if (r.posicion === 1) {
-                        <span class="medal gold">🥇</span>
-                        } @else if (r.posicion === 2) {
-                        <span class="medal silver">🥈</span>
-                        } @else if (r.posicion === 3) {
-                        <span class="medal bronze">🥉</span>
-                        } @else {
-                        <span class="pos-num">{{ r.posicion }}</span>
+    <!-- ═══════════════════ TAB 1: MÉRITOS ═══════════════════ -->
+    @if (activeTab === 'meritos') {
+    <div class="tab-content">
+        <div class="tab-inner">
+
+            <!-- Lista postulantes -->
+            <div class="panel postulantes-panel">
+                <h3 class="panel-title"><lucide-icon name="users" size="15"></lucide-icon> Postulantes</h3>
+                @if (loadingPostulantes) {
+                <div class="loader-mini"><lucide-icon name="loader-2" class="spin" size="20"></lucide-icon> Cargando...
+                </div>
+                } @else if (postulantes.length === 0) {
+                <p class="empty-text">No hay postulantes registrados.</p>
+                } @else {
+                <ul class="postulante-list">
+                    @for (p of postulantes; track p.idPostulacion) {
+                    <li class="postulante-item"
+                        [class.selected]="postulanteSeleccionado?.idPostulacion === p.idPostulacion"
+                        (click)="seleccionarPostulanteMeritos(p)">
+                        <div class="post-name">{{ p.nombreEstudiante }}</div>
+                        <div class="post-mat">{{ p.matricula }}</div>
+                        @if (meritosGuardados[p.idPostulacion]) {
+                        <span class="badge-sm badge-green">✓ Calificado</span>
                         }
-                    </td>
-                    <td class="font-medium">{{ r.nombreEstudiante }}</td>
-                    <td class="text-muted">{{ r.matricula }}</td>
-
-                    <!-- Méritos -->
-                    <td class="text-center">
-                        <div class="puntaje-cell">
-                            <span class="puntaje-val">{{ r.puntajeMeritos | number:'1.2-2' }}</span>
-                            <input type="number" min="0" max="100" step="0.01" class="input-mini"
-                                [(ngModel)]="puntajesMeritos[r.idPostulacion]" placeholder="Nuevo">
-                            <button class="btn-mini" (click)="guardarMeritos(r.idPostulacion)"
-                                [disabled]="puntajesMeritos[r.idPostulacion] == null || guardandoPuntaje[r.idPostulacion]">
-                                <lucide-icon name="save" size="12"></lucide-icon>
-                            </button>
-                        </div>
-                    </td>
-
-                    <!-- Oposición -->
-                    <td class="text-center">
-                        <div class="puntaje-cell">
-                            <span class="puntaje-val">{{ r.puntajeOposicion | number:'1.2-2' }}</span>
-                            <input type="number" min="0" max="100" step="0.01" class="input-mini"
-                                [(ngModel)]="puntajesOposicion[r.idPostulacion]" placeholder="Nuevo">
-                            <button class="btn-mini" (click)="guardarOposicion(r.idPostulacion)"
-                                [disabled]="puntajesOposicion[r.idPostulacion] == null || guardandoPuntaje[r.idPostulacion]">
-                                <lucide-icon name="save" size="12"></lucide-icon>
-                            </button>
-                        </div>
-                    </td>
-
-                    <!-- Total -->
-                    <td class="text-center">
-                        <strong class="total-val">{{ r.puntajeTotal | number:'1.2-2' }}</strong>
-                    </td>
-
-                    <td class="text-center">
-                        <span class="badge" [class]="r.posicion === 1 ? 'badge-green' : 'badge-gray'">
-                            {{ r.posicion === 1 ? 'Ganador' : '#' + r.posicion }}
-                        </span>
-                    </td>
-                </tr>
+                        @if (temaSorteado[p.idPostulacion]) {
+                        <span class="badge-sm badge-blue">Tema sorteado</span>
+                        }
+                    </li>
+                    }
+                </ul>
                 }
-            </tbody>
-        </table>
+            </div>
+
+            <!-- Formulario méritos -->
+            <div class="panel form-panel">
+                @if (!postulanteSeleccionado) {
+                <div class="empty-state-sm">
+                    <lucide-icon name="mouse-pointer-2" size="32" class="icon-muted"></lucide-icon>
+                    <p>Selecciona un postulante para calificar sus méritos</p>
+                </div>
+                } @else {
+                <h3 class="panel-title">
+                    <lucide-icon name="clipboard-list" size="15"></lucide-icon>
+                    Méritos — {{ postulanteSeleccionado.nombreEstudiante }}
+                </h3>
+                @if (userRol === 'DECANO') {
+                <div class="alert-info"><lucide-icon name="info" size="14"></lucide-icon> Solo lectura (DECANO)</div>
+                }
+                <form [formGroup]="meritosForm" (ngSubmit)="guardarMeritos()">
+                    <div class="criterio-row">
+                        <label class="criterio-label">Calificación final asignatura <span class="max-hint">(máx.
+                                10)</span></label>
+                        <input type="number" class="input-criterio" formControlName="calificacionAsignatura" min="0"
+                            max="10" step="0.01" placeholder="0.00"
+                            [attr.disabled]="userRol === 'DECANO' ? true : null">
+                        @if (meritosForm.get('calificacionAsignatura')?.invalid &&
+                        meritosForm.get('calificacionAsignatura')?.touched) {
+                        <span class="input-error">Valor entre 0 y 10</span>
+                        }
+                    </div>
+                    <div class="criterio-row">
+                        <label class="criterio-label">Promedio por semestres <span class="max-hint">(máx.
+                                4)</span></label>
+                        <input type="number" class="input-criterio" formControlName="promedioPorSemestres" min="0"
+                            max="4" step="0.01" placeholder="0.00" [attr.disabled]="userRol === 'DECANO' ? true : null">
+                        @if (meritosForm.get('promedioPorSemestres')?.invalid &&
+                        meritosForm.get('promedioPorSemestres')?.touched) {
+                        <span class="input-error">Valor entre 0 y 4</span>
+                        }
+                    </div>
+                    <div class="criterio-row">
+                        <label class="criterio-label">Experiencia en colaboración académica <span class="max-hint">(máx.
+                                4)</span></label>
+                        <input type="number" class="input-criterio" formControlName="experienciaColaboracion" min="0"
+                            max="4" step="0.01" placeholder="0.00" [attr.disabled]="userRol === 'DECANO' ? true : null">
+                        @if (meritosForm.get('experienciaColaboracion')?.invalid &&
+                        meritosForm.get('experienciaColaboracion')?.touched) {
+                        <span class="input-error">Valor entre 0 y 4</span>
+                        }
+                    </div>
+                    <div class="criterio-row">
+                        <label class="criterio-label">Participación en eventos académicos/científicos <span
+                                class="max-hint">(máx. 2)</span></label>
+                        <input type="number" class="input-criterio" formControlName="participacionEventos" min="0"
+                            max="2" step="0.01" placeholder="0.00" [attr.disabled]="userRol === 'DECANO' ? true : null">
+                        @if (meritosForm.get('participacionEventos')?.invalid &&
+                        meritosForm.get('participacionEventos')?.touched) {
+                        <span class="input-error">Valor entre 0 y 2</span>
+                        }
+                    </div>
+                    <div class="total-meritos" [class.over-max]="totalMeritos > 20">
+                        <span class="total-label">Total Méritos:</span>
+                        <span class="total-val">{{ totalMeritos.toFixed(2) }} / 20</span>
+                    </div>
+                    @if (meritosForm.hasError('totalExcede')) {
+                    <p class="input-error">La sumatoria no puede superar 20 puntos.</p>
+                    }
+                    @if (userRol !== 'DECANO') {
+                    <button type="submit" class="btn-primary"
+                        [disabled]="meritosForm.invalid || guardandoMeritos || totalMeritos > 20">
+                        @if (guardandoMeritos) {
+                        <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon> Guardando...
+                        } @else {
+                        <lucide-icon name="save" size="14"></lucide-icon> Guardar Méritos y Sortear Tema
+                        }
+                    </button>
+                    }
+                </form>
+                }
+            </div>
+        </div>
     </div>
     }
+
+    <!-- ═══════════════════ TAB 2: OPOSICIÓN ═══════════════════ -->
+    @if (activeTab === 'oposicion') {
+    <div class="tab-content">
+        <div class="tab-inner">
+
+            <div class="panel postulantes-panel">
+                <h3 class="panel-title"><lucide-icon name="users" size="15"></lucide-icon> Postulantes</h3>
+                <ul class="postulante-list">
+                    @for (p of postulantes; track p.idPostulacion) {
+                    <li class="postulante-item"
+                        [class.selected]="postulanteOposicion?.idPostulacion === p.idPostulacion"
+                        (click)="seleccionarPostulanteOposicion(p)">
+                        <div class="post-name">{{ p.nombreEstudiante }}</div>
+                        <div class="post-mat">{{ p.matricula }}</div>
+                    </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="panel form-panel">
+                @if (!postulanteOposicion) {
+                <div class="empty-state-sm">
+                    <lucide-icon name="mouse-pointer-2" size="32" class="icon-muted"></lucide-icon>
+                    <p>Selecciona un postulante para calificar la oposición</p>
+                </div>
+                } @else {
+                <h3 class="panel-title"><lucide-icon name="mic" size="15"></lucide-icon> Oposición — {{
+                    postulanteOposicion.nombreEstudiante }}</h3>
+
+                @if (estadoOposicion?.temaSorteado) {
+                <div class="tema-chip">
+                    <lucide-icon name="book-open" size="14"></lucide-icon>
+                    Tema sorteado: <strong>{{ estadoOposicion.temaSorteado }}</strong>
+                </div>
+                }
+
+                <div class="estado-row">
+                    <span class="estado-check" [class.done]="estadoOposicion?.decanoCalificado">
+                        <lucide-icon [name]="estadoOposicion?.decanoCalificado ? 'check-circle' : 'circle'"
+                            size="14"></lucide-icon> Decano
+                    </span>
+                    <span class="estado-check" [class.done]="estadoOposicion?.coordinadorCalificado">
+                        <lucide-icon [name]="estadoOposicion?.coordinadorCalificado ? 'check-circle' : 'circle'"
+                            size="14"></lucide-icon> Coordinador
+                    </span>
+                    <span class="estado-check" [class.done]="estadoOposicion?.docenteCalificado">
+                        <lucide-icon [name]="estadoOposicion?.docenteCalificado ? 'check-circle' : 'circle'"
+                            size="14"></lucide-icon> Docente
+                    </span>
+                </div>
+
+                <form [formGroup]="oposicionForm" (ngSubmit)="guardarOposicion()">
+                    <div class="bloque-evaluador">
+                        <h4 class="bloque-title"><lucide-icon name="user-check" size="14"></lucide-icon> Tu evaluación
+                            ({{ userRol }})</h4>
+                        <ng-container [formGroupName]="rolKey">
+                            <div class="criterio-row">
+                                <label class="criterio-label">Material impreso/digital/didáctico <span
+                                        class="max-hint">(máx. 10)</span></label>
+                                <input type="number" class="input-criterio" formControlName="material" min="0" max="10"
+                                    step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="criterio-row">
+                                <label class="criterio-label">Calidad de la exposición <span class="max-hint">(máx.
+                                        4)</span></label>
+                                <input type="number" class="input-criterio" formControlName="calidad" min="0" max="4"
+                                    step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="criterio-row">
+                                <label class="criterio-label">Pertinencia de las respuestas <span class="max-hint">(máx.
+                                        6)</span></label>
+                                <input type="number" class="input-criterio" formControlName="pertinencia" min="0"
+                                    max="6" step="0.01" placeholder="0.00">
+                            </div>
+                        </ng-container>
+                        <div class="total-meritos" [class.over-max]="subtotalOposicion > 20">
+                            Subtotal: <strong>{{ subtotalOposicion.toFixed(2) }} / 20</strong>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary"
+                        [disabled]="oposicionForm.get(rolKey)?.invalid || guardandoOposicion">
+                        @if (guardandoOposicion) {
+                        <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon> Guardando...
+                        } @else {
+                        <lucide-icon name="save" size="14"></lucide-icon> Guardar mi Evaluación
+                        }
+                    </button>
+                </form>
+
+                @if (estadoOposicion?.todosCalificados) {
+                <div class="promedio-final">
+                    <lucide-icon name="bar-chart-2" size="16"></lucide-icon>
+                    Promedio de Oposición: <strong>{{ estadoOposicion.promedioOposicion | number:'1.2-2' }} /
+                        20</strong>
+                </div>
+                }
+                }
+            </div>
+        </div>
+    </div>
+    }
+
+    <!-- ═══════════════════ TAB 3: RESULTADOS ═══════════════════ -->
+    @if (activeTab === 'resultados') {
+    <div class="tab-content">
+        <div class="ranking-actions">
+            <button class="btn-secondary" (click)="cargarRanking()" [disabled]="loadingRanking">
+                <lucide-icon name="refresh-cw" size="14"></lucide-icon> Actualizar Ranking
+            </button>
+        </div>
+
+        @if (hayEmpate) {
+        <div class="alert-warning">
+            <lucide-icon name="alert-triangle" size="14"></lucide-icon>
+            <strong>Se detectaron postulantes empatados.</strong>
+            Desempate: 1) Mayor promedio oposición → 2) Mayor puntaje material → 3) Mayor puntaje pertinencia.
+            Las filas en naranja tienen el mismo total final.
+        </div>
+        }
+
+        @if (loadingRanking) {
+        <div class="info-message">
+            <lucide-icon name="loader-2" class="spin" size="32"></lucide-icon>
+            <p>Calculando ranking...</p>
+        </div>
+        } @else if (ranking.length === 0) {
+        <div class="empty-state">
+            <lucide-icon name="bar-chart-3" size="48" class="icon-muted"></lucide-icon>
+            <p>No hay evaluaciones completadas todavía.</p>
+        </div>
+        } @else {
+        <div class="table-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="text-center">Pos.</th>
+                        <th>Postulante</th>
+                        <th>Matrícula</th>
+                        <th class="text-center">Méritos<br><small>/20</small></th>
+                        <th class="text-center">Oposición<br><small>/20</small></th>
+                        <th class="text-center">Total<br><small>/40</small></th>
+                        <th class="text-center">Estado</th>
+                        @if (hayEmpate) {
+                        <th class="text-center desempate-col">Material<br><small>(desempate)</small></th>
+                        <th class="text-center desempate-col">Pertinencia<br><small>(desempate)</small></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (r of ranking; track r.idPostulacion) {
+                    <tr [class.row-ganador]="r.estado === 'GANADOR'"
+                        [class.row-empate]="r.empate && r.estado !== 'GANADOR'">
+                        <td class="text-center">
+                            @if (r.posicion === 1 && r.estado === 'GANADOR') {
+                            <span class="medal">🥇</span>
+                            } @else {
+                            <span class="pos-num">{{ r.posicion }}</span>
+                            }
+                        </td>
+                        <td class="font-medium">{{ r.nombreEstudiante }}</td>
+                        <td class="text-muted">{{ r.matricula }}</td>
+                        <td class="text-center score-cell">{{ r.totalMeritos | number:'1.2-2' }}</td>
+                        <td class="text-center score-cell">{{ r.promedioOposicion | number:'1.2-2' }}</td>
+                        <td class="text-center score-total">{{ r.totalFinal | number:'1.2-2' }}</td>
+                        <td class="text-center">
+                            <span class="badge" [ngClass]="getEstadoClass(r.estado)">{{ r.estado }}</span>
+                        </td>
+                        @if (hayEmpate) {
+                        <td class="text-center desempate-col">{{ r.matSum | number:'1.2-2' }}</td>
+                        <td class="text-center desempate-col">{{ r.pertinenciaSum | number:'1.2-2' }}</td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (userRol === 'COORDINADOR') {
+        <div class="actions-bar" style="margin-top:1rem">
+            <button class="btn-primary" style="background: var(--color-success)" (click)="publicarResultados()"
+                [disabled]="publicandoResultados || ranking.length === 0">
+                @if (publicandoResultados) {
+                <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon> Publicando...
+                } @else {
+                <lucide-icon name="send" size="14"></lucide-icon> Publicar Resultados y Notificar
+                }
+            </button>
+        </div>
+
+        }
+        }
+    </div>
+    }
+
+    <!-- ═══════════════════ TAB 4: ACTAS ═══════════════════ -->
+    @if (activeTab === 'actas') {
+    <div class="tab-content">
+        <div class="tab-inner">
+
+            <div class="panel postulantes-panel">
+                <h3 class="panel-title"><lucide-icon name="users" size="15"></lucide-icon> Postulantes</h3>
+                <ul class="postulante-list">
+                    @for (p of postulantes; track p.idPostulacion) {
+                    <li class="postulante-item" [class.selected]="postulanteActas?.idPostulacion === p.idPostulacion"
+                        (click)="seleccionarPostulanteActas(p)">
+                        <div class="post-name">{{ p.nombreEstudiante }}</div>
+                    </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="panel form-panel">
+                @if (!postulanteActas) {
+                <div class="empty-state-sm">
+                    <lucide-icon name="file-text" size="32" class="icon-muted"></lucide-icon>
+                    <p>Selecciona un postulante para gestionar sus actas</p>
+                </div>
+                } @else {
+                <h3 class="panel-title">Actas — {{ postulanteActas.nombreEstudiante }}</h3>
+
+                <!-- Acta de Méritos -->
+                <div class="acta-card">
+                    <div class="acta-header">
+                        <lucide-icon name="award" size="16"></lucide-icon>
+                        <span>Acta de Méritos</span>
+                        @if (actasMeritos?.estado === 'CONFIRMADO') {
+                        <span class="badge-sm badge-green">✓ Confirmada</span>
+                        }
+                    </div>
+                    <div class="acta-actions">
+                        <button class="btn-secondary" (click)="generarActa('MERITOS')" [disabled]="generandoActa">
+                            <lucide-icon name="file-plus" size="14"></lucide-icon>
+                            {{ actasMeritos ? 'Regenerar' : 'Generar' }} Acta
+                        </button>
+                        @if (actasMeritos && !yaConfirme(actasMeritos)) {
+                        <button class="btn-primary" (click)="confirmarActa(actasMeritos)" [disabled]="confirmandoActa">
+                            <lucide-icon name="check" size="14"></lucide-icon> Confirmar ({{ userRol }})
+                        </button>
+                        }
+                        @if (actasMeritos?.urlDocumento) {
+                        <a class="btn-outline" [href]="actasMeritos.urlDocumento" target="_blank">
+                            <lucide-icon name="download" size="14"></lucide-icon> Ver PDF
+                        </a>
+                        }
+                    </div>
+                    @if (actasMeritos) {
+                    <div class="confirmaciones-row">
+                        <span [class.conf-done]="actasMeritos.confirmadoDecano">
+                            <lucide-icon [name]="actasMeritos.confirmadoDecano ? 'check-circle' : 'circle'"
+                                size="13"></lucide-icon> Decano
+                        </span>
+                        <span [class.conf-done]="actasMeritos.confirmadoCoordinador">
+                            <lucide-icon [name]="actasMeritos.confirmadoCoordinador ? 'check-circle' : 'circle'"
+                                size="13"></lucide-icon> Coordinador
+                        </span>
+                        <span [class.conf-done]="actasMeritos.confirmadoDocente">
+                            <lucide-icon [name]="actasMeritos.confirmadoDocente ? 'check-circle' : 'circle'"
+                                size="13"></lucide-icon> Docente
+                        </span>
+                    </div>
+                    }
+                </div>
+
+                <!-- Acta de Oposición -->
+                <div class="acta-card">
+                    <div class="acta-header">
+                        <lucide-icon name="mic" size="16"></lucide-icon>
+                        <span>Acta de Oposición / Resolución</span>
+                        @if (actasOposicion?.estado === 'CONFIRMADO') {
+                        <span class="badge-sm badge-green">✓ Confirmada</span>
+                        }
+                    </div>
+                    <div class="acta-actions">
+                        <button class="btn-secondary" (click)="generarActa('OPOSICION')" [disabled]="generandoActa">
+                            <lucide-icon name="file-plus" size="14"></lucide-icon>
+                            {{ actasOposicion ? 'Regenerar' : 'Generar' }} Acta
+                        </button>
+                        @if (actasOposicion && !yaConfirme(actasOposicion)) {
+                        <button class="btn-primary" (click)="confirmarActa(actasOposicion)"
+                            [disabled]="confirmandoActa">
+                            <lucide-icon name="check" size="14"></lucide-icon> Confirmar ({{ userRol }})
+                        </button>
+                        }
+                        @if (actasOposicion?.urlDocumento) {
+                        <a class="btn-outline" [href]="actasOposicion.urlDocumento" target="_blank">
+                            <lucide-icon name="download" size="14"></lucide-icon> Ver PDF
+                        </a>
+                        }
+                    </div>
+                    @if (actasOposicion) {
+                    <div class="confirmaciones-row">
+                        <span [class.conf-done]="actasOposicion.confirmadoDecano">
+                            <lucide-icon [name]="actasOposicion.confirmadoDecano ? 'check-circle' : 'circle'"
+                                size="13"></lucide-icon> Decano
+                        </span>
+                        <span [class.conf-done]="actasOposicion.confirmadoCoordinador">
+                            <lucide-icon [name]="actasOposicion.confirmadoCoordinador ? 'check-circle' : 'circle'"
+                                size="13"></lucide-icon> Coordinador
+                        </span>
+                        <span [class.conf-done]="actasOposicion.confirmadoDocente">
+                            <lucide-icon [name]="actasOposicion.confirmadoDocente ? 'check-circle' : 'circle'"
+                                size="13"></lucide-icon> Docente
+                        </span>
+                    </div>
+                    }
+                </div>
+
+                <!-- Notificar resultado final -->
+                @if (userRol === 'COORDINADOR') {
+                <div class="acta-card" style="border-color: var(--color-success)">
+                    <div class="acta-header">
+                        <lucide-icon name="send" size="16"></lucide-icon>
+                        Notificar Resultado Final al Postulante
+                    </div>
+                    <p class="text-muted" style="font-size:.85rem; margin: .5rem 0 1rem">
+                        Envía una notificación al estudiante con el resultado definitivo del concurso.
+                    </p>
+                    <button class="btn-primary" style="background: var(--color-success)">
+                        <lucide-icon name="bell" size="14"></lucide-icon> Enviar Notificación Final
+                    </button>
+                </div>
+                }
+                }
+            </div>
+        </div>
+    </div>
+    }
+
+    }
+
 </div>

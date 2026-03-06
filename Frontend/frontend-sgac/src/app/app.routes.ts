@@ -42,7 +42,7 @@ import { AyudanteNotificacionesComponent } from './features/ayudante/notificacio
 
 
 
-import {SesionesComponent} from './features/ayudante/sesiones/sesiones';
+import { SesionesComponent } from './features/ayudante/sesiones/sesiones';
 import { NotificacionesPageComponent } from './features/notificaciones/notificaciones-page.component';
 import { DocenteDashboardComponent } from './features/docente/dashboard/docente-dashboard.component';
 import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayudantes.component';
@@ -81,6 +81,7 @@ export const routes: Routes = [
       { path: 'decano/convocatorias', component: DecanoConvocatorias },
       { path: 'decano/postulantes/:idConvocatoria', component: DecanoPostulantes },
       { path: 'decano/comisiones', component: ComisionesDecanoComponent },
+      { path: 'decano/evaluaciones', component: EvaluacionesComponent },     // Módulo Evaluación y Selección (acceso Decano)
       { path: 'decano/reportes', component: DecanoAuditoria },
       { path: 'decano/notifications', component: PostulanteNotificaciones },
 
@@ -104,13 +105,9 @@ export const routes: Routes = [
       // Docente
       { path: 'docente/dashboard', component: DocenteDashboardComponent },
       { path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
-
-
-      // Docente
-      //{ path: 'docente/dashboard', component: DocenteDashboardComponent },
-      //{ path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
       { path: 'docente/aprobar-informes', component: MisAyudantesComponent },
       { path: 'docente/mis-ayudantes/:idAyudantia/actividades', component: ActividadesAyudanteComponent },
+      { path: 'docente/evaluaciones', component: EvaluacionesComponent },   // Módulo Evaluación y Selección (acceso Docente-Secretario)
       { path: 'docente/notifications', component: PostulanteNotificaciones },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' }

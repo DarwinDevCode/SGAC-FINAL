@@ -54,9 +54,9 @@ public class PeriodoAcademicoController {
     public ResponseEntity<?> activar(@PathVariable Integer id) {
         try {
             periodoAcademicoService.activar(id);
-            return ResponseEntity.ok("Período activado correctamente.");
+            return ResponseEntity.ok(java.util.Map.of("mensaje", "Período activado correctamente."));
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", e.getMessage()));
         }
     }
 

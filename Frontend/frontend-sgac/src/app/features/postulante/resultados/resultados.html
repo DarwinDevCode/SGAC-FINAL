@@ -9,17 +9,18 @@
     @if (loading) {
     <div class="info-message">
         <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Calculando resultados...</p>
+        <p style="margin-top:.75rem">Cargando resultados...</p>
     </div>
     } @else if (postulaciones.length === 0) {
     <div class="info-message" style="border:2px dashed hsl(var(--border));border-radius:var(--radius)">
         <lucide-icon name="inbox" size="40" style="opacity:.3"></lucide-icon>
-        <p style="margin-top:.75rem">No hay resultados disponibles en este momento.</p>
+        <p style="margin-top:.75rem">No hay postulaciones disponibles.</p>
     </div>
     } @else {
     <div style="display:flex;flex-direction:column;gap:1.5rem">
         @for (p of postulaciones; track p.idPostulacion) {
         <div class="postulacion-card">
+            <!-- Header de la tarjeta -->
             <div class="card-header">
                 <div style="display:flex;gap:1rem;align-items:flex-start">
                     <div class="stat-icon green" style="width:3rem;height:3rem;font-size:1.1rem">
@@ -42,58 +43,94 @@
                 </div>
             </div>
 
+            <!-- Stepper de progreso -->
             <div class="stepper-container">
                 <ul class="stepper">
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 1"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 1">
+                    <li [class.active]="getPhase(p) >= 1" [class.completed]="getPhase(p) > 1">
                         <div class="step-icon"><lucide-icon name="clipboard-check" size="16"></lucide-icon></div>
                         <div class="step-label">Postulación</div>
                     </li>
-                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 1"></li>
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 2"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 2">
+                    <li class="stepper-line" [class.active-line]="getPhase(p) > 1"></li>
+                    <li [class.active]="getPhase(p) >= 2" [class.completed]="getPhase(p) > 2">
                         <div class="step-icon"><lucide-icon name="award" size="16"></lucide-icon></div>
                         <div class="step-label">Méritos</div>
                     </li>
-                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 2"></li>
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 3"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 3">
+                    <li class="stepper-line" [class.active-line]="getPhase(p) > 2"></li>
+                    <li [class.active]="getPhase(p) >= 3" [class.completed]="getPhase(p) > 3">
                         <div class="step-icon"><lucide-icon name="users" size="16"></lucide-icon></div>
                         <div class="step-label">Oposición</div>
                     </li>
-                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 3"></li>
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 4"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 4">
+                    <li class="stepper-line" [class.active-line]="getPhase(p) > 3"></li>
+                    <li [class.active]="getPhase(p) >= 4" [class.completed]="getPhase(p) >= 4">
                         <div class="step-icon"><lucide-icon name="flag" size="16"></lucide-icon></div>
                         <div class="step-label">Resultados</div>
                     </li>
                 </ul>
             </div>
 
-            <!-- Custom Card Footer for Resultados -->
+            <!-- Panel de resultado (visible si ya se publicó) -->
+            @if (p.resultado) {
+            <div class="resultado-panel" [ngClass]="getEstadoClass(p.resultado.estado)">
+                <div class="resultado-veredicto">
+                    <lucide-icon [name]="p.resultado.aprobado ? 'check-circle' : 'x-circle'" size="22"></lucide-icon>
+                    <span>{{ getEstadoLabel(p.resultado.estado) }}</span>
+                </div>
+
+                <div class="puntajes-grid">
+                    <div class="puntaje-item">
+                        <span class="punt-label">Méritos</span>
+                        <span class="punt-valor">{{ p.resultado.totalMeritos | number:'1.2-2' }}<small> /
+                                20</small></span>
+                    </div>
+                    <div class="puntaje-item">
+                        <span class="punt-label">Oposición</span>
+                        <span class="punt-valor">{{ p.resultado.promedioOposicion | number:'1.2-2' }}<small> /
+                                20</small></span>
+                    </div>
+                    <div class="puntaje-item puntaje-total">
+                        <span class="punt-label">Total Final</span>
+                        <span class="punt-valor total">{{ p.resultado.totalFinal | number:'1.2-2' }}<small> /
+                                40</small></span>
+                    </div>
+                    @if (p.resultado.posicion) {
+                    <div class="puntaje-item">
+                        <span class="punt-label">Posición</span>
+                        <span class="punt-valor"># {{ p.resultado.posicion }}</span>
+                    </div>
+                    }
+                </div>
+
+                <!-- Barra de progreso del puntaje -->
+                <div class="score-bar-container">
+                    <div class="score-bar-track">
+                        <div class="score-bar-fill" [style.width]="((p.resultado.totalFinal || 0) / 40 * 100) + '%'"
+                            [class.fill-aprobado]="p.resultado.aprobado" [class.fill-rechazado]="!p.resultado.aprobado">
+                        </div>
+                        <!-- Marcador de puntaje mínimo (25/40 = 62.5%) -->
+                        <div class="score-bar-threshold" style="left:62.5%">
+                            <span class="threshold-label">25 pts mín.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            } @else {
+            <!-- Sin resultado aún -->
             <div class="results-footer">
                 <div class="score-summary">
-                    <span class="score-label">Puntaje Preliminar de Méritos</span>
-                    @if (p.evaluacionCompletada) {
-                    <div class="score-value-container">
-                        <span class="score-number">{{ p.notaFinal | number:'1.2-2' }}</span>
-                        <span class="score-max">/ 100</span>
-                    </div>
-                    } @else {
-                    <span class="score-pending">Calificación en proceso</span>
-                    }
+                    <span class="score-label">Estado</span>
+                    <span class="score-pending">Evaluación en proceso — los resultados serán notificados cuando la
+                        coordinadora los publique.</span>
                 </div>
                 <div class="card-actions">
                     <a [routerLink]="['/postulante/meritos', p.idPostulacion]" class="btn-secondary-small">
-                        <lucide-icon name="award" size="16"></lucide-icon>
-                        Méritos
+                        <lucide-icon name="award" size="16"></lucide-icon> Méritos
                     </a>
                     <a [routerLink]="['/postulante/oposicion', p.idPostulacion]" class="btn-secondary-small">
-                        <lucide-icon name="users" size="16"></lucide-icon>
-                        Oposición
+                        <lucide-icon name="users" size="16"></lucide-icon> Oposición
                     </a>
                 </div>
             </div>
+            }
         </div>
         }
     </div>
