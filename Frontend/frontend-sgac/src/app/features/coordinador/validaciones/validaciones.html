@@ -1,388 +1,441 @@
 <div class="gestion-container">
+    <!-- Vista Lista -->
+    @if (!vistaDetalle) {
     <div class="section-header">
         <div class="title-container">
-            <h2 class="title">Validar Postulantes</h2>
-            <p class="subtitle">Postulaciones en estado pendiente de revisión.</p>
+            <h2 class="title">Evaluación de Postulaciones</h2>
+            <p class="subtitle">Revisa y evalúa las postulaciones de estudiantes a ayudantía de cátedra.</p>
         </div>
+        <button class="btn-refresh" (click)="cargarPostulaciones()" [disabled]="loading">
+            <lucide-icon name="refresh-cw" [class.spin]="loading" size="16"></lucide-icon>
+            Actualizar
+        </button>
     </div>
 
+    <!-- Mensajes de alerta -->
     @if (successMensaje) {
-    <div class="alert-banner success">
+    <div class="alert alert-success">
         <lucide-icon name="check-circle" size="18"></lucide-icon>
-        {{ successMensaje }}
+        <span>{{ successMensaje }}</span>
     </div>
     }
 
     @if (errorMensaje) {
-    <div class="alert-banner error">
+    <div class="alert alert-error">
         <lucide-icon name="alert-circle" size="18"></lucide-icon>
-        {{ errorMensaje }}
+        <span>{{ errorMensaje }}</span>
     </div>
     }
 
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <button class="tab-btn" [class.active]="tabActivo === 'requiere-atencion'"
+            (click)="cambiarTab('requiere-atencion')">
+            <lucide-icon name="alert-triangle" size="16"></lucide-icon>
+            Requieren Atención
+            @if (contadorRequierenAtencion > 0) {
+            <span class="badge-count">{{ contadorRequierenAtencion }}</span>
+            }
+        </button>
+        <button class="tab-btn" [class.active]="tabActivo === 'todas'" (click)="cambiarTab('todas')">
+            <lucide-icon name="users" size="16"></lucide-icon>
+            Todas las Postulaciones
+            <span class="badge-count-secondary">{{ postulaciones.length }}</span>
+        </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="search-card">
+        <div class="filtros-grid">
+            <div class="search-wrapper">
+                <lucide-icon class="search-icon" name="search" size="18"></lucide-icon>
+                <input type="text" [(ngModel)]="filtroBusqueda" placeholder="Buscar por estudiante, matrícula o asignatura..."
+                    class="input-field search-input" />
+            </div>
+            <div class="select-wrapper">
+                <select [(ngModel)]="filtroEstado" class="input-field select-estado">
+                    <option value="TODOS">Todos los estados</option>
+                    @for (estado of estadosUnicos; track estado) {
+                    <option [value]="estado">{{ estado }}</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading -->
     @if (loading) {
-    <div class="info-message">
-        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Cargando postulaciones...</p>
+    <div class="loading-container">
+        <lucide-icon name="loader-2" class="spin" size="32"></lucide-icon>
+        <p>Cargando postulaciones...</p>
     </div>
     } @else {
 
-    <!-- Tabs -->
-    <div class="tabs-container"
-        style="display:flex;gap:0;border-bottom:2px solid hsl(var(--border));margin-bottom:1.5rem">
-        <button (click)="cambiarTab('pendientes')"
-            style="padding:.6rem 1.4rem;font-size:.875rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s"
-            [style.border-bottom-color]="tabActivo === 'pendientes' ? 'hsl(var(--primary))' : 'transparent'"
-            [style.color]="tabActivo === 'pendientes' ? 'hsl(var(--primary))' : '#64748b'">
-            <span style="display:inline-flex;align-items:center;gap:.4rem">
-                <lucide-icon name="clock" size="14"></lucide-icon>
-                Pendientes de Revisión
-                @if (postulantes.length > 0) {
-                <span style="background:#ef4444;color:white;border-radius:999px;padding:.1rem .45rem;font-size:.7rem">{{
-                    postulantes.length }}</span>
-                }
-            </span>
-        </button>
-        <button (click)="cambiarTab('en-evaluacion')"
-            style="padding:.6rem 1.4rem;font-size:.875rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s"
-            [style.border-bottom-color]="tabActivo === 'en-evaluacion' ? 'hsl(var(--primary))' : 'transparent'"
-            [style.color]="tabActivo === 'en-evaluacion' ? 'hsl(var(--primary))' : '#64748b'">
-            <span style="display:inline-flex;align-items:center;gap:.4rem">
-                <lucide-icon name="Users" size="14"></lucide-icon>
-                Aprobados — En Evaluación
-                @if (enEvaluacion.length > 0) {
-                <span style="background:#16a34a;color:white;border-radius:999px;padding:.1rem .45rem;font-size:.7rem">{{
-                    enEvaluacion.length }}</span>
-                }
-            </span>
-        </button>
-    </div>
+    <!-- Cards Grid -->
+    <div class="cards-grid">
+        @for (p of postulacionesFiltradas; track p.id_postulacion) {
+        <div class="postulacion-card" [class.requiere-atencion]="p.requiere_atencion">
+            <div class="card-header">
+                <div class="estudiante-info">
+                    <h3 class="estudiante-nombre">{{ p.nombre_estudiante }}</h3>
+                    <span class="estudiante-matricula">{{ p.matricula }} · {{ p.semestre }}° Semestre</span>
+                </div>
+                <span [class]="'status-badge ' + getEstadoClase(p.estado_codigo)">
+                    {{ p.estado_nombre }}
+                </span>
+            </div>
 
-    <!-- TAB: PENDIENTES -->
-    @if (tabActivo === 'pendientes') {
-    <div class="table-card">
-        @if (postulantes.length === 0) {
-        <div class="info-message">
-            <lucide-icon name="check-circle" size="40" style="color:hsl(var(--primary));opacity:.6"></lucide-icon>
-            <p style="margin-top:.75rem">No hay postulantes pendientes de validación.</p>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Asignatura:</span>
+                    <span class="info-value">{{ p.nombre_asignatura }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Carrera:</span>
+                    <span class="info-value">{{ p.nombre_carrera }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Fecha Postulación:</span>
+                    <span class="info-value">{{ formatearFecha(p.fecha_postulacion) }}</span>
+                </div>
+
+                <!-- Resumen de documentos -->
+                <div class="docs-resumen">
+                    @if (p.documentos_aprobados > 0) {
+                    <span class="doc-badge aprobado">
+                        <lucide-icon name="check-circle" size="12"></lucide-icon>
+                        {{ p.documentos_aprobados }}
+                    </span>
+                    }
+                    @if (p.documentos_pendientes > 0) {
+                    <span class="doc-badge pendiente">
+                        <lucide-icon name="clock" size="12"></lucide-icon>
+                        {{ p.documentos_pendientes }}
+                    </span>
+                    }
+                    @if (p.documentos_observados > 0) {
+                    <span class="doc-badge observado">
+                        <lucide-icon name="alert-triangle" size="12"></lucide-icon>
+                        {{ p.documentos_observados }}
+                    </span>
+                    }
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <button class="btn-primary btn-revisar" (click)="verDetalle(p)">
+                    <lucide-icon name="eye" size="16"></lucide-icon>
+                    Revisar Postulación
+                </button>
+            </div>
         </div>
-        } @else {
-        <div class="alert-banner warning" style="margin:1rem 1rem 0 1rem;border-radius:var(--radius)">
-            <lucide-icon name="clock" size="16"></lucide-icon>
-            {{ postulantes.length }} postulación(es) pendiente(s) de revisión
+        } @empty {
+        <div class="empty-state-container">
+            <lucide-icon name="inbox" size="48"></lucide-icon>
+            <p>No hay postulaciones que coincidan con los filtros.</p>
         </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Estudiante</th>
-                    <th>Matrícula</th>
-                    <th>Convocatoria</th>
-                    <th>Fecha</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (p of postulantes; track p.idPostulacion) {
-                <tr>
-                    <td><span class="full-name">{{ p.nombreCompletoEstudiante }}</span></td>
-                    <td style="font-family:monospace;font-size:.85rem">{{ p.matriculaEstudiante }}</td>
-                    <td>{{ p.asignaturaConvocatoria }}</td>
-                    <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
-                    <td><span class="status-pill pendiente">{{ p.estadoPostulacion }}</span></td>
-                    <td>
-                        <button class="btn-primary btn-sm" (click)="abrirModal(p)">
-                            <lucide-icon name="check-square" size="14"></lucide-icon>
-                            Revisar
-                        </button>
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
         }
     </div>
     }
+    }
 
-    <!-- TAB: EN EVALUACION -->
-    @if (tabActivo === 'en-evaluacion') {
-    <div class="table-card">
-        @if (loadingEval) {
-        <div class="info-message">
-            <lucide-icon name="loader-2" class="animate-spin" size="24"></lucide-icon>
-            <p style="margin-top:.5rem;font-size:.9rem">Cargando...</p>
-        </div>
-        } @else if (enEvaluacion.length === 0) {
-        <div class="info-message">
-            <lucide-icon name="Users" size="40" style="color:hsl(var(--primary));opacity:.5"></lucide-icon>
-            <p style="margin-top:.75rem">No hay postulantes aprobados para evaluación.</p>
-            <p style="font-size:.8rem;color:#94a3b8">Revisa y aprueba postulantes desde la pestaña "Pendientes".</p>
-        </div>
-        } @else {
-        <div class="alert-banner"
-            style="margin:1rem 1rem 0 1rem;border-radius:var(--radius);background:#f0fdf4;border-color:#86efac;color:#15803d">
-            <lucide-icon name="Users" size="16"></lucide-icon>
-            {{ enEvaluacion.length }} postulante(s) aprobado(s) — pendientes de asignación de comisión
-        </div>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Estudiante</th>
-                    <th>Matrícula</th>
-                    <th>Convocatoria / Asignatura</th>
-                    <th>Fecha Postulación</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (p of enEvaluacion; track p.idPostulacion) {
-                <tr>
-                    <td><span class="full-name">{{ p.nombreCompletoEstudiante }}</span></td>
-                    <td style="font-family:monospace;font-size:.85rem">{{ p.matriculaEstudiante }}</td>
-                    <td>{{ p.asignaturaConvocatoria }}</td>
-                    <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
-                    <td>
-                        @if (p.comisionAsignada) {
-                        <span
-                            style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .85rem;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:var(--radius);font-size:.82rem;font-weight:600;">
-                            <lucide-icon name="check" size="13"></lucide-icon>
-                            Comisión Asignada
-                        </span>
-                        } @else {
-                        <button (click)="abrirModalAsignacion(p)"
-                            style="background:#16a34a;color:white;border:none;border-radius:var(--radius);padding:.3rem .85rem;font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem">
-                            <lucide-icon name="Users" size="13"></lucide-icon>
-                            Asignar Comisión
-                        </button>
-                        }
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
-        }
+    <!-- Vista Detalle -->
+    @if (vistaDetalle) {
+    <div class="detalle-header">
+        <button class="btn-volver" (click)="volverALista()">
+            <lucide-icon name="chevron-left" size="18"></lucide-icon>
+            Volver a la lista
+        </button>
+        <h2 class="title">Detalle de Postulación</h2>
+    </div>
+
+    <!-- Mensajes -->
+    @if (successMensaje) {
+    <div class="alert alert-success">
+        <lucide-icon name="check-circle" size="18"></lucide-icon>
+        <span>{{ successMensaje }}</span>
+    </div>
+    }
+    @if (errorMensaje) {
+    <div class="alert alert-error">
+        <lucide-icon name="alert-circle" size="18"></lucide-icon>
+        <span>{{ errorMensaje }}</span>
     </div>
     }
 
-    }
-</div>
+    <!-- Loading Detalle -->
+    @if (loadingDetalle) {
+    <div class="loading-container">
+        <lucide-icon name="loader-2" class="spin" size="32"></lucide-icon>
+        <p>Cargando información...</p>
+    </div>
+    } @else if (detallePostulacion) {
 
-<!-- Modal de decisión — el backdrop centra el modal-box dentro de sí mismo -->
-@if (mostrarModal && postulacionSeleccionada) {
-<div class="modal-backdrop" (click)="cerrarModal()">
-    <div class="modal-box" style="max-width:480px" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3 style="font-size:1rem;font-weight:700;margin:0">Revisar Postulación</h3>
-            <button class="btn-icon" (click)="cerrarModal()">
-                <lucide-icon name="x" size="18"></lucide-icon>
-            </button>
+    <div class="detalle-content">
+        <!-- Grid de información -->
+        <div class="info-cards-grid">
+            <!-- Card Estudiante -->
+            <div class="info-card">
+                <h4 class="card-section-title">
+                    <lucide-icon name="users" size="18"></lucide-icon>
+                    Información del Estudiante
+                </h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Nombre Completo</span>
+                        <span class="info-value">{{ detallePostulacion.estudiante.nombre_completo }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Matrícula</span>
+                        <span class="info-value">{{ detallePostulacion.estudiante.matricula }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Semestre</span>
+                        <span class="info-value">{{ detallePostulacion.estudiante.semestre }}°</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <span class="info-value">{{ detallePostulacion.estudiante.email }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Convocatoria -->
+            <div class="info-card">
+                <h4 class="card-section-title">
+                    <lucide-icon name="calendar" size="18"></lucide-icon>
+                    Convocatoria
+                </h4>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Asignatura</span>
+                        <span class="info-value">{{ detallePostulacion.convocatoria.asignatura }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Docente</span>
+                        <span class="info-value">{{ detallePostulacion.convocatoria.docente }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cierre</span>
+                        <span class="info-value">{{ formatearFecha(detallePostulacion.convocatoria.fecha_cierre) }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cupos</span>
+                        <span class="info-value">{{ detallePostulacion.convocatoria.cupos_disponibles }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Estado -->
+            <div class="info-card estado-card">
+                <h4 class="card-section-title">
+                    <lucide-icon name="check-square" size="18"></lucide-icon>
+                    Estado de la Postulación
+                </h4>
+                <div class="estado-principal">
+                    <span [class]="'status-badge large ' + getEstadoClase(detallePostulacion.postulacion.estado_codigo)">
+                        {{ detallePostulacion.postulacion.estado_nombre }}
+                    </span>
+                </div>
+                <div class="resumen-documentos">
+                    <div class="resumen-item">
+                        <span class="resumen-numero">{{ detallePostulacion.resumen_documentos.total }}</span>
+                        <span class="resumen-texto">Total</span>
+                    </div>
+                    <div class="resumen-item aprobado">
+                        <span class="resumen-numero">{{ detallePostulacion.resumen_documentos.aprobados }}</span>
+                        <span class="resumen-texto">Aprobados</span>
+                    </div>
+                    <div class="resumen-item pendiente">
+                        <span class="resumen-numero">{{ detallePostulacion.resumen_documentos.pendientes }}</span>
+                        <span class="resumen-texto">Pendientes</span>
+                    </div>
+                    <div class="resumen-item observado">
+                        <span class="resumen-numero">{{ detallePostulacion.resumen_documentos.observados }}</span>
+                        <span class="resumen-texto">Observados</span>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div style="padding:1.5rem">
-            <p style="margin-bottom:.75rem;font-size:.9rem">
-                <strong>Estudiante:</strong> {{ postulacionSeleccionada.nombreCompletoEstudiante }}
-            </p>
-            <p style="margin-bottom:1.25rem;font-size:.9rem">
-                <strong>Convocatoria:</strong> {{ postulacionSeleccionada.asignaturaConvocatoria }}
-            </p>
 
-            <!-- Documentos adjuntos -->
-            <div style="margin-bottom:1.25rem">
-                <p
-                    style="font-size:.8rem;font-weight:600;color:#475569;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem">
-                    <lucide-icon name="paperclip" size="14"></lucide-icon> Documentos adjuntos
-                </p>
-                @if (loadingDocs) {
-                <p style="font-size:.8rem;color:#94a3b8">Cargando documentos...</p>
-                } @else if (documentos.length === 0) {
-                <p style="font-size:.8rem;color:#94a3b8;font-style:italic">Sin documentos adjuntos.</p>
-                } @else {
-                <div style="display:flex;flex-direction:column;gap:.5rem">
-                    @for (doc of documentos; track doc.idRequisitoAdjunto) {
-                    <div
-                        style="border:1px solid hsl(var(--border));border-radius:var(--radius);overflow:hidden;background:hsl(var(--card))">
-                        <!-- Fila principal: nombre + estado + descargar -->
-                        <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem">
-                            <lucide-icon name="file-text" size="16"
-                                style="color:hsl(var(--primary));flex-shrink:0"></lucide-icon>
-                            <span
-                                style="flex:1;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
-                                doc.nombreRequisito || 'Requisito' }}</span>
-                            <!-- Badge de estado -->
-                            <span
-                                style="padding:.1rem .45rem;border-radius:999px;font-size:.65rem;font-weight:700;text-transform:uppercase;flex-shrink:0"
-                                [ngStyle]="{
-                                  'background': doc.nombreEstado === 'APROBADO' ? '#dcfce7' : doc.nombreEstado === 'OBSERVADO' ? '#fef3c7' : '#f1f5f9',
-                                  'color': doc.nombreEstado === 'APROBADO' ? '#15803d' : doc.nombreEstado === 'OBSERVADO' ? '#92400e' : '#64748b'
-                                }">
-                                {{ doc.nombreEstado }}
-                            </span>
-                            <a href="#" (click)="verDocumento($event, doc.idRequisitoAdjunto)"
-                                style="display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;color:#2563eb;flex-shrink:0;text-decoration:none">
-                                <lucide-icon name="eye" size="12"></lucide-icon> Ver
-                            </a>
+        <!-- Documentos -->
+        <div class="documentos-section">
+            <h4 class="section-title">
+                <lucide-icon name="paperclip" size="18"></lucide-icon>
+                Documentos Adjuntos
+            </h4>
+
+            <div class="documentos-lista">
+                @for (doc of detallePostulacion.documentos; track doc.id_requisito_adjunto) {
+                <div class="documento-item" [class]="getDocumentoEstadoClase(doc.estado_codigo)">
+                    <div class="doc-info">
+                        <div class="doc-icono">
+                            <lucide-icon name="file-text" size="20"></lucide-icon>
                         </div>
-                        <!-- Observación existente -->
-                        @if (doc.observacion) {
-                        <div style="padding:.3rem .75rem .4rem;border-top:1px dashed hsl(var(--border));">
-                            <p style="font-size:.72rem;color:#ef4444;margin:0">💬 {{ doc.observacion }}</p>
+                        <div class="doc-detalles">
+                            <span class="doc-tipo">{{ doc.tipo_requisito }}</span>
+                            <span class="doc-nombre">{{ doc.nombre_archivo }}</span>
+                            <span class="doc-fecha">Subido: {{ formatearFecha(doc.fecha_subida) }}</span>
                         </div>
-                        }
-                        <!-- Acción: Observar este documento -->
-                        @if (docObservandoId === doc.idRequisitoAdjunto) {
-                        <div style="padding:.5rem .75rem;border-top:1px solid hsl(var(--border));background:#fffbeb">
-                            <textarea [(ngModel)]="docObservacion" rows="2"
-                                style="width:100%;font-size:.8rem;border:1px solid #fcd34d;border-radius:.3rem;padding:.3rem .5rem;resize:none"
-                                placeholder="Escribe la observación para este documento..."></textarea>
-                            <div style="display:flex;gap:.5rem;margin-top:.35rem;justify-content:flex-end">
-                                <button
-                                    style="font-size:.72rem;padding:.2rem .6rem;background:white;border:1px solid #cbd5e1;border-radius:.3rem;cursor:pointer"
-                                    (click)="docObservandoId = null">Cancelar</button>
-                                <button
-                                    style="font-size:.72rem;padding:.2rem .6rem;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:.3rem;cursor:pointer;font-weight:600"
-                                    (click)="observarDocumento(doc)">
-                                    {{ guardandoObs ? 'Guardando...' : 'Guardar obs.' }}
-                                </button>
-                            </div>
-                        </div>
-                        } @else {
-                        <div style="padding:.25rem .75rem .35rem;border-top:1px dashed hsl(var(--border))">
-                            <button (click)="docObservandoId = doc.idRequisitoAdjunto; docObservacion = ''"
-                                style="font-size:.7rem;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:.3rem;padding:.15rem .5rem;cursor:pointer;display:inline-flex;align-items:center;gap:.25rem">
-                                <lucide-icon name="message-square" size="11"></lucide-icon> Observar doc
+                    </div>
+
+                    <div class="doc-estado-badge">
+                        <span class="estado-texto">{{ doc.estado_codigo }}</span>
+                    </div>
+
+                    @if (doc.observacion) {
+                    <div class="doc-observacion">
+                        <lucide-icon name="message-square" size="14"></lucide-icon>
+                        <span>{{ doc.observacion }}</span>
+                    </div>
+                    }
+
+                    <div class="doc-acciones">
+                        <button class="btn-icon" (click)="visualizarDocumento(doc)" [disabled]="!doc.tiene_archivo"
+                            title="Visualizar">
+                            <lucide-icon name="eye" size="16"></lucide-icon>
+                        </button>
+                        <button class="btn-icon" (click)="descargarDocumento(doc)" [disabled]="!doc.tiene_archivo"
+                            title="Descargar">
+                            <lucide-icon name="download" size="16"></lucide-icon>
+                        </button>
+
+                        @if (puedeEvaluarDocumento(doc)) {
+                        <div class="acciones-evaluacion">
+                            <button class="btn-evaluar validar" (click)="iniciarEvaluacionDocumento(doc, 'VALIDAR')"
+                                title="Validar">
+                                <lucide-icon name="thumbs-up" size="14"></lucide-icon>
+                            </button>
+                            <button class="btn-evaluar observar" (click)="iniciarEvaluacionDocumento(doc, 'OBSERVAR')"
+                                title="Observar">
+                                <lucide-icon name="edit-3" size="14"></lucide-icon>
+                            </button>
+                            <button class="btn-evaluar rechazar" (click)="iniciarEvaluacionDocumento(doc, 'RECHAZAR')"
+                                title="Rechazar">
+                                <lucide-icon name="thumbs-down" size="14"></lucide-icon>
                             </button>
                         </div>
                         }
                     </div>
-                    }
                 </div>
                 }
             </div>
+        </div>
 
-            <hr style="border:none;border-top:1px solid hsl(var(--border));margin-bottom:1.25rem">
+        <!-- Acciones Finales -->
+        <div class="acciones-finales">
+            <button class="btn-dictamen rechazar" (click)="abrirModalDictamen('RECHAZAR')">
+                <lucide-icon name="x-circle" size="18"></lucide-icon>
+                Rechazar Postulación
+            </button>
+            <button class="btn-dictamen aprobar" (click)="abrirModalDictamen('APROBAR')"
+                [disabled]="!detallePostulacion.puede_aprobar">
+                <lucide-icon name="check-circle" size="18"></lucide-icon>
+                Aprobar Postulación
+            </button>
+        </div>
+        @if (!detallePostulacion.puede_aprobar) {
+        <p class="aviso-aprobar">* Todos los documentos deben estar validados para aprobar la postulación</p>
+        }
+    </div>
+    }
+    }
+</div>
 
-            <div class="form-group" style="margin-bottom:1rem">
-                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">
-                    Decisión
-                </label>
-                <select class="input-field" [(ngModel)]="nuevoEstado">
-                    <option value="EN_EVALUACION">Aprobar para evaluación</option>
-                    <option value="RECHAZADO">Rechazar postulación</option>
-                </select>
+<!-- Modal Evaluar Documento -->
+@if (documentoEvaluando) {
+<div class="modal-backdrop" (click)="cancelarEvaluacionDocumento()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header" [class]="accionDocumento?.toLowerCase()">
+            <h3>
+                @switch (accionDocumento) {
+                @case ('VALIDAR') { ✓ Validar Documento }
+                @case ('OBSERVAR') { ✎ Observar Documento }
+                @case ('RECHAZAR') { ✗ Rechazar Documento }
+                }
+            </h3>
+            <button class="btn-icon" (click)="cancelarEvaluacionDocumento()">
+                <lucide-icon name="x" size="18"></lucide-icon>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="doc-seleccionado">
+                <strong>{{ documentoEvaluando.tipo_requisito }}</strong>
+                <span>{{ documentoEvaluando.nombre_archivo }}</span>
             </div>
 
+            @if (accionDocumento === 'OBSERVAR') {
             <div class="form-group">
-                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">
-                    Observación (opcional)
-                </label>
-                <textarea class="input-field" rows="3" [(ngModel)]="observacion"
-                    placeholder="Dejar un comentario sobre la decisión..." style="resize:vertical"></textarea>
+                <label>Observación (requerida):</label>
+                <textarea [(ngModel)]="observacionDocumento" rows="4"
+                    placeholder="Indique los problemas encontrados en el documento..."></textarea>
             </div>
+            }
 
-            <div style="display:flex;gap:.75rem;margin-top:1.5rem;justify-content:flex-end">
-                <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
-                <button class="btn-primary" (click)="confirmarDecision()" [disabled]="loadingAccion"
-                    style="display:inline-flex;align-items:center;gap:.5rem">
-                    @if (loadingAccion) {
-                    <lucide-icon name="loader-2" class="animate-spin" size="14"></lucide-icon>
-                    } @else {
-                    <lucide-icon name="check" size="14"></lucide-icon>
-                    }
-                    Confirmar
-                </button>
-            </div>
+            @if (accionDocumento === 'VALIDAR') {
+            <p class="confirmacion-texto">¿Confirma que el documento cumple con todos los requisitos?</p>
+            }
+
+            @if (accionDocumento === 'RECHAZAR') {
+            <p class="confirmacion-texto warning">⚠️ Esta acción es irreversible. El documento será marcado como
+                rechazado.</p>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="cancelarEvaluacionDocumento()">Cancelar</button>
+            <button class="btn-primary" [class]="accionDocumento?.toLowerCase()" (click)="confirmarEvaluacionDocumento()"
+                [disabled]="loadingEvaluacion">
+                @if (loadingEvaluacion) {
+                <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon>
+                }
+                @switch (accionDocumento) {
+                @case ('VALIDAR') { Validar }
+                @case ('OBSERVAR') { Guardar Observación }
+                @case ('RECHAZAR') { Rechazar }
+                }
+            </button>
         </div>
     </div>
 </div>
 }
 
-<!-- Modal Asignar Comisión -->
-@if (mostrarModalAsignacion && postulacionParaAsignar) {
-<div class="modal-backdrop" (click)="cerrarModalAsignacion()">
-    <div class="modal-box" style="max-width:520px" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h3 style="font-size:1rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.5rem">
-                <lucide-icon name="Users" size="18"></lucide-icon>
-                Asignar Comisión de Evaluación
-            </h3>
-            <button class="btn-icon" (click)="cerrarModalAsignacion()">
+<!-- Modal Dictamen -->
+@if (mostrarModalDictamen) {
+<div class="modal-backdrop" (click)="cerrarModalDictamen()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-header" [class]="accionDictamen?.toLowerCase()">
+            <h3>{{ accionDictamen === 'APROBAR' ? '✓ Aprobar Postulación' : '✗ Rechazar Postulación' }}</h3>
+            <button class="btn-icon" (click)="cerrarModalDictamen()">
                 <lucide-icon name="x" size="18"></lucide-icon>
             </button>
         </div>
-        <div style="padding:1.5rem">
-            <p style="font-size:.85rem;color:#64748b;margin-bottom:1.25rem">
-                Asignando comisión para: <strong>{{ postulacionParaAsignar.nombreCompletoEstudiante }}</strong>
-                — <em>{{ postulacionParaAsignar.asignaturaConvocatoria }}</em>
+        <div class="modal-body">
+            @if (accionDictamen === 'APROBAR') {
+            <p class="confirmacion-texto success">
+                La postulación será aprobada y el estudiante será notificado.
+                El proceso continuará con la evaluación de méritos y oposición.
             </p>
+            }
 
-            <!-- Selector de comisión -->
-            <div class="form-group" style="margin-bottom:1rem">
-                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Comisión
-                    <span style="color:red">*</span></label>
-                @if (loadingComisiones) {
-                <p style="font-size:.8rem;color:#94a3b8">Cargando comisiones...</p>
-                } @else if (comisionesDisponibles.length === 0) {
-                <p style="font-size:.8rem;color:#ef4444">No hay comisiones activas para esta convocatoria. El Decano
-                    debe crear una primero.</p>
-                } @else {
-                <select class="input-field" [(ngModel)]="asignacionForm.idComisionSeleccion">
-                    <option [ngValue]="null" disabled>— Seleccionar comisión —</option>
-                    @for (c of comisionesDisponibles; track c.idComisionSeleccion) {
-                    <option [ngValue]="c.idComisionSeleccion">{{ c.nombreComision }}</option>
-                    }
-                </select>
+            @if (accionDictamen === 'RECHAZAR') {
+            <p class="confirmacion-texto warning">⚠️ Esta acción es irreversible. El estudiante será notificado del
+                rechazo.</p>
+            <div class="form-group">
+                <label>Motivo del rechazo (requerido):</label>
+                <textarea [(ngModel)]="observacionDictamen" rows="4"
+                    placeholder="Explique el motivo del rechazo..."></textarea>
+            </div>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" (click)="cerrarModalDictamen()">Cancelar</button>
+            <button class="btn-primary" [class]="accionDictamen?.toLowerCase()" (click)="confirmarDictamen()"
+                [disabled]="loadingDictamen">
+                @if (loadingDictamen) {
+                <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon>
                 }
-            </div>
-
-            <!-- Tema de la exposición -->
-            <div class="form-group" style="margin-bottom:1rem">
-                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Tema de
-                    la Exposición <span style="color:red">*</span></label>
-                <input type="text" class="input-field" [(ngModel)]="asignacionForm.temaExposicion"
-                    placeholder="Ej. Estructuras de Datos y Algoritmia" />
-            </div>
-
-            <!-- Fecha y horario -->
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1rem">
-                <div class="form-group" style="margin:0">
-                    <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">
-                        <lucide-icon name="Calendar" size="12"></lucide-icon> Fecha *
-                    </label>
-                    <input type="date" class="input-field" [(ngModel)]="asignacionForm.fechaEvaluacion" />
-                </div>
-                <div class="form-group" style="margin:0">
-                    <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Hora
-                        inicio</label>
-                    <input type="time" class="input-field" [(ngModel)]="asignacionForm.horaInicio" />
-                </div>
-                <div class="form-group" style="margin:0">
-                    <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Hora
-                        fin</label>
-                    <input type="time" class="input-field" [(ngModel)]="asignacionForm.horaFin" />
-                </div>
-            </div>
-
-            <!-- Lugar -->
-            <div class="form-group" style="margin-bottom:1.5rem">
-                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Lugar
-                    <span style="color:red">*</span></label>
-                <input type="text" class="input-field" [(ngModel)]="asignacionForm.lugar"
-                    placeholder="Ej. Aula A-201, Bloque Académico" />
-            </div>
-
-            <div style="display:flex;gap:.75rem;justify-content:flex-end">
-                <button class="btn-secondary" (click)="cerrarModalAsignacion()">Cancelar</button>
-                <button class="btn-primary" (click)="confirmarAsignacion()"
-                    [disabled]="asignando || comisionesDisponibles.length === 0"
-                    style="display:inline-flex;align-items:center;gap:.5rem">
-                    @if (asignando) {
-                    <lucide-icon name="loader-2" class="animate-spin" size="14"></lucide-icon>
-                    Asignando...
-                    } @else {
-                    <lucide-icon name="Users" size="14"></lucide-icon>
-                    Asignar Comisión
-                    }
-                </button>
-            </div>
+                {{ accionDictamen === 'APROBAR' ? 'Confirmar Aprobación' : 'Confirmar Rechazo' }}
+            </button>
         </div>
     </div>
 </div>

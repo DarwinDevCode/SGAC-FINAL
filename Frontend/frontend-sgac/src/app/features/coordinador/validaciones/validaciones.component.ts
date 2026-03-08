@@ -2,15 +2,22 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, CheckCircle, AlertCircle, Loader2, Clock, CheckSquare, X, Paperclip, FileText, Eye, MessageSquare, Check, Users, Calendar } from 'lucide-angular';
-import { Subscription, switchMap } from 'rxjs';
-import { CoordinadorService } from '../../../core/services/coordinador-service';
+import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider,
+    CheckCircle, AlertCircle, Loader2, Clock, CheckSquare, X,
+    Paperclip, FileText, Eye, MessageSquare, Check, Users, Calendar,
+    ThumbsUp, ThumbsDown, Edit3, Download, ChevronLeft, RefreshCw,
+    AlertTriangle, Search, Filter, XCircle, Inbox
+} from 'lucide-angular';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth-service';
-import { PostulacionResponseDTO, RequisitoAdjuntoResponseDTO } from '../../../core/dto/postulacion';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { ComisionService } from '../../../core/services/comision-service';
-import { ComisionDTO } from '../../../core/dto/comision';
-import { EvaluacionOposicionService, AsignarComisionRequest } from '../../../core/services/evaluacion-oposicion-service';
+import { EvaluacionPostulacionService } from '../../../core/services/evaluacion-postulacion-service';
+import {
+    PostulacionListadoCoordinador,
+    DetallePostulacionCoordinador,
+    DocumentoEvaluacion,
+    EvaluarDocumentoRequest,
+    DictaminarPostulacionRequest
+} from '../../../core/dto/evaluacion-postulacion';
 
 @Component({
     selector: 'app-coordinador-validaciones',
@@ -22,297 +29,361 @@ import { EvaluacionOposicionService, AsignarComisionRequest } from '../../../cor
         {
             provide: LUCIDE_ICONS,
             multi: true,
-            useValue: new LucideIconProvider({ CheckCircle, AlertCircle, Loader2, Clock, CheckSquare, X, Paperclip, FileText, Eye, MessageSquare, Check, Users, Calendar })
+            useValue: new LucideIconProvider({
+                CheckCircle, AlertCircle, Loader2, Clock, CheckSquare, X,
+                Paperclip, FileText, Eye, MessageSquare, Check, Users, Calendar,
+                ThumbsUp, ThumbsDown, Edit3, Download, ChevronLeft, RefreshCw,
+                AlertTriangle, Search, Filter, XCircle, Inbox
+            })
         }
     ]
 })
 export class ValidacionesComponent implements OnInit, OnDestroy {
-    private coordinadorService = inject(CoordinadorService);
     private authService = inject(AuthService);
-    private http = inject(HttpClient);
-    private comisionService = inject(ComisionService);
-    private evaluacionService = inject(EvaluacionOposicionService);
+    private evaluacionService = inject(EvaluacionPostulacionService);
     private subs = new Subscription();
 
-    postulantes: PostulacionResponseDTO[] = [];
+    // Estado general
+    postulaciones: PostulacionListadoCoordinador[] = [];
     loading = true;
     errorMensaje = '';
     successMensaje = '';
+    idUsuario: number | null = null;
 
-    // Modal
-    mostrarModal = false;
-    postulacionSeleccionada: PostulacionResponseDTO | null = null;
-    nuevoEstado = 'EN_EVALUACION';
-    observacion = '';
-    loadingAccion = false;
-
-    // Documentos del postulante
-    documentos: RequisitoAdjuntoResponseDTO[] = [];
-    loadingDocs = false;
-
-    // P7: Observar un documento individual
-    docObservandoId: number | null = null;
-    docObservacion = '';
-    guardandoObs = false;
-
-    // Modal Asignar Comisión
-    mostrarModalAsignacion = false;
-    postulacionParaAsignar: PostulacionResponseDTO | null = null;
-    comisionesDisponibles: ComisionDTO[] = [];
-    loadingComisiones = false;
-    asignacionForm = {
-        idComisionSeleccion: null as number | null,
-        temaExposicion: '',
-        fechaEvaluacion: '',
-        horaInicio: '',
-        horaFin: '',
-        lugar: ''
-    };
-    asignando = false;
+    // Filtros
+    filtroEstado = 'TODOS';
+    filtroBusqueda = '';
 
     // Tabs
-    tabActivo: 'pendientes' | 'en-evaluacion' = 'pendientes';
-    enEvaluacion: PostulacionResponseDTO[] = [];
-    loadingEval = false;
-    idCarreraActual: number | null = null;
+    tabActivo: 'requiere-atencion' | 'todas' = 'requiere-atencion';
 
-    readonly estadosValidos = ['EN_EVALUACION', 'RECHAZADO'];
+    // Vista detalle
+    vistaDetalle = false;
+    detallePostulacion: DetallePostulacionCoordinador | null = null;
+    loadingDetalle = false;
+    postulacionSeleccionadaId: number | null = null;
+
+    // Evaluar documento
+    documentoEvaluando: DocumentoEvaluacion | null = null;
+    accionDocumento: 'VALIDAR' | 'OBSERVAR' | 'RECHAZAR' | null = null;
+    observacionDocumento = '';
+    loadingEvaluacion = false;
+
+    // Modal dictamen
+    mostrarModalDictamen = false;
+    accionDictamen: 'APROBAR' | 'RECHAZAR' | null = null;
+    observacionDictamen = '';
+    loadingDictamen = false;
 
     ngOnInit(): void {
-        this.cargarPostulantes();
+        const user = this.authService.getUser();
+        if (user) {
+            this.idUsuario = user.idUsuario;
+            this.cargarPostulaciones();
+        }
     }
 
     ngOnDestroy(): void {
         this.subs.unsubscribe();
     }
 
-    cargarPostulantes() {
+    cargarPostulaciones(): void {
+        if (!this.idUsuario) return;
+
         this.loading = true;
         this.errorMensaje = '';
-        const user = this.authService.getUser();
-        if (!user) { this.loading = false; return; }
 
         this.subs.add(
-            this.coordinadorService.obtenerCoordinadorPorUsuario(user.idUsuario).pipe(
-                switchMap((coord: any) => {
-                    this.idCarreraActual = coord.idCarrera ?? 0;
-                    return this.coordinadorService.listarPendientesPorCarrera(coord.idCarrera ?? 0);
-                })
-            ).subscribe({
+            this.evaluacionService.listarPostulaciones(this.idUsuario).subscribe({
                 next: (lista) => {
-                    this.postulantes = lista;
+                    this.postulaciones = lista;
                     this.loading = false;
-                    // load EN_EVALUACION tab in background
-                    this.cargarEnEvaluacion();
                 },
-                error: (err: HttpErrorResponse) => {
-                    console.error(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar postulaciones:');
-                    this.errorMensaje = 'Error al cargar postulaciones.';
+                error: (err) => {
+                    console.error('Error al cargar postulaciones:', err);
+                    this.errorMensaje = err.error?.mensaje || 'Error al cargar las postulaciones';
                     this.loading = false;
                 }
             })
         );
     }
 
-    cargarEnEvaluacion() {
-        if (!this.idCarreraActual) return;
-        this.loadingEval = true;
+    // Filtrado de postulaciones
+    get postulacionesFiltradas(): PostulacionListadoCoordinador[] {
+        let lista = this.postulaciones;
+
+        // Filtro por tab
+        if (this.tabActivo === 'requiere-atencion') {
+            lista = lista.filter(p => p.requiere_atencion);
+        }
+
+        // Filtro por estado
+        if (this.filtroEstado !== 'TODOS') {
+            lista = lista.filter(p => p.estado_codigo === this.filtroEstado);
+        }
+
+        // Filtro por búsqueda
+        if (this.filtroBusqueda.trim()) {
+            const busqueda = this.filtroBusqueda.toLowerCase();
+            lista = lista.filter(p =>
+                p.nombre_estudiante.toLowerCase().includes(busqueda) ||
+                p.matricula.toLowerCase().includes(busqueda) ||
+                p.nombre_asignatura.toLowerCase().includes(busqueda)
+            );
+        }
+
+        return lista;
+    }
+
+    get estadosUnicos(): string[] {
+        return [...new Set(this.postulaciones.map(p => p.estado_codigo))].filter(Boolean);
+    }
+
+    get contadorRequierenAtencion(): number {
+        return this.postulaciones.filter(p => p.requiere_atencion).length;
+    }
+
+    cambiarTab(tab: 'requiere-atencion' | 'todas'): void {
+        this.tabActivo = tab;
+    }
+
+    // Ver detalle de postulación
+    verDetalle(postulacion: PostulacionListadoCoordinador): void {
+        if (!this.idUsuario) return;
+
+        this.postulacionSeleccionadaId = postulacion.id_postulacion;
+        this.loadingDetalle = true;
+        this.vistaDetalle = true;
+        this.errorMensaje = '';
+
+        // Primero iniciar revisión (cambiar estado si es necesario)
         this.subs.add(
-            this.coordinadorService.listarEnEvaluacionPorCarrera(this.idCarreraActual).subscribe({
-                next: (lista) => {
-                    this.enEvaluacion = lista;
-                    this.loadingEval = false;
+            this.evaluacionService.iniciarRevision(this.idUsuario, postulacion.id_postulacion).subscribe({
+                next: (resp) => {
+                    if (resp.cambio_realizado) {
+                        const idx = this.postulaciones.findIndex(p => p.id_postulacion === postulacion.id_postulacion);
+                        if (idx >= 0) {
+                            this.postulaciones[idx].estado_codigo = resp.estado_actual || 'EN_REVISION';
+                            this.postulaciones[idx].estado_nombre = 'En Revisión';
+                        }
+                    }
+                    this.cargarDetallePostulacion(postulacion.id_postulacion);
                 },
-                error: () => { this.loadingEval = false; }
+                error: () => {
+                    this.cargarDetallePostulacion(postulacion.id_postulacion);
+                }
             })
         );
     }
 
-    cambiarTab(tab: 'pendientes' | 'en-evaluacion') {
-        this.tabActivo = tab;
-        if (tab === 'en-evaluacion') this.cargarEnEvaluacion();
-    }
+    cargarDetallePostulacion(idPostulacion: number): void {
+        if (!this.idUsuario) return;
 
-    abrirModal(p: PostulacionResponseDTO) {
-        this.postulacionSeleccionada = p;
-        this.nuevoEstado = 'EN_EVALUACION';
-        this.observacion = '';
-        this.documentos = [];
-        this.mostrarModal = true;
-
-        // Cargar los documentos adjuntos
-        if (p.idPostulacion) {
-            this.loadingDocs = true;
-            this.subs.add(
-                this.coordinadorService.listarDocumentosPorPostulacion(p.idPostulacion).subscribe({
-                    next: (docs) => {
-                        this.documentos = docs;
-                        this.loadingDocs = false;
-                    },
-                    error: () => {
-                        this.loadingDocs = false;
-                    }
-                })
-            );
-        }
-    }
-
-    cerrarModal() {
-        this.mostrarModal = false;
-        this.postulacionSeleccionada = null;
-        this.documentos = [];
-    }
-
-    verDocumento(event: Event, idRequisito: number) {
-        event.preventDefault();
         this.subs.add(
-            this.http.get(`http://localhost:8080/api/requisitos-adjuntos/descargar/${idRequisito}`, {
-                responseType: 'blob'
-            }).subscribe({
+            this.evaluacionService.obtenerDetallePostulacion(this.idUsuario, idPostulacion).subscribe({
+                next: (detalle) => {
+                    this.detallePostulacion = detalle;
+                    this.loadingDetalle = false;
+                },
+                error: (err) => {
+                    console.error('Error al cargar detalle:', err);
+                    this.errorMensaje = err.error?.mensaje || 'Error al cargar el detalle de la postulación';
+                    this.loadingDetalle = false;
+                }
+            })
+        );
+    }
+
+    volverALista(): void {
+        this.vistaDetalle = false;
+        this.detallePostulacion = null;
+        this.postulacionSeleccionadaId = null;
+        this.cargarPostulaciones();
+    }
+
+    // Visualizar documento
+    visualizarDocumento(doc: DocumentoEvaluacion): void {
+        if (!this.idUsuario || !doc.tiene_archivo) return;
+
+        this.subs.add(
+            this.evaluacionService.visualizarDocumento(this.idUsuario, doc.id_requisito_adjunto).subscribe({
                 next: (blob) => {
                     const url = window.URL.createObjectURL(blob);
                     window.open(url, '_blank');
-                    // Opcional: Para liberarlo luego, window.URL.revokeObjectURL(url) pero si es _blank el GC del nuevo tab lo limpia.
                 },
-                error: (err: HttpErrorResponse) => {
-                    console.error('Error al descargar documento:', err);
-                    alert('No tiene los permisos suficientes o el documento no existe.');
+                error: (err) => {
+                    console.error('Error al visualizar documento:', err);
+                    this.errorMensaje = 'Error al visualizar el documento';
+                    setTimeout(() => this.errorMensaje = '', 3000);
                 }
             })
         );
     }
 
-    confirmarDecision() {
-        if (!this.postulacionSeleccionada?.idPostulacion) return;
-        this.loadingAccion = true;
+    descargarDocumento(doc: DocumentoEvaluacion): void {
+        if (!this.idUsuario || !doc.tiene_archivo) return;
 
         this.subs.add(
-            this.coordinadorService.cambiarEstadoPostulacion(
-                this.postulacionSeleccionada.idPostulacion,
-                this.nuevoEstado,
-                this.observacion || '—'
-            ).subscribe({
-                next: () => {
-                    const estadoMsg = this.nuevoEstado === 'EN_EVALUACION' ? 'aprobada para evaluación' : 'rechazada';
-                    this.successMensaje = `Postulación ${estadoMsg} correctamente.`;
-                    this.loadingAccion = false;
-                    this.cerrarModal();
-                    this.cargarPostulantes();
-                    setTimeout(() => this.successMensaje = '', 4000);
+            this.evaluacionService.descargarDocumento(this.idUsuario, doc.id_requisito_adjunto).subscribe({
+                next: (blob) => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = doc.nombre_archivo || 'documento.pdf';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
                 },
-                error: (err: HttpErrorResponse) => {
-                    console.error(err.error?.data?.message || err.error?.message || err.message || 'Error al cambiar estado de postulación:');
-                    this.errorMensaje = 'Error al actualizar el estado.';
-                    this.loadingAccion = false;
+                error: (err) => {
+                    console.error('Error al descargar documento:', err);
+                    this.errorMensaje = 'Error al descargar el documento';
+                    setTimeout(() => this.errorMensaje = '', 3000);
+                }
+            })
+        );
+    }
+
+    // Evaluar documento
+    iniciarEvaluacionDocumento(doc: DocumentoEvaluacion, accion: 'VALIDAR' | 'OBSERVAR' | 'RECHAZAR'): void {
+        this.documentoEvaluando = doc;
+        this.accionDocumento = accion;
+        this.observacionDocumento = '';
+    }
+
+    cancelarEvaluacionDocumento(): void {
+        this.documentoEvaluando = null;
+        this.accionDocumento = null;
+        this.observacionDocumento = '';
+    }
+
+    confirmarEvaluacionDocumento(): void {
+        if (!this.idUsuario || !this.documentoEvaluando || !this.accionDocumento) return;
+
+        if (this.accionDocumento === 'OBSERVAR' && !this.observacionDocumento.trim()) {
+            this.errorMensaje = 'Debe ingresar una observación para el documento';
+            setTimeout(() => this.errorMensaje = '', 3000);
+            return;
+        }
+
+        this.loadingEvaluacion = true;
+
+        const request: EvaluarDocumentoRequest = {
+            id_requisito_adjunto: this.documentoEvaluando.id_requisito_adjunto,
+            accion: this.accionDocumento,
+            observacion: this.accionDocumento === 'OBSERVAR' ? this.observacionDocumento : undefined
+        };
+
+        this.subs.add(
+            this.evaluacionService.evaluarDocumento(this.idUsuario, request).subscribe({
+                next: (resp) => {
+                    this.loadingEvaluacion = false;
+                    if (resp.exito) {
+                        this.successMensaje = resp.mensaje;
+                        if (this.postulacionSeleccionadaId) {
+                            this.cargarDetallePostulacion(this.postulacionSeleccionadaId);
+                        }
+                        this.cancelarEvaluacionDocumento();
+                    } else {
+                        this.errorMensaje = resp.mensaje;
+                    }
+                    setTimeout(() => {
+                        this.successMensaje = '';
+                        this.errorMensaje = '';
+                    }, 4000);
+                },
+                error: (err) => {
+                    this.loadingEvaluacion = false;
+                    this.errorMensaje = err.error?.mensaje || 'Error al evaluar el documento';
                     setTimeout(() => this.errorMensaje = '', 4000);
                 }
             })
         );
     }
 
-    /** P7: Marcar un documento individual como OBSERVADO con una observación */
-    observarDocumento(doc: RequisitoAdjuntoResponseDTO) {
-        if (!this.docObservacion.trim()) return;
-        this.guardandoObs = true;
-        // id_tipo_estado_requisito = 3 es el estado OBSERVADO (ajustar si difiere en tu BD)
-        const ID_ESTADO_OBSERVADO = 3;
-        const API_REQUISITOS = 'http://localhost:8080/api/requisitos-adjuntos';
-        this.subs.add(
-            this.http.put(`${API_REQUISITOS}/${doc.idRequisitoAdjunto}`, null, {
-                params: { idTipoEstadoRequisito: ID_ESTADO_OBSERVADO, observacion: this.docObservacion },
-                responseType: 'json'
-            }).subscribe({
-                next: (updated: any) => {
-                    doc.nombreEstado = updated.nombreEstado ?? 'OBSERVADO';
-                    doc.observacion = this.docObservacion;
-                    this.docObservandoId = null;
-                    this.docObservacion = '';
-                    this.guardandoObs = false;
-                },
-                error: () => {
-                    this.guardandoObs = false;
-                    alert('Error al guardar la observación.');
-                }
-            })
-        );
+    // Dictaminar postulación
+    abrirModalDictamen(accion: 'APROBAR' | 'RECHAZAR'): void {
+        this.accionDictamen = accion;
+        this.observacionDictamen = '';
+        this.mostrarModalDictamen = true;
     }
 
-    /** Abrir el modal para asignar una comisión a una postulación EN_EVALUACION */
-    abrirModalAsignacion(p: PostulacionResponseDTO) {
-        this.postulacionParaAsignar = p;
-        this.asignacionForm = {
-            idComisionSeleccion: null,
-            temaExposicion: '',
-            fechaEvaluacion: new Date().toISOString().split('T')[0],
-            horaInicio: '09:00',
-            horaFin: '10:00',
-            lugar: ''
-        };
-        this.mostrarModalAsignacion = true;
-        this.comisionesDisponibles = [];
-
-        // Fetch comisiones for the convocatoria
-        if (p.idConvocatoria) {
-            this.loadingComisiones = true;
-            this.subs.add(
-                this.comisionService.listarPorConvocatoria(p.idConvocatoria).subscribe({
-                    next: (coms) => {
-                        this.comisionesDisponibles = coms.filter(c => c.activo);
-                        this.loadingComisiones = false;
-                    },
-                    error: () => { this.loadingComisiones = false; }
-                })
-            );
-        }
+    cerrarModalDictamen(): void {
+        this.mostrarModalDictamen = false;
+        this.accionDictamen = null;
+        this.observacionDictamen = '';
     }
 
-    cerrarModalAsignacion() {
-        this.mostrarModalAsignacion = false;
-        this.postulacionParaAsignar = null;
-    }
+    confirmarDictamen(): void {
+        if (!this.idUsuario || !this.detallePostulacion || !this.accionDictamen) return;
 
-    confirmarAsignacion() {
-        if (!this.postulacionParaAsignar?.idPostulacion) return;
-        if (!this.asignacionForm.idComisionSeleccion) {
-            alert('Debes seleccionar una comisión.');
+        if (this.accionDictamen === 'RECHAZAR' && !this.observacionDictamen.trim()) {
+            this.errorMensaje = 'Debe ingresar un motivo para rechazar la postulación';
+            setTimeout(() => this.errorMensaje = '', 3000);
             return;
         }
-        if (!this.asignacionForm.temaExposicion || !this.asignacionForm.fechaEvaluacion || !this.asignacionForm.lugar) {
-            alert('Por favor completa todos los campos requeridos.');
-            return;
-        }
-        this.asignando = true;
 
-        const request: AsignarComisionRequest = {
-            idPostulacion: this.postulacionParaAsignar.idPostulacion,
-            idComisionSeleccion: this.asignacionForm.idComisionSeleccion,
-            temaExposicion: this.asignacionForm.temaExposicion,
-            fechaEvaluacion: this.asignacionForm.fechaEvaluacion,
-            horaInicio: this.asignacionForm.horaInicio + ':00',
-            horaFin: this.asignacionForm.horaFin + ':00',
-            lugar: this.asignacionForm.lugar
+        this.loadingDictamen = true;
+
+        const request: DictaminarPostulacionRequest = {
+            id_postulacion: this.detallePostulacion.postulacion.id_postulacion,
+            accion: this.accionDictamen,
+            observacion: this.accionDictamen === 'RECHAZAR' ? this.observacionDictamen : undefined
         };
 
         this.subs.add(
-            this.evaluacionService.asignarComision(request).subscribe({
-                next: () => {
-                    this.successMensaje = '¡Comisión asignada correctamente al postulante!';
-                    this.asignando = false;
-
-                    if (this.postulacionParaAsignar) {
-                        this.postulacionParaAsignar.comisionAsignada = true;
+            this.evaluacionService.dictaminarPostulacion(this.idUsuario, request).subscribe({
+                next: (resp) => {
+                    this.loadingDictamen = false;
+                    if (resp.exito) {
+                        this.successMensaje = resp.mensaje;
+                        this.cerrarModalDictamen();
+                        this.volverALista();
+                    } else {
+                        this.errorMensaje = resp.mensaje;
                     }
-
-                    this.cerrarModalAsignacion();
-                    setTimeout(() => this.successMensaje = '', 4000);
+                    setTimeout(() => {
+                        this.successMensaje = '';
+                        this.errorMensaje = '';
+                    }, 4000);
                 },
-                error: (err: HttpErrorResponse) => {
-                    this.asignando = false;
-                    this.errorMensaje = 'Error al asignar la comisión: ' + (err.error || err.message);
-                    setTimeout(() => this.errorMensaje = '', 5000);
+                error: (err) => {
+                    this.loadingDictamen = false;
+                    this.errorMensaje = err.error?.mensaje || 'Error al dictaminar la postulación';
+                    setTimeout(() => this.errorMensaje = '', 4000);
                 }
             })
         );
+    }
+
+    // Helpers
+    getEstadoClase(estado: string): string {
+        const clases: { [key: string]: string } = {
+            'PENDIENTE': 'status-pendiente',
+            'EN_REVISION': 'status-revision',
+            'OBSERVADA': 'status-observada',
+            'CORREGIDA': 'status-corregida',
+            'APROBADA': 'status-aprobada',
+            'RECHAZADA': 'status-rechazada'
+        };
+        return clases[estado] || 'status-default';
+    }
+
+    getDocumentoEstadoClase(estado: string): string {
+        const estadoUpper = estado?.toUpperCase() || '';
+        if (estadoUpper.includes('APROBADO') || estadoUpper.includes('VALIDADO')) return 'doc-aprobado';
+        if (estadoUpper.includes('OBSERVADO')) return 'doc-observado';
+        if (estadoUpper.includes('RECHAZADO')) return 'doc-rechazado';
+        if (estadoUpper.includes('CORREGIDO')) return 'doc-corregido';
+        return 'doc-pendiente';
+    }
+
+    puedeEvaluarDocumento(doc: DocumentoEvaluacion): boolean {
+        const estado = doc.estado_codigo?.toUpperCase() || '';
+        return estado.includes('PENDIENTE') || estado.includes('CORREGIDO');
+    }
+
+    formatearFecha(fecha: string): string {
+        if (!fecha) return '—';
+        const date = new Date(fecha);
+        return date.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 }
-

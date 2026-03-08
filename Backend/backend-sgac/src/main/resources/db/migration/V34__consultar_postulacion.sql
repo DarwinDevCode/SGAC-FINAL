@@ -175,7 +175,6 @@ BEGIN
              INNER JOIN seguridad.usuario u ON d.id_usuario = u.id_usuario
     WHERE p.id_estudiante = v_id_estudiante
       AND p.activo = TRUE
-      AND p.estado_postulacion NOT IN ('RECHAZADA', 'CANCELADA')
     ORDER BY p.fecha_postulacion DESC
     LIMIT 1;
 

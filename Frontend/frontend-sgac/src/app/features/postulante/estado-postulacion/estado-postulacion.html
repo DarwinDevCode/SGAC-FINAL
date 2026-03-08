@@ -68,6 +68,17 @@
                 <p>{{ postulacion?.observaciones }}</p>
             </div>
             }
+
+            <!-- Alerta de postulación rechazada -->
+            @if (postulacionRechazada) {
+            <div class="alerta-rechazada">
+                <lucide-icon name="x-circle" size="20"></lucide-icon>
+                <div class="alerta-contenido">
+                    <strong>Postulación Rechazada</strong>
+                    <p>Tu postulación ha sido rechazada. Solo puedes visualizar los documentos adjuntos. No es posible realizar modificaciones.</p>
+                </div>
+            </div>
+            }
         </div>
 
         <!-- Cronograma / Timeline -->
@@ -167,8 +178,8 @@
                     </div>
                     }
 
-                    <!-- Botón de reemplazo (solo si es editable) -->
-                    @if (doc.es_editable) {
+                    <!-- Botón de reemplazo (solo si es editable y postulación no rechazada) -->
+                    @if (esDocumentoEditable(doc)) {
                     <div class="doc-reemplazo">
                         <label class="btn-reemplazar">
                             <lucide-icon name="upload" size="14"></lucide-icon>

@@ -35,6 +35,10 @@ public class Postulacion {
     @Column(name = "estado_postulacion", length = 30)
     private String estadoPostulacion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipo_estado_postulacion")
+    private TipoEstadoPostulacion tipoEstadoPostulacion;
+
     @Column(name = "observaciones", length = 500)
     private String observaciones;
 

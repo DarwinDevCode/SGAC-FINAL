@@ -206,13 +206,32 @@ export class EstadoPostulacionComponent implements OnInit, OnDestroy {
     getEstadoPostulacionClase(estado: string): string {
         switch (estado?.toUpperCase()) {
             case 'APROBADO':
+            case 'APROBADA':
             case 'APTO': return 'status-pill aprobado';
             case 'RECHAZADO':
+            case 'RECHAZADA':
             case 'NO_APTO': return 'status-pill rechazado';
             case 'EN_REVISION':
             case 'EN_EVALUACION': return 'status-pill info';
-            case 'OBSERVADO': return 'status-pill observado';
+            case 'OBSERVADO':
+            case 'OBSERVADA': return 'status-pill observado';
             default: return 'status-pill pendiente';
         }
+    }
+
+    // Verifica si la postulación está rechazada (bloquea todas las acciones)
+    get postulacionRechazada(): boolean {
+        const estado = this.postulacion?.estado_postulacion?.toUpperCase() || '';
+        return estado === 'RECHAZADA' || estado === 'RECHAZADO';
+    }
+
+    // Verifica si un documento es editable (considerando el estado de la postulación)
+    esDocumentoEditable(doc: DocumentoPostulacionDTO): boolean {
+        // Si la postulación está rechazada, ningún documento es editable
+        if (this.postulacionRechazada) {
+            return false;
+        }
+        // De lo contrario, usar el flag es_editable del documento
+        return doc.es_editable === true;
     }
 }
