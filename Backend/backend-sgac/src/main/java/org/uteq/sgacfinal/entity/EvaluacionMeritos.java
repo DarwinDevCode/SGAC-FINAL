@@ -36,6 +36,4 @@ public class EvaluacionMeritos {
     @Column(name = "nota_experiencia", precision = 5, scale = 2)
     private BigDecimal notaExperiencia;
 
-    @Column(name = "fecha_evaluacion")
-    private LocalDate fechaEvaluacion;
 }

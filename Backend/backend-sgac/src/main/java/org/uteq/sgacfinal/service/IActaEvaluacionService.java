@@ -23,4 +23,6 @@ public interface IActaEvaluacionService {
      * Lista todas las actas de una postulación.
      */
     List<ActaEvaluacionResponseDTO> listarPorPostulacion(Integer idPostulacion);
+
+    void eliminar(Integer idActa);
 }

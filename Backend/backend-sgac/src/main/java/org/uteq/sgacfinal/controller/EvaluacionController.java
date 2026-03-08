@@ -61,6 +61,17 @@ public class EvaluacionController {
         }
     }
 
+    @DeleteMapping("/meritos/{id}")
+    public ResponseEntity<?> eliminarMeritos(@PathVariable Integer id) {
+        try {
+            evaluacionMeritosService.eliminar(id);
+            return ResponseEntity.ok().body("Evaluación de méritos eliminada correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar evaluación de méritos: " + e.getMessage());
+        }
+    }
+
     /**
      * P13 (Ítem 15): Ranking completo de una convocatoria.
      * GET /api/evaluaciones/ranking/convocatoria/{idConvocatoria}
@@ -115,6 +126,16 @@ public class EvaluacionController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al calcular resultado final: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/debug/meritos")
+    public ResponseEntity<?> debugMeritos() {
+        try {
+            List<Map<String, Object>> result = jdbcTemplate.queryForList("SELECT * FROM postulacion.evaluacion_meritos");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
         }
     }
 }

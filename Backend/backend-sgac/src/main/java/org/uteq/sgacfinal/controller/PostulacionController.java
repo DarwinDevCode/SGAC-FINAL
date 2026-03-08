@@ -117,4 +117,17 @@ public class PostulacionController {
                     .body("Error al verificar postulación: " + e.getMessage());
         }
     }
+
+    @GetMapping("/debug/all")
+    public ResponseEntity<?> debugAll(@org.springframework.beans.factory.annotation.Autowired org.springframework.jdbc.core.JdbcTemplate jdbcTemplate) {
+        try {
+            return ResponseEntity.ok(jdbcTemplate.queryForList(
+                "SELECT p.id_postulacion, p.estado_postulacion, e.nombres, e.apellidos, p.id_convocatoria " +
+                "FROM postulacion.postulacion p " +
+                "JOIN academico.estudiante e ON p.id_estudiante = e.id_estudiante"
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
 }

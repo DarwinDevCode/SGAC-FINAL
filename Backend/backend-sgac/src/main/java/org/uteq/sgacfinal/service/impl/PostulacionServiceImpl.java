@@ -144,37 +144,37 @@ public class PostulacionServiceImpl implements IPostulacionService {
 
     @Override
     public void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion) {
-        Postulacion postulacion = postulacionRepository.findById(idPostulacion)
-                .orElseThrow(() -> new RuntimeException("Postulacion no encontrada"));
-
-        postulacion.setEstadoPostulacion(nuevoEstado);
-        postulacion.setObservaciones(observacion);
-
         try {
-            postulacionRepository.save(postulacion);
+            Integer resultado = postulacionRepository.actualizarPostulacion(idPostulacion, nuevoEstado, observacion);
+            if (resultado == null || resultado == -1) {
+                throw new RuntimeException("El SP devolvio error al actualizar el estado de la postulacion.");
+            }
         } catch (Exception ex) {
             throw new RuntimeException(
                     "Error al actualizar el estado de la postulacion en la base de datos: " + ex.getMessage(), ex);
         }
 
-        if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
-            try {
-                String mensaje = "Tu postulacion ha cambiado de estado a: " + nuevoEstado;
+        // Para la notificacion, recuperamos el estudiante usando el id de la postulacion
+        postulacionRepository.findById(idPostulacion).ifPresent(postulacion -> {
+            if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
+                try {
+                    String mensaje = "Tu postulacion ha cambiado de estado a: " + nuevoEstado;
 
-                NotificationRequest notificationRequest = NotificationRequest.builder()
-                        .titulo("Actualizacion de postulacion")
-                        .mensaje(mensaje)
-                        .tipo("POSTULACION")
-                        .idReferencia(idPostulacion)
-                        .build();
+                    NotificationRequest notificationRequest = NotificationRequest.builder()
+                            .titulo("Actualizacion de postulacion")
+                            .mensaje(mensaje)
+                            .tipo("POSTULACION")
+                            .idReferencia(idPostulacion)
+                            .build();
 
-                notificacionService.enviarNotificacion(
-                        postulacion.getEstudiante().getUsuario().getIdUsuario(),
-                        notificationRequest);
-            } catch (Exception notifEx) {
-                System.err.println("[NOTIFICACION] No se pudo enviar notificacion (no critico): " + notifEx.getMessage());
+                    notificacionService.enviarNotificacion(
+                            postulacion.getEstudiante().getUsuario().getIdUsuario(),
+                            notificationRequest);
+                } catch (Exception notifEx) {
+                    System.err.println("[NOTIFICACION] No se pudo enviar notificacion (no critico): " + notifEx.getMessage());
+                }
             }
-        }
+        });
     }
 
     private PostulacionResponseDTO mapearADTO(Postulacion entidad) {

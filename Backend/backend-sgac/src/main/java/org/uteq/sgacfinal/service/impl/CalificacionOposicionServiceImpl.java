@@ -44,18 +44,29 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
             throw new IllegalArgumentException("El subtotal de oposición no puede superar 20 puntos. Total calculado: " + subtotal);
         }
 
-        // Persistir vía SP (inserta o actualiza, y calcula promedio cuando los 3 están)
-        Integer resultado = oposicionRepo.guardarOposicionIndividual(
-                req.getIdPostulacion(),
-                req.getIdEvaluador(),
-                req.getRolEvaluador(),
-                req.getCriterioMaterial(),
-                req.getCriterioCalidad(),
-                req.getCriterioPertinencia()
-        );
+        Integer resultado;
+        var existente = oposicionRepo.findByIdPostulacionAndIdEvaluador(req.getIdPostulacion(), req.getIdEvaluador());
+
+        if (existente.isPresent()) {
+            resultado = oposicionRepo.actualizarOposicionIndividual(
+                    existente.get().getIdCalificacion(),
+                    req.getCriterioMaterial(),
+                    req.getCriterioCalidad(),
+                    req.getCriterioPertinencia()
+            );
+        } else {
+            resultado = oposicionRepo.guardarOposicionIndividual(
+                    req.getIdPostulacion(),
+                    req.getIdEvaluador(),
+                    req.getRolEvaluador(),
+                    req.getCriterioMaterial(),
+                    req.getCriterioCalidad(),
+                    req.getCriterioPertinencia()
+            );
+        }
 
         if (resultado == null || resultado == -1) {
-            throw new RuntimeException("Error al guardar la calificación de oposición.");
+            throw new RuntimeException("Error al guardar o actualizar la calificación de oposición.");
         }
 
         // Si los 3 ya calificaron, notificar al postulante
@@ -69,6 +80,14 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
                 .findByIdPostulacionAndIdEvaluador(req.getIdPostulacion(), req.getIdEvaluador())
                 .orElseThrow(() -> new RuntimeException("Calificación no encontrada después de guardar."));
         return mapToDTO(entidad);
+    }
+
+    @Override
+    public void eliminar(Integer id) {
+        Integer res = oposicionRepo.eliminarOposicionIndividual(id);
+        if (res == -1 || res == 0) {
+            throw new RuntimeException("Error al eliminar la calificación de oposición individual o no existe.");
+        }
     }
 
     @Override

@@ -34,7 +34,7 @@ import java.util.Map;
  *   Resultado del postulante → /api/evaluaciones/resultado-postulante/{idPostulacion}
  */
 @RestController
-@RequestMapping("/api/evaluaciones")
+@RequestMapping("/api/evaluacion-seleccion")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
 public class EvaluacionSeleccionController {
@@ -64,6 +64,21 @@ public class EvaluacionSeleccionController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al guardar calificación de oposición: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Eliminar la nota individual de un miembro del tribunal.
+     * DELETE /api/evaluaciones/oposicion/individual/{idCalificacion}
+     */
+    @DeleteMapping("/oposicion/individual/{idCalificacion}")
+    public ResponseEntity<?> eliminarOposicionIndividual(@PathVariable Integer idCalificacion) {
+        try {
+            oposicionService.eliminar(idCalificacion);
+            return ResponseEntity.ok().body("Calificación individual eliminada con éxito.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar calificación individual: " + e.getMessage());
         }
     }
 
@@ -158,6 +173,21 @@ public class EvaluacionSeleccionController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al confirmar acta: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Eliminar un acta específica del sistema.
+     * DELETE /api/evaluaciones/actas/{idActa}
+     */
+    @DeleteMapping("/actas/{idActa}")
+    public ResponseEntity<?> eliminarActa(@PathVariable Integer idActa) {
+        try {
+            actaService.eliminar(idActa);
+            return ResponseEntity.ok().body("Acta de evaluación eliminada correctamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar acta: " + e.getMessage());
         }
     }
 

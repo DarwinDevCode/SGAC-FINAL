@@ -29,28 +29,33 @@ public class ActaEvaluacionServiceImpl implements IActaEvaluacionService {
         Postulacion postulacion = postulacionRepo.findById(request.getIdPostulacion())
                 .orElseThrow(() -> new RuntimeException("Postulación no encontrada: " + request.getIdPostulacion()));
 
-        // Verificar si ya existe un acta del mismo tipo; si existe, actualizarla
-        ActaEvaluacion acta = actaRepo
-                .findByIdPostulacionAndTipoActa(request.getIdPostulacion(), request.getTipoActa())
-                .orElse(ActaEvaluacion.builder()
-                        .postulacion(postulacion)
-                        .tipoActa(request.getTipoActa())
-                        .confirmadoDecano(false)
-                        .confirmadoCoordinador(false)
-                        .confirmadoDocente(false)
-                        .estado("PENDIENTE")
-                        .build());
-
-        // Por ahora generamos una URL de placeholder; aquí se integraría JasperReports
-        // Cuando se integre JasperReports: generar el reporte, guardarlo en filesystem y setear la URL real
+        // Generar URL real despues 
         String urlDocumento = "/api/actas/download/" + request.getTipoActa().toLowerCase()
                 + "/" + request.getIdPostulacion() + "/" + System.currentTimeMillis() + ".pdf";
 
-        acta.setUrlDocumento(urlDocumento);
-        acta.setFechaGeneracion(LocalDateTime.now());
-        ActaEvaluacion saved = actaRepo.save(acta);
+        Integer resultado;
+        var existente = actaRepo.findByIdPostulacionAndTipoActa(request.getIdPostulacion(), request.getTipoActa());
+        if (existente.isPresent()) {
+            resultado = actaRepo.actualizarActa(existente.get().getIdActa(), "PENDIENTE", urlDocumento);
+        } else {
+            resultado = actaRepo.crearActa(request.getIdPostulacion(), request.getTipoActa(), "PENDIENTE", urlDocumento);
+        }
 
+        if (resultado == null || resultado == -1) {
+            throw new RuntimeException("Error al guardar o actualizar el acta de evaluación.");
+        }
+
+        ActaEvaluacion saved = actaRepo.findById(resultado)
+                .orElseThrow(() -> new RuntimeException("No se encontró el acta creada/actualizada"));
         return mapToDTO(saved);
+    }
+
+    @Override
+    public void eliminar(Integer idActa) {
+        Integer res = actaRepo.eliminarActa(idActa);
+        if (res == -1 || res == 0) {
+            throw new RuntimeException("Error al eliminar el acta de evaluación o no existe.");
+        }
     }
 
     @Override

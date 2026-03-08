@@ -113,6 +113,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/notificaciones/**").authenticated()
                         .requestMatchers(
+                                "/api/evaluacion-seleccion/oposicion/postulacion/**",
                                 "/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
                         .requestMatchers(
                                 "/api/convocatorias/**").authenticated()

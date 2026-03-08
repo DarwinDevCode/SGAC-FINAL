@@ -30,4 +30,6 @@ public interface ICalificacionOposicionService {
      * Retorna el ranking completo de una convocatoria con estados y datos de desempate.
      */
     List<RankingEvaluacionDTO> obtenerRankingConvocatoria(Integer idConvocatoria);
+
+    void eliminar(Integer id);
 }

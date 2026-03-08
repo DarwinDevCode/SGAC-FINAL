@@ -20,7 +20,21 @@ public interface ActaEvaluacionRepository extends JpaRepository<ActaEvaluacion, 
             @Param("idPostulacion") Integer idPostulacion,
             @Param("tipoActa") String tipoActa);
 
-    @Query(value = "SELECT public.sp_confirmar_acta(:idActa, :idEvaluador, :rol)", nativeQuery = true)
+    @Query(value = "SELECT CAST(public.sp_crear_acta(:idPostulacion, :tipoActa, :estado, :urlDocumento) AS INTEGER)", nativeQuery = true)
+    Integer crearActa(@Param("idPostulacion") Integer idPostulacion,
+                      @Param("tipoActa") String tipoActa,
+                      @Param("estado") String estado,
+                      @Param("urlDocumento") String urlDocumento);
+
+    @Query(value = "SELECT CAST(public.sp_actualizar_acta(:idActa, :estado, :urlDocumento) AS INTEGER)", nativeQuery = true)
+    Integer actualizarActa(@Param("idActa") Integer idActa,
+                           @Param("estado") String estado,
+                           @Param("urlDocumento") String urlDocumento);
+
+    @Query(value = "SELECT CAST(public.sp_eliminar_acta(:idActa) AS INTEGER)", nativeQuery = true)
+    Integer eliminarActa(@Param("idActa") Integer idActa);
+
+    @Query(value = "SELECT CAST(public.sp_confirmar_acta(:idActa, :idEvaluador, :rol) AS INTEGER)", nativeQuery = true)
     Integer confirmarActa(
             @Param("idActa") Integer idActa,
             @Param("idEvaluador") Integer idEvaluador,

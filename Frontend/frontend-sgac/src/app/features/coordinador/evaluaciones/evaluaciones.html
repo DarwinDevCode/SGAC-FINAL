@@ -50,6 +50,19 @@
         <button class="tab-btn" [class.active]="activeTab === 'actas'" (click)="setTab('actas')">
             <lucide-icon name="file-text" size="15"></lucide-icon> Actas / Confirmar
         </button>
+
+        <!-- Botón superior derecho de guardado -->
+        <div
+            style="flex-grow: 1; display: flex; justify-content: flex-end; align-items: center; padding-bottom: 0.2rem; flex-shrink: 0; min-width: max-content;">
+            @if (activeTab === 'meritos' && postulanteSeleccionado && userRol !== 'DECANO') {
+            <button class="btn-primary"
+                style="padding: 0.45rem 1rem; font-size: 0.85rem; background-color: hsl(125, 53%, 24%); color: white; border-color: hsl(125, 53%, 24%); white-space: nowrap;"
+                [disabled]="guardandoMeritos || totalMeritos > 20" (click)="guardarMeritos()">
+                <lucide-icon name="save" size="14"></lucide-icon>
+                {{ guardandoMeritos ? 'Guardando...' : 'Guardar Méritos' }}
+            </button>
+            }
+        </div>
     </div>
 
     <!-- ═══════════════════ TAB 1: MÉRITOS ═══════════════════ -->
@@ -75,9 +88,6 @@
                         <div class="post-mat">{{ p.matricula }}</div>
                         @if (meritosGuardados[p.idPostulacion]) {
                         <span class="badge-sm badge-green">✓ Calificado</span>
-                        }
-                        @if (temaSorteado[p.idPostulacion]) {
-                        <span class="badge-sm badge-blue">Tema sorteado</span>
                         }
                     </li>
                     }
@@ -149,16 +159,6 @@
                     @if (meritosForm.hasError('totalExcede')) {
                     <p class="input-error">La sumatoria no puede superar 20 puntos.</p>
                     }
-                    @if (userRol !== 'DECANO') {
-                    <button type="submit" class="btn-primary"
-                        [disabled]="meritosForm.invalid || guardandoMeritos || totalMeritos > 20">
-                        @if (guardandoMeritos) {
-                        <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon> Guardando...
-                        } @else {
-                        <lucide-icon name="save" size="14"></lucide-icon> Guardar Méritos y Sortear Tema
-                        }
-                    </button>
-                    }
                 </form>
                 }
             </div>
@@ -178,7 +178,13 @@
                     <li class="postulante-item"
                         [class.selected]="postulanteOposicion?.idPostulacion === p.idPostulacion"
                         (click)="seleccionarPostulanteOposicion(p)">
-                        <div class="post-name">{{ p.nombreEstudiante }}</div>
+                        <div class="post-name">
+                            {{ p.nombreEstudiante }}
+                            @if (p._oposicionCalificado) {
+                            <span class="badge-calificado"><lucide-icon name="check" size="12"></lucide-icon>
+                                CALIFICADO</span>
+                            }
+                        </div>
                         <div class="post-mat">{{ p.matricula }}</div>
                     </li>
                     }
@@ -245,14 +251,19 @@
                             Subtotal: <strong>{{ subtotalOposicion.toFixed(2) }} / 20</strong>
                         </div>
                     </div>
-                    <button type="submit" class="btn-primary"
-                        [disabled]="oposicionForm.get(rolKey)?.invalid || guardandoOposicion">
-                        @if (guardandoOposicion) {
-                        <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon> Guardando...
-                        } @else {
-                        <lucide-icon name="save" size="14"></lucide-icon> Guardar mi Evaluación
-                        }
-                    </button>
+                    <!-- Botón de guardar oposición -->
+                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn-primary"
+                            style="background-color: hsl(125, 53%, 24%); color: white; border-color: hsl(125, 53%, 24%);"
+                            [disabled]="oposicionForm.get(rolKey)?.invalid || guardandoOposicion">
+                            @if (guardandoOposicion) {
+                            <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon>
+                            } @else {
+                            <lucide-icon name="save" size="14"></lucide-icon>
+                            }
+                            {{ guardandoOposicion ? 'Guardando...' : 'Guardar mi Evaluación' }}
+                        </button>
+                    </div>
                 </form>
 
                 @if (estadoOposicion?.todosCalificados) {

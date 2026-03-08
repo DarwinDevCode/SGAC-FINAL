@@ -22,7 +22,7 @@ public interface CalificacionOposicionIndividualRepository
             @Param("idPostulacion") Integer idPostulacion,
             @Param("idEvaluador") Integer idEvaluador);
 
-    @Query(value = "SELECT public.sp_guardar_oposicion_individual(:idPostulacion, :idEvaluador, :rol, :material, :calidad, :pertinencia)",
+    @Query(value = "SELECT CAST(public.sp_guardar_oposicion_individual(:idPostulacion, :idEvaluador, :rol, :material, :calidad, :pertinencia) AS INTEGER)",
            nativeQuery = true)
     Integer guardarOposicionIndividual(
             @Param("idPostulacion") Integer idPostulacion,
@@ -34,4 +34,13 @@ public interface CalificacionOposicionIndividualRepository
 
     @Query("SELECT COUNT(c) FROM CalificacionOposicionIndividual c WHERE c.postulacion.idPostulacion = :idPostulacion")
     Long countByIdPostulacion(@Param("idPostulacion") Integer idPostulacion);
+
+    @Query(value = "SELECT CAST(public.sp_actualizar_oposicion_individual(:id, :material, :calidad, :pertinencia) AS INTEGER)", nativeQuery = true)
+    Integer actualizarOposicionIndividual(@Param("id") Integer idCalificacion,
+                                          @Param("material") BigDecimal material,
+                                          @Param("calidad") BigDecimal calidad,
+                                          @Param("pertinencia") BigDecimal pertinencia);
+
+    @Query(value = "SELECT CAST(public.sp_eliminar_oposicion_individual(:id) AS INTEGER)", nativeQuery = true)
+    Integer eliminarOposicionIndividual(@Param("id") Integer idCalificacion);
 }

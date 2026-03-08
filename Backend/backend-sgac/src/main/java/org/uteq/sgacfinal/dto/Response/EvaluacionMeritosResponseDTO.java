@@ -16,5 +16,4 @@ public class EvaluacionMeritosResponseDTO {
     private BigDecimal notaSemestres;
     private BigDecimal notaEventos;
     private BigDecimal notaExperiencia;
-    private LocalDate fechaEvaluacion;
 }

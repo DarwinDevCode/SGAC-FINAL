@@ -12,4 +12,6 @@ public interface IEvaluacionMeritosService {
     EvaluacionMeritosResponseDTO buscarPorId(Integer id);
 
     EvaluacionMeritosResponseDTO buscarPorPostulacion(Integer idPostulacion);
+
+    void eliminar(Integer id);
 }

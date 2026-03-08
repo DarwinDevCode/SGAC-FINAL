@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, Star, Mic } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { Subscription, switchMap, of } from 'rxjs';
 import { CoordinadorService } from '../../../core/services/coordinador-service';
@@ -173,6 +173,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.ranking = [];
         this.actasMeritos = null;
         this.actasOposicion = null;
+        this.meritosGuardados = {};
         this.cargarPostulantes();
     }
 
@@ -180,7 +181,40 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.loadingPostulantes = true;
         this.subs.add(
             this.http.get<any[]>(`${this.BASE}/postulaciones/convocatoria/${this.idConvSeleccionada}`).subscribe({
-                next: (data) => { this.postulantes = data || []; this.loadingPostulantes = false; },
+                next: (data) => {
+                    this.postulantes = (data || [])
+                        .filter(p => ['EN_EVALUACION', 'APTO', 'NO_APTO', 'GANADOR', 'DESIERTO'].includes(p.estadoPostulacion))
+                        .map(p => ({
+                            ...p,
+                            nombreEstudiante: p.nombreEstudiante || p.nombreCompletoEstudiante,
+                            matricula: p.matricula || p.matriculaEstudiante,
+                            _oposicionCalificado: false
+                        }));
+
+                    // Verificar estado de oposición individual de cada postulante
+                    this.postulantes.forEach(p => {
+                        this.http.get<any>(`${this.BASE}/evaluacion-seleccion/oposicion/estado/${p.idPostulacion}`).subscribe({
+                            next: (estado) => {
+                                if (estado) {
+                                    p._oposicionCalificado = (this.userRol === 'COORDINADOR' && estado.coordinadorCalificado) ||
+                                        (this.userRol === 'DECANO' && estado.decanoCalificado) ||
+                                        (this.userRol === 'DOCENTE' && estado.docenteCalificado);
+                                }
+                            }, error: () => { }
+                        });
+
+                        // Cargar méritos guardados para que aparezcan en la lista como "Calificados"
+                        this.http.get<any>(`${this.BASE}/evaluaciones/meritos/postulacion/${p.idPostulacion}`).subscribe({
+                            next: (meritos) => {
+                                if (meritos) {
+                                    this.meritosGuardados[p.idPostulacion] = meritos;
+                                }
+                            }, error: () => { } // Error o 404 = aún no tiene méritos
+                        });
+                    });
+
+                    this.loadingPostulantes = false;
+                },
                 error: () => { this.loadingPostulantes = false; }
             })
         );
@@ -190,15 +224,33 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
     seleccionarPostulanteMeritos(p: any): void {
         this.postulanteSeleccionado = p;
         this.meritosForm.reset();
-        // Cargar datos existentes si ya fueron evaluados
-        const existente = this.meritosGuardados[p.idPostulacion];
-        if (existente) {
+
+        // Cargar datos existentes si ya fueron evaluados (caché local)
+        if (this.meritosGuardados[p.idPostulacion]) {
+            const existente = this.meritosGuardados[p.idPostulacion];
             this.meritosForm.patchValue({
                 calificacionAsignatura: existente.notaAsignatura,
                 promedioPorSemestres: existente.notaSemestres,
                 experienciaColaboracion: existente.notaExperiencia,
                 participacionEventos: existente.notaEventos,
             });
+        } else {
+            // Cargar datos desde backend por si no se han cargado en la lista general aún
+            this.subs.add(
+                this.http.get<any>(`${this.BASE}/evaluaciones/meritos/postulacion/${p.idPostulacion}`).subscribe({
+                    next: (meritos) => {
+                        if (meritos) {
+                            this.meritosGuardados[p.idPostulacion] = meritos;
+                            this.meritosForm.patchValue({
+                                calificacionAsignatura: meritos.notaAsignatura,
+                                promedioPorSemestres: meritos.notaSemestres,
+                                experienciaColaboracion: meritos.notaExperiencia,
+                                participacionEventos: meritos.notaEventos,
+                            });
+                        }
+                    }, error: () => { }
+                })
+            );
         }
     }
 
@@ -212,22 +264,14 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
             notaAsignatura: v.calificacionAsignatura,
             notaSemestres: v.promedioPorSemestres,
             notaExperiencia: v.experienciaColaboracion,
-            notaEventos: v.participacionEventos,
-            fechaEvaluacion: new Date().toISOString().split('T')[0],
+            notaEventos: v.participacionEventos
         };
         this.subs.add(
             this.http.post<any>(`${this.BASE}/evaluaciones/meritos`, body).subscribe({
                 next: (res) => {
                     this.guardandoMeritos = false;
                     this.meritosGuardados[this.postulanteSeleccionado!.idPostulacion] = res;
-                    // Verificar si hay sorteo
-                    this.http.get<any>(`${this.BASE}/evaluaciones/oposicion/estado/${this.postulanteSeleccionado!.idPostulacion}`)
-                        .subscribe(estado => {
-                            if (estado?.temaSorteado) {
-                                this.temaSorteado[this.postulanteSeleccionado!.idPostulacion] = estado.temaSorteado;
-                            }
-                        });
-                    this.showSuccess(`Méritos guardados (Total: ${this.totalMeritos.toFixed(2)} / 20). Se realizó el sorteo del tema de oposición.`);
+                    this.showSuccess(`Méritos guardados (Total: ${this.totalMeritos.toFixed(2)} / 20).`);
                     this.postulanteSeleccionado = null;
                     this.meritosForm.reset();
                 },
@@ -244,7 +288,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.postulanteOposicion = p;
         this.cargarEstadoOposicion(p.idPostulacion);
         // Cargar la nota propia si existe
-        this.http.get<any>(`${this.BASE}/evaluaciones/oposicion/${p.idPostulacion}/evaluador/${this.userId}`)
+        this.http.get<any>(`${this.BASE}/evaluacion-seleccion/oposicion/${p.idPostulacion}/evaluador/${this.userId}`)
             .subscribe({
                 next: (nota) => {
                     if (nota) {
@@ -256,10 +300,11 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
             });
     }
 
+
     cargarEstadoOposicion(idPostulacion: number): void {
         this.loadingEstado = true;
         this.subs.add(
-            this.http.get<any>(`${this.BASE}/evaluaciones/oposicion/estado/${idPostulacion}`).subscribe({
+            this.http.get<any>(`${this.BASE}/evaluacion-seleccion/oposicion/estado/${idPostulacion}`).subscribe({
                 next: (estado) => { this.estadoOposicion = estado; this.loadingEstado = false; },
                 error: () => { this.loadingEstado = false; }
             })
@@ -283,11 +328,14 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
             criterioPertinencia: v.pertinencia,
         };
         this.subs.add(
-            this.http.post<any>(`${this.BASE}/evaluaciones/oposicion/individual`, body).subscribe({
+            this.http.post<any>(`${this.BASE}/evaluacion-seleccion/oposicion/individual`, body).subscribe({
                 next: () => {
                     this.guardandoOposicion = false;
                     this.showSuccess('Calificación de oposición guardada correctamente.');
                     this.cargarEstadoOposicion(this.postulanteOposicion!.idPostulacion);
+                    if (this.postulanteOposicion) {
+                        this.postulanteOposicion._oposicionCalificado = true;
+                    }
                 },
                 error: (err) => {
                     this.guardandoOposicion = false;
