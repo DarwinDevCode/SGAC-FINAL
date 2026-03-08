@@ -106,4 +106,30 @@ public class RequisitoAdjuntoController {
         // Return JSON explicitly as the frontend expects { "nombreEstado": "..." }
         return ResponseEntity.ok("{\"nombreEstado\": \"OBSERVADO\", \"message\": \"Observación guardada.\"}");
     }
+
+    /**
+     * Subsana un documento observado con validaciones de fecha y notificación al coordinador.
+     * PUT /api/requisitos-adjuntos/subsanar/{idUsuario}/{idAdjunto}
+     *
+     * Validaciones:
+     * 1. El documento debe estar en estado OBSERVADO
+     * 2. Debe estar dentro del periodo de subsanación (etapa de revisión)
+     *
+     * Acciones:
+     * 1. Actualiza el archivo
+     * 2. Cambia estado a CORREGIDO
+     * 3. Notifica automáticamente al coordinador
+     */
+    @PutMapping("/subsanar/{idUsuario}/{idAdjunto}")
+    public ResponseEntity<?> subsanarDocumento(
+            @PathVariable Integer idUsuario,
+            @PathVariable Integer idAdjunto,
+            @RequestParam("archivo") MultipartFile archivo) {
+        try {
+            return ResponseEntity.ok(requisitoService.subsanarDocumentoObservado(idUsuario, idAdjunto, archivo));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"exito\": false, \"mensaje\": \"Error al subsanar: " + e.getMessage() + "\"}");
+        }
+    }
 }

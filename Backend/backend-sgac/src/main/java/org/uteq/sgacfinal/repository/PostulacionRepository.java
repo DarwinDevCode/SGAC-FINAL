@@ -71,4 +71,7 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
             @Param("archivo") byte[] archivo,
             @Param("nombre") String nombre,
             @Param("fecha") Date fecha);
+
+    @Query(value = "SELECT postulacion.fn_ver_detalle_postulacion(:idUsuario)", nativeQuery = true)
+    String obtenerDetallePostulacion(@Param("idUsuario") Integer idUsuario);
 }

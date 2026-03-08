@@ -1,89 +1,114 @@
 <div class="gestion-container">
     <div class="section-header">
         <div class="title-container">
-            <h2 class="title">Convocatorias Abiertas</h2>
-            <p class="subtitle">Encuentra y postula a tu próxima posición de ayudantía.</p>
+            <h2 class="title">Convocatorias Disponibles</h2>
+            <p class="subtitle">Encuentra y postula a las ayudantías de asignaturas que ya cursaste.</p>
         </div>
     </div>
 
+    <!-- Mensaje de error (no elegible) -->
+    @if (mensajeError && !esElegible) {
+    <div class="alert alert-warning">
+        <lucide-icon name="alert-triangle" size="20"></lucide-icon>
+        <div class="alert-content">
+            <strong>No puedes postular en este momento</strong>
+            <p>{{ mensajeError }}</p>
+        </div>
+    </div>
+    }
+
+    <!-- Mensaje de error de sistema -->
+    @if (mensajeError && esElegible) {
+    <div class="alert alert-error">
+        <lucide-icon name="x-circle" size="20"></lucide-icon>
+        <div class="alert-content">
+            <strong>Error</strong>
+            <p>{{ mensajeError }}</p>
+        </div>
+    </div>
+    }
+
+    <!-- Contenido principal (solo si es elegible) -->
+    @if (esElegible) {
     <div class="search-card">
         <div class="search-wrapper">
             <lucide-icon class="search-icon" name="search" size="18"></lucide-icon>
             <input type="text" [(ngModel)]="busqueda" (ngModelChange)="filtrarConvocatorias($event)"
-                placeholder="Buscar por asignatura o periodo..." class="input-field search-input" />
+                placeholder="Buscar por asignatura, carrera o docente..." class="input-field search-input" />
         </div>
     </div>
 
-    <div class="table-card">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Asignatura</th>
-                    <th>Periodo Académico</th>
-                    <th>Docente</th>
-                    <th>Fechas</th>
-                    <th>Cupos</th>
-                    <th class="text-right">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (loading) {
-                <tr>
-                    <td colspan="5">Cargando convocatorias...</td>
-                </tr>
-                } @else {
-                @for (conv of convocatoriasFiltradas; track conv.idConvocatoria) {
-                <tr>
-                    <td>
-                        <div class="conv-info">
-                            <div class="conv-title">{{ conv.nombreAsignatura }}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="periodo-badge">{{ conv.nombrePeriodo }}</span>
-                    </td>
-                  <td>
-                    <span class="periodo-badge">{{ conv.nombreDocente }}</span>
-                  </td>
-                    <td>
-                        <div class="fechas-info">
-                            <span class="fecha-item"><lucide-icon name="calendar" size="14"></lucide-icon> Publicada: {{
-                                conv.fechaPublicacion }}</span>
-                            <span class="fecha-item cierre"><lucide-icon name="clock" size="14"></lucide-icon> Cierra:
-                                {{ conv.fechaCierre }}</span>
-                        </div>
-                    </td>
-                    <td>
-                        <span class="cupos-indicator" [class.few]="(conv.cuposDisponibles || 0) <= 2">
-                            {{ conv.cuposDisponibles }} plazas
-                        </span>
-                    </td>
-                    <td class="text-right">
-                        <ng-container *ngIf="postulacionPorConvocatoria[conv.idConvocatoria!] === true; else btnActivo">
-                            <button type="button" class="btn-ya-postulado" disabled
-                                title="Ya te postulaste a esta convocatoria">
-                                <lucide-icon name="check-circle" size="16"></lucide-icon>
-                                Ya Postulado
-                            </button>
-                        </ng-container>
-                        <ng-template #btnActivo>
-                            <button type="button" class="btn-primary-small" (click)="abrirModalPostulacion(conv)"
-                                title="Postularme a esta convocatoria">
-                                Postular
-                                <lucide-icon name="arrow-right" size="16"></lucide-icon>
-                            </button>
-                        </ng-template>
-                    </td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="5" class="empty-state">No hay convocatorias disponibles en este momento.</td>
-                </tr>
-                }
-                }
-            </tbody>
-        </table>
+    <!-- Loading State -->
+    @if (loading) {
+    <div class="loading-container">
+        <lucide-icon name="loader-2" size="24" class="spin"></lucide-icon>
+        <span>Cargando convocatorias elegibles...</span>
     </div>
+    } @else {
+
+    <!-- Grid de Cards -->
+    <div class="cards-grid">
+        @for (conv of convocatoriasFiltradas; track conv.idConvocatoria) {
+        <div class="convocatoria-card" [class.sin-cupo]="conv.cuposDisponibles === 0">
+            <!-- Header de la card -->
+            <div class="card-header">
+                <h3 class="card-title">{{ conv.nombreAsignatura }}</h3>
+                @if (conv.cuposDisponibles === 0) {
+                <span class="badge-sin-cupo">Sin cupo</span>
+                }
+            </div>
+
+            <!-- Contenido de la card -->
+            <div class="card-body">
+                <p class="card-carrera">{{ conv.nombreCarrera }}</p>
+
+                <div class="card-info">
+                    <div class="info-row">
+                        <span class="info-label">Cupos:</span>
+                        <span class="info-value">{{ conv.cuposDisponibles }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Docente:</span>
+                        <span class="info-value">{{ conv.nombreDocente }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Semestre:</span>
+                        <span class="info-value">{{ conv.semestreAsignatura }}°</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Cierra:</span>
+                        <span class="info-value">{{ formatearFecha(conv.fechaCierre) }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer de la card -->
+            <div class="card-footer">
+                @if (postulacionPorConvocatoria[conv.idConvocatoria!] === true) {
+                <button type="button" class="btn-card btn-ya-postulado" disabled>
+                    <lucide-icon name="check-circle" size="16"></lucide-icon>
+                    Ya Postulado
+                </button>
+                } @else if (conv.cuposDisponibles === 0) {
+                <button type="button" class="btn-card btn-disabled" disabled>
+                    Postular
+                </button>
+                } @else {
+                <button type="button" class="btn-card btn-postular" (click)="abrirModalPostulacion(conv)">
+                    Postular
+                </button>
+                }
+            </div>
+        </div>
+        } @empty {
+        <div class="empty-state-container">
+            <lucide-icon name="inbox" size="48"></lucide-icon>
+            <p>{{ mensajeInfo || 'No hay convocatorias disponibles en este momento.' }}</p>
+        </div>
+        }
+    </div>
+    }
+    }
 
     <!-- Modal Component -->
     @if (mostrarModal && convocatoriaSeleccionada) {
@@ -92,7 +117,7 @@
             <div class="modal-header">
                 <div>
                     <h3>Formulario de Postulación</h3>
-                    <p class="subtitle-modal">{{ convocatoriaSeleccionada.nombreAsignatura }}</p>
+                    <p class="subtitle-modal">{{ convocatoriaSeleccionada.nombreAsignatura }} - {{ convocatoriaSeleccionada.semestreAsignatura }}° Semestre</p>
                 </div>
                 <button type="button" class="btn-icon" (click)="cerrarModal()">
                     <lucide-icon name="x" size="18"></lucide-icon>

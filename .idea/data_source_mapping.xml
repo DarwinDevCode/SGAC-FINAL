@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="file://$PROJECT_DIR$/Backend/backend-sgac/docs/sql/fix_fn_es_periodo_subsanacion.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/81e1fb37-5f4d-422c-90b8-648e9d3671a2/console.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/81e1fb37-5f4d-422c-90b8-648e9d3671a2/console_1.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/81e1fb37-5f4d-422c-90b8-648e9d3671a2/console_2.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/81e1fb37-5f4d-422c-90b8-648e9d3671a2/console_3.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/81e1fb37-5f4d-422c-90b8-648e9d3671a2/console_4.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/81e1fb37-5f4d-422c-90b8-648e9d3671a2/console_5.sql" value="81e1fb37-5f4d-422c-90b8-648e9d3671a2" />
   </component>
 </project>

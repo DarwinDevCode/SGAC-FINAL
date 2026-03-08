@@ -6,6 +6,7 @@ import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { TipoRequisitoPostulacionResponseDTO, PostulacionResponseDTO, RequisitoAdjuntoResponseDTO } from '../dto/postulacion';
 import { EvaluacionMeritosResponseDTO, EvaluacionOposicionResponseDTO } from '../dto/evaluacion';
 import { NotificacionResponseDTO } from '../dto/notificacion';
+import { DetallePostulacionResponseDTO, SubsanacionDocumentoResponseDTO } from '../dto/detalle-postulacion';
 
 const API_CONVOCATORIAS = 'http://localhost:8080/api/convocatorias';
 const API_POSTULACIONES = 'http://localhost:8080/api/postulaciones';
@@ -109,10 +110,39 @@ export class PostulanteService {
         return `${API_REQUISITOS}/descargar/${idRequisito}`;
     }
 
-    /** Reemplaza un documento observado por uno nuevo (ítem 8) */
     reemplazarDocumento(idAdjunto: number, archivo: File): Observable<RequisitoAdjuntoResponseDTO> {
         const formData = new FormData();
         formData.append('archivo', archivo);
         return this.http.put<RequisitoAdjuntoResponseDTO>(`${API_REQUISITOS}/reemplazar/${idAdjunto}`, formData);
+    }
+
+    // --- Detalle de Postulación Activa ---
+
+    /**
+     * Obtiene el detalle completo de la postulación activa del estudiante.
+     * @param idUsuario ID del usuario estudiante
+     */
+    obtenerMiPostulacionActiva(idUsuario: number): Observable<DetallePostulacionResponseDTO> {
+        return this.http.get<DetallePostulacionResponseDTO>(`${API_POSTULACIONES}/mi-postulacion/${idUsuario}`);
+    }
+
+    /**
+     * Subsana un documento observado con validación de fechas y notificación al coordinador.
+     * Solo permite reemplazo si:
+     * 1. El documento está en estado OBSERVADO
+     * 2. Estamos dentro del periodo de subsanación (etapa de revisión)
+     *
+     * @param idUsuario ID del usuario estudiante
+     * @param idRequisitoAdjunto ID del documento a subsanar
+     * @param archivo Nuevo archivo
+     * @returns Resultado de la operación con estado y mensaje
+     */
+    subsanarDocumentoObservado(idUsuario: number, idRequisitoAdjunto: number, archivo: File): Observable<SubsanacionDocumentoResponseDTO> {
+        const formData = new FormData();
+        formData.append('archivo', archivo);
+        return this.http.put<SubsanacionDocumentoResponseDTO>(
+            `${API_REQUISITOS}/subsanar/${idUsuario}/${idRequisitoAdjunto}`,
+            formData
+        );
     }
 }

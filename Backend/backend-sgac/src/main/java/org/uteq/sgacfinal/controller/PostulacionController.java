@@ -117,4 +117,20 @@ public class PostulacionController {
                     .body("Error al verificar postulación: " + e.getMessage());
         }
     }
+
+    /**
+     * Obtiene el detalle completo de la postulación activa del estudiante.
+     * Incluye: información de postulación, convocatoria, cronograma de etapas,
+     * documentos adjuntos y resumen de estados.
+     * GET /api/postulaciones/mi-postulacion/{idUsuario}
+     */
+    @GetMapping("/mi-postulacion/{idUsuario}")
+    public ResponseEntity<?> obtenerMiPostulacion(@PathVariable Integer idUsuario) {
+        try {
+            return ResponseEntity.ok(postulacionService.obtenerMiPostulacionActiva(idUsuario));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener postulación: " + e.getMessage());
+        }
+    }
 }

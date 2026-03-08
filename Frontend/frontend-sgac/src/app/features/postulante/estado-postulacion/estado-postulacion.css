@@ -1,4 +1,4 @@
-/* --- Heredado de Admin y Convocatorias --- */
+/* --- Estado Postulación Styles --- */
 .gestion-container {
     padding: 1rem;
 }
@@ -20,111 +20,259 @@
     margin-top: 0.25rem;
 }
 
-/* Postulación Card Styling */
-.postulacion-card {
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.75rem;
-    padding: 1.5rem;
+/* ==================================================================================
+   Loading & Empty States
+   ================================================================================== */
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    color: #64748b;
+}
+
+.loading-container p {
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.empty-state-card {
+    background: white;
+    border: 2px dashed #e2e8f0;
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.empty-state-card lucide-icon {
+    color: #cbd5e1;
+}
+
+.empty-state-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #334155;
+}
+
+.empty-state-card p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #166534;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #14532d;
+}
+
+/* ==================================================================================
+   Postulación Detalle Layout
+   ================================================================================== */
+
+.postulacion-detalle {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.postulacion-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
+/* ==================================================================================
+   Info Card
+   ================================================================================== */
+
+.info-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
 }
 
-.card-header {
+.info-card-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+    gap: 1rem;
 }
 
-.observations {
-    margin: 0.5rem 0 0 0;
-    font-style: italic;
-    color: #64748b;
-    font-size: 0.85rem;
-    background: #f8fafc;
-    padding: 0.5rem 0.75rem;
-    border-radius: 0.375rem;
-    border-left: 3px solid #cbd5e1;
+.info-principal {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.status-pill {
+.asignatura-nombre {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.carrera-badge {
+    display: inline-block;
+    background: #dcfce7;
+    color: #166534;
     padding: 0.25rem 0.75rem;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    display: inline-block;
-    text-align: center;
 }
 
-.status-pill.big {
-    padding: 0.4rem 1rem;
-    font-size: 0.85rem;
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
 }
 
-/* Aprobado */
-.status-pill.aprobado,
-.status-pill.active {
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info-value {
+    font-size: 0.95rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.observaciones-box {
+    margin-top: 1rem;
+    padding: 0.75rem 1rem;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.observaciones-box lucide-icon {
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.observaciones-box p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #92400e;
+}
+
+/* ==================================================================================
+   Status Pills
+   ================================================================================== */
+
+.status-pill {
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-pill.aprobado {
     background: #dcfce7;
     color: #15803d;
 }
 
-/* Rechazado */
-.status-pill.rechazado,
-.status-pill.inactive {
+.status-pill.rechazado {
     background: #fee2e2;
     color: #b91c1c;
 }
 
-/* Pendiente */
-.status-pill.pendiente,
-.status-pill.pending {
-    background: #fef08a;
-    color: #854d0e;
+.status-pill.pendiente {
+    background: #fef3c7;
+    color: #92400e;
 }
 
-/* En Evaluación / Info */
 .status-pill.info {
     background: #e0f2fe;
     color: #0369a1;
 }
 
-/* Stepper Component */
-.stepper-container {
-    width: 100%;
-    margin-top: 0.5rem;
-    padding: 1rem 0;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-    border: 1px dashed hsl(var(--border));
+.status-pill.observado {
+    background: #ffedd5;
+    color: #c2410c;
 }
 
-.stepper {
+/* ==================================================================================
+   Cronograma / Timeline
+   ================================================================================== */
+
+.cronograma-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+}
+
+.section-title {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    list-style: none;
-    padding: 0 2rem;
-    margin: 0;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #334155;
 }
 
-.stepper li {
+.section-title lucide-icon {
+    color: #64748b;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 1rem;
+}
+
+.timeline-marker {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    position: relative;
-    z-index: 2;
 }
 
-.stepper li .step-icon {
+.marker-circle {
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
@@ -134,179 +282,239 @@
     align-items: center;
     justify-content: center;
     font-weight: 600;
+    font-size: 0.9rem;
+    flex-shrink: 0;
     border: 3px solid white;
-    box-shadow: 0 0 0 1px #cbd5e1;
+    box-shadow: 0 0 0 2px #e2e8f0;
     transition: all 0.3s ease;
 }
 
-.stepper li .step-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.3s ease;
+.marker-number {
+    font-size: 0.85rem;
 }
 
-.stepper-line {
+.timeline-line {
+    width: 3px;
     flex: 1;
-    height: 3px;
+    min-height: 2rem;
     background: #e2e8f0;
-    margin: 0 1rem;
-    margin-bottom: 1.5rem;
-    /* Align generally with the circles */
-    transition: all 0.3s ease;
-    z-index: 1;
+    margin: 0.25rem 0;
 }
 
-/* Active State */
-.stepper li.active .step-icon {
-    background: white;
-    color: #0f172a;
-    box-shadow: 0 0 0 2px #0f172a;
+.timeline-content {
+    flex: 1;
+    padding-bottom: 1.5rem;
 }
 
-.stepper li.active .step-label {
-    color: #0f172a;
-    font-weight: 700;
+.etapa-nombre {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #334155;
 }
 
-/* Completed State */
-.stepper li.completed .step-icon {
+.etapa-descripcion {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.etapa-fechas {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.etapa-fechas span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Timeline States */
+.timeline-item.etapa-completada .marker-circle {
     background: #10b981;
     color: white;
     box-shadow: 0 0 0 2px #10b981;
 }
 
-.stepper li.completed .step-label {
-    color: #10b981;
-}
-
-/* Line Active */
-.stepper-line.active-line {
+.timeline-item.etapa-completada .timeline-line {
     background: #10b981;
 }
 
-
-/* Actions */
-.card-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    border-top: 1px solid hsl(var(--border));
-    padding-top: 1rem;
+.timeline-item.etapa-completada .etapa-nombre {
+    color: #10b981;
 }
 
-.btn-secondary-small {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
+.timeline-item.etapa-activa .marker-circle {
     background: white;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-    border-radius: 0.375rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
+    color: #1e293b;
+    box-shadow: 0 0 0 2px #1e293b;
+    animation: pulse 2s infinite;
 }
 
-.btn-secondary-small:hover {
-    background: #f1f5f9;
-    color: #0f172a;
-    border-color: #94a3b8;
+.timeline-item.etapa-activa .etapa-nombre {
+    color: #1e293b;
+    font-weight: 700;
 }
 
-/* Icons styling */
-.stat-icon {
-    border-radius: 0.5rem;
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 2px #1e293b; }
+    50% { box-shadow: 0 0 0 4px rgba(30, 41, 59, 0.3); }
+}
+
+/* ==================================================================================
+   Documentos Card
+   ================================================================================== */
+
+.documentos-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+}
+
+.documentos-header {
     display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.stat-icon.green {
-    background: #dcfce7;
-    color: #16a34a;
-}
-
-/* ---- Panel de documentos (Ítem 2 y 8) ---- */
-.docs-panel {
-    border-top: 1px dashed hsl(var(--border));
-    padding-top: 1rem;
-}
-
-.docs-title {
-    font-size: .85rem;
-    font-weight: 600;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    margin: 0 0 .75rem;
-}
-
-.docs-list {
-    display: flex;
-    flex-direction: column;
-    gap: .6rem;
-}
-
-.doc-row {
-    display: flex;
+    justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: .75rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.documentos-header .section-title {
+    margin: 0;
+}
+
+.resumen-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.badge-mini {
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.badge-mini.aprobado {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge-mini.pendiente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-mini.observado {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.badge-mini.rechazado {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.documentos-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.documento-item {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
-    border-radius: .5rem;
-    padding: .6rem .9rem;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.documento-item.editable {
+    border-color: #fbbf24;
+    background: #fffbeb;
 }
 
 .doc-info {
     display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.doc-icono {
+    width: 2.5rem;
+    height: 2.5rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.doc-detalles {
+    display: flex;
     flex-direction: column;
-    gap: .1rem;
+    gap: 0.15rem;
     flex: 1;
-    min-width: 120px;
 }
 
 .doc-nombre {
-    font-size: .8rem;
     font-weight: 600;
-    color: #0f172a;
+    font-size: 0.9rem;
+    color: #1e293b;
 }
 
 .doc-archivo {
-    font-size: .72rem;
+    font-size: 0.8rem;
     color: #64748b;
-    font-family: monospace;
 }
 
-/* Estado badges */
+.doc-fecha {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.doc-acciones {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: space-between;
+}
+
 .doc-estado {
-    padding: .15rem .5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 999px;
-    font-size: .7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.doc-estado.pendiente {
-    background: #fef9c3;
-    color: #ca8a04;
+    font-size: 0.75rem;
+    font-weight: 600;
 }
 
 .doc-estado.aprobado {
     background: #dcfce7;
-    color: #16a34a;
+    color: #15803d;
+}
+
+.doc-estado.pendiente {
+    background: #f1f5f9;
+    color: #64748b;
 }
 
 .doc-estado.observado {
-    background: #fef3c7;
-    color: #92400e;
+    background: #ffedd5;
+    color: #c2410c;
 }
 
 .doc-estado.rechazado {
@@ -314,54 +522,63 @@
     color: #b91c1c;
 }
 
-.doc-obs {
-    font-size: .75rem;
-    color: #ef4444;
-    width: 100%;
-    padding-left: .25rem;
-}
-
 .btn-ver-doc {
-    padding: .3rem .6rem;
-    font-size: .75rem;
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
     background: white;
-    border: 1px solid #cbd5e1;
-    border-radius: .35rem;
+    border-radius: 0.375rem;
+    color: #64748b;
     cursor: pointer;
-    color: #475569;
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: .25rem;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
 .btn-ver-doc:hover {
     background: #f1f5f9;
+    color: #334155;
 }
 
-/* Reemplazar documento */
-.reemplazar-wrapper {
+.doc-observacion {
     display: flex;
-    flex-direction: column;
-    gap: .25rem;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #fef3c7;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
+    color: #92400e;
+}
+
+.doc-observacion lucide-icon {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.doc-reemplazo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
 .btn-reemplazar {
     display: inline-flex;
     align-items: center;
-    gap: .3rem;
-    padding: .3rem .7rem;
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fcd34d;
-    border-radius: .35rem;
-    font-size: .75rem;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #166534;
+    color: white;
+    border-radius: 0.375rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background .2s;
+    transition: background 0.2s;
 }
 
 .btn-reemplazar:hover {
-    background: #fde68a;
+    background: #14532d;
 }
 
 .hidden-input {
@@ -369,6 +586,53 @@
 }
 
 .msg-reemplazo {
-    font-size: .72rem;
-    color: #16a34a;
+    font-size: 0.8rem;
+    color: #b91c1c;
+}
+
+.msg-reemplazo.success {
+    color: #15803d;
+}
+
+.no-documentos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.no-documentos lucide-icon {
+    margin-bottom: 0.5rem;
+}
+
+.no-documentos p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* ==================================================================================
+   Responsive
+   ================================================================================== */
+
+@media (max-width: 640px) {
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .documentos-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .doc-acciones {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }

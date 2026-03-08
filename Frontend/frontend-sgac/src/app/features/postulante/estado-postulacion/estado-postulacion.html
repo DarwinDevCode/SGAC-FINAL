@@ -1,143 +1,200 @@
 <div class="gestion-container">
     <div class="section-header">
         <div class="title-container">
-            <h2 class="title">Mis Postulaciones</h2>
-            <p class="subtitle">Estado de tus postulaciones a convocatorias de ayudantía.</p>
+            <h2 class="title">Mi Postulación</h2>
+            <p class="subtitle">Estado actual de tu postulación a ayudantía de cátedra.</p>
         </div>
     </div>
 
+    <!-- Loading State -->
     @if (loading) {
-    <div class="info-message">
-        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Cargando postulaciones...</p>
+    <div class="loading-container">
+        <lucide-icon name="loader-2" class="spin" size="32"></lucide-icon>
+        <p>Cargando información de tu postulación...</p>
     </div>
-    } @else if (postulaciones.length === 0) {
-    <div class="info-message" style="border:2px dashed hsl(var(--border));border-radius:var(--radius)">
-        <lucide-icon name="folder-open" size="40" style="opacity:.3"></lucide-icon>
-        <p style="margin-top:.75rem">Aún no tienes postulaciones registradas.</p>
-        <a routerLink="/postulante/convocatorias" class="btn btn-primary" style="margin-top:1rem">
-            Ver Convocatorias
+    }
+
+    <!-- Sin postulación activa -->
+    @else if (!tienePostulacion) {
+    <div class="empty-state-card">
+        <lucide-icon name="folder-open" size="48"></lucide-icon>
+        <h3>No tienes postulaciones activas</h3>
+        <p>{{ mensajeError || 'Aún no te has postulado a ninguna convocatoria de ayudantía.' }}</p>
+        <a routerLink="/postulante/convocatorias" class="btn-primary">
+            <lucide-icon name="file-text" size="18"></lucide-icon>
+            Ver Convocatorias Disponibles
         </a>
     </div>
-    } @else {
-    <div style="display:flex;flex-direction:column;gap:1.5rem">
-        @for (p of postulaciones; track p.idPostulacion) {
-        <div class="postulacion-card">
-            <div class="card-header">
-                <div style="display:flex;gap:1rem;align-items:flex-start">
-                    <div class="stat-icon green" style="width:3rem;height:3rem;font-size:1.1rem">
-                        <lucide-icon name="file-text" size="24"></lucide-icon>
-                    </div>
-                    <div>
-                        <h3 style="font-weight:600;font-size:1.1rem;margin:0;color:hsl(var(--foreground))">{{
-                            p.asignaturaConvocatoria }}</h3>
-                        <p class="subtitle" style="margin:.2rem 0 0 0">Postulación #{{ p.idPostulacion }} · {{
-                            p.fechaPostulacion | date:'dd/MM/yyyy' }}</p>
-                        @if (p.observaciones) {
-                        <p class="subtitle observations">"{{ p.observaciones }}"</p>
-                        }
-                    </div>
+    }
+
+    <!-- Postulación activa -->
+    @else {
+    <div class="postulacion-detalle">
+
+        <!-- Card de información principal -->
+        <div class="info-card">
+            <div class="info-card-header">
+                <div class="info-principal">
+                    <h3 class="asignatura-nombre">{{ convocatoria?.nombre_asignatura }}</h3>
+                    <span class="carrera-badge">{{ convocatoria?.nombre_carrera }}</span>
                 </div>
-                <div class="status-container">
-                    <span [ngClass]="{
-                        'aprobado': p.estadoPostulacion === 'APROBADO',
-                        'rechazado': p.estadoPostulacion === 'RECHAZADO',
-                        'pendiente': p.estadoPostulacion === 'PENDIENTE',
-                        'info': p.estadoPostulacion === 'EN_EVALUACION' || p.estadoPostulacion === 'MERITOS_EVALUADOS' || p.estadoPostulacion === 'OPOSICION_EVALUADA'
-                    }" class="status-pill big">{{ p.estadoPostulacion }}</span>
+                <span [class]="getEstadoPostulacionClase(postulacion?.estado_postulacion || '')">
+                    {{ postulacion?.estado_postulacion }}
+                </span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Docente</span>
+                    <span class="info-value">{{ convocatoria?.nombre_docente }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Semestre</span>
+                    <span class="info-value">{{ convocatoria?.semestre_asignatura }}°</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fecha de Postulación</span>
+                    <span class="info-value">{{ formatearFecha(postulacion?.fecha_postulacion || '') }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Cupos Disponibles</span>
+                    <span class="info-value">{{ convocatoria?.cupos_disponibles }}</span>
                 </div>
             </div>
 
-            <div class="stepper-container">
-                <ul class="stepper">
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 1"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 1">
-                        <div class="step-icon"><lucide-icon name="clipboard-check" size="16"></lucide-icon></div>
-                        <div class="step-label">Postulación</div>
-                    </li>
-                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 1"></li>
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 2"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 2">
-                        <div class="step-icon"><lucide-icon name="award" size="16"></lucide-icon></div>
-                        <div class="step-label">Méritos</div>
-                    </li>
-                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 2"></li>
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 3"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 3">
-                        <div class="step-icon"><lucide-icon name="users" size="16"></lucide-icon></div>
-                        <div class="step-label">Oposición</div>
-                    </li>
-                    <li class="stepper-line" [class.active-line]="getPhase(p.estadoPostulacion) > 3"></li>
-                    <li [class.active]="getPhase(p.estadoPostulacion) >= 4"
-                        [class.completed]="getPhase(p.estadoPostulacion) > 4">
-                        <div class="step-icon"><lucide-icon name="flag" size="16"></lucide-icon></div>
-                        <div class="step-label">Resultados</div>
-                    </li>
-                </ul>
+            @if (postulacion?.observaciones) {
+            <div class="observaciones-box">
+                <lucide-icon name="alert-circle" size="16"></lucide-icon>
+                <p>{{ postulacion?.observaciones }}</p>
             </div>
+            }
+        </div>
 
-            <div class="card-actions">
-                <a [routerLink]="['/postulante/meritos', p.idPostulacion]" class="btn-secondary-small">
-                    <lucide-icon name="award" size="16"></lucide-icon>
-                    Ver Méritos
-                </a>
-                <a [routerLink]="['/postulante/oposicion', p.idPostulacion]" class="btn-secondary-small">
-                    <lucide-icon name="users" size="16"></lucide-icon>
-                    Ver Oposición
-                </a>
-                <button type="button" class="btn-secondary-small" (click)="toggleDocumentos(p.idPostulacion)">
-                    <lucide-icon name="file-text" size="16"></lucide-icon>
-                    {{ expandidoPostulacion[p.idPostulacion] ? 'Ocultar Documentos' : 'Ver Documentos' }}
-                </button>
-            </div>
+        <!-- Cronograma / Timeline -->
+        <div class="cronograma-card">
+            <h4 class="section-title">
+                <lucide-icon name="calendar" size="18"></lucide-icon>
+                Cronograma del Proceso
+            </h4>
 
-            <!-- Panel de documentos -->
-            @if (expandidoPostulacion[p.idPostulacion]) {
-            <div class="docs-panel">
-                <h4 class="docs-title"><lucide-icon name="paperclip" size="16"></lucide-icon> Documentos Adjuntos</h4>
-                @if (!documentosPorPostulacion[p.idPostulacion]) {
-                <p style="color:#94a3b8;font-size:.85rem;text-align:center;padding:.75rem">Cargando documentos...</p>
-                } @else if (documentosPorPostulacion[p.idPostulacion].length === 0) {
-                <p style="color:#94a3b8;font-size:.85rem;text-align:center;padding:.75rem">No hay documentos adjuntos.
-                </p>
-                } @else {
-                <div class="docs-list">
-                    @for (doc of documentosPorPostulacion[p.idPostulacion]; track doc.idRequisitoAdjunto) {
-                    <div class="doc-row">
-                        <div class="doc-info">
-                            <span class="doc-nombre">{{ doc.nombreRequisito || 'Requisito' }}</span>
-                            <span class="doc-archivo">{{ doc.nombreArchivo }}</span>
-                        </div>
-                        <span [class]="getEstadoClass(doc.nombreEstado)">{{ doc.nombreEstado }}</span>
-                        <button type="button" class="btn-ver-doc" (click)="verDocumento(doc.idRequisitoAdjunto)"
-                            title="Ver/Descargar documento">
-                            <lucide-icon name="eye" size="14"></lucide-icon>
-                        </button>
-                        @if (doc.observacion) {
-                        <span class="doc-obs">💬 {{ doc.observacion }}</span>
-                        }
-                        @if (doc.nombreEstado === 'OBSERVADO' || doc.nombreEstado === 'RECHAZADO') {
-                        <div class="reemplazar-wrapper">
-                            <label class="btn-reemplazar" [title]="'Reemplazar: ' + doc.nombreArchivo">
-                                <lucide-icon name="upload" size="14"></lucide-icon>
-                                {{ subiendoRequisito[doc.idRequisitoAdjunto] ? 'Subiendo...' : 'Reemplazar' }}
-                                <input type="file" class="hidden-input"
-                                    (change)="onArchivoReemplazo($event, doc.idRequisitoAdjunto)"
-                                    accept=".pdf,.doc,.docx,.png,.jpg" />
-                            </label>
-                            @if (mensajeReemplazo[doc.idRequisitoAdjunto]) {
-                            <span class="msg-reemplazo">{{ mensajeReemplazo[doc.idRequisitoAdjunto] }}</span>
+            <div class="timeline">
+                @for (etapa of cronograma; track etapa.numero; let last = $last) {
+                <div class="timeline-item" [class]="getEtapaClase(etapa.estado)">
+                    <div class="timeline-marker">
+                        <div class="marker-circle">
+                            @if (etapa.estado === 'COMPLETADA') {
+                            <lucide-icon name="check-circle" size="16"></lucide-icon>
+                            } @else if (etapa.estado === 'EN_CURSO') {
+                            <lucide-icon name="clock" size="16"></lucide-icon>
+                            } @else {
+                            <span class="marker-number">{{ etapa.numero }}</span>
                             }
                         </div>
+                        @if (!last) {
+                        <div class="timeline-line"></div>
                         }
                     </div>
+                    <div class="timeline-content">
+                        <h5 class="etapa-nombre">{{ etapa.nombre }}</h5>
+                        <p class="etapa-descripcion">{{ etapa.descripcion }}</p>
+                        <div class="etapa-fechas">
+                            <span><lucide-icon name="calendar" size="12"></lucide-icon> {{ formatearFecha(etapa.fecha_inicio) }}</span>
+                            <span>→</span>
+                            <span>{{ formatearFecha(etapa.fecha_fin) }}</span>
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Documentos -->
+        <div class="documentos-card">
+            <div class="documentos-header">
+                <h4 class="section-title">
+                    <lucide-icon name="paperclip" size="18"></lucide-icon>
+                    Mis Documentos
+                </h4>
+
+                @if (resumenDocumentos) {
+                <div class="resumen-badges">
+                    @if (resumenDocumentos.aprobados > 0) {
+                    <span class="badge-mini aprobado">{{ resumenDocumentos.aprobados }} aprobados</span>
+                    }
+                    @if (resumenDocumentos.pendientes > 0) {
+                    <span class="badge-mini pendiente">{{ resumenDocumentos.pendientes }} pendientes</span>
+                    }
+                    @if (resumenDocumentos.observados > 0) {
+                    <span class="badge-mini observado">{{ resumenDocumentos.observados }} observados</span>
+                    }
+                    @if (resumenDocumentos.rechazados > 0) {
+                    <span class="badge-mini rechazado">{{ resumenDocumentos.rechazados }} rechazados</span>
                     }
                 </div>
                 }
             </div>
-            }
+
+            <div class="documentos-lista">
+                @for (doc of documentos; track doc.id_requisito_adjunto) {
+                <div class="documento-item" [class.editable]="doc.es_editable">
+                    <div class="doc-info">
+                        <div class="doc-icono">
+                            <lucide-icon name="file-text" size="20"></lucide-icon>
+                        </div>
+                        <div class="doc-detalles">
+                            <span class="doc-nombre">{{ doc.nombre_requisito }}</span>
+                            <span class="doc-archivo">{{ doc.nombre_archivo }}</span>
+                            <span class="doc-fecha">Subido: {{ formatearFecha(doc.fecha_subida) }}</span>
+                        </div>
+                    </div>
+
+                    <div class="doc-acciones">
+                        <span [class]="getEstadoDocumentoClase(doc.estado)">
+                            <lucide-icon [name]="getEstadoDocumentoIcono(doc.estado)" size="14"></lucide-icon>
+                            {{ doc.estado }}
+                        </span>
+
+                        <button type="button" class="btn-ver-doc" (click)="verDocumento(doc.id_requisito_adjunto)" title="Ver documento">
+                            <lucide-icon name="eye" size="16"></lucide-icon>
+                        </button>
+                    </div>
+
+                    <!-- Observación del coordinador -->
+                    @if (doc.observacion) {
+                    <div class="doc-observacion">
+                        <lucide-icon name="alert-triangle" size="14"></lucide-icon>
+                        <span>{{ doc.observacion }}</span>
+                    </div>
+                    }
+
+                    <!-- Botón de reemplazo (solo si es editable) -->
+                    @if (doc.es_editable) {
+                    <div class="doc-reemplazo">
+                        <label class="btn-reemplazar">
+                            <lucide-icon name="upload" size="14"></lucide-icon>
+                            {{ subiendoRequisito[doc.id_requisito_adjunto] ? 'Subiendo...' : 'Reemplazar documento' }}
+                            <input type="file" class="hidden-input"
+                                (change)="onArchivoReemplazo($event, doc.id_requisito_adjunto)"
+                                [disabled]="subiendoRequisito[doc.id_requisito_adjunto]"
+                                accept=".pdf,.doc,.docx,.png,.jpg" />
+                        </label>
+                        @if (mensajeReemplazo[doc.id_requisito_adjunto]) {
+                        <span class="msg-reemplazo" [class.success]="mensajeReemplazo[doc.id_requisito_adjunto].startsWith('✔')">
+                            {{ mensajeReemplazo[doc.id_requisito_adjunto] }}
+                        </span>
+                        }
+                    </div>
+                    }
+                </div>
+                } @empty {
+                <div class="no-documentos">
+                    <lucide-icon name="folder-open" size="24"></lucide-icon>
+                    <p>No hay documentos adjuntos.</p>
+                </div>
+                }
+            </div>
         </div>
-        }
     </div>
     }
 </div>
+

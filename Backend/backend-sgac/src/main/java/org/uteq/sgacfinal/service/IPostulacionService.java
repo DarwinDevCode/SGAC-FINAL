@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.Response.DetallePostulacionResponseDTO;
 import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
 import java.util.List;
 
@@ -18,7 +19,7 @@ public interface IPostulacionService {
     List<PostulacionResponseDTO> listarEnEvaluacionPorCarrera(Integer idCarrera);
     String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito);
     void actualizarEstado(Integer idPostulacion, String nuevoEstado, String observacion);
-
-    /** Verifica si un estudiante ya tiene postulación activa para una convocatoria específica */
     boolean existePostulacion(Integer idEstudiante, Integer idConvocatoria);
+    DetallePostulacionResponseDTO obtenerMiPostulacionActiva(Integer idUsuario);
+
 }

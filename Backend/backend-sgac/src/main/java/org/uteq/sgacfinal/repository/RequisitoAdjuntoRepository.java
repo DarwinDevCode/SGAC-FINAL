@@ -37,4 +37,24 @@ public interface RequisitoAdjuntoRepository extends JpaRepository<RequisitoAdjun
                                  @Param("archivo") byte[] archivo,
                                  @Param("nombre") String nombreArchivo,
                                  @Param("fecha") java.time.LocalDate fechaSubida);
+
+    /**
+     * Subsana un documento observado con validación de fechas y notificación al coordinador.
+     * Llama a la función fn_subsanar_documento_estudiante que:
+     * 1. Valida que el documento esté en estado OBSERVADO
+     * 2. Valida que estemos en periodo de subsanación (revisión)
+     * 3. Actualiza el archivo y cambia estado a CORREGIDO
+     * 4. Notifica automáticamente al coordinador
+     *
+     * @param idUsuario ID del usuario estudiante
+     * @param idRequisitoAdjunto ID del documento a subsanar
+     * @param archivo Nuevo archivo en bytes
+     * @param nombreArchivo Nombre del archivo
+     * @return JSON con resultado de la operación
+     */
+    @Query(value = "SELECT postulacion.fn_subsanar_documento_estudiante(:idUsuario, :idRequisito, :archivo, :nombreArchivo)", nativeQuery = true)
+    String subsanarDocumentoObservado(@Param("idUsuario") Integer idUsuario,
+                                       @Param("idRequisito") Integer idRequisitoAdjunto,
+                                       @Param("archivo") byte[] archivo,
+                                       @Param("nombreArchivo") String nombreArchivo);
 }

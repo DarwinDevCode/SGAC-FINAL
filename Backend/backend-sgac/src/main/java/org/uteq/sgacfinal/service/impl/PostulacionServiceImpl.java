@@ -1,12 +1,16 @@
 package org.uteq.sgacfinal.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.NotificationRequest;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
+import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.entity.Estudiante;
 import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.repository.EstudianteRepository;
@@ -15,11 +19,13 @@ import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IPostulacionService;
 
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -28,6 +34,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
     private final PostulacionRepository postulacionRepository;
     private final EstudianteRepository estudianteRepository;
     private final INotificacionService notificacionService;
+    private final ObjectMapper objectMapper;
 
     @Override
     public PostulacionResponseDTO crear(PostulacionRequestDTO request) {
@@ -235,4 +242,123 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 .map(est -> postulacionRepository.existePostulacionActiva(est.getIdEstudiante(), idConvocatoria))
                 .orElse(false);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DetallePostulacionResponseDTO obtenerMiPostulacionActiva(Integer idUsuario) {
+        log.info("Consultando postulación activa para usuario: {}", idUsuario);
+
+        try {
+            String jsonResultado = postulacionRepository.obtenerDetallePostulacion(idUsuario);
+
+            if (jsonResultado == null || jsonResultado.isEmpty()) {
+                return DetallePostulacionResponseDTO.builder()
+                        .exito(false)
+                        .codigo("ERROR_CONSULTA")
+                        .mensaje("No se pudo obtener información de la postulación")
+                        .build();
+            }
+
+            return parsearRespuestaPostulacion(jsonResultado);
+
+        } catch (Exception e) {
+            log.error("Error al obtener detalle de postulación: {}", e.getMessage());
+
+            String mensajeError = e.getMessage();
+            if (mensajeError != null && mensajeError.contains("ERROR SISTEMA")) {
+                return DetallePostulacionResponseDTO.builder()
+                        .exito(false)
+                        .codigo("ERROR_SISTEMA")
+                        .mensaje(mensajeError)
+                        .build();
+            }
+
+            return DetallePostulacionResponseDTO.builder()
+                    .exito(false)
+                    .codigo("ERROR")
+                    .mensaje("Error al consultar la postulación: " + mensajeError)
+                    .build();
+        }
+    }
+
+    /**
+     * Parsea la respuesta JSON de la función PostgreSQL fn_ver_detalle_postulacion.
+     */
+    private DetallePostulacionResponseDTO parsearRespuestaPostulacion(String json) {
+        try {
+            JsonNode root = objectMapper.readTree(json);
+
+            Boolean exito = root.path("exito").asBoolean(false);
+
+            if (!exito) {
+                return DetallePostulacionResponseDTO.builder()
+                        .exito(false)
+                        .codigo(root.path("codigo").asText(""))
+                        .mensaje(root.path("mensaje").asText("Error desconocido"))
+                        .build();
+            }
+
+            // Parsear postulación
+            PostulacionInfoDTO postulacion = null;
+            JsonNode postulacionNode = root.path("postulacion");
+            if (!postulacionNode.isMissingNode()) {
+                postulacion = objectMapper.treeToValue(postulacionNode, PostulacionInfoDTO.class);
+            }
+
+            // Parsear convocatoria
+            ConvocatoriaPostulacionDTO convocatoria = null;
+            JsonNode convocatoriaNode = root.path("convocatoria");
+            if (!convocatoriaNode.isMissingNode()) {
+                convocatoria = objectMapper.treeToValue(convocatoriaNode, ConvocatoriaPostulacionDTO.class);
+            }
+
+            // Parsear cronograma
+            List<EtapaCronogramaDTO> cronograma = Collections.emptyList();
+            JsonNode cronogramaNode = root.path("cronograma");
+            if (cronogramaNode.isArray()) {
+                cronograma = objectMapper.readValue(
+                        cronogramaNode.toString(),
+                        new TypeReference<List<EtapaCronogramaDTO>>() {}
+                );
+            }
+
+            // Parsear documentos
+            List<DocumentoPostulacionDTO> documentos = Collections.emptyList();
+            JsonNode documentosNode = root.path("documentos");
+            if (documentosNode.isArray()) {
+                documentos = objectMapper.readValue(
+                        documentosNode.toString(),
+                        new TypeReference<List<DocumentoPostulacionDTO>>() {}
+                );
+            }
+
+            // Parsear resumen de documentos
+            ResumenDocumentosDTO resumen = null;
+            JsonNode resumenNode = root.path("resumen_documentos");
+            if (!resumenNode.isMissingNode()) {
+                resumen = objectMapper.treeToValue(resumenNode, ResumenDocumentosDTO.class);
+            }
+
+            return DetallePostulacionResponseDTO.builder()
+                    .exito(true)
+                    .mensaje(root.path("mensaje").asText(""))
+                    .postulacion(postulacion)
+                    .convocatoria(convocatoria)
+                    .cronograma(cronograma)
+                    .documentos(documentos)
+                    .totalDocumentos(root.path("total_documentos").asInt(0))
+                    .resumenDocumentos(resumen)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("Error al parsear respuesta JSON de postulación: {}", e.getMessage());
+            return DetallePostulacionResponseDTO.builder()
+                    .exito(false)
+                    .codigo("ERROR_PARSEO")
+                    .mensaje("Error al procesar la respuesta: " + e.getMessage())
+                    .build();
+        }
+    }
+
+
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/Backend/backend-sgac/docs/sql/fix_fn_es_periodo_subsanacion.sql" dialect="PostgreSQL" />
+  </component>
+</project>

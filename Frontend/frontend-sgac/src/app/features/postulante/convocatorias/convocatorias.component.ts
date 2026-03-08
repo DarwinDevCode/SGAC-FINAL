@@ -4,9 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { PostulanteService } from '../../../core/services/postulante-service';
+import { ConvocatoriaService } from '../../../core/services/convocatoria-service';
 import { AuthService } from '../../../core/services/auth-service';
-import { ConvocatoriaDTO } from '../../../core/dto/convocatoria';
 import { TipoRequisitoPostulacionResponseDTO } from '../../../core/dto/postulacion';
+import {
+  ConvocatoriaEstudianteDTO,
+  ConvocatoriasEstudianteWrapperDTO
+} from '../../../core/dto/convocatoria-estudiante';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -18,21 +22,28 @@ import { HttpErrorResponse } from '@angular/common/http';
 })
 export class ConvocatoriasComponent implements OnInit, OnDestroy {
   postulanteService = inject(PostulanteService);
+  convocatoriaService = inject(ConvocatoriaService);
   authService = inject(AuthService);
   private subs = new Subscription();
 
-  // Data
-  convocatoriasList: ConvocatoriaDTO[] = [];
-  convocatoriasFiltradas: ConvocatoriaDTO[] = [];
+  // Data - Ahora usa ConvocatoriaEstudianteDTO
+  convocatoriasList: ConvocatoriaEstudianteDTO[] = [];
+  convocatoriasFiltradas: ConvocatoriaEstudianteDTO[] = [];
   tiposRequisito: TipoRequisitoPostulacionResponseDTO[] = [];
 
   // UI State
   loading = true;
   mostrarModal = false;
   busqueda = '';
-  convocatoriaSeleccionada: ConvocatoriaDTO | null = null;
+  convocatoriaSeleccionada: ConvocatoriaEstudianteDTO | null = null;
+
   /** Mapa: idConvocatoria → true si el estudiante ya se postuló a esa convocatoria */
   postulacionPorConvocatoria: Record<number, boolean> = {};
+
+  // Mensajes de estado
+  mensajeError: string | null = null;
+  mensajeInfo: string | null = null;
+  esElegible = true;
 
   // Form State
   idEstudianteBase = 0;
@@ -45,7 +56,7 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     if (user) {
       this.idEstudianteBase = user.idUsuario;
     }
-    this.listarConvocatorias();
+    this.listarConvocatoriasElegibles();
     this.cargarRequisitos();
   }
 
@@ -71,18 +82,43 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  listarConvocatorias() {
+  /**
+   * Lista las convocatorias elegibles para el estudiante autenticado.
+   * Usa el nuevo endpoint que aplica filtros de elegibilidad académica.
+   */
+  listarConvocatoriasElegibles() {
     this.loading = true;
+    this.mensajeError = null;
+    this.mensajeInfo = null;
+    this.esElegible = true;
+
     this.subs.add(
-      this.postulanteService.listarConvocatoriasActivas().subscribe({
-        next: (data) => {
-          this.convocatoriasList = data || [];
-          this.aplicarFiltro(this.busqueda);
-          // Una vez cargadas las convocatorias, verificar cuáles ya tiene postulación
-          this.checkPostulacionesGranulares();
+      this.convocatoriaService.getMisConvocatoriasElegibles().subscribe({
+        next: (response: ConvocatoriasEstudianteWrapperDTO) => {
+          if (response.exito) {
+            this.convocatoriasList = response.convocatorias || [];
+            this.aplicarFiltro(this.busqueda);
+
+            if (this.convocatoriasList.length === 0) {
+              this.mensajeInfo = 'No hay convocatorias disponibles para tu carrera y nivel académico en este momento.';
+            }
+
+            // Verificar cuáles ya tiene postulación
+            this.checkPostulacionesGranulares();
+          } else {
+            // Error de negocio (no cumple requisitos)
+            this.esElegible = false;
+            this.mensajeError = response.mensaje;
+            this.convocatoriasList = [];
+            this.convocatoriasFiltradas = [];
+          }
           this.loading = false;
         },
-        error: () => this.loading = false
+        error: (err: HttpErrorResponse) => {
+          console.error('Error al cargar convocatorias:', err);
+          this.mensajeError = 'Error al cargar las convocatorias. Por favor, intenta de nuevo.';
+          this.loading = false;
+        }
       })
     );
   }
@@ -110,11 +146,12 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
 
     this.convocatoriasFiltradas = this.convocatoriasList.filter(c =>
       (c.nombreAsignatura || '').toLowerCase().includes(term) ||
-      (c.nombrePeriodo || '').toLowerCase().includes(term)
+      (c.nombreCarrera || '').toLowerCase().includes(term) ||
+      (c.nombreDocente || '').toLowerCase().includes(term)
     );
   }
 
-  abrirModalPostulacion(convocatoria: ConvocatoriaDTO) {
+  abrirModalPostulacion(convocatoria: ConvocatoriaEstudianteDTO) {
     this.convocatoriaSeleccionada = convocatoria;
     this.archivosSubidos = [];
     this.observacionesGenerales = '';
@@ -163,7 +200,7 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
         next: () => {
           alert('Postulación registrada exitosamente');
           this.cerrarModal();
-          this.listarConvocatorias();
+          this.listarConvocatoriasElegibles();
         },
         error: (err: HttpErrorResponse) => {
           console.error('Error al postular:', err);
@@ -172,5 +209,22 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+  /**
+   * Formatea la fecha para mostrar en formato legible.
+   */
+  formatearFecha(fecha: string): string {
+    if (!fecha) return 'N/A';
+    try {
+      const date = new Date(fecha);
+      return date.toLocaleDateString('es-EC', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return fecha;
+    }
   }
 }

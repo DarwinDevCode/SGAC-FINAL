@@ -1,12 +1,20 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Loader2, FolderOpen, FileText, ClipboardCheck, Award, Users, Flag, Paperclip, Eye, Upload } from 'lucide-angular';
+import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Loader2, FolderOpen, FileText, ClipboardCheck, Award, Users, Flag, Paperclip, Eye, Upload, AlertTriangle, Calendar, Clock, CheckCircle, XCircle, AlertCircle } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { PostulanteService } from '../../../core/services/postulante-service';
 import { AuthService } from '../../../core/services/auth-service';
-import { PostulacionResponseDTO, RequisitoAdjuntoResponseDTO } from '../../../core/dto/postulacion';
+import {
+    DetallePostulacionResponseDTO,
+    EtapaCronogramaDTO,
+    DocumentoPostulacionDTO,
+    PostulacionInfoDTO,
+    ConvocatoriaPostulacionDTO,
+    ResumenDocumentosDTO,
+    SubsanacionDocumentoResponseDTO
+} from '../../../core/dto/detalle-postulacion';
 
 @Component({
     selector: 'app-estado-postulacion',
@@ -18,7 +26,11 @@ import { PostulacionResponseDTO, RequisitoAdjuntoResponseDTO } from '../../../co
         {
             provide: LUCIDE_ICONS,
             multi: true,
-            useValue: new LucideIconProvider({ Loader2, FolderOpen, FileText, ClipboardCheck, Award, Users, Flag, Paperclip, Eye, Upload })
+            useValue: new LucideIconProvider({
+                Loader2, FolderOpen, FileText, ClipboardCheck, Award, Users, Flag,
+                Paperclip, Eye, Upload, AlertTriangle, Calendar, Clock, CheckCircle,
+                XCircle, AlertCircle
+            })
         }
     ]
 })
@@ -28,63 +40,66 @@ export class EstadoPostulacionComponent implements OnInit, OnDestroy {
     http = inject(HttpClient);
     private subs = new Subscription();
 
-    postulaciones: PostulacionResponseDTO[] = [];
+    // Estados de carga
     loading = true;
-    idEstudianteBase = 0;
+    idUsuario = 0;
 
-    /** Mapa idPostulacion → lista de documentos */
-    documentosPorPostulacion: Record<number, RequisitoAdjuntoResponseDTO[]> = {};
-    /** Mapa idPostulacion → si está expandido el panel de documentos */
-    expandidoPostulacion: Record<number, boolean> = {};
-    /** Mapa idRequisito → mensaje de éxito/error al reemplazar */
+    // Datos de la postulación activa
+    tienePostulacion = false;
+    postulacion: PostulacionInfoDTO | null = null;
+    convocatoria: ConvocatoriaPostulacionDTO | null = null;
+    cronograma: EtapaCronogramaDTO[] = [];
+    documentos: DocumentoPostulacionDTO[] = [];
+    resumenDocumentos: ResumenDocumentosDTO | null = null;
+
+    // Mensajes
+    mensajeError: string | null = null;
+    codigoError: string | null = null;
+
+    // Control de documentos
     mensajeReemplazo: Record<number, string> = {};
-    /** Mapa idRequisito → si está subiendo */
     subiendoRequisito: Record<number, boolean> = {};
 
     ngOnInit(): void {
         const user = this.authService.getUser();
         if (user) {
-            this.idEstudianteBase = user.idUsuario;
+            this.idUsuario = user.idUsuario;
         }
-        this.cargarMisPostulaciones();
+        this.cargarMiPostulacionActiva();
     }
 
     ngOnDestroy(): void {
         this.subs.unsubscribe();
     }
 
-    cargarMisPostulaciones() {
+    cargarMiPostulacionActiva() {
         this.loading = true;
+        this.mensajeError = null;
+
         this.subs.add(
-            this.postulanteService.misPostulaciones(this.idEstudianteBase).subscribe({
-                next: (data) => {
-                    this.postulaciones = data || [];
+            this.postulanteService.obtenerMiPostulacionActiva(this.idUsuario).subscribe({
+                next: (response: DetallePostulacionResponseDTO) => {
+                    if (response.exito) {
+                        this.tienePostulacion = true;
+                        this.postulacion = response.postulacion || null;
+                        this.convocatoria = response.convocatoria || null;
+                        this.cronograma = response.cronograma || [];
+                        this.documentos = response.documentos || [];
+                        this.resumenDocumentos = response.resumen_documentos || null;
+                    } else {
+                        this.tienePostulacion = false;
+                        this.codigoError = response.codigo || null;
+                        this.mensajeError = response.mensaje;
+                    }
                     this.loading = false;
                 },
                 error: (err) => {
-                    console.error(err.error?.mensaje || err.message || 'Error al cargar postulaciones');
+                    console.error('Error al cargar postulación:', err);
+                    this.mensajeError = 'Error al cargar la información de tu postulación.';
                     this.loading = false;
                 }
             })
         );
-    }
-
-    toggleDocumentos(idPostulacion: number) {
-        const yaExpandido = this.expandidoPostulacion[idPostulacion];
-        this.expandidoPostulacion[idPostulacion] = !yaExpandido;
-        // Carga documentos la primera vez que se expande
-        if (!yaExpandido && !this.documentosPorPostulacion[idPostulacion]) {
-            this.subs.add(
-                this.postulanteService.listarDocumentosPostulacion(idPostulacion).subscribe({
-                    next: (docs) => {
-                        this.documentosPorPostulacion[idPostulacion] = docs || [];
-                    },
-                    error: () => {
-                        this.documentosPorPostulacion[idPostulacion] = [];
-                    }
-                })
-            );
-        }
     }
 
     verDocumento(idRequisito: number) {
@@ -108,44 +123,96 @@ export class EstadoPostulacionComponent implements OnInit, OnDestroy {
         const input = event.target as HTMLInputElement;
         if (!input.files || !input.files[0]) return;
         const archivo = input.files[0];
+
         this.subiendoRequisito[idRequisito] = true;
         this.mensajeReemplazo[idRequisito] = '';
+
         this.subs.add(
-            this.postulanteService.reemplazarDocumento(idRequisito, archivo).subscribe({
-                next: (dto) => {
-                    this.mensajeReemplazo[idRequisito] = '✔ Documento reemplazado correctamente.';
+            this.postulanteService.subsanarDocumentoObservado(this.idUsuario, idRequisito, archivo).subscribe({
+                next: (response: SubsanacionDocumentoResponseDTO) => {
                     this.subiendoRequisito[idRequisito] = false;
-                    // Actualizar el documento en el mapa
-                    const idPost = dto.idPostulacion;
-                    if (this.documentosPorPostulacion[idPost]) {
-                        const idx = this.documentosPorPostulacion[idPost].findIndex(d => d.idRequisitoAdjunto === idRequisito);
-                        if (idx !== -1) this.documentosPorPostulacion[idPost][idx] = dto;
+
+                    if (response.exito) {
+                        this.mensajeReemplazo[idRequisito] = '✔ ' + response.mensaje;
+                        // Recargar datos para ver el nuevo estado
+                        this.cargarMiPostulacionActiva();
+                    } else {
+                        // Mostrar mensaje de error específico (fuera de periodo, estado incorrecto, etc.)
+                        this.mensajeReemplazo[idRequisito] = '✖ ' + response.mensaje;
                     }
                 },
                 error: (e) => {
-                    this.mensajeReemplazo[idRequisito] = '✖ Error: ' + (e.error?.message || e.message || 'No se pudo reemplazar el documento.');
                     this.subiendoRequisito[idRequisito] = false;
+                    const errorMsg = e.error?.mensaje || e.error?.message || e.message || 'No se pudo subsanar el documento.';
+                    this.mensajeReemplazo[idRequisito] = '✖ Error: ' + errorMsg;
                 }
             })
         );
     }
 
-    getPhase(estado: string | undefined): number {
-        if (!estado) return 1;
-        const e = estado.toUpperCase();
-        if (e === 'PENDIENTE') return 1;
-        if (e === 'EN_EVALUACION' || e === 'MERITOS_EVALUADOS') return 2;
-        if (e === 'OPOSICION_EVALUADA') return 3;
-        if (e === 'APROBADO' || e === 'RECHAZADO') return 4;
-        return 1;
+    // Helpers para el estado de las etapas del cronograma
+    getEtapaIcono(nombre: string): string {
+        switch (nombre.toUpperCase()) {
+            case 'POSTULACIÓN': return 'clipboard-check';
+            case 'REVISIÓN': return 'eye';
+            case 'RESULTADOS': return 'flag';
+            default: return 'clock';
+        }
     }
 
-    getEstadoClass(estado: string): string {
+    getEtapaClase(estado: string): string {
+        switch (estado) {
+            case 'COMPLETADA': return 'etapa-completada';
+            case 'EN_CURSO': return 'etapa-activa';
+            default: return 'etapa-pendiente';
+        }
+    }
+
+    // Helpers para el estado de documentos
+    getEstadoDocumentoClase(estado: string): string {
         switch (estado?.toUpperCase()) {
             case 'APROBADO': return 'doc-estado aprobado';
             case 'RECHAZADO': return 'doc-estado rechazado';
             case 'OBSERVADO': return 'doc-estado observado';
             default: return 'doc-estado pendiente';
+        }
+    }
+
+    getEstadoDocumentoIcono(estado: string): string {
+        switch (estado?.toUpperCase()) {
+            case 'APROBADO': return 'check-circle';
+            case 'RECHAZADO': return 'x-circle';
+            case 'OBSERVADO': return 'alert-circle';
+            default: return 'clock';
+        }
+    }
+
+    // Helper para formatear fechas
+    formatearFecha(fecha: string): string {
+        if (!fecha) return 'N/A';
+        try {
+            const date = new Date(fecha);
+            return date.toLocaleDateString('es-EC', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch {
+            return fecha;
+        }
+    }
+
+    // Helper para estado de postulación
+    getEstadoPostulacionClase(estado: string): string {
+        switch (estado?.toUpperCase()) {
+            case 'APROBADO':
+            case 'APTO': return 'status-pill aprobado';
+            case 'RECHAZADO':
+            case 'NO_APTO': return 'status-pill rechazado';
+            case 'EN_REVISION':
+            case 'EN_EVALUACION': return 'status-pill info';
+            case 'OBSERVADO': return 'status-pill observado';
+            default: return 'status-pill pendiente';
         }
     }
 }

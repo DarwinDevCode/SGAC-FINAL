@@ -7,6 +7,12 @@ import { PeriodoAcademicoDTO } from '../dto/periodo-academico';
 import { AsignaturaDTO } from '../dto/asignatura';
 import { DocenteDTO } from '../dto/docente';
 import { DocenteComboDTO, AsignaturaComboDTO } from '../models/convocatoria.model';
+import {
+  ConvocatoriaEstudianteDTO,
+  ConvocatoriasEstudianteWrapperDTO,
+  ValidacionContextoEstudianteDTO,
+  ValidacionElegibilidadAcademicaDTO
+} from '../dto/convocatoria-estudiante';
 
 @Injectable({
   providedIn: 'root',
@@ -63,5 +69,53 @@ export class ConvocatoriaService {
   /** Coordinador: asignaturas activas filtradas por docente (solo relaciones activas). */
   getAsignaturasPorDocente(idDocente: number) {
     return this.http.get<AsignaturaComboDTO[]>(`${this.baseUrl}/coordinador/docentes/${idDocente}/asignaturas`);
+  }
+
+  // ==================================================================================
+  // Métodos para Estudiante - Convocatorias Elegibles
+  // ==================================================================================
+
+  /**
+   * Lista las convocatorias elegibles para el estudiante autenticado.
+   * Aplica filtros de carrera, nivel de asignatura, estado y fecha.
+   * @returns Wrapper con lista de convocatorias y metadatos
+   */
+  getMisConvocatoriasElegibles(): Observable<ConvocatoriasEstudianteWrapperDTO> {
+    return this.http.get<ConvocatoriasEstudianteWrapperDTO>(
+      `${this.baseUrl}/estudiante/convocatorias`
+    );
+  }
+
+  /**
+   * Lista las convocatorias elegibles para un usuario específico.
+   * @param idUsuario ID del usuario a consultar
+   * @returns Lista de convocatorias elegibles
+   */
+  getConvocatoriasElegiblesPorUsuario(idUsuario: number): Observable<ConvocatoriaEstudianteDTO[]> {
+    return this.http.get<ConvocatoriaEstudianteDTO[]>(
+      `${this.baseUrl}/estudiante/convocatorias/listar/${idUsuario}`
+    );
+  }
+
+  /**
+   * Valida el contexto del estudiante (transforma id_usuario en id_estudiante).
+   * @param idUsuario ID del usuario a validar
+   * @returns DTO con resultado de validación
+   */
+  validarContextoEstudiante(idUsuario: number): Observable<ValidacionContextoEstudianteDTO> {
+    return this.http.get<ValidacionContextoEstudianteDTO>(
+      `${this.baseUrl}/estudiante/convocatorias/validar-contexto/${idUsuario}`
+    );
+  }
+
+  /**
+   * Valida la elegibilidad académica del estudiante (semestre >= 6).
+   * @param idEstudiante ID del estudiante a validar
+   * @returns DTO con resultado de validación
+   */
+  validarElegibilidadAcademica(idEstudiante: number): Observable<ValidacionElegibilidadAcademicaDTO> {
+    return this.http.get<ValidacionElegibilidadAcademicaDTO>(
+      `${this.baseUrl}/estudiante/convocatorias/validar-elegibilidad/${idEstudiante}`
+    );
   }
 }
