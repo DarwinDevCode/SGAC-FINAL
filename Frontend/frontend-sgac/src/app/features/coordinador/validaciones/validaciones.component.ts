@@ -470,14 +470,8 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
                     this.loadingAsignacion = false;
                     this.successMensaje = 'Comisión asignada exitosamente.';
                     this.cerrarModalAsignacion();
-                    // Refrescar al estudiante localmente para que figure EN_EVALUACION
-                    if (this.postulacionAAsignar) {
-                        const idx = this.postulaciones.findIndex(p => p.id_postulacion === this.postulacionAAsignar!.id_postulacion);
-                        if (idx >= 0) {
-                            this.postulaciones[idx].estado_codigo = 'EN_EVALUACION';
-                            this.postulaciones[idx].estado_nombre = 'En Evaluación';
-                        }
-                    }
+                    // Refrescar toda la lista para asegurar estados consistentes
+                    this.cargarPostulaciones();
                     setTimeout(() => this.successMensaje = '', 3500);
                 },
                 error: (err) => {
