@@ -1,6 +1,6 @@
 package org.uteq.sgacfinal.controller;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,17 +25,17 @@ import java.util.Map;
  * Controlador del Módulo de Evaluación y Selección.
  *
  * Tabs del frontend:
- *   Tab 1 (Méritos)          → EvaluacionController existente  (/api/evaluaciones/meritos)
- *   Tab 2 (Oposición)        → /api/evaluaciones/oposicion/*
- *   Tab 3 (Resultados)       → /api/evaluaciones/ranking/convocatoria/v2/{id}
- *   Tab 4 (Actas/Confirmar)  → /api/evaluaciones/actas/*
+ * Tab 1 (Méritos) → EvaluacionController existente (/api/evaluaciones/meritos)
+ * Tab 2 (Oposición) → /api/evaluaciones/oposicion/*
+ * Tab 3 (Resultados) → /api/evaluaciones/ranking/convocatoria/v2/{id}
+ * Tab 4 (Actas/Confirmar) → /api/evaluaciones/actas/*
  *
- *   Publicación:             → /api/evaluaciones/publicar-resultados/{idConvocatoria}
- *   Resultado del postulante → /api/evaluaciones/resultado-postulante/{idPostulacion}
+ * Publicación: → /api/evaluaciones/publicar-resultados/{idConvocatoria}
+ * Resultado del postulante →
+ * /api/evaluaciones/resultado-postulante/{idPostulacion}
  */
 @RestController
 @RequestMapping("/api/evaluacion-seleccion")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
 public class EvaluacionSeleccionController {
 
@@ -45,6 +45,18 @@ public class EvaluacionSeleccionController {
     private final PostulacionRepository postulacionRepo;
     private final INotificacionService notificacionService;
 
+    @Autowired
+    public EvaluacionSeleccionController(ICalificacionOposicionService oposicionService,
+            IActaEvaluacionService actaService,
+            ResumenEvaluacionRepository resumenRepo,
+            PostulacionRepository postulacionRepo,
+            INotificacionService notificacionService) {
+        this.oposicionService = oposicionService;
+        this.actaService = actaService;
+        this.resumenRepo = resumenRepo;
+        this.postulacionRepo = postulacionRepo;
+        this.notificacionService = notificacionService;
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     // TAB 2: CALIFICACIÓN DE OPOSICIÓN INDIVIDUAL
@@ -92,12 +104,15 @@ public class EvaluacionSeleccionController {
         try {
             return ResponseEntity.ok(oposicionService.obtenerEstado(idPostulacion));
         } catch (Exception e) {
+            System.err.println("ERROR OBTENIENDO ESTADO OPOSICION:");
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     /**
-     * Calificación individual de un evaluador específico (solo para que el frontend la cargue en su propio formulario).
+     * Calificación individual de un evaluador específico (solo para que el frontend
+     * la cargue en su propio formulario).
      * GET /api/evaluaciones/oposicion/{idPostulacion}/evaluador/{idEvaluador}
      */
     @GetMapping("/oposicion/{idPostulacion}/evaluador/{idEvaluador}")
@@ -116,9 +131,11 @@ public class EvaluacionSeleccionController {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Ranking completo de una convocatoria con estados (GANADOR/APTO/NO_APTO/DESIERTO)
+     * Ranking completo de una convocatoria con estados
+     * (GANADOR/APTO/NO_APTO/DESIERTO)
      * y datos de desempate. Postulantes empatados tienen el flag empate=true.
-     * GET /api/evaluaciones/ranking/convocatoria/{idConvocatoria}   (sobreescribe el existente)
+     * GET /api/evaluaciones/ranking/convocatoria/{idConvocatoria} (sobreescribe el
+     * existente)
      */
     @GetMapping("/ranking/convocatoria/v2/{idConvocatoria}")
     public ResponseEntity<?> rankingConvocatoria(@PathVariable Integer idConvocatoria) {
@@ -201,7 +218,8 @@ public class EvaluacionSeleccionController {
      *
      * Lógica:
      * - Recorre todos los resúmenes existentes de la convocatoria
-     * - Para cada uno arma el mensaje según su estado (GANADOR / APTO / NO_APTO / DESIERTO)
+     * - Para cada uno arma el mensaje según su estado (GANADOR / APTO / NO_APTO /
+     * DESIERTO)
      * - Llama a INotificacionService.enviarNotificacion por cada postulante
      */
     @PostMapping("/publicar-resultados/{idConvocatoria}")
@@ -218,31 +236,35 @@ public class EvaluacionSeleccionController {
                 try {
                     Integer idUsuario = r.getPostulacion().getEstudiante().getUsuario().getIdUsuario();
                     BigDecimal total = r.getTotalFinal() != null ? r.getTotalFinal() : BigDecimal.ZERO;
-                    String estado   = r.getEstado() != null ? r.getEstado() : "PENDIENTE";
+                    String estado = r.getEstado() != null ? r.getEstado() : "PENDIENTE";
 
                     String titulo;
                     String mensaje;
 
                     switch (estado) {
                         case "GANADOR" -> {
-                            titulo  = "¡Resultado de Concurso de Méritos y Oposición!";
-                            mensaje = "¡Felicitaciones! Has obtenido " + total + " / 40 puntos y has sido seleccionado(a) como Ayudante de Cátedra.";
+                            titulo = "¡Resultado de Concurso de Méritos y Oposición!";
+                            mensaje = "¡Felicitaciones! Has obtenido " + total
+                                    + " / 40 puntos y has sido seleccionado(a) como Ayudante de Cátedra.";
                         }
                         case "APTO" -> {
-                            titulo  = "Resultado de Concurso de Méritos y Oposición";
-                            mensaje = "Has aprobado el concurso con " + total + " / 40 puntos. Tu postulación quedó en la lista de elegibles.";
+                            titulo = "Resultado de Concurso de Méritos y Oposición";
+                            mensaje = "Has aprobado el concurso con " + total
+                                    + " / 40 puntos. Tu postulación quedó en la lista de elegibles.";
                         }
                         case "NO_APTO" -> {
-                            titulo  = "Resultado de Concurso de Méritos y Oposición";
-                            mensaje = "Has obtenido " + total + " / 40 puntos. Lamentablemente no alcanzaste el puntaje mínimo requerido de 25 puntos.";
+                            titulo = "Resultado de Concurso de Méritos y Oposición";
+                            mensaje = "Has obtenido " + total
+                                    + " / 40 puntos. Lamentablemente no alcanzaste el puntaje mínimo requerido de 25 puntos.";
                         }
                         case "DESIERTO" -> {
-                            titulo  = "Concurso Declarado Desierto";
+                            titulo = "Concurso Declarado Desierto";
                             mensaje = "El concurso de méritos y oposición ha sido declarado desierto. Ningún postulante alcanzó el puntaje mínimo de 25 puntos.";
                         }
                         default -> {
-                            titulo  = "Actualización de tu Postulación";
-                            mensaje = "Los resultados de la evaluación han sido publicados. Tu puntaje total fue " + total + " / 40.";
+                            titulo = "Actualización de tu Postulación";
+                            mensaje = "Los resultados de la evaluación han sido publicados. Tu puntaje total fue "
+                                    + total + " / 40.";
                         }
                     }
 
@@ -289,12 +311,12 @@ public class EvaluacionSeleccionController {
                     .map(r -> {
                         Map<String, Object> res = new HashMap<>();
                         res.put("idPostulacion", idPostulacion);
-                        res.put("totalMeritos",     r.getTotalMeritos());
+                        res.put("totalMeritos", r.getTotalMeritos());
                         res.put("promedioOposicion", r.getPromedioOposicion());
-                        res.put("totalFinal",        r.getTotalFinal());
-                        res.put("estado",            r.getEstado());
-                        res.put("posicion",          r.getPosicion());
-                        res.put("aprobado",          r.getTotalFinal() != null &&
+                        res.put("totalFinal", r.getTotalFinal());
+                        res.put("estado", r.getEstado());
+                        res.put("posicion", r.getPosicion());
+                        res.put("aprobado", r.getTotalFinal() != null &&
                                 r.getTotalFinal().compareTo(BigDecimal.valueOf(25)) >= 0);
                         return ResponseEntity.ok(res);
                     })

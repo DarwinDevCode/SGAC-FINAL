@@ -78,6 +78,23 @@
             <div class="details-card col-span-1 md:col-span-2 w-full">
                 <h3 class="details-title">Detalles Examen de Oposición</h3>
 
+                @if (resultado?.promedioOposicion != null) {
+                <div class="score-row py-4"
+                    style="background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; align-items: center;">
+                    <div class="score-label">
+                        <lucide-icon name="award" size="24" style="color: #16a34a;"></lucide-icon>
+                        <div>
+                            <strong style="color: #166534; font-size: 1.1rem;">Calificación Obtenida</strong>
+                            <p style="color: #15803d; font-size: 0.9rem;">Promedio final asignado por el tribunal</p>
+                        </div>
+                    </div>
+                    <div class="score-points" style="font-size: 1.5rem; font-weight: bold; color: #166534;">
+                        {{ resultado.promedioOposicion | number:'1.2-2' }}<small
+                            style="font-size: 0.9rem; font-weight: normal;"> / 20</small>
+                    </div>
+                </div>
+                }
+
                 <div class="score-row py-4">
                     <div class="score-label w-full">
                         <lucide-icon name="book-open" size="20" class="text-blue mt-1"></lucide-icon>

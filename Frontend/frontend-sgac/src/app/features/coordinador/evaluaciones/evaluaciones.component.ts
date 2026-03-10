@@ -88,6 +88,10 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         return 'coordinador';
     }
 
+    get postulantesOposicion(): any[] {
+        return this.postulantes.filter(p => p.comisionAsignada);
+    }
+
     /** El DECANO solo puede ver méritos en read-only y ver actas/resultados — no puede calificar oposición */
     get puedeCalificarMeritos(): boolean { return this.userRol !== 'DECANO'; }
     get puedeCalificarOposicion(): boolean { return true; } // Los 3 pueden

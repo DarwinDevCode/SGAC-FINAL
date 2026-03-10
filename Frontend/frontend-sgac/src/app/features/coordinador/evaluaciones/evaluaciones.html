@@ -174,7 +174,7 @@
             <div class="panel postulantes-panel">
                 <h3 class="panel-title"><lucide-icon name="users" size="15"></lucide-icon> Postulantes</h3>
                 <ul class="postulante-list">
-                    @for (p of postulantes; track p.idPostulacion) {
+                    @for (p of postulantesOposicion; track p.idPostulacion) {
                     <li class="postulante-item"
                         [class.selected]="postulanteOposicion?.idPostulacion === p.idPostulacion"
                         (click)="seleccionarPostulanteOposicion(p)">
@@ -210,16 +210,13 @@
 
                 <div class="estado-row">
                     <span class="estado-check" [class.done]="estadoOposicion?.decanoCalificado">
-                        <lucide-icon [name]="estadoOposicion?.decanoCalificado ? 'check-circle' : 'circle'"
-                            size="14"></lucide-icon> Decano
+                        <div class="dot-indicator" [class.dot-green]="estadoOposicion?.decanoCalificado" [class.dot-red]="!estadoOposicion?.decanoCalificado"></div> Decano
                     </span>
                     <span class="estado-check" [class.done]="estadoOposicion?.coordinadorCalificado">
-                        <lucide-icon [name]="estadoOposicion?.coordinadorCalificado ? 'check-circle' : 'circle'"
-                            size="14"></lucide-icon> Coordinador
+                        <div class="dot-indicator" [class.dot-green]="estadoOposicion?.coordinadorCalificado" [class.dot-red]="!estadoOposicion?.coordinadorCalificado"></div> Coordinador
                     </span>
                     <span class="estado-check" [class.done]="estadoOposicion?.docenteCalificado">
-                        <lucide-icon [name]="estadoOposicion?.docenteCalificado ? 'check-circle' : 'circle'"
-                            size="14"></lucide-icon> Docente
+                        <div class="dot-indicator" [class.dot-green]="estadoOposicion?.docenteCalificado" [class.dot-red]="!estadoOposicion?.docenteCalificado"></div> Docente
                     </span>
                 </div>
 

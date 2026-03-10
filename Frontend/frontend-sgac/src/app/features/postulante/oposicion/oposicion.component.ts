@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
@@ -16,10 +17,12 @@ import { EvaluacionOposicionResponseDTO } from '../../../core/dto/evaluacion';
 export class OposicionComponent implements OnInit, OnDestroy {
   route = inject(ActivatedRoute);
   postulanteService = inject(PostulanteService);
+  private http = inject(HttpClient);
   private subs = new Subscription();
 
   idPostulacion: number | null = null;
   evaluacion: EvaluacionOposicionResponseDTO | null = null;
+  resultado: any = null;
   loading = true;
   errorMensaje = '';
 
@@ -48,7 +51,16 @@ export class OposicionComponent implements OnInit, OnDestroy {
       this.postulanteService.obtenerOposicionPorPostulacion(id).subscribe({
         next: (data) => {
           this.evaluacion = data;
-          this.loading = false;
+
+          this.http.get<any>(`http://localhost:8080/api/evaluaciones/resultado-postulante/${id}`).subscribe({
+            next: (res) => {
+              this.resultado = res;
+              this.loading = false;
+            },
+            error: () => {
+              this.loading = false;
+            }
+          });
         },
         error: (err) => {
           console.error(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar oposición:');

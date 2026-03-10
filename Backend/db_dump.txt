@@ -1,0 +1,16 @@
+---- Dumping sp_calcular_ranking_evaluacion ----
+Not found or error: Incorrect result size: expected 1, actual 0
+
+---- Dumping table structure for calificacion_oposicion_individual ----
+id_calificacion : integer
+id_postulacion : integer
+id_evaluador : integer
+rol_evaluador : character varying
+criterio_material : numeric
+criterio_calidad : numeric
+criterio_pertinencia : numeric
+subtotal : numeric
+fecha_registro : timestamp without time zone
+
+---- Content of calificacion_oposicion_individual ----
+{id_calificacion=1, id_postulacion=10, id_evaluador=112, rol_evaluador=COORDINADOR, criterio_material=10.00, criterio_calidad=4.00, criterio_pertinencia=5.00, subtotal=19.00, fecha_registro=2026-03-09 19:50:10.083402}

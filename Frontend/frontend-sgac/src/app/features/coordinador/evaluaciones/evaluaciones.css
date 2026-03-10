@@ -560,6 +560,21 @@
   color: var(--color-success);
 }
 
+.dot-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-green {
+  background-color: var(--color-success);
+}
+
+.dot-red {
+  background-color: var(--color-danger);
+}
+
 .tema-chip {
   display: flex;
   align-items: center;
