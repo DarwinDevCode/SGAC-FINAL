@@ -398,7 +398,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
 
     cargarActas(idPostulacion: number): void {
         this.subs.add(
-            this.http.get<any[]>(`${this.BASE}/evaluaciones/actas/${idPostulacion}`).subscribe({
+          this.http.get<any[]>(`${this.BASE}/evaluacion-seleccion/actas/${idPostulacion}`).subscribe({
                 next: (actas) => {
                     this.actasMeritos = actas.find(a => a.tipoActa === 'MERITOS') || null;
                     this.actasOposicion = actas.find(a => a.tipoActa === 'OPOSICION') || null;
@@ -413,12 +413,16 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.generandoActa = true;
         const body = { idPostulacion: this.postulanteActas.idPostulacion, tipoActa: tipo };
         this.subs.add(
-            this.http.post<any>(`${this.BASE}/evaluaciones/actas/generar`, body).subscribe({
-                next: () => {
-                    this.generandoActa = false;
-                    this.showSuccess(`Acta de ${tipo === 'MERITOS' ? 'Méritos' : 'Oposición'} generada.`);
-                    this.cargarActas(this.postulanteActas!.idPostulacion);
-                },
+          this.http.post<any>(`${this.BASE}/evaluacion-seleccion/actas/generar`, body).subscribe({
+              next: (res) => {
+                this.generandoActa = false;
+                this.showSuccess(`Acta de ${tipo === 'MERITOS' ? 'Méritos' : 'Oposición'} generada.`);
+                this.cargarActas(this.postulanteActas!.idPostulacion);
+
+                if (res?.urlDocumento) {
+                  window.open(res.urlDocumento, '_blank');
+                }
+              },
                 error: (err) => { this.generandoActa = false; this.showError('Error: ' + (err.error || err.message)); }
             })
         );
@@ -429,7 +433,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.confirmandoActa = true;
         const body = { idActa: acta.idActa, idEvaluador: this.userId, rolEvaluador: this.userRol };
         this.subs.add(
-            this.http.post<any>(`${this.BASE}/evaluaciones/actas/confirmar`, body).subscribe({
+          this.http.post<any>(`${this.BASE}/evaluacion-seleccion/actas/confirmar`, body).subscribe({
                 next: () => {
                     this.confirmandoActa = false;
                     this.showSuccess('Confirmación registrada correctamente.');

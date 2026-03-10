@@ -1,6 +1,10 @@
 package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,7 +12,6 @@ import org.uteq.sgacfinal.dto.Request.CalificacionOposicionRequestDTO;
 import org.uteq.sgacfinal.dto.Request.ConfirmarActaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.GenerarActaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.NotificationRequest;
-import org.uteq.sgacfinal.dto.Response.RankingEvaluacionDTO;
 import org.uteq.sgacfinal.entity.ResumenEvaluacion;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.repository.ResumenEvaluacionRepository;
@@ -17,6 +20,8 @@ import org.uteq.sgacfinal.service.ICalificacionOposicionService;
 import org.uteq.sgacfinal.service.INotificacionService;
 
 import java.math.BigDecimal;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +30,10 @@ import java.util.Map;
  * Controlador del Módulo de Evaluación y Selección.
  *
  * Tabs del frontend:
- *   Tab 1 (Méritos)          → EvaluacionController existente  (/api/evaluaciones/meritos)
- *   Tab 2 (Oposición)        → /api/evaluaciones/oposicion/*
- *   Tab 3 (Resultados)       → /api/evaluaciones/ranking/convocatoria/v2/{id}
- *   Tab 4 (Actas/Confirmar)  → /api/evaluaciones/actas/*
- *
- *   Publicación:             → /api/evaluaciones/publicar-resultados/{idConvocatoria}
- *   Resultado del postulante → /api/evaluaciones/resultado-postulante/{idPostulacion}
+ *   Tab 1 (Méritos)          → EvaluacionController existente
+ *   Tab 2 (Oposición)        → /api/evaluacion-seleccion/oposicion/*
+ *   Tab 3 (Resultados)       → /api/evaluacion-seleccion/ranking/convocatoria/v2/{id}
+ *   Tab 4 (Actas/Confirmar)  → /api/evaluacion-seleccion/actas/*
  */
 @RestController
 @RequestMapping("/api/evaluacion-seleccion")
@@ -45,6 +47,8 @@ public class EvaluacionSeleccionController {
     private final PostulacionRepository postulacionRepo;
     private final INotificacionService notificacionService;
 
+    @Value("${app.actas.ruta}")
+    private String rutaActas;
 
     // ─────────────────────────────────────────────────────────────────────────
     // TAB 2: CALIFICACIÓN DE OPOSICIÓN INDIVIDUAL
@@ -53,7 +57,6 @@ public class EvaluacionSeleccionController {
     /**
      * Guarda o actualiza la nota individual de un miembro del tribunal.
      * Cuando los 3 guardaron, calcula el promedio y notifica al postulante.
-     * POST /api/evaluaciones/oposicion/individual
      */
     @PostMapping("/oposicion/individual")
     public ResponseEntity<?> guardarOposicionIndividual(@RequestBody CalificacionOposicionRequestDTO request) {
@@ -68,8 +71,7 @@ public class EvaluacionSeleccionController {
     }
 
     /**
-     * Eliminar la nota individual de un miembro del tribunal.
-     * DELETE /api/evaluaciones/oposicion/individual/{idCalificacion}
+     * Elimina la nota individual de un miembro del tribunal.
      */
     @DeleteMapping("/oposicion/individual/{idCalificacion}")
     public ResponseEntity<?> eliminarOposicionIndividual(@PathVariable Integer idCalificacion) {
@@ -83,9 +85,7 @@ public class EvaluacionSeleccionController {
     }
 
     /**
-     * Estado actual de la oposición para una postulación:
-     * qué miembros han calificado y el promedio (solo si los 3 guardaron).
-     * GET /api/evaluaciones/oposicion/estado/{idPostulacion}
+     * Estado actual de la oposición para una postulación.
      */
     @GetMapping("/oposicion/estado/{idPostulacion}")
     public ResponseEntity<?> obtenerEstadoOposicion(@PathVariable Integer idPostulacion) {
@@ -97,8 +97,7 @@ public class EvaluacionSeleccionController {
     }
 
     /**
-     * Calificación individual de un evaluador específico (solo para que el frontend la cargue en su propio formulario).
-     * GET /api/evaluaciones/oposicion/{idPostulacion}/evaluador/{idEvaluador}
+     * Obtiene la calificación individual de un evaluador específico.
      */
     @GetMapping("/oposicion/{idPostulacion}/evaluador/{idEvaluador}")
     public ResponseEntity<?> obtenerCalificacionEvaluador(
@@ -116,9 +115,7 @@ public class EvaluacionSeleccionController {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Ranking completo de una convocatoria con estados (GANADOR/APTO/NO_APTO/DESIERTO)
-     * y datos de desempate. Postulantes empatados tienen el flag empate=true.
-     * GET /api/evaluaciones/ranking/convocatoria/{idConvocatoria}   (sobreescribe el existente)
+     * Ranking completo de una convocatoria.
      */
     @GetMapping("/ranking/convocatoria/v2/{idConvocatoria}")
     public ResponseEntity<?> rankingConvocatoria(@PathVariable Integer idConvocatoria) {
@@ -135,8 +132,7 @@ public class EvaluacionSeleccionController {
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Genera el registro del acta y su URL de descarga.
-     * POST /api/evaluaciones/actas/generar
+     * Genera el acta (por ahora, méritos).
      */
     @PostMapping("/actas/generar")
     public ResponseEntity<?> generarActa(@RequestBody GenerarActaRequestDTO request) {
@@ -149,8 +145,7 @@ public class EvaluacionSeleccionController {
     }
 
     /**
-     * Lista todas las actas de una postulación (MERITOS y OPOSICION).
-     * GET /api/evaluaciones/actas/{idPostulacion}
+     * Lista todas las actas de una postulación.
      */
     @GetMapping("/actas/{idPostulacion}")
     public ResponseEntity<?> listarActas(@PathVariable Integer idPostulacion) {
@@ -163,8 +158,7 @@ public class EvaluacionSeleccionController {
     }
 
     /**
-     * Confirma el acta por parte de un miembro del tribunal.
-     * POST /api/evaluaciones/actas/confirmar
+     * Confirma el acta por parte de un evaluador.
      */
     @PostMapping("/actas/confirmar")
     public ResponseEntity<?> confirmarActa(@RequestBody ConfirmarActaRequestDTO request) {
@@ -177,8 +171,7 @@ public class EvaluacionSeleccionController {
     }
 
     /**
-     * Eliminar un acta específica del sistema.
-     * DELETE /api/evaluaciones/actas/{idActa}
+     * Elimina un acta específica.
      */
     @DeleteMapping("/actas/{idActa}")
     public ResponseEntity<?> eliminarActa(@PathVariable Integer idActa) {
@@ -191,18 +184,44 @@ public class EvaluacionSeleccionController {
         }
     }
 
+    /**
+     * Abre el archivo PDF del acta generado.
+     * Ejemplo:
+     * GET /api/evaluacion-seleccion/actas/archivo/meritos_1_Adrian_Garcia.pdf
+     */
+    @GetMapping("/actas/archivo/{nombreArchivo:.+}")
+    public ResponseEntity<?> verArchivoActa(@PathVariable String nombreArchivo) {
+        try {
+            Path ruta = Paths.get(rutaActas)
+                    .toAbsolutePath()
+                    .normalize()
+                    .resolve(nombreArchivo)
+                    .normalize();
+
+            Resource recurso = new UrlResource(ruta.toUri());
+
+            if (!recurso.exists() || !recurso.isReadable()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No se encontró el archivo del acta.");
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "application/pdf")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + recurso.getFilename() + "\"")
+                    .body(recurso);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al abrir el archivo del acta: " + e.getMessage());
+        }
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
-    // PUBLICAR RESULTADOS (solo COORDINADOR)
+    // PUBLICAR RESULTADOS
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Publica los resultados de una convocatoria y notifica a CADA postulante.
-     * POST /api/evaluaciones/publicar-resultados/{idConvocatoria}
-     *
-     * Lógica:
-     * - Recorre todos los resúmenes existentes de la convocatoria
-     * - Para cada uno arma el mensaje según su estado (GANADOR / APTO / NO_APTO / DESIERTO)
-     * - Llama a INotificacionService.enviarNotificacion por cada postulante
+     * Publica los resultados de una convocatoria y notifica a cada postulante.
      */
     @PostMapping("/publicar-resultados/{idConvocatoria}")
     public ResponseEntity<?> publicarResultados(@PathVariable Integer idConvocatoria) {
@@ -218,31 +237,36 @@ public class EvaluacionSeleccionController {
                 try {
                     Integer idUsuario = r.getPostulacion().getEstudiante().getUsuario().getIdUsuario();
                     BigDecimal total = r.getTotalFinal() != null ? r.getTotalFinal() : BigDecimal.ZERO;
-                    String estado   = r.getEstado() != null ? r.getEstado() : "PENDIENTE";
+                    String estado = r.getEstado() != null ? r.getEstado() : "PENDIENTE";
 
                     String titulo;
                     String mensaje;
 
                     switch (estado) {
                         case "GANADOR" -> {
-                            titulo  = "¡Resultado de Concurso de Méritos y Oposición!";
-                            mensaje = "¡Felicitaciones! Has obtenido " + total + " / 40 puntos y has sido seleccionado(a) como Ayudante de Cátedra.";
+                            titulo = "¡Resultado de Concurso de Méritos y Oposición!";
+                            mensaje = "¡Felicitaciones! Has obtenido " + total
+                                    + " / 40 puntos y has sido seleccionado(a) como Ayudante de Cátedra.";
                         }
                         case "APTO" -> {
-                            titulo  = "Resultado de Concurso de Méritos y Oposición";
-                            mensaje = "Has aprobado el concurso con " + total + " / 40 puntos. Tu postulación quedó en la lista de elegibles.";
+                            titulo = "Resultado de Concurso de Méritos y Oposición";
+                            mensaje = "Has aprobado el concurso con " + total
+                                    + " / 40 puntos. Tu postulación quedó en la lista de elegibles.";
                         }
                         case "NO_APTO" -> {
-                            titulo  = "Resultado de Concurso de Méritos y Oposición";
-                            mensaje = "Has obtenido " + total + " / 40 puntos. Lamentablemente no alcanzaste el puntaje mínimo requerido de 25 puntos.";
+                            titulo = "Resultado de Concurso de Méritos y Oposición";
+                            mensaje = "Has obtenido " + total
+                                    + " / 40 puntos. Lamentablemente no alcanzaste el puntaje mínimo requerido de 25 puntos.";
                         }
                         case "DESIERTO" -> {
-                            titulo  = "Concurso Declarado Desierto";
-                            mensaje = "El concurso de méritos y oposición ha sido declarado desierto. Ningún postulante alcanzó el puntaje mínimo de 25 puntos.";
+                            titulo = "Concurso Declarado Desierto";
+                            mensaje = "El concurso de méritos y oposición ha sido declarado desierto. "
+                                    + "Ningún postulante alcanzó el puntaje mínimo de 25 puntos.";
                         }
                         default -> {
-                            titulo  = "Actualización de tu Postulación";
-                            mensaje = "Los resultados de la evaluación han sido publicados. Tu puntaje total fue " + total + " / 40.";
+                            titulo = "Actualización de tu Postulación";
+                            mensaje = "Los resultados de la evaluación han sido publicados. "
+                                    + "Tu puntaje total fue " + total + " / 40.";
                         }
                     }
 
@@ -252,11 +276,11 @@ public class EvaluacionSeleccionController {
                             .tipo("RESULTADO_EVALUACION")
                             .idReferencia(r.getPostulacion().getIdPostulacion())
                             .build());
+
                     notificados++;
                 } catch (Exception ex) {
-                    // Log pero continúa con el siguiente
-                    System.err.println("Error notificando al postulante " +
-                            r.getPostulacion().getIdPostulacion() + ": " + ex.getMessage());
+                    System.err.println("Error notificando al postulante "
+                            + r.getPostulacion().getIdPostulacion() + ": " + ex.getMessage());
                 }
             }
 
@@ -264,6 +288,7 @@ public class EvaluacionSeleccionController {
             resp.put("mensaje", "Resultados publicados");
             resp.put("totalPostulantes", resumenes.size());
             resp.put("notificados", notificados);
+
             return ResponseEntity.ok(resp);
 
         } catch (Exception e) {
@@ -273,14 +298,11 @@ public class EvaluacionSeleccionController {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // RESULTADO INDIVIDUAL (para el estudiante)
+    // RESULTADO INDIVIDUAL
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * El estudiante consulta su propio resultado.
-     * GET /api/evaluaciones/resultado-postulante/{idPostulacion}
-     *
-     * Devuelve: totalMeritos, promedioOposicion, totalFinal, estado, posicion
      */
     @GetMapping("/resultado-postulante/{idPostulacion}")
     public ResponseEntity<?> obtenerResultadoPostulante(@PathVariable Integer idPostulacion) {
@@ -289,16 +311,17 @@ public class EvaluacionSeleccionController {
                     .map(r -> {
                         Map<String, Object> res = new HashMap<>();
                         res.put("idPostulacion", idPostulacion);
-                        res.put("totalMeritos",     r.getTotalMeritos());
+                        res.put("totalMeritos", r.getTotalMeritos());
                         res.put("promedioOposicion", r.getPromedioOposicion());
-                        res.put("totalFinal",        r.getTotalFinal());
-                        res.put("estado",            r.getEstado());
-                        res.put("posicion",          r.getPosicion());
-                        res.put("aprobado",          r.getTotalFinal() != null &&
-                                r.getTotalFinal().compareTo(BigDecimal.valueOf(25)) >= 0);
+                        res.put("totalFinal", r.getTotalFinal());
+                        res.put("estado", r.getEstado());
+                        res.put("posicion", r.getPosicion());
+                        res.put("aprobado", r.getTotalFinal() != null
+                                && r.getTotalFinal().compareTo(BigDecimal.valueOf(25)) >= 0);
                         return ResponseEntity.ok(res);
                     })
                     .orElse(ResponseEntity.notFound().build());
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al obtener resultado: " + e.getMessage());
