@@ -1,4 +1,4 @@
-export interface TipoFase {
+export interface TipoFaseResponse {
   id: number;
   codigo: string;
   nombre: string;
@@ -7,3 +7,9 @@ export interface TipoFase {
   activo: boolean;
 }
 
+export interface TipoFaseRequest {
+  codigo: string;
+  nombre: string;
+  descripcion: string;
+  orden: number;
+}

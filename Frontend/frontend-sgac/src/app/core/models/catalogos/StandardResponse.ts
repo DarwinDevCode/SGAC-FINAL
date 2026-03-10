@@ -1,6 +1,10 @@
-export interface StandardResponse<T> {
+export interface StandardModificacionResponse {
   exito: boolean;
   mensaje: string;
-  datos: T;
+  id: number;
 }
 
+export interface StandardConsultaResponse<T> {
+  exito: boolean;
+  datos: T;
+}

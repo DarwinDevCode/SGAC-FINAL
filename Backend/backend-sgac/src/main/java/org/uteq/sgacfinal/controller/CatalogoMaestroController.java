@@ -58,7 +58,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoSancionService.actualizar(id, request));
     }
 
-    @DeleteMapping("/tipos-sancion/{id}")
+    @PatchMapping("/tipos-sancion/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarTipoSancion(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoSancionService.desactivar(id));
     }
@@ -83,7 +83,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoEstadoAyudantiaService.actualizar(id, request));
     }
 
-    @DeleteMapping("/estados-ayudantia/{id}")
+    @PatchMapping("/estados-ayudantia/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarEstadoAyudantia(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoEstadoAyudantiaService.desactivar(id));
     }
@@ -108,7 +108,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoEstadoRegistroService.actualizar(id, request));
     }
 
-    @DeleteMapping("/estados-registro/{id}")
+    @PatchMapping("/estados-registro/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarEstadoRegistro(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoEstadoRegistroService.desactivar(id));
     }
@@ -133,7 +133,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoEvidenciaService.actualizar(id, request));
     }
 
-    @DeleteMapping("/tipos-evidencia/{id}")
+    @PatchMapping("/tipos-evidencia/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarTipoEvidencia(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoEvidenciaService.desactivar(id));
     }
@@ -158,7 +158,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoEstadoEvidenciaService.actualizar(id, request));
     }
 
-    @DeleteMapping("/estados-evidencia/{id}")
+    @PatchMapping("/estados-evidencia/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarEstadoEvidencia(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoEstadoEvidenciaService.desactivar(id));
     }
@@ -183,7 +183,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoEstadoRequisitoService.actualizar(id, request));
     }
 
-    @DeleteMapping("/estados-requisito/{id}")
+    @PatchMapping("/estados-requisito/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarEstadoRequisito(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoEstadoRequisitoService.desactivar(id));
     }
@@ -208,7 +208,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoFaseService.actualizar(id, request));
     }
 
-    @DeleteMapping("/tipos-fase/{id}")
+    @PatchMapping("/tipos-fase/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarTipoFase(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoFaseService.desactivar(id));
     }
@@ -233,7 +233,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(tipoEstadoPostulacionService.actualizar(id, request));
     }
 
-    @DeleteMapping("/estados-postulacion/{id}")
+    @PatchMapping("/estados-postulacion/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarEstadoPostulacion(@PathVariable Integer id) {
         return ResponseEntity.ok(tipoEstadoPostulacionService.desactivar(id));
     }
@@ -258,7 +258,7 @@ public class CatalogoMaestroController {
         return ResponseEntity.ok(privilegioService.actualizar(id, request));
     }
 
-    @DeleteMapping("/privilegios/{id}")
+    @PatchMapping("/privilegios/{id}/desactivar")
     public ResponseEntity<StandardResponseDTO<Integer>> desactivarPrivilegio(@PathVariable Integer id) {
         return ResponseEntity.ok(privilegioService.desactivar(id));
     }

@@ -1,29 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { StandardResponse } from '../../models/catalogos/StandardResponse';
-import { TipoEstadoRegistro } from '../../models/catalogos/TipoEstadoRegistro';
+import { environment } from '../../../../environments/environment';
+import { StandardConsultaResponse, StandardModificacionResponse } from '../../models/catalogos/StandardResponse';
+import { TipoEstadoRegistroRequest, TipoEstadoRegistroResponse } from '../../models/catalogos/TipoEstadoRegistro';
 
 @Injectable({ providedIn: 'root' })
 export class TipoEstadoRegistroService {
-  private baseUrl = 'http://localhost:8080/api' + '/catalogos/estados-registro';
+
+  private readonly env = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private baseUrl = `${this.env}/admin/catalogos-maestros/estados-registro`;
 
   constructor(private http: HttpClient) {}
 
-  listar(): Observable<StandardResponse<TipoEstadoRegistro[]>> {
-    return this.http.get<StandardResponse<TipoEstadoRegistro[]>>(this.baseUrl + '/listar');
+  listar(): Observable<StandardConsultaResponse<TipoEstadoRegistroResponse[]>> {
+    return this.http.get<StandardConsultaResponse<TipoEstadoRegistroResponse[]>>(this.baseUrl);
   }
 
-  crear(data: TipoEstadoRegistro): Observable<StandardResponse<number>> {
-    return this.http.post<StandardResponse<number>>(this.baseUrl + '/crear', data);
+  crear(data: TipoEstadoRegistroRequest): Observable<StandardModificacionResponse> {
+    return this.http.post<StandardModificacionResponse>(this.baseUrl, data);
   }
 
-  actualizar(id: number, data: TipoEstadoRegistro): Observable<StandardResponse<number>> {
-    return this.http.put<StandardResponse<number>>(this.baseUrl + `/actualizar/${id}`, data);
+  actualizar(id: number, data: TipoEstadoRegistroRequest): Observable<StandardModificacionResponse> {
+    return this.http.put<StandardModificacionResponse>(`${this.baseUrl}/${id}`, data);
   }
 
-  desactivar(id: number): Observable<StandardResponse<number>> {
-    return this.http.patch<StandardResponse<number>>(this.baseUrl + `/desactivar/${id}`, {});
+  desactivar(id: number): Observable<StandardModificacionResponse> {
+    return this.http.patch<StandardModificacionResponse>(`${this.baseUrl}/${id}/desactivar`, {});
   }
 }
-
