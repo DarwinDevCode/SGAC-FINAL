@@ -36,50 +36,64 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
 
     @Override
     public CalificacionOposicionResponseDTO guardarNota(CalificacionOposicionRequestDTO req) {
-        // Validar subtotal ≤ 20
-        BigDecimal subtotal = req.getCriterioMaterial()
-                .add(req.getCriterioCalidad())
-                .add(req.getCriterioPertinencia());
-        if (subtotal.compareTo(BigDecimal.valueOf(20)) > 0) {
-            throw new IllegalArgumentException("El subtotal de oposición no puede superar 20 puntos. Total calculado: " + subtotal);
+        try {
+            // Validar subtotal ≤ 20
+            BigDecimal subtotal = req.getCriterioMaterial()
+                    .add(req.getCriterioCalidad())
+                    .add(req.getCriterioPertinencia());
+            if (subtotal.compareTo(BigDecimal.valueOf(20)) > 0) {
+                throw new IllegalArgumentException(
+                        "El subtotal de oposición no puede superar 20 puntos. Total calculado: " + subtotal);
+            }
+
+            Integer resultado;
+            var existente = oposicionRepo.findByIdPostulacionAndIdEvaluador(req.getIdPostulacion(),
+                    req.getIdEvaluador());
+
+            if (existente.isPresent()) {
+                resultado = oposicionRepo.actualizarOposicionIndividual(
+                        existente.get().getIdCalificacion(),
+                        req.getCriterioMaterial(),
+                        req.getCriterioCalidad(),
+                        req.getCriterioPertinencia());
+            } else {
+                resultado = oposicionRepo.guardarOposicionIndividual(
+                        req.getIdPostulacion(),
+                        req.getIdEvaluador(),
+                        req.getRolEvaluador(),
+                        req.getCriterioMaterial(),
+                        req.getCriterioCalidad(),
+                        req.getCriterioPertinencia());
+            }
+
+            if (resultado == null || resultado == -1) {
+                throw new RuntimeException("Error al guardar o actualizar la calificación de oposición.");
+            }
+
+            // Si los 3 ya calificaron, notificar al postulante
+            Long count = oposicionRepo.countByIdPostulacion(req.getIdPostulacion());
+            if (count >= 3) {
+                notificarResumenOposicion(req.getIdPostulacion());
+            }
+
+            // Retornar la calificación guardada
+            CalificacionOposicionIndividual entidad = oposicionRepo
+                    .findByIdPostulacionAndIdEvaluador(req.getIdPostulacion(), req.getIdEvaluador())
+                    .orElseThrow(() -> new RuntimeException("Calificación no encontrada después de guardar."));
+            return mapToDTO(entidad);
+        } catch (Throwable e) {
+            try {
+                java.io.File file = new java.io.File("C:\\SGAC\\error_guardarNota.txt");
+                java.io.FileWriter fw = new java.io.FileWriter(file, true);
+                java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+                pw.println("====== ERROR ======");
+                pw.println(java.time.LocalDateTime.now());
+                e.printStackTrace(pw);
+                pw.close();
+            } catch (Exception ex) {
+            }
+            throw e;
         }
-
-        Integer resultado;
-        var existente = oposicionRepo.findByIdPostulacionAndIdEvaluador(req.getIdPostulacion(), req.getIdEvaluador());
-
-        if (existente.isPresent()) {
-            resultado = oposicionRepo.actualizarOposicionIndividual(
-                    existente.get().getIdCalificacion(),
-                    req.getCriterioMaterial(),
-                    req.getCriterioCalidad(),
-                    req.getCriterioPertinencia()
-            );
-        } else {
-            resultado = oposicionRepo.guardarOposicionIndividual(
-                    req.getIdPostulacion(),
-                    req.getIdEvaluador(),
-                    req.getRolEvaluador(),
-                    req.getCriterioMaterial(),
-                    req.getCriterioCalidad(),
-                    req.getCriterioPertinencia()
-            );
-        }
-
-        if (resultado == null || resultado == -1) {
-            throw new RuntimeException("Error al guardar o actualizar la calificación de oposición.");
-        }
-
-        // Si los 3 ya calificaron, notificar al postulante
-        Long count = oposicionRepo.countByIdPostulacion(req.getIdPostulacion());
-        if (count >= 3) {
-            notificarResumenOposicion(req.getIdPostulacion());
-        }
-
-        // Retornar la calificación guardada
-        CalificacionOposicionIndividual entidad = oposicionRepo
-                .findByIdPostulacionAndIdEvaluador(req.getIdPostulacion(), req.getIdEvaluador())
-                .orElseThrow(() -> new RuntimeException("Calificación no encontrada después de guardar."));
-        return mapToDTO(entidad);
     }
 
     @Override
@@ -95,16 +109,16 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
     public OposicionEstadoResponseDTO obtenerEstado(Integer idPostulacion) {
         List<CalificacionOposicionIndividual> calificaciones = oposicionRepo.findByIdPostulacion(idPostulacion);
 
-        boolean decanoCalif      = calificaciones.stream().anyMatch(c -> "DECANO".equals(c.getRolEvaluador()));
+        boolean decanoCalif = calificaciones.stream().anyMatch(c -> "DECANO".equals(c.getRolEvaluador()));
         boolean coordinadorCalif = calificaciones.stream().anyMatch(c -> "COORDINADOR".equals(c.getRolEvaluador()));
-        boolean docenteCalif     = calificaciones.stream().anyMatch(c -> "DOCENTE".equals(c.getRolEvaluador()));
-        boolean todosCalif       = decanoCalif && coordinadorCalif && docenteCalif;
+        boolean docenteCalif = calificaciones.stream().anyMatch(c -> "DOCENTE".equals(c.getRolEvaluador()));
+        boolean todosCalif = decanoCalif && coordinadorCalif && docenteCalif;
 
         BigDecimal promedio = null;
         if (todosCalif) {
             promedio = calificaciones.stream()
-                    .map(c -> c.getSubtotal() != null ? c.getSubtotal() :
-                            c.getCriterioMaterial().add(c.getCriterioCalidad()).add(c.getCriterioPertinencia()))
+                    .map(c -> c.getSubtotal() != null ? c.getSubtotal()
+                            : c.getCriterioMaterial().add(c.getCriterioCalidad()).add(c.getCriterioPertinencia()))
                     .reduce(BigDecimal.ZERO, BigDecimal::add)
                     .divide(BigDecimal.valueOf(3), 2, RoundingMode.HALF_UP);
         }
@@ -169,35 +183,33 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
     }
 
     private void notificarResumenOposicion(Integer idPostulacion) {
-        try {
-            Postulacion postulacion = postulacionRepo.findById(idPostulacion).orElse(null);
-            if (postulacion == null) return;
+        Postulacion postulacion = postulacionRepo.findById(idPostulacion).orElse(null);
+        if (postulacion == null)
+            return;
 
-            Integer idUsuario = postulacion.getEstudiante().getUsuario().getIdUsuario();
-            BigDecimal totalFinal = resumenRepo.findByIdPostulacion(idPostulacion)
-                    .map(re -> re.getTotalFinal())
-                    .orElse(null);
+        Integer idUsuario = postulacion.getEstudiante().getUsuario().getIdUsuario();
+        BigDecimal totalFinal = resumenRepo.findByIdPostulacion(idPostulacion)
+                .map(re -> re.getTotalFinal())
+                .orElse(null);
 
-            String mensaje;
-            if (totalFinal != null) {
-                boolean aprobado = totalFinal.compareTo(BigDecimal.valueOf(25)) >= 0;
-                mensaje = aprobado
-                        ? "Tu evaluación final es de " + totalFinal + " puntos. ¡Felicitaciones, has alcanzado el puntaje mínimo requerido!"
-                        : "Tu evaluación final es de " + totalFinal + " puntos. Lamentablemente no alcanzaste el puntaje mínimo de 25 puntos.";
-            } else {
-                mensaje = "La evaluación de oposición ha sido completada por todos los miembros del tribunal.";
-            }
-
-            notificacionService.enviarNotificacion(idUsuario, NotificationRequest.builder()
-                    .titulo("Resultado de Evaluación de Oposición")
-                    .mensaje(mensaje)
-                    .tipo("EVALUACION")
-                    .idReferencia(idPostulacion)
-                    .build());
-        } catch (Exception e) {
-            // No fallar el flujo principal por un error de notificación
-            System.err.println("Error enviando notificación de oposición: " + e.getMessage());
+        String mensaje;
+        if (totalFinal != null) {
+            boolean aprobado = totalFinal.compareTo(BigDecimal.valueOf(25)) >= 0;
+            mensaje = aprobado
+                    ? "Tu evaluación final es de " + totalFinal
+                            + " puntos. ¡Felicitaciones, has alcanzado el puntaje mínimo requerido!"
+                    : "Tu evaluación final es de " + totalFinal
+                            + " puntos. Lamentablemente no alcanzaste el puntaje mínimo de 25 puntos.";
+        } else {
+            mensaje = "La evaluación de oposición ha sido completada por todos los miembros del tribunal.";
         }
+
+        notificacionService.enviarNotificacion(idUsuario, NotificationRequest.builder()
+                .titulo("Resultado de Evaluación de Oposición")
+                .mensaje(mensaje)
+                .tipo("EVALUACION")
+                .idReferencia(idPostulacion)
+                .build());
     }
 
     private CalificacionOposicionResponseDTO mapToDTO(CalificacionOposicionIndividual e) {
@@ -209,8 +221,8 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
                 .criterioMaterial(e.getCriterioMaterial())
                 .criterioCalidad(e.getCriterioCalidad())
                 .criterioPertinencia(e.getCriterioPertinencia())
-                .subtotal(e.getSubtotal() != null ? e.getSubtotal() :
-                        e.getCriterioMaterial().add(e.getCriterioCalidad()).add(e.getCriterioPertinencia()))
+                .subtotal(e.getSubtotal() != null ? e.getSubtotal()
+                        : e.getCriterioMaterial().add(e.getCriterioCalidad()).add(e.getCriterioPertinencia()))
                 .fechaRegistro(e.getFechaRegistro())
                 .build();
     }

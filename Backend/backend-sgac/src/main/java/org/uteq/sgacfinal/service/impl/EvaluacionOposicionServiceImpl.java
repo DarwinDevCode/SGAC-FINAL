@@ -36,8 +36,7 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
                 request.getHoraInicio(),
                 request.getHoraFin(),
                 request.getLugar(),
-                request.getEstado()
-        );
+                request.getEstado());
 
         if (idGenerado == -1) {
             throw new RuntimeException("Error al registrar evaluación de oposición.");
@@ -55,8 +54,7 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
                 request.getHoraInicio(),
                 request.getHoraFin(),
                 request.getLugar(),
-                request.getEstado()
-        );
+                request.getEstado());
         if (resultado == -1) {
             throw new RuntimeException("Error al actualizar evaluación de oposición.");
         }
@@ -79,7 +77,8 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
                 .filter(ev -> ev.getPostulacion().getIdPostulacion().equals(idPostulacion))
                 .findFirst()
                 .map(this::mapearADTO)
-                .orElseThrow(() -> new RuntimeException("No existe evaluación de oposición para la postulación ID: " + idPostulacion));
+                .orElseThrow(() -> new RuntimeException(
+                        "No existe evaluación de oposición para la postulación ID: " + idPostulacion));
     }
 
     @Override
@@ -117,24 +116,55 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
     public EvaluacionOposicionResponseDTO asignarComisionAPostulacion(AsignarComisionRequestDTO request) {
         // 1. Verify commission exists
         comisionSeleccionRepository.findById(request.getIdComisionSeleccion())
-                .orElseThrow(() -> new RuntimeException("Comisión no encontrada con ID: " + request.getIdComisionSeleccion()));
+                .orElseThrow(() -> new RuntimeException(
+                        "Comisión no encontrada con ID: " + request.getIdComisionSeleccion()));
 
-        // 2. Create the EvaluacionOposicion record via the stored procedure
-        Integer idEvaluacion = evaluacionOposicionRepository.registrarEvaluacionOposicion(
-                request.getIdPostulacion(),
-                request.getTemaExposicion(),
-                request.getFechaEvaluacion(),
-                request.getHoraInicio(),
-                request.getHoraFin(),
-                request.getLugar(),
-                "PROGRAMADA"
-        );
+        // 2. Create or Update the EvaluacionOposicion record
+        Integer idEvaluacion = null;
+        var evaluacionExistente = evaluacionOposicionRepository.findAll().stream()
+                .filter(ev -> ev.getPostulacion().getIdPostulacion().equals(request.getIdPostulacion()))
+                .findFirst();
+
+        if (evaluacionExistente.isPresent()) {
+            idEvaluacion = evaluacionExistente.get().getIdEvaluacionOposicion();
+            Integer resUpdate = evaluacionOposicionRepository.actualizarEvaluacionOposicion(
+                    idEvaluacion,
+                    request.getTemaExposicion(),
+                    request.getFechaEvaluacion(),
+                    request.getHoraInicio(),
+                    request.getHoraFin(),
+                    request.getLugar(),
+                    "PROGRAMADA");
+            if (resUpdate == null || resUpdate == -1) {
+                throw new RuntimeException("Error al actualizar la evaluación de oposición existente.");
+            }
+
+            // Delete old commission members since we are re-assigning
+            final Integer finalIdEvaluacion = idEvaluacion;
+            List<UsuarioComision> oldMembers = usuarioComisionRepository.findAll().stream()
+                    .filter(uc -> uc.getEvaluacionOposicion() != null
+                            && uc.getEvaluacionOposicion().getIdEvaluacionOposicion().equals(finalIdEvaluacion))
+                    .collect(Collectors.toList());
+            for (UsuarioComision oldMember : oldMembers) {
+                usuarioComisionRepository.desactivarUsuarioComision(oldMember.getIdUsuarioComision());
+            }
+
+        } else {
+            idEvaluacion = evaluacionOposicionRepository.registrarEvaluacionOposicion(
+                    request.getIdPostulacion(),
+                    request.getTemaExposicion(),
+                    request.getFechaEvaluacion(),
+                    request.getHoraInicio(),
+                    request.getHoraFin(),
+                    request.getLugar(),
+                    "PROGRAMADA");
+        }
 
         if (idEvaluacion == null || idEvaluacion == -1) {
             throw new RuntimeException("Error al crear la evaluación de oposición.");
         }
 
-        // 3. Fetch commission members (Decano, Coordinador, Docente)
+        // 3. Fetch new commission members (Decano, Coordinador, Docente)
         List<UsuarioComision> miembros = usuarioComisionRepository
                 .findByComisionSeleccion_IdComisionSeleccion(request.getIdComisionSeleccion());
 
@@ -146,10 +176,10 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
                     idEvaluacion,
                     miembro.getRolIntegrante(),
                     null, null, null,
-                    request.getFechaEvaluacion()
-            );
+                    request.getFechaEvaluacion());
             if (resultado == null || resultado == -1) {
-                throw new RuntimeException("Error al asignar miembro " + miembro.getUsuario().getIdUsuario() + " a la evaluación.");
+                throw new RuntimeException(
+                        "Error al asignar miembro " + miembro.getUsuario().getIdUsuario() + " a la evaluación.");
             }
         }
 
