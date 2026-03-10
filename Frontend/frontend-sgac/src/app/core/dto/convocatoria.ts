@@ -13,4 +13,9 @@ export interface ConvocatoriaDTO {
   fechaCierre?: string | number[];
   estado?: string;
   activo?: boolean;
+  idCarrera?: number;
+  nombreCarrera?: string;
+  idFacultad?: number;
+  nombreFacultad?: string;
+  _tieneComisiones?: boolean;
 }

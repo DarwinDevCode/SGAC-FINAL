@@ -42,6 +42,13 @@
             Todas las Postulaciones
             <span class="badge-count-secondary">{{ postulaciones.length }}</span>
         </button>
+        <button class="tab-btn" [class.active]="tabActivo === 'aprobados'" (click)="cambiarTab('aprobados')">
+            <lucide-icon name="check-circle" size="16"></lucide-icon>
+            Aprobados — En Evaluación
+            @if (contadorAprobados > 0) {
+            <span class="badge-count-success">{{ contadorAprobados }}</span>
+            }
+        </button>
     </div>
 
     <!-- Filtros -->
@@ -49,8 +56,8 @@
         <div class="filtros-grid">
             <div class="search-wrapper">
                 <lucide-icon class="search-icon" name="search" size="18"></lucide-icon>
-                <input type="text" [(ngModel)]="filtroBusqueda" placeholder="Buscar por estudiante, matrícula o asignatura..."
-                    class="input-field search-input" />
+                <input type="text" [(ngModel)]="filtroBusqueda"
+                    placeholder="Buscar por estudiante, matrícula o asignatura..." class="input-field search-input" />
             </div>
             <div class="select-wrapper">
                 <select [(ngModel)]="filtroEstado" class="input-field select-estado">
@@ -71,7 +78,65 @@
     </div>
     } @else {
 
-    <!-- Cards Grid -->
+    <!-- Contenido Principal: Cards o Tabla -->
+    @if (tabActivo === 'aprobados') {
+    <div class="aprobados-header">
+        <h3>{{ postulacionesFiltradas.length }} postulante(s) aprobados — pendientes de asignación de comisión de
+            oposición y méritos</h3>
+    </div>
+
+    <div class="table-container">
+        <table class="aprobados-table">
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Asignatura</th>
+                    <th>Estado de Postulación</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of postulacionesFiltradas; track p.id_postulacion) {
+                <tr>
+                    <td>
+                        <div class="estudiante-celda">
+                            <span class="nombre">{{ p.nombre_estudiante }}</span>
+                            <span class="matricula">{{ p.matricula }}</span>
+                        </div>
+                    </td>
+                    <td>{{ p.nombre_asignatura }}</td>
+                    <td>
+                        <span [class]="'status-badge ' + getEstadoClase(p.estado_codigo)">
+                            {{ p.estado_nombre }}
+                        </span>
+                    </td>
+                    <td>
+                        @if (p.estado_codigo === 'APROBADA') {
+                        <button class="btn-primary btn-asignar" (click)="abrirModalAsignacion(p)">
+                            <lucide-icon name="user-check" size="16"></lucide-icon>
+                            Asignar Comisión
+                        </button>
+                        } @else if (p.estado_codigo === 'EN_EVALUACION') {
+                        <button class="btn-secondary btn-asignado" disabled>
+                            <lucide-icon name="check" size="16"></lucide-icon>
+                            Comisión Asignada
+                        </button>
+                        }
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="4" class="empty-row text-center">
+                        No hay postulantes aprobados pendientes de asignación.
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    } @else {
+    <!-- Cards Grid para otros tabs -->
     <div class="cards-grid">
         @for (p of postulacionesFiltradas; track p.id_postulacion) {
         <div class="postulacion-card" [class.requiere-atencion]="p.requiere_atencion">
@@ -136,6 +201,7 @@
         </div>
         }
     </div>
+    }
     }
     }
 
@@ -217,7 +283,8 @@
                     </div>
                     <div class="info-item">
                         <span class="info-label">Cierre</span>
-                        <span class="info-value">{{ formatearFecha(detallePostulacion.convocatoria.fecha_cierre) }}</span>
+                        <span class="info-value">{{ formatearFecha(detallePostulacion.convocatoria.fecha_cierre)
+                            }}</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">Cupos</span>
@@ -233,7 +300,8 @@
                     Estado de la Postulación
                 </h4>
                 <div class="estado-principal">
-                    <span [class]="'status-badge large ' + getEstadoClase(detallePostulacion.postulacion.estado_codigo)">
+                    <span
+                        [class]="'status-badge large ' + getEstadoClase(detallePostulacion.postulacion.estado_codigo)">
                         {{ detallePostulacion.postulacion.estado_nombre }}
                     </span>
                 </div>
@@ -340,103 +408,180 @@
     </div>
     }
     }
-</div>
 
-<!-- Modal Evaluar Documento -->
-@if (documentoEvaluando) {
-<div class="modal-backdrop" (click)="cancelarEvaluacionDocumento()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header" [class]="accionDocumento?.toLowerCase()">
-            <h3>
-                @switch (accionDocumento) {
-                @case ('VALIDAR') { ✓ Validar Documento }
-                @case ('OBSERVAR') { ✎ Observar Documento }
-                @case ('RECHAZAR') { ✗ Rechazar Documento }
-                }
-            </h3>
-            <button class="btn-icon" (click)="cancelarEvaluacionDocumento()">
-                <lucide-icon name="x" size="18"></lucide-icon>
-            </button>
-        </div>
-        <div class="modal-body">
-            <div class="doc-seleccionado">
-                <strong>{{ documentoEvaluando.tipo_requisito }}</strong>
-                <span>{{ documentoEvaluando.nombre_archivo }}</span>
+    <!-- Modal Evaluar Documento -->
+    @if (documentoEvaluando) {
+    <div class="modal-backdrop" (click)="cancelarEvaluacionDocumento()">
+        <div class="modal-box" (click)="$event.stopPropagation()">
+            <div class="modal-header" [class]="accionDocumento?.toLowerCase()">
+                <h3>
+                    @switch (accionDocumento) {
+                    @case ('VALIDAR') { ✓ Validar Documento }
+                    @case ('OBSERVAR') { ✎ Observar Documento }
+                    @case ('RECHAZAR') { ✗ Rechazar Documento }
+                    }
+                </h3>
+                <button class="btn-icon" (click)="cancelarEvaluacionDocumento()">
+                    <lucide-icon name="x" size="18"></lucide-icon>
+                </button>
             </div>
+            <div class="modal-body">
+                <div class="doc-seleccionado">
+                    <strong>{{ documentoEvaluando.tipo_requisito }}</strong>
+                    <span>{{ documentoEvaluando.nombre_archivo }}</span>
+                </div>
 
-            @if (accionDocumento === 'OBSERVAR') {
-            <div class="form-group">
-                <label>Observación (requerida):</label>
-                <textarea [(ngModel)]="observacionDocumento" rows="4"
-                    placeholder="Indique los problemas encontrados en el documento..."></textarea>
+                @if (accionDocumento === 'OBSERVAR') {
+                <div class="form-group">
+                    <label>Observación (requerida):</label>
+                    <textarea [(ngModel)]="observacionDocumento" rows="4"
+                        placeholder="Indique los problemas encontrados en el documento..."></textarea>
+                </div>
+                }
+
+                @if (accionDocumento === 'VALIDAR') {
+                <p class="confirmacion-texto">¿Confirma que el documento cumple con todos los requisitos?</p>
+                }
+
+                @if (accionDocumento === 'RECHAZAR') {
+                <p class="confirmacion-texto warning">⚠️ Esta acción es irreversible. El documento será marcado como
+                    rechazado.</p>
+                }
             </div>
-            }
-
-            @if (accionDocumento === 'VALIDAR') {
-            <p class="confirmacion-texto">¿Confirma que el documento cumple con todos los requisitos?</p>
-            }
-
-            @if (accionDocumento === 'RECHAZAR') {
-            <p class="confirmacion-texto warning">⚠️ Esta acción es irreversible. El documento será marcado como
-                rechazado.</p>
-            }
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" (click)="cancelarEvaluacionDocumento()">Cancelar</button>
-            <button class="btn-primary" [class]="accionDocumento?.toLowerCase()" (click)="confirmarEvaluacionDocumento()"
-                [disabled]="loadingEvaluacion">
-                @if (loadingEvaluacion) {
-                <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon>
-                }
-                @switch (accionDocumento) {
-                @case ('VALIDAR') { Validar }
-                @case ('OBSERVAR') { Guardar Observación }
-                @case ('RECHAZAR') { Rechazar }
-                }
-            </button>
+            <div class="modal-footer">
+                <button class="btn-secondary" (click)="cancelarEvaluacionDocumento()">Cancelar</button>
+                <button class="btn-primary" [class]="accionDocumento?.toLowerCase()"
+                    (click)="confirmarEvaluacionDocumento()" [disabled]="loadingEvaluacion">
+                    @if (loadingEvaluacion) {
+                    <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon>
+                    }
+                    @switch (accionDocumento) {
+                    @case ('VALIDAR') { Validar }
+                    @case ('OBSERVAR') { Guardar Observación }
+                    @case ('RECHAZAR') { Rechazar }
+                    }
+                </button>
+            </div>
         </div>
     </div>
-</div>
-}
+    }
 
-<!-- Modal Dictamen -->
-@if (mostrarModalDictamen) {
-<div class="modal-backdrop" (click)="cerrarModalDictamen()">
-    <div class="modal-box" (click)="$event.stopPropagation()">
-        <div class="modal-header" [class]="accionDictamen?.toLowerCase()">
-            <h3>{{ accionDictamen === 'APROBAR' ? '✓ Aprobar Postulación' : '✗ Rechazar Postulación' }}</h3>
-            <button class="btn-icon" (click)="cerrarModalDictamen()">
-                <lucide-icon name="x" size="18"></lucide-icon>
-            </button>
-        </div>
-        <div class="modal-body">
-            @if (accionDictamen === 'APROBAR') {
-            <p class="confirmacion-texto success">
-                La postulación será aprobada y el estudiante será notificado.
-                El proceso continuará con la evaluación de méritos y oposición.
-            </p>
-            }
-
-            @if (accionDictamen === 'RECHAZAR') {
-            <p class="confirmacion-texto warning">⚠️ Esta acción es irreversible. El estudiante será notificado del
-                rechazo.</p>
-            <div class="form-group">
-                <label>Motivo del rechazo (requerido):</label>
-                <textarea [(ngModel)]="observacionDictamen" rows="4"
-                    placeholder="Explique el motivo del rechazo..."></textarea>
+    <!-- Modal Dictamen -->
+    @if (mostrarModalDictamen) {
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header" [class.danger]="accionDictamen === 'RECHAZAR'">
+                <h3>{{ accionDictamen === 'APROBAR' ? 'Aprobar Postulación' : 'Rechazar Postulación' }}</h3>
+                <button class="btn-icon" (click)="cerrarModalDictamen()">
+                    <lucide-icon name="x" size="20"></lucide-icon>
+                </button>
             </div>
-            }
-        </div>
-        <div class="modal-footer">
-            <button class="btn-secondary" (click)="cerrarModalDictamen()">Cancelar</button>
-            <button class="btn-primary" [class]="accionDictamen?.toLowerCase()" (click)="confirmarDictamen()"
-                [disabled]="loadingDictamen">
-                @if (loadingDictamen) {
-                <lucide-icon name="loader-2" class="spin" size="14"></lucide-icon>
+
+            <div class="modal-body">
+                @if (accionDictamen === 'RECHAZAR') {
+                <div class="form-group">
+                    <label>Motivo del Rechazo <span class="required">*</span></label>
+                    <textarea [(ngModel)]="observacionDictamen" rows="3" class="input-field"
+                        placeholder="Ingrese el motivo detallado del rechazo..."></textarea>
+                </div>
+                } @else {
+                <div class="alert alert-info">
+                    <lucide-icon name="info" size="20"></lucide-icon>
+                    <p>¿Está seguro de aprobar esta postulación? Verifique que todos los documentos estén validados.</p>
+                </div>
                 }
-                {{ accionDictamen === 'APROBAR' ? 'Confirmar Aprobación' : 'Confirmar Rechazo' }}
-            </button>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" (click)="cerrarModalDictamen()" [disabled]="loadingDictamen">
+                    Cancelar
+                </button>
+                <button [class]="accionDictamen === 'APROBAR' ? 'btn-primary' : 'btn-danger'"
+                    (click)="confirmarDictamen()"
+                    [disabled]="loadingDictamen || (accionDictamen === 'RECHAZAR' && !observacionDictamen.trim())">
+                    @if (loadingDictamen) {
+                    <lucide-icon name="loader-2" class="spin" size="16"></lucide-icon>
+                    Confirmando...
+                    } @else {
+                    <lucide-icon [name]="accionDictamen === 'APROBAR' ? 'check' : 'x'" size="16"></lucide-icon>
+                    Confirmar
+                    }
+                </button>
+            </div>
         </div>
     </div>
+    }
+
+    <!-- Modal de Asignar Comisión -->
+    @if (mostrarModalAsignacion) {
+    <div class="modal-overlay custom-modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h3>Asignar Comisión Evaluación Oposición Méritos</h3>
+                <button class="btn-icon" (click)="cerrarModalAsignacion()">
+                    <lucide-icon name="x" size="20"></lucide-icon>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label>Comisión <span class="required">*</span></label>
+                        <select [(ngModel)]="formAsignacion.idComisionSeleccion" class="input-field">
+                            <option [value]="undefined" disabled selected>Seleccione la comisión asignada...</option>
+                            @for (c of comisionesDisponibles; track c.idComisionSeleccion) {
+                            <option [value]="c.idComisionSeleccion">{{ c.nombreComision }}</option>
+                            }
+                        </select>
+                        @if (comisionesDisponibles.length === 0 && !loadingComisiones) {
+                        <span class="warning-text">No hay comisiones disponibles para esta asignatura.</span>
+                        }
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label>Tema Asignado <span class="required">*</span></label>
+                        <input type="text" [(ngModel)]="formAsignacion.temaExposicion" class="input-field"
+                            placeholder="Agregue el tema del que va a dictar clase..." />
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label>Fecha <span class="required">*</span></label>
+                        <input type="date" [(ngModel)]="formAsignacion.fechaEvaluacion" class="input-field" />
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label>Lugar <span class="required">*</span></label>
+                        <input type="text" [(ngModel)]="formAsignacion.lugar" class="input-field"
+                            placeholder="Lugar de evaluación..." />
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label>Hora Inicio <span class="required">*</span></label>
+                        <input type="time" [(ngModel)]="formAsignacion.horaInicio" class="input-field" />
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label>Hora Fin <span class="required">*</span></label>
+                        <input type="time" [(ngModel)]="formAsignacion.horaFin" class="input-field" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer group-buttons">
+                <button class="btn-secondary" (click)="cerrarModalAsignacion()" [disabled]="loadingAsignacion">
+                    Cancelar
+                </button>
+                <button class="btn-primary" (click)="confirmarAsignacion()"
+                    [disabled]="loadingAsignacion || loadingComisiones">
+                    @if (loadingAsignacion) {
+                    <lucide-icon name="loader-2" class="spin" size="16"></lucide-icon>
+                    Guardando...
+                    } @else {
+                    <lucide-icon name="calendar-check" size="16"></lucide-icon> Asignar
+                    }
+                </button>
+            </div>
+        </div>
+    </div>
+    }
 </div>
-}

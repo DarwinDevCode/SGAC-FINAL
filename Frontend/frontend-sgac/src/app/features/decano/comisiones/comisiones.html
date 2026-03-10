@@ -1,11 +1,17 @@
 <div class="gestion-container">
 
-    <!-- Encabezado -->
+    <!-- Vista Lista de Convocatorias (Tarjetas) -->
+    @if (!vistaDetalle) {
     <div class="section-header">
         <div class="title-container">
             <h1 class="title">Designar Comisiones</h1>
-            <p class="subtitle">Asigna comisiones de selección a las convocatorias activas.</p>
+            <p class="subtitle">Selecciona una convocatoria de tu facultad para gestionar sus comisiones de selección.
+            </p>
         </div>
+        <button class="btn-refresh" (click)="ngOnInit()" [disabled]="loadingConvocatorias">
+            <lucide-icon name="refresh-cw" [class.spin]="loadingConvocatorias" size="16"></lucide-icon>
+            Actualizar
+        </button>
     </div>
 
     <!-- Toast de éxito -->
@@ -16,88 +22,166 @@
     </div>
     }
 
-    <!-- Selector de convocatoria -->
-    <div class="filtro-card">
-        <div class="filtro-row">
-            <div class="select-wrapper">
-                <lucide-icon name="FileText" size="16" class="select-icon"></lucide-icon>
-                @if (loadingConvocatorias) {
-                <select class="select-input" disabled>
-                    <option>Cargando convocatorias...</option>
-                </select>
-                } @else {
-                <select class="select-input" [(ngModel)]="idConvocatoriaSeleccionada"
-                    (ngModelChange)="seleccionarConvocatoria()">
-                    <option [ngValue]="null" disabled>— Selecciona una convocatoria —</option>
-                    @for (c of convocatorias; track c.idConvocatoria) {
-                    <option [ngValue]="c.idConvocatoria">{{ nombreConvocatoria(c) }}</option>
-                    }
-                </select>
-                }
+    <!-- Loading Convocatorias -->
+    @if (loadingConvocatorias) {
+    <div class="loading-state">
+        <lucide-icon name="Loader2" size="32" class="spin"></lucide-icon>
+        Cargando convocatorias de la facultad...
+    </div>
+    } @else {
+
+    <!-- Cards Grid -->
+    <div class="cards-grid">
+        @for (c of convocatorias; track c.idConvocatoria) {
+        <div class="postulacion-card">
+            <div class="card-header">
+                <div class="estudiante-info">
+                    <h3 class="estudiante-nombre">{{ c.nombreAsignatura }}</h3>
+                    <span class="estudiante-matricula">{{ c.nombreCarrera || 'Carrera no especificada' }}</span>
+                </div>
+                <span class="status-badge" [ngClass]="{
+                    'status-aprobada': c._tieneComisiones,
+                    'status-pendiente': !c._tieneComisiones && c.activo,
+                    'status-rechazada': !c.activo
+                }">
+                    {{ !c.activo ? 'Inactiva' : (c._tieneComisiones ? 'Asignado' : 'Sin asignar') }}
+                </span>
             </div>
 
-            @if (idConvocatoriaSeleccionada) {
-            <button class="btn-primary" (click)="abrirModalCrear()">
-                <lucide-icon name="Plus" size="16"></lucide-icon>
-                Nueva Comisión
-            </button>
-            }
-        </div>
-    </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="info-label">Periodo:</span>
+                    <span class="info-value">{{ c.nombrePeriodo }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Docente:</span>
+                    <span class="info-value">{{ c.nombreDocente }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Cupos:</span>
+                    <span class="info-value">{{ c.cuposDisponibles }}</span>
+                </div>
+            </div>
 
-    <!-- Tabla de comisiones -->
-    @if (idConvocatoriaSeleccionada) {
-    <div class="table-card">
-        @if (loadingComisiones) {
-        <div class="loading-state">
-            <lucide-icon name="Loader2" size="20" class="spin"></lucide-icon>
-            Cargando comisiones...
+            <div class="card-footer">
+                <button class="btn-primary" (click)="verDetalle(c)">
+                    <lucide-icon name="Users" size="16"></lucide-icon>
+                    Gestionar Comisiones
+                </button>
+            </div>
         </div>
-        } @else if (comisiones.length === 0) {
-        <div class="empty-state">
-            <lucide-icon name="Users" size="36"></lucide-icon>
-            <p>No hay comisiones para esta convocatoria.</p>
-            <span>Haz clic en <strong>Nueva Comisión</strong> para crear la primera.</span>
+        } @empty {
+        <div class="empty-state-container">
+            <lucide-icon name="FolderOpen" size="48"></lucide-icon>
+            <p>No hay convocatorias activas en tu facultad.</p>
         </div>
-        } @else {
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nombre de la Comisión</th>
-                    <th>Fecha Conformación</th>
-                    <th>Estado</th>
-                    <th class="col-acciones">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (c of comisiones; track c.idComisionSeleccion; let i = $index) {
-                <tr>
-                    <td class="col-num">{{ i + 1 }}</td>
-                    <td class="col-nombre">{{ c.nombreComision }}</td>
-                    <td>{{ c.fechaConformacion | date: 'dd/MM/yyyy' }}</td>
-                    <td>
-                        <span class="badge" [class.badge-activo]="c.activo" [class.badge-inactivo]="!c.activo">
-                            {{ c.activo ? 'Activa' : 'Inactiva' }}
-                        </span>
-                    </td>
-                    <td class="col-acciones">
-                        <button class="btn-icon btn-edit" (click)="abrirModalEditar(c)" title="Editar">
-                            <lucide-icon name="Pencil" size="15"></lucide-icon>
-                        </button>
-                        @if (c.activo) {
-                        <button class="btn-icon btn-delete" (click)="confirmarDesactivar(c)" title="Desactivar">
-                            <lucide-icon name="XCircle" size="15"></lucide-icon>
-                        </button>
-                        }
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
         }
     </div>
     }
+    } <!-- Fin Vista Lista -->
+
+    <!-- Vista Detalle de Comisiones -->
+    @if (vistaDetalle && convocatoriaDetalle) {
+    <div class="detalle-header">
+        <div class="header-actions">
+            <button class="btn-volver" (click)="volverALista()">
+                <lucide-icon name="ChevronLeft" size="18"></lucide-icon>
+                Volver a Convocatorias
+            </button>
+            <h2 class="title">Gestión de Comisiones</h2>
+        </div>
+        <button class="btn-primary" (click)="abrirModalCrear()">
+            <lucide-icon name="Plus" size="16"></lucide-icon>
+            Nueva Comisión
+        </button>
+    </div>
+
+    <!-- Mensajes en Detalle -->
+    @if (mensajeExito) {
+    <div class="toast-exito" style="margin-bottom: 1.5rem;">
+        <lucide-icon name="CheckCircle2" size="16"></lucide-icon>
+        {{ mensajeExito }}
+    </div>
+    }
+
+    <div class="detalle-content">
+        <!-- Tarjeta de Info Convocatoria -->
+        <div class="info-card">
+            <h4 class="card-section-title">
+                <lucide-icon name="FileText" size="18"></lucide-icon>
+                Información de la Convocatoria
+            </h4>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Asignatura y Carrera</span>
+                    <span class="info-value">{{ convocatoriaDetalle.nombreAsignatura }} - {{
+                        convocatoriaDetalle.nombreCarrera }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Periodo Académico</span>
+                    <span class="info-value">{{ convocatoriaDetalle.nombrePeriodo }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fechas</span>
+                    <span class="info-value">Cierre: {{ formatearFecha(convocatoriaDetalle.fechaCierre) | date:
+                        'dd/MM/yyyy' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de comisiones -->
+        <div class="table-card mt-4">
+            @if (loadingComisiones) {
+            <div class="loading-state">
+                <lucide-icon name="Loader2" size="20" class="spin"></lucide-icon>
+                Cargando comisiones...
+            </div>
+            } @else if (comisiones.length === 0) {
+            <div class="empty-state">
+                <lucide-icon name="Users" size="36"></lucide-icon>
+                <p>No hay comisiones conformadas para esta convocatoria.</p>
+                <span>Haz clic en <strong>Nueva Comisión</strong> para crear la primera.</span>
+            </div>
+            } @else {
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre de la Comisión</th>
+                        <th>Fecha Conformación</th>
+                        <th>Estado</th>
+                        <th class="col-acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (c of comisiones; track c.idComisionSeleccion; let i = $index) {
+                    <tr>
+                        <td class="col-num">{{ i + 1 }}</td>
+                        <td class="col-nombre">{{ c.nombreComision }}</td>
+                        <td>{{ c.fechaConformacion | date: 'dd/MM/yyyy' }}</td>
+                        <td>
+                            <span class="badge" [class.badge-activo]="c.activo" [class.badge-inactivo]="!c.activo">
+                                {{ c.activo ? 'Activa' : 'Inactiva' }}
+                            </span>
+                        </td>
+                        <td class="col-acciones">
+                            <button class="btn-icon btn-edit" (click)="abrirModalEditar(c)" title="Editar">
+                                <lucide-icon name="Pencil" size="15"></lucide-icon>
+                            </button>
+                            @if (c.activo) {
+                            <button class="btn-icon btn-delete" (click)="confirmarDesactivar(c)" title="Desactivar">
+                                <lucide-icon name="XCircle" size="15"></lucide-icon>
+                            </button>
+                            }
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            }
+        </div>
+    </div>
+    } <!-- Fin Vista Detalle -->
 
 </div>
 
@@ -146,18 +230,17 @@
             <div class="integrantes-section" *ngIf="!modoEdicion" style="margin-top:20px;">
                 <h3 class="subsection-title">Integrantes (Evaluación de Méritos y Oposición)</h3>
 
-                <!-- Decano (Seleccionable) -->
+                <!-- Decano (Lectura) -->
                 <div class="form-group" style="margin-bottom:15px;">
                     <label class="form-label">Decano <span class="required">*</span></label>
-                    <select class="form-input" [(ngModel)]="idUsuarioDecano" style="width:100%;">
-                        <option [ngValue]="null" disabled>— Selecciona un decano —</option>
-                        @for (d of decanos; track d.idDecano) {
-                        <option [ngValue]="d.idUsuario">{{ d.nombreCompletoUsuario }}</option>
-                        }
-                    </select>
-                    @if (decanos.length === 0) {
-                    <small class="text-muted">No hay decanos activos en el sistema.</small>
-                    }
+                    <div class="input-field"
+                        style="background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:8px 12px;color:#15803d;display:flex;align-items:center;justify-content:space-between;cursor:not-allowed">
+                        <span
+                            style="font-weight:600;font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                            getNombreDecanoStr() }}</span>
+                        <lucide-icon name="lock" size="14"
+                            style="color:#86efac;flex-shrink:0;margin-left:8px;"></lucide-icon>
+                    </div>
                 </div>
 
                 <!-- Coordinador y Docente (Lectura) -->

@@ -15,13 +15,17 @@ import {
     AlertTriangle,
     Save,
     LucideIconProvider,
-    LUCIDE_ICONS
+    LUCIDE_ICONS,
+    RefreshCw,
+    ChevronLeft,
+    FolderOpen
 } from 'lucide-angular';
 import { ComisionService } from '../../../core/services/comision-service';
 import { DecanoService } from '../../../core/services/decano-service';
 import { CoordinadorService } from '../../../core/services/coordinador-service';
 import { DocenteService } from '../../../core/services/docente-service';
 import { ComisionIntegranteService } from '../../../core/services/comision-integrante-service';
+import { AuthService } from '../../../core/services/auth-service';
 import { ComisionDTO, ComisionRequestDTO } from '../../../core/dto/comision';
 import { ConvocatoriaDTO } from '../../../core/dto/convocatoria';
 import { DecanoResponseDTO } from '../../../core/dto/decano';
@@ -49,7 +53,10 @@ import { forkJoin, of } from 'rxjs';
                 X,
                 Lock,
                 AlertTriangle,
-                Save
+                Save,
+                RefreshCw,
+                ChevronLeft,
+                FolderOpen
             })
         }
     ],
@@ -62,6 +69,7 @@ export class ComisionesDecanoComponent implements OnInit {
     private coordinadorService = inject(CoordinadorService);
     private docenteService = inject(DocenteService);
     private integranteService = inject(ComisionIntegranteService);
+    private authService = inject(AuthService);
 
     // Estado de datos
     convocatorias: ConvocatoriaDTO[] = [];
@@ -69,6 +77,10 @@ export class ComisionesDecanoComponent implements OnInit {
     decanos: DecanoResponseDTO[] = [];
     coordinadores: CoordinadorResponseDTO[] = [];
     docentes: DocenteDTO[] = [];
+
+    // Control de vista
+    vistaDetalle = false;
+    convocatoriaDetalle: ConvocatoriaDTO | null = null;
 
     idConvocatoriaSeleccionada: number | null = null;
     loadingConvocatorias = true;
@@ -93,6 +105,7 @@ export class ComisionesDecanoComponent implements OnInit {
     idUsuarioDecano: number | null = null;
     idUsuarioCoordinador: number | null = null;
     idUsuarioDocente: number | null = null;
+    decanoLogueado: DecanoResponseDTO | null = null;
 
     // Confirmación desactivar
     comisionADesactivar: ComisionDTO | null = null;
@@ -100,24 +113,52 @@ export class ComisionesDecanoComponent implements OnInit {
     mensajeExito = '';
 
     ngOnInit(): void {
-        this.decanoService.listarConvocatoriasActivas().subscribe({
-            next: (data) => { this.convocatorias = data; this.loadingConvocatorias = false; },
-            error: () => { this.loadingConvocatorias = false; },
+        const currentUser = this.authService.getUser();
+
+        forkJoin({
+            decanos: this.decanoService.listarActivos(),
+            convocatorias: this.decanoService.listarConvocatoriasActivas()
+        }).subscribe({
+            next: (res) => {
+                this.decanos = res.decanos;
+                if (currentUser) {
+                    this.decanoLogueado = this.decanos.find(d => d.idUsuario === currentUser.idUsuario) || null;
+                }
+
+                if (this.decanoLogueado && this.decanoLogueado.idFacultad) {
+                    this.convocatorias = res.convocatorias.filter(c => c.idFacultad === this.decanoLogueado?.idFacultad);
+                } else {
+                    this.convocatorias = res.convocatorias;
+                }
+
+                // Cargar estado de comisiones para cada convocatoria de forma asíncrona
+                if (this.convocatorias.length > 0) {
+                    this.convocatorias.forEach(c => {
+                        const idConv = c.idConvocatoria;
+                        if (idConv !== undefined && idConv !== null) {
+                            this.comisionService.listarPorConvocatoria(idConv).subscribe(comisiones => {
+                                // Cualquier miembro activo
+                                c._tieneComisiones = comisiones && comisiones.length > 0 && comisiones.some(com => com.activo);
+                            });
+                        }
+                    });
+                }
+
+                this.loadingConvocatorias = false;
+            },
+            error: () => {
+                this.loadingConvocatorias = false;
+            }
         });
 
-        // Cargar listas para integrantes
-        this.decanoService.listarActivos().subscribe(res => {
-            console.log('Decanos activos cargados:', res.length, res);
-            this.decanos = res;
-        });
-        this.coordinadorService.listarActivos().subscribe(res => {
-            console.log('Coordinadores activos cargados:', res.length, res);
-            this.coordinadores = res;
-        });
-        this.docenteService.listarActivos().subscribe(res => {
-            console.log('Docentes activos cargados:', res.length, res);
-            this.docentes = res;
-        });
+        this.coordinadorService.listarActivos().subscribe(res => this.coordinadores = res);
+        this.docenteService.listarActivos().subscribe(res => this.docentes = res);
+
+        // Opcional: Para cargar el estado real de "Asignada" o no,
+        // esto requiere que el backend lo devuelva en la vista. Si no lo devuelve,
+        // asumiremos que dice "Vigente" hasta que entre o se agregue otro endpoint.
+        // Como solución temporal, lo evaluaremos usando una verificación rápida en la UI
+        // basada en la propiedad interna o en si decidimos pre-cargar.
     }
 
     seleccionarConvocatoria(): void {
@@ -125,9 +166,32 @@ export class ComisionesDecanoComponent implements OnInit {
         this.loadingComisiones = true;
         this.comisiones = [];
         this.comisionService.listarPorConvocatoria(this.idConvocatoriaSeleccionada).subscribe({
-            next: (data) => { this.comisiones = data; this.loadingComisiones = false; },
+            next: (data) => {
+                this.comisiones = data;
+                this.loadingComisiones = false;
+
+                // Marcar en la lista original que ya tiene comisiones (para la UI)
+                const conv = this.convocatorias.find(c => c.idConvocatoria === this.idConvocatoriaSeleccionada);
+                if (conv) {
+                    conv._tieneComisiones = data && data.length > 0;
+                }
+            },
             error: () => { this.loadingComisiones = false; },
         });
+    }
+
+    verDetalle(convocatoria: ConvocatoriaDTO): void {
+        this.convocatoriaDetalle = convocatoria;
+        this.idConvocatoriaSeleccionada = convocatoria.idConvocatoria || null;
+        this.vistaDetalle = true;
+        this.seleccionarConvocatoria();
+    }
+
+    volverALista(): void {
+        this.vistaDetalle = false;
+        this.convocatoriaDetalle = null;
+        this.idConvocatoriaSeleccionada = null;
+        this.comisiones = [];
     }
 
     abrirModalCrear(): void {
@@ -141,7 +205,7 @@ export class ComisionesDecanoComponent implements OnInit {
             activo: true,
         };
 
-        this.idUsuarioDecano = null;
+        this.idUsuarioDecano = this.decanoLogueado ? this.decanoLogueado.idUsuario : null;
 
         // Auto-asignación de Coordinador y Docente desde la convocatoria
         const convocatoriaSeleccionada = this.convocatorias.find(c => c.idConvocatoria === this.idConvocatoriaSeleccionada);
@@ -263,9 +327,29 @@ export class ComisionesDecanoComponent implements OnInit {
     }
 
     nombreConvocatoria(c: ConvocatoriaDTO): string {
-        const nombre = c.nombreAsignatura ?? 'Convocatoria';
+        const materia = c.nombreAsignatura ?? 'Convocatoria';
+        const carrera = c.nombreCarrera ? ` - ${c.nombreCarrera}` : '';
         const periodo = c.nombrePeriodo ? ` (${c.nombrePeriodo})` : '';
-        return nombre + periodo;
+        return materia + carrera + periodo;
+    }
+
+    getNombreDecanoStr(): string {
+        if (!this.idUsuarioDecano) return '— No asignado —';
+        const d = this.decanos.find(dec => dec.idUsuario === this.idUsuarioDecano);
+        return d ? d.nombreCompletoUsuario : 'Desconocido';
+    }
+
+    formatearFecha(fecha: string | number[] | undefined): string | null {
+        if (!fecha) return null;
+        if (Array.isArray(fecha)) {
+            // Asumiendo formato [year, month, day]
+            if (fecha.length >= 3) {
+                const dateObj = new Date(fecha[0], fecha[1] - 1, fecha[2]);
+                return dateObj.toISOString();
+            }
+            return null;
+        }
+        return fecha;
     }
 
     getNombreCoordinadorStr(): string {

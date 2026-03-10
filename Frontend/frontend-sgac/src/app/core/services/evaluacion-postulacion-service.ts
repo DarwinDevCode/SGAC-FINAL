@@ -9,7 +9,8 @@ import {
   EvaluacionDocumentoResponse,
   DictaminarPostulacionRequest,
   DictamenPostulacionResponse,
-  CambioEstadoRevisionResponse
+  CambioEstadoRevisionResponse,
+  AsignarComisionRequest
 } from '../dto/evaluacion-postulacion';
 
 /**
@@ -23,7 +24,7 @@ export class EvaluacionPostulacionService {
 
   private apiUrl = `${this.baseUrl}/coordinador/evaluacion`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Lista todas las postulaciones de la carrera del coordinador
@@ -104,6 +105,16 @@ export class EvaluacionPostulacionService {
     return this.http.get(
       `${this.apiUrl}/documentos/${idUsuario}/visualizar/${idRequisitoAdjunto}`,
       { responseType: 'blob' }
+    );
+  }
+
+  /**
+   * Asigna una comisión evaluadora a una postulación aprobada
+   */
+  asignarComision(request: AsignarComisionRequest): Observable<any> {
+    return this.http.post<any>(
+      `${this.baseUrl}/evaluaciones/asignar`,
+      request
     );
   }
 }

@@ -2,11 +2,12 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider,
+import {
+    LucideAngularModule, LUCIDE_ICONS, LucideIconProvider,
     CheckCircle, AlertCircle, Loader2, Clock, CheckSquare, X,
     Paperclip, FileText, Eye, MessageSquare, Check, Users, Calendar,
     ThumbsUp, ThumbsDown, Edit3, Download, ChevronLeft, RefreshCw,
-    AlertTriangle, Search, Filter, XCircle, Inbox
+    AlertTriangle, Search, Filter, XCircle, Inbox, UserCheck, CalendarCheck
 } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth-service';
@@ -16,8 +17,11 @@ import {
     DetallePostulacionCoordinador,
     DocumentoEvaluacion,
     EvaluarDocumentoRequest,
-    DictaminarPostulacionRequest
+    DictaminarPostulacionRequest,
+    AsignarComisionRequest
 } from '../../../core/dto/evaluacion-postulacion';
+import { ComisionService } from '../../../core/services/comision-service';
+import { ComisionDTO } from '../../../core/dto/comision';
 
 @Component({
     selector: 'app-coordinador-validaciones',
@@ -33,7 +37,7 @@ import {
                 CheckCircle, AlertCircle, Loader2, Clock, CheckSquare, X,
                 Paperclip, FileText, Eye, MessageSquare, Check, Users, Calendar,
                 ThumbsUp, ThumbsDown, Edit3, Download, ChevronLeft, RefreshCw,
-                AlertTriangle, Search, Filter, XCircle, Inbox
+                AlertTriangle, Search, Filter, XCircle, Inbox, UserCheck, CalendarCheck
             })
         }
     ]
@@ -41,6 +45,7 @@ import {
 export class ValidacionesComponent implements OnInit, OnDestroy {
     private authService = inject(AuthService);
     private evaluacionService = inject(EvaluacionPostulacionService);
+    private comisionService = inject(ComisionService);
     private subs = new Subscription();
 
     // Estado general
@@ -55,7 +60,7 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
     filtroBusqueda = '';
 
     // Tabs
-    tabActivo: 'requiere-atencion' | 'todas' = 'requiere-atencion';
+    tabActivo: 'requiere-atencion' | 'todas' | 'aprobados' = 'requiere-atencion';
 
     // Vista detalle
     vistaDetalle = false;
@@ -74,6 +79,20 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
     accionDictamen: 'APROBAR' | 'RECHAZAR' | null = null;
     observacionDictamen = '';
     loadingDictamen = false;
+
+    // Modal Asignación de Comisión
+    mostrarModalAsignacion = false;
+    postulacionAAsignar: PostulacionListadoCoordinador | null = null;
+    comisionesDisponibles: ComisionDTO[] = [];
+    loadingComisiones = false;
+    loadingAsignacion = false;
+    formAsignacion: Partial<AsignarComisionRequest> = {
+        temaExposicion: '',
+        fechaEvaluacion: new Date().toISOString().split('T')[0],
+        horaInicio: '09:00',
+        horaFin: '10:00',
+        lugar: ''
+    };
 
     ngOnInit(): void {
         const user = this.authService.getUser();
@@ -115,6 +134,8 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
         // Filtro por tab
         if (this.tabActivo === 'requiere-atencion') {
             lista = lista.filter(p => p.requiere_atencion);
+        } else if (this.tabActivo === 'aprobados') {
+            lista = lista.filter(p => p.estado_codigo === 'APROBADA' || p.estado_codigo === 'EN_EVALUACION');
         }
 
         // Filtro por estado
@@ -143,7 +164,11 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
         return this.postulaciones.filter(p => p.requiere_atencion).length;
     }
 
-    cambiarTab(tab: 'requiere-atencion' | 'todas'): void {
+    get contadorAprobados(): number {
+        return this.postulaciones.filter(p => p.estado_codigo === 'APROBADA' || p.estado_codigo === 'EN_EVALUACION').length;
+    }
+
+    cambiarTab(tab: 'requiere-atencion' | 'todas' | 'aprobados'): void {
         this.tabActivo = tab;
     }
 
@@ -362,6 +387,7 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
             'OBSERVADA': 'status-observada',
             'CORREGIDA': 'status-corregida',
             'APROBADA': 'status-aprobada',
+            'EN_EVALUACION': 'status-evaluacion',
             'RECHAZADA': 'status-rechazada'
         };
         return clases[estado] || 'status-default';
@@ -385,5 +411,81 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
         if (!fecha) return '—';
         const date = new Date(fecha);
         return date.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    // Modal de asiganción
+    abrirModalAsignacion(postulacion: PostulacionListadoCoordinador): void {
+        this.postulacionAAsignar = postulacion;
+        this.mostrarModalAsignacion = true;
+        this.errorMensaje = '';
+        this.successMensaje = '';
+        this.formAsignacion = {
+            idPostulacion: postulacion.id_postulacion,
+            idComisionSeleccion: undefined,
+            temaExposicion: '',
+            fechaEvaluacion: new Date().toISOString().split('T')[0],
+            horaInicio: '09:00',
+            horaFin: '10:00',
+            lugar: ''
+        };
+        this.cargarComisionesDisponibles(postulacion.id_convocatoria);
+    }
+
+    cargarComisionesDisponibles(idConvocatoria: number): void {
+        this.loadingComisiones = true;
+        this.subs.add(
+            this.comisionService.listarPorConvocatoria(idConvocatoria).subscribe({
+                next: (res) => {
+                    this.comisionesDisponibles = res.filter(c => c.activo);
+                    this.loadingComisiones = false;
+                },
+                error: (err) => {
+                    this.errorMensaje = 'No se pudieron cargar las comisiones para esta asignatura.';
+                    this.loadingComisiones = false;
+                    setTimeout(() => this.errorMensaje = '', 3000);
+                }
+            })
+        );
+    }
+
+    cerrarModalAsignacion(): void {
+        this.mostrarModalAsignacion = false;
+        this.postulacionAAsignar = null;
+        this.formAsignacion = {};
+    }
+
+    confirmarAsignacion(): void {
+        if (!this.formAsignacion.idComisionSeleccion || !this.formAsignacion.temaExposicion || !this.formAsignacion.lugar) {
+            this.errorMensaje = 'Por favor complete todos los campos obligatorios (*).';
+            setTimeout(() => this.errorMensaje = '', 3000);
+            return;
+        }
+
+        this.loadingAsignacion = true;
+        const request = this.formAsignacion as AsignarComisionRequest;
+
+        this.subs.add(
+            this.evaluacionService.asignarComision(request).subscribe({
+                next: (resp) => {
+                    this.loadingAsignacion = false;
+                    this.successMensaje = 'Comisión asignada exitosamente.';
+                    this.cerrarModalAsignacion();
+                    // Refrescar al estudiante localmente para que figure EN_EVALUACION
+                    if (this.postulacionAAsignar) {
+                        const idx = this.postulaciones.findIndex(p => p.id_postulacion === this.postulacionAAsignar!.id_postulacion);
+                        if (idx >= 0) {
+                            this.postulaciones[idx].estado_codigo = 'EN_EVALUACION';
+                            this.postulaciones[idx].estado_nombre = 'En Evaluación';
+                        }
+                    }
+                    setTimeout(() => this.successMensaje = '', 3500);
+                },
+                error: (err) => {
+                    this.loadingAsignacion = false;
+                    this.errorMensaje = err.error?.mensaje || 'Error al asignar la comisión.';
+                    setTimeout(() => this.errorMensaje = '', 4000);
+                }
+            })
+        );
     }
 }

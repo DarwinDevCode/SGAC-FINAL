@@ -36,6 +36,10 @@ public class ConvocatoriaMapper {
                 .fechaCierre(entity.getFechaCierre())
                 .estado(entity.getEstado())
                 .activo(entity.getActivo())
+                .idCarrera(entity.getAsignatura() != null && entity.getAsignatura().getCarrera() != null ? entity.getAsignatura().getCarrera().getIdCarrera() : null)
+                .nombreCarrera(entity.getAsignatura() != null && entity.getAsignatura().getCarrera() != null ? entity.getAsignatura().getCarrera().getNombreCarrera() : "N/A")
+                .idFacultad(entity.getAsignatura() != null && entity.getAsignatura().getCarrera() != null && entity.getAsignatura().getCarrera().getFacultad() != null ? entity.getAsignatura().getCarrera().getFacultad().getIdFacultad() : null)
+                .nombreFacultad(entity.getAsignatura() != null && entity.getAsignatura().getCarrera() != null && entity.getAsignatura().getCarrera().getFacultad() != null ? entity.getAsignatura().getCarrera().getFacultad().getNombreFacultad() : "N/A")
                 .build();
     }
 }

@@ -8,10 +8,14 @@ import org.uteq.sgacfinal.dto.Request.EvaluacionOposicionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.EvaluacionOposicionResponseDTO;
 import org.uteq.sgacfinal.entity.EvaluacionOposicion;
 import org.uteq.sgacfinal.entity.UsuarioComision;
+import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.repository.ComisionSeleccionRepository;
 import org.uteq.sgacfinal.repository.EvaluacionOposicionRepository;
 import org.uteq.sgacfinal.repository.UsuarioComisionRepository;
+import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.IEvaluacionOposicionService;
+import org.uteq.sgacfinal.service.INotificacionService;
+import org.uteq.sgacfinal.dto.Request.NotificationRequest;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -26,6 +30,8 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
     private final EvaluacionOposicionRepository evaluacionOposicionRepository;
     private final UsuarioComisionRepository usuarioComisionRepository;
     private final ComisionSeleccionRepository comisionSeleccionRepository;
+    private final PostulacionRepository postulacionRepository;
+    private final INotificacionService notificacionService;
 
     @Override
     public EvaluacionOposicionResponseDTO crear(EvaluacionOposicionRequestDTO request) {
@@ -151,6 +157,37 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
             if (resultado == null || resultado == -1) {
                 throw new RuntimeException("Error al asignar miembro " + miembro.getUsuario().getIdUsuario() + " a la evaluación.");
             }
+            
+            // Notificar al evaluador
+            try {
+                String rol = miembro.getRolIntegrante();
+                notificacionService.enviarNotificacion(miembro.getUsuario().getIdUsuario(), NotificationRequest.builder()
+                        .titulo("Asignación de Comisión Evaluadora")
+                        .mensaje("Usted ha sido asignado como " + rol + " para la evaluación de oposición con tema: " 
+                                + request.getTemaExposicion() + ". Fecha: " + request.getFechaEvaluacion() 
+                                + ", Hora: " + request.getHoraInicio() + " - " + request.getHoraFin() + " en " + request.getLugar() + ".")
+                        .tipo("SISTEMA").build());
+            } catch (Exception e) {
+                System.err.println("Error al notificar al miembro de comisión: " + e.getMessage());
+            }
+        }
+
+        // 5. Notificar al estudiante
+        try {
+            Postulacion postulacion = postulacionRepository.findById(request.getIdPostulacion())
+                    .orElseThrow(() -> new RuntimeException("Postulación no encontrada"));
+            
+            Integer idEstudiante = postulacion.getEstudiante().getUsuario().getIdUsuario();
+            
+            notificacionService.enviarNotificacion(idEstudiante, NotificationRequest.builder()
+                    .titulo("Comisión de Evaluación Asignada")
+                    .mensaje("Su postulación ha sido programada para evaluación de oposición y méritos. " +
+                            "Tema: " + request.getTemaExposicion() + ". Fecha: " + request.getFechaEvaluacion() + 
+                            ", Horario: " + request.getHoraInicio() + " - " + request.getHoraFin() + 
+                            ", Lugar: " + request.getLugar() + ".")
+                    .tipo("SISTEMA").build());
+        } catch (Exception e) {
+            System.err.println("Error al notificar al estudiante sobre la asignación de comisión: " + e.getMessage());
         }
 
         return buscarPorId(idEvaluacion);
