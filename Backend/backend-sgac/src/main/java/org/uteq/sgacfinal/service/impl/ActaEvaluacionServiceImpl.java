@@ -23,15 +23,26 @@ public class ActaEvaluacionServiceImpl implements IActaEvaluacionService {
 
     private final ActaEvaluacionRepository actaRepo;
     private final PostulacionRepository postulacionRepo;
+    private final org.uteq.sgacfinal.service.IPdfGeneratorService pdfService;
+    private final org.uteq.sgacfinal.service.IUploadService uploadService;
 
     @Override
     public ActaEvaluacionResponseDTO generarActa(GenerarActaRequestDTO request) {
         Postulacion postulacion = postulacionRepo.findById(request.getIdPostulacion())
                 .orElseThrow(() -> new RuntimeException("Postulación no encontrada: " + request.getIdPostulacion()));
 
-        // Generar URL real despues 
-        String urlDocumento = "/api/actas/download/" + request.getTipoActa().toLowerCase()
-                + "/" + request.getIdPostulacion() + "/" + System.currentTimeMillis() + ".pdf";
+        byte[] pdfBytes;
+        if ("MERITOS".equalsIgnoreCase(request.getTipoActa())) {
+            pdfBytes = pdfService.generarActaMeritos(postulacion);
+        } else if ("OPOSICION".equalsIgnoreCase(request.getTipoActa())) {
+            pdfBytes = pdfService.generarActaOposicion(postulacion);
+        } else {
+            throw new IllegalArgumentException("Tipo de acta inválido: " + request.getTipoActa());
+        }
+
+        String fileName = "Acta_" + request.getTipoActa() + "_" + postulacion.getEstudiante().getUsuario().getCedula() + ".pdf";
+        java.util.Map<String, Object> uploadResult = uploadService.upload(pdfBytes, fileName, "application/pdf");
+        String urlDocumento = uploadResult.get("url").toString();
 
         Integer resultado;
         var existente = actaRepo.findByIdPostulacionAndTipoActa(request.getIdPostulacion(), request.getTipoActa());

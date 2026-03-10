@@ -94,7 +94,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/ws-sgac/**").permitAll()
+                                "/ws-sgac/**",
+                                "/api/files/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/login").permitAll()
                         .requestMatchers(

@@ -354,7 +354,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         if (!this.idConvSeleccionada) return;
         this.loadingRanking = true;
         this.subs.add(
-            this.http.get<any[]>(`${this.BASE}/evaluaciones/ranking/convocatoria/v2/${this.idConvSeleccionada}`).subscribe({
+            this.http.get<any[]>(`${this.BASE}/evaluacion-seleccion/ranking/convocatoria/v2/${this.idConvSeleccionada}`).subscribe({
                 next: (data) => {
                     this.ranking = data || [];
                     this.hayEmpate = this.ranking.some(r => r.empate);
@@ -381,7 +381,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         if (!this.idConvSeleccionada || this.publicandoResultados) return;
         this.publicandoResultados = true;
         this.subs.add(
-            this.http.post<any>(`${this.BASE}/evaluaciones/publicar-resultados/${this.idConvSeleccionada}`, {}).subscribe({
+            this.http.post<any>(`${this.BASE}/evaluacion-seleccion/publicar-resultados/${this.idConvSeleccionada}`, {}).subscribe({
                 next: (res) => {
                     this.publicandoResultados = false;
                     this.showSuccess(`✅ Resultados publicados. Se notificó a ${res.notificados} estudiante(s).`);
@@ -402,7 +402,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
 
     cargarActas(idPostulacion: number): void {
         this.subs.add(
-            this.http.get<any[]>(`${this.BASE}/evaluaciones/actas/${idPostulacion}`).subscribe({
+            this.http.get<any[]>(`${this.BASE}/evaluacion-seleccion/actas/${idPostulacion}`).subscribe({
                 next: (actas) => {
                     this.actasMeritos = actas.find(a => a.tipoActa === 'MERITOS') || null;
                     this.actasOposicion = actas.find(a => a.tipoActa === 'OPOSICION') || null;
@@ -417,7 +417,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.generandoActa = true;
         const body = { idPostulacion: this.postulanteActas.idPostulacion, tipoActa: tipo };
         this.subs.add(
-            this.http.post<any>(`${this.BASE}/evaluaciones/actas/generar`, body).subscribe({
+            this.http.post<any>(`${this.BASE}/evaluacion-seleccion/actas/generar`, body).subscribe({
                 next: () => {
                     this.generandoActa = false;
                     this.showSuccess(`Acta de ${tipo === 'MERITOS' ? 'Méritos' : 'Oposición'} generada.`);
@@ -433,7 +433,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         this.confirmandoActa = true;
         const body = { idActa: acta.idActa, idEvaluador: this.userId, rolEvaluador: this.userRol };
         this.subs.add(
-            this.http.post<any>(`${this.BASE}/evaluaciones/actas/confirmar`, body).subscribe({
+            this.http.post<any>(`${this.BASE}/evaluacion-seleccion/actas/confirmar`, body).subscribe({
                 next: () => {
                     this.confirmandoActa = false;
                     this.showSuccess('Confirmación registrada correctamente.');
