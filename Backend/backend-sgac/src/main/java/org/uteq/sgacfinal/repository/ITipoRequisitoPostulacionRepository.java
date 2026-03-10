@@ -13,13 +13,16 @@ public interface ITipoRequisitoPostulacionRepository extends JpaRepository<TipoR
     List<TipoRequisitoPostulacion> findByActivo(Boolean activo);
     List<TipoRequisitoPostulacion> findByActivoTrue();
 
-    @Query(value = "SELECT public.fn_actualizar_tipo_requisito_postulacion(:id, :nombre, :descripcion)", nativeQuery = true)
+    @Query(value = "SELECT public.fn_actualizar_tipo_requisito_postulacion(:id, :nombre, :descripcion, :tipoDocumento)", nativeQuery = true)
     Integer actualizarTipoRequisitoPostulacion(@Param("id") Integer id,
                                                @Param("nombre") String nombre,
-                                               @Param("descripcion") String descripcion);
+                                               @Param("descripcion") String descripcion,
+                                               @Param("tipoDocumento") String tipoDocumento);
 
-    @Query(value = "SELECT public.fn_crear_tipo_requisito_postulacion(:nombre, :descripcion)", nativeQuery = true)
-    Integer crearTipoRequisitoPostulacion(@Param("nombre") String nombre, @Param("descripcion") String descripcion);
+    @Query(value = "SELECT public.fn_crear_tipo_requisito_postulacion(:nombre, :descripcion, :tipoDocumento)", nativeQuery = true)
+    Integer crearTipoRequisitoPostulacion(@Param("nombre") String nombre, 
+                                          @Param("descripcion") String descripcion,
+                                          @Param("tipoDocumento") String tipoDocumento);
 
     @Query(value = "SELECT public.fn_desactivar_tipo_requisito_postulacion(:id)", nativeQuery = true)
     Integer desactivarTipoRequisitoPostulacion(@Param("id") Integer id);

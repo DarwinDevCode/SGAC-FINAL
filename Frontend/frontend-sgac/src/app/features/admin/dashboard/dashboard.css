@@ -1,0 +1,94 @@
+/* ================================================================
+   ADMIN DASHBOARD — alineado al estilo del dashboard AYUDANTE
+   (reutiliza el sistema global de styles.css)
+   ================================================================ */
+
+/* (sin overrides de :host para mantener consistencia) */
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Grid inferior igual al ayudante */
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .bottom-grid { grid-template-columns: 1fr; }
+}
+
+/* Reutilizamos table-card del sistema global */
+.ultimas-sesiones {
+  background: hsl(var(--card, 0 0% 100%));
+  border: 1px solid hsl(var(--border, 0 0% 88%));
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.ultimas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid hsl(var(--border, 0 0% 88%));
+  background: hsl(var(--muted, 130 43% 94%) / 0.2);
+}
+
+.ultimas-header .section-subtitle { margin: 0; }
+
+/* Grid de roles */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .roles-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .roles-grid { grid-template-columns: 1fr; }
+}
+
+.role-card {
+  border: 1px solid hsl(var(--border, 0 0% 88%));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: hsl(var(--card, 0 0% 100%));
+  transition: box-shadow 0.2s;
+}
+
+.role-card:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+/* Empty state */
+.empty-sesiones {
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  color: hsl(var(--muted-foreground, 0 0% 46%));
+}
+
+/* Skeleton helpers (alineados a ayudante) */
+.sk-circle { width: 3rem; height: 3rem; border-radius: 999px; background: hsl(var(--muted, 130 43% 94%) / 0.6); }
+.sk-lines { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+.sk-line { height: 0.75rem; border-radius: 999px; background: hsl(var(--muted, 130 43% 94%) / 0.6); }
+.sk-line.w-50 { width: 50%; }
+.sk-line.w-70 { width: 70%; }
+.sk-block { width: 100%; height: 120px; border-radius: 0.5rem; background: hsl(var(--muted, 130 43% 94%) / 0.6); }

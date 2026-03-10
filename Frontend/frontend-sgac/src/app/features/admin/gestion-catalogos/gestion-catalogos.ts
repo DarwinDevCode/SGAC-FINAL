@@ -91,9 +91,10 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
         next: (data) => { this.requisitosPostulacionList = data || []; this.loading = false; console.log(this.requisitosPostulacionList) },
         error: (err: HttpErrorResponse) => { alert(err.error?.message || 'Error al cargar requisitos'); this.loading = false; }
       }));
+
     } else if (this.activeTab === 'estadoEvidencias') {
-      this.subs.add(this.catalogosService.getEstadosEvidencia().subscribe({
-        next: (data) => { this.estadoEvidenciasAyudantiasList = data || []; this.loading = false; console.log(this.estadoEvidenciasAyudantiasList)},
+      this.subs.add(this.catalogosService.getEstadosEvidenciaAyudantia().subscribe({
+        next: (data) => { this.estadoEvidenciasAyudantiasList = data || []; this.loading = false; console.log(this.estadoEvidenciasAyudantiasList) },
         error: (err: HttpErrorResponse) => { alert(err.error?.message || 'Error al cargar estados'); this.loading = false; }
       }));
     }
@@ -218,7 +219,7 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   abrirModalNuevoRequisito() {
     this.isEditMode = false;
     // @ts-ignore - Ajusta el nombre del campo si tu DTO varía
-    this.formRequisito = { nombreRequisito: '', activo: true };
+    this.formRequisito = { nombreRequisito: '', activo: true, tipoDocumentoPermitido: '' };
     this.mostrarModal = true;
   }
   abrirModalEditarRequisito(r: TipoRequisitoPostulacionDTO) {
@@ -242,9 +243,11 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   }
 
 
+
+
   abrirModalNuevoEstado() {
     this.isEditMode = false;
-    this.formEstado = { nombreEstado: '', descripcion: '', activo: true };
+    this.formEstado = { nombreEstado: '', activo: true };
     this.mostrarModal = true;
   }
   abrirModalEditarEstado(e: TipoEstadoEvidenciaAyudantiaDTO) {
@@ -254,18 +257,20 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
   }
   guardarEstado() {
     const peticion = this.isEditMode && this.formEstado.idTipoEstadoEvidenciaAyudantia
-      ? this.catalogosService.putEstadoEvidencia(this.formEstado.idTipoEstadoEvidenciaAyudantia, this.formEstado as TipoEstadoEvidenciaAyudantiaDTO)
-      : this.catalogosService.postEstadoEvidencia(this.formEstado as TipoEstadoEvidenciaAyudantiaDTO);
+      ? this.catalogosService.putEstadoEvidenciaAyudantia(this.formEstado.idTipoEstadoEvidenciaAyudantia, this.formEstado as TipoEstadoEvidenciaAyudantiaDTO)
+      : this.catalogosService.postEstadoEvidenciaAyudantia(this.formEstado as TipoEstadoEvidenciaAyudantiaDTO);
     this.procesarGuardado(peticion, 'Estado de Evidencia');
   }
   toggleEstadoEvidencia(e: TipoEstadoEvidenciaAyudantiaDTO) {
     if (!e.idTipoEstadoEvidenciaAyudantia) return;
     if (!confirm(`¿Desea cambiar el estado de ${e.nombreEstado}?`)) return;
-    this.subs.add(this.catalogosService.desactivarEstadoEvidencia(e.idTipoEstadoEvidenciaAyudantia).subscribe({
+    this.subs.add(this.catalogosService.desactivarEstadoEvidenciaAyudantia(e.idTipoEstadoEvidenciaAyudantia).subscribe({
       next: () => e.activo = !e.activo,
       error: (err: HttpErrorResponse) => alert(err.error?.message || 'Error al cambiar estado')
     }));
   }
+
+
 
 
   private procesarGuardado(peticionObservable: any, nombreEntidad: string) {

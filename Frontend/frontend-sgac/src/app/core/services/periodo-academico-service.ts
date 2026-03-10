@@ -16,4 +16,25 @@ export class PeriodoAcademicoService {
   obtenerActivo(): Observable<PeriodoAcademicoDTO> {
     return this.http.get<PeriodoAcademicoDTO>(`${BASE}/activo`);
   }
+
+  crear(data: Partial<PeriodoAcademicoDTO>): Observable<PeriodoAcademicoDTO> {
+    return this.http.post<PeriodoAcademicoDTO>(BASE, data);
+  }
+
+  actualizar(id: number, data: Partial<PeriodoAcademicoDTO>): Observable<PeriodoAcademicoDTO> {
+    return this.http.put<PeriodoAcademicoDTO>(`${BASE}/${id}`, data);
+  }
+
+  desactivar(id: number): Observable<any> {
+    return this.http.patch(`${BASE}/${id}/desactivar`, {});
+  }
+
+  activar(id: number): Observable<any> {
+    return this.http.patch(`${BASE}/${id}/activar`, {});
+  }
+
+  importarRequisitos(idDestino: number, idFuente: number): Observable<any> {
+    // POST /api/periodos-academicos/{id}/importar-requisitos?fuentePeriodoId={idAnterior}
+    return this.http.post(`${BASE}/${idDestino}/importar-requisitos?fuentePeriodoId=${idFuente}`, {});
+  }
 }

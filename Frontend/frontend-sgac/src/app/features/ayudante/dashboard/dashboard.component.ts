@@ -1,72 +1,115 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { Subscription } from 'rxjs';
-import { AyudanteService } from '../../../core/services/ayudante-service';
-import { AuthService } from '../../../core/services/auth-service';
-import { AyudanteCatedraResponseDTO, AyudantiaResponseDTO } from '../../../core/dto/ayudante';
+import {Component, OnInit, OnDestroy, inject} from '@angular/core';
+import { CommonModule }                 from '@angular/common';
+import { RouterModule }                 from '@angular/router';
+import { Subject, forkJoin }            from 'rxjs';
+import { takeUntil, finalize }          from 'rxjs/operators';
+import { LucideAngularModule }          from 'lucide-angular';
+
+import { SesionService } from '../../../core/services/sesion-service';
+import { ProgresoGeneral } from '../../../core/dto/progreso-general';
+import { ControlSemanal } from '../../../core/dto/control-semanal';
+import { SesionListado } from '../../../core/dto/sesion-listado';
+import {AuthService} from '../../../core/services/auth-service';
+import {HttpErrorResponse} from '@angular/common/http';
+
 
 @Component({
-  selector: 'app-ayudante-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  selector:    'app-dashboard',
+  standalone:  true,
+  imports:     [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css',
+  styleUrls:   ['./dashboard.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-  ayudanteService = inject(AyudanteService);
+
+  private destroy$ = new Subject<void>();
   authService = inject(AuthService);
-  private subs = new Subscription();
+  sesionService = inject(SesionService);
 
-  ayudanteData: AyudanteCatedraResponseDTO | null = null;
-  ayudantiaActiva: AyudantiaResponseDTO | null = null;
+  ID_USUARIO_MOCK = this.authService.getUser()?.idUsuario ?? 0;
 
-  loading = true;
-  errorMensaje = '';
+  cargando = false;
+  progreso!:       ProgresoGeneral;
+  controlSemanal!: ControlSemanal;
+  ultimasSesiones: SesionListado[] = [];
+  error: string | null = null;
 
   ngOnInit(): void {
-    this.cargarDatosAyudante();
+    this.cargarDashboard();
   }
 
   ngOnDestroy(): void {
-    this.subs.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  cargarDatosAyudante() {
-    this.loading = true;
-    const user = this.authService.getUser();
+  cargarDashboard(): void {
+    this.cargando = true;
+    this.error    = null;
 
-    if (!user) {
-      this.errorMensaje = 'Sesión no encontrada.';
-      this.loading = false;
-      return;
-    }
-
-    this.subs.add(
-      this.ayudanteService.obtenerAyudantePorUsuario(user.idUsuario).subscribe({
-        next: (ayudante) => {
-          this.ayudanteData = ayudante;
-          // Note: In a real scenario, we might need an idPostulacion or active ayudantia ID
-          // For now, we'll try to fetch by a generic logic or assume the dashboard shows global hours.
-          // Since the AyudanteController has buscarPorPostulacion, we might need to find the user's postulation first.
-          // For simplicity in this step, if we don't have idPostulacion, we show profile hours.
-          this.loading = false;
+    forkJoin({
+      progreso: this.sesionService.progresoGeneral(this.ID_USUARIO_MOCK),
+      semanal:  this.sesionService.controlSemanal(this.ID_USUARIO_MOCK),
+      sesiones: this.sesionService.listarSesiones(this.ID_USUARIO_MOCK)
+    })
+      .pipe(takeUntil(this.destroy$), finalize(() => this.cargando = false))
+      .subscribe({
+        next: ({ progreso, semanal, sesiones }) => {
+          this.progreso        = progreso;
+          this.controlSemanal  = semanal;
+          this.ultimasSesiones = sesiones.slice(0, 5); // top 5
         },
-        error: (err) => {
-          console.error(err);
-          this.errorMensaje = 'No se encontró perfil de ayudante para este usuario.';
-          this.loading = false;
+        error: (err: HttpErrorResponse) => {
+          console.log(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar');
+          this.error = 'No se pudo cargar la información del dashboard. Intente nuevamente.';
         }
-      })
+      });
+  }
+
+  getPorcentajeGlobal(): number {
+    return Math.min(this.progreso?.porcentajeAvance ?? 0, 100);
+  }
+
+  getPorcentajeSemanal(): number {
+    if (!this.controlSemanal) return 0;
+    return Math.min(
+      (this.controlSemanal.horasRegistradas / this.controlSemanal.limiteSemanal) * 100,
+      100
     );
   }
 
-  get porcentajeHoras(): number {
-    if (!this.ayudanteData || !this.ayudanteData.horasAyudante) return 0;
-    // Assuming 160 hours total for a standard assistantship (mock value)
-    const totalRequerido = 160;
-    const porcentaje = (Number(this.ayudanteData.horasAyudante) / totalRequerido) * 100;
-    return Math.min(Math.round(porcentaje), 100);
+  sesionesConObservacion(): SesionListado[] {
+    return this.ultimasSesiones.filter(s => s.tieneObservacion);
+  }
+
+  getClaseEstado(estado: string): string {
+    const mapa: Record<string, string> = {
+      APROBADO:  'aprobado',
+      PENDIENTE: 'pendiente',
+      OBSERVADO: 'observado',
+      RECHAZADO: 'rechazado'
+    };
+    return mapa[estado] ?? 'pendiente';
+  }
+
+  getColorProgreso(): string {
+    const p = this.getPorcentajeGlobal();
+    if (p >= 75) return 'green';
+    if (p >= 40) return 'amber';
+    return 'blue';
+  }
+
+  getColorSemanal(): string {
+    if (this.controlSemanal?.superaLimite) return 'red';
+    const p = this.getPorcentajeSemanal();
+    if (p >= 85) return 'amber';
+    return 'green';
+  }
+
+  formatearFecha(fecha: string): string {
+    if (!fecha) return '—';
+    return new Date(fecha).toLocaleDateString('es-EC', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
   }
 }

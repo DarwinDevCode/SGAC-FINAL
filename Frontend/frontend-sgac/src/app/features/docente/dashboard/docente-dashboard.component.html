@@ -1,0 +1,186 @@
+<div class="gestion-container">
+
+  <!-- CABECERA -->
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title">Dashboard Docente</h2>
+      <p class="subtitle">Resumen general de tus convocatorias y actividades pendientes.</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="nuevaConvocatoria()">
+      <lucide-icon name="Plus" size="16"></lucide-icon>
+      Nueva Convocatoria
+    </button>
+  </div>
+
+  <!-- Error global -->
+  @if (error) {
+    <div class="alert-banner error">
+      <lucide-icon name="AlertCircle" size="18"></lucide-icon>
+      {{ error }}
+    </div>
+  }
+
+  <!-- CARGA (Skeletons) -->
+  @if (loading) {
+    <div class="stats-grid cols-4">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="stat-card">
+          <div class="sk-circle"></div>
+          <div class="sk-lines">
+            <div class="sk-line w-50"></div>
+            <div class="sk-line w-70"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="bottom-grid">
+      <div class="table-card"><div class="sk-block" style="height: 220px;"></div></div>
+      <div class="table-card"><div class="sk-block" style="height: 220px;"></div></div>
+    </div>
+
+  } @else if (resumen) {
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid cols-4">
+
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <lucide-icon name="Briefcase" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ resumen.totalConvocatoriasActivas }}</div>
+          <div class="stat-label">Convocatorias abiertas</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon violet">
+          <lucide-icon name="ClipboardList" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ resumen.totalPostulacionesPendientes }}</div>
+          <div class="stat-label">Postulaciones pendientes</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <lucide-icon name="Users" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ resumen.totalAyudantesAsignados }}</div>
+          <div class="stat-label">Ayudantes asignados</div>
+        </div>
+      </div>
+
+      <div class="stat-card" [class.stat-alert]="resumen.totalActividadesPorRevisar > 0">
+        <div class="stat-icon" [class]="resumen.totalActividadesPorRevisar > 0 ? 'amber' : 'green'">
+          <lucide-icon [name]="resumen.totalActividadesPorRevisar > 0 ? 'AlertCircle' : 'ShieldCheck'" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ resumen.totalActividadesPorRevisar }}</div>
+          <div class="stat-label">Actividades por revisar</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- GRID INFERIOR: Acciones rápidas + Actividades recientes -->
+    <div class="bottom-grid">
+
+      <div class="quick-access">
+        <h3 class="section-subtitle">Accesos rápidos</h3>
+        <div class="actions-grid cols-2">
+
+          <button type="button" class="action-card green" (click)="nuevaConvocatoria()">
+            <div class="action-icon green">
+              <lucide-icon name="PlusCircle" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Nueva Convocatoria</div>
+              <div class="action-desc">Crear un nuevo proceso de ayudantía</div>
+            </div>
+          </button>
+
+          <button type="button" class="action-card blue" (click)="evaluarPostulantes()">
+            <div class="action-icon blue">
+              <lucide-icon name="Users" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Evaluar postulantes</div>
+              <div class="action-desc">Revisar y calificar postulaciones</div>
+            </div>
+          </button>
+
+          <button type="button" class="action-card amber" (click)="reportes()">
+            <div class="action-icon amber">
+              <lucide-icon name="FileText" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Reportes</div>
+              <div class="action-desc">Exportar información y métricas</div>
+            </div>
+          </button>
+
+          <button type="button" class="action-card violet" routerLink="/notificaciones">
+            <div class="action-icon violet">
+              <lucide-icon name="Bell" size="20"></lucide-icon>
+            </div>
+            <div>
+              <div class="action-title">Notificaciones</div>
+              <div class="action-desc">Revisar avisos del sistema</div>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="ultimas-sesiones">
+        <div class="ultimas-header">
+          <h3 class="section-subtitle">Actividades recientes</h3>
+          <a class="ver-todas-link" routerLink="/docente/actividades">
+            Ver todas <lucide-icon name="ArrowRight" size="14"></lucide-icon>
+          </a>
+        </div>
+
+        @if (resumen.ultimasActividades.length === 0) {
+          <div class="empty-sesiones">
+            <lucide-icon name="ClipboardCheck" size="36"></lucide-icon>
+            <p class="m-0">No hay actividades recientes por revisar.</p>
+          </div>
+        } @else {
+          <div class="sesiones-list">
+            @for (a of resumen.ultimasActividades; track a.idRegistro) {
+              <div class="sesion-item" (click)="revisarActividad(a.idRegistro)">
+                <div class="sesion-fecha">
+                  <div class="fecha-dia">{{ a.fecha | date:'dd' }}</div>
+                  <div class="fecha-mes">{{ a.fecha | date:'MMM' }}</div>
+                </div>
+
+                <div class="sesion-info">
+                  <div class="sesion-tema">
+                    <lucide-icon name="ClipboardList" size="14" class="text-muted-foreground"></lucide-icon>
+                    {{ a.tema }}
+                  </div>
+                  <div class="sesion-meta">
+                    <span class="text-xs text-muted-foreground">{{ a.nombreEstudiante }}</span>
+                    <span class="id-pill">#{{ a.idRegistro }}</span>
+                  </div>
+                </div>
+
+                <button class="btn-icon" type="button" (click)="$event.stopPropagation(); revisarActividad(a.idRegistro)">
+                  <lucide-icon name="ArrowRight" size="16"></lucide-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+  }
+
+</div>

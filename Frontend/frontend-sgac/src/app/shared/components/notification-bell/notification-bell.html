@@ -1,0 +1,48 @@
+﻿<div class="notif-wrapper">
+  <button class="notification-btn" type="button" (click)="togglePanel()" aria-label="Notificaciones">
+    <lucide-icon name="Bell" size="20"></lucide-icon>
+    <span *ngIf="unreadCount() > 0" class="notif-badge">{{ unreadCountText() }}</span>
+  </button>
+  <div *ngIf="panelOpen()" class="notif-panel" role="dialog" aria-label="Panel de notificaciones">
+    <div class="notif-panel-header">
+      <p class="notif-title">Notificaciones</p>
+      <button type="button" class="notif-close" (click)="closePanel()" aria-label="Cerrar">
+        <lucide-icon name="X" size="16"></lucide-icon>
+      </button>
+    </div>
+    <div class="notif-panel-body">
+      <div *ngIf="notificaciones().length === 0" class="notif-empty">
+        <p>No tienes notificaciones recientes.</p>
+      </div>
+      <button
+        *ngFor="let n of notificaciones()"
+        type="button"
+        [class]="getItemClass(n)"
+        (click)="onClickNotificacion(n)"
+      >
+        <div class="notif-icon">
+          <lucide-icon [name]="getIconName(n)" size="18"></lucide-icon>
+        </div>
+        <div class="notif-content">
+          <div class="notif-row">
+            <p class="notif-item-title">{{ n.titulo }}</p>
+            <span class="notif-date">{{ formatFecha(n.fechaCreacion) }}</span>
+          </div>
+          <p class="notif-message">{{ n.mensaje }}</p>
+        </div>
+        <div class="notif-actions">
+          <span *ngIf="!n.leido" class="notif-dot" title="No leída"></span>
+          <button
+            type="button"
+            class="notif-mark"
+            (click)="marcarLeida(n, $event)"
+            [disabled]="n.leido"
+            title="Marcar como leída"
+          >
+            <lucide-icon name="Check" size="16"></lucide-icon>
+          </button>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>

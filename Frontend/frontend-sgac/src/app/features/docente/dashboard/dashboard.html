@@ -1,0 +1,118 @@
+<div class="dashboard-container">
+    <div class="dash-header">
+        <h1 class="dash-title">Panel del Docente</h1>
+        <p class="dash-subtitle">Resumen de tus ayudantes y actividades</p>
+    </div>
+
+    @if (loading) {
+    <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando datos...</p>
+    </div>
+    }
+
+    @if (!loading && dashboard) {
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-icon"><lucide-icon name="users" [size]="28"></lucide-icon></div>
+            <div class="kpi-data">
+                <span class="kpi-value">{{ dashboard.totalAyudantes }}</span>
+                <span class="kpi-label">Ayudantes Activos</span>
+            </div>
+        </div>
+        <div class="kpi-card kpi-amber">
+            <div class="kpi-icon"><lucide-icon name="clock" [size]="28"></lucide-icon></div>
+            <div class="kpi-data">
+                <span class="kpi-value">{{ dashboard.actividadesPendientes }}</span>
+                <span class="kpi-label">Pendientes de Revisión</span>
+            </div>
+        </div>
+        <div class="kpi-card kpi-green">
+            <div class="kpi-icon"><lucide-icon name="clipboard-check" [size]="28"></lucide-icon></div>
+            <div class="kpi-data">
+                <span class="kpi-value">{{ dashboard.actividadesAceptadas }}</span>
+                <span class="kpi-label">Aceptadas</span>
+            </div>
+        </div>
+        <div class="kpi-card kpi-red">
+            <div class="kpi-icon"><lucide-icon name="x-circle" [size]="28"></lucide-icon></div>
+            <div class="kpi-data">
+                <span class="kpi-value">{{ dashboard.actividadesRechazadas }}</span>
+                <span class="kpi-label">Rechazadas</span>
+            </div>
+        </div>
+        <div class="kpi-card kpi-purple">
+            <div class="kpi-icon"><lucide-icon name="eye" [size]="28"></lucide-icon></div>
+            <div class="kpi-data">
+                <span class="kpi-value">{{ dashboard.actividadesObservadas }}</span>
+                <span class="kpi-label">Con Observación</span>
+            </div>
+        </div>
+        <div class="kpi-card kpi-indigo">
+            <div class="kpi-icon"><lucide-icon name="trending-up" [size]="28"></lucide-icon></div>
+            <div class="kpi-data">
+                <span class="kpi-value">{{ dashboard.totalActividades }}</span>
+                <span class="kpi-label">Total Actividades</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    @if (dashboard.totalActividades > 0) {
+    <div class="progress-section">
+        <h3 class="section-title">Distribución de Estados</h3>
+        <div class="progress-bar-container">
+            <div class="progress-bar">
+                <div class="prog-seg prog-green" [style.width.%]="getPct(dashboard.actividadesAceptadas)"
+                    [title]="'Aceptadas: ' + dashboard.actividadesAceptadas"></div>
+                <div class="prog-seg prog-amber" [style.width.%]="getPct(dashboard.actividadesPendientes)"
+                    [title]="'Pendientes: ' + dashboard.actividadesPendientes"></div>
+                <div class="prog-seg prog-purple" [style.width.%]="getPct(dashboard.actividadesObservadas)"
+                    [title]="'Observadas: ' + dashboard.actividadesObservadas"></div>
+                <div class="prog-seg prog-red" [style.width.%]="getPct(dashboard.actividadesRechazadas)"
+                    [title]="'Rechazadas: ' + dashboard.actividadesRechazadas"></div>
+            </div>
+            <div class="progress-legend">
+                <span class="legend-item"><span class="dot dot-green"></span>Aceptadas ({{
+                    getPct(dashboard.actividadesAceptadas) }}%)</span>
+                <span class="legend-item"><span class="dot dot-amber"></span>Pendientes ({{
+                    getPct(dashboard.actividadesPendientes) }}%)</span>
+                <span class="legend-item"><span class="dot dot-purple"></span>Observadas ({{
+                    getPct(dashboard.actividadesObservadas) }}%)</span>
+                <span class="legend-item"><span class="dot dot-red"></span>Rechazadas ({{
+                    getPct(dashboard.actividadesRechazadas) }}%)</span>
+            </div>
+        </div>
+    </div>
+    }
+    }
+
+    <!-- Lista rápida ayudantes -->
+    @if (ayudantes.length > 0) {
+    <div class="ayudantes-preview">
+        <div class="section-header-row">
+            <h3 class="section-title">Mis Ayudantes</h3>
+            <button class="btn-link" (click)="irAMisAyudantes()">
+                Ver todos <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
+            </button>
+        </div>
+        <div class="ayudantes-list">
+            @for (a of ayudantes; track a.idAyudantia) {
+            <div class="ayudante-row" (click)="verAyudante(a.idAyudantia)">
+                <div class="ayudante-avatar">{{ a.nombreCompleto.charAt(0) }}</div>
+                <div class="ayudante-info">
+                    <span class="ayudante-nombre">{{ a.nombreCompleto }}</span>
+                    <span class="ayudante-asig">{{ a.nombreAsignatura }}</span>
+                </div>
+                @if (a.actividadesPendientes > 0) {
+                <span class="badge-pendiente">{{ a.actividadesPendientes }} pendiente{{ a.actividadesPendientes > 1 ?
+                    's' : '' }}</span>
+                }
+                <lucide-icon name="chevron-right" [size]="18" class="row-arrow"></lucide-icon>
+            </div>
+            }
+        </div>
+    </div>
+    }
+</div>

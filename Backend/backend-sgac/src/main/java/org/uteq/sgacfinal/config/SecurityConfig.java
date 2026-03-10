@@ -7,7 +7,7 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -31,6 +31,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtService jwtService;
@@ -92,13 +93,30 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/registro-estudiante").permitAll()
-                        .requestMatchers("/api/auth/registro-admin", "/api/auth/registro-decano", "/api/auth/registro-coordinador").hasAuthority("ADMINISTRADOR")
-                        .requestMatchers("/api/auth/registro-docente", "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
-                        .requestMatchers("/api/convocatorias/crear", "/api/convocatorias/editar/**").hasAnyAuthority("DOCENTE", "COORDINADOR")
-                        .requestMatchers("/api/permisos/consultar", "/api/tipos-rol/resumen-permisos", "/api/permisos/gestionar", "/api/permisos/esquemas", "/api/permisos/tipos-objeto", "/api/permisos/elementos", "/api/permisos/privilegios/**", "/api/permisos/gestionar-masivo").hasAnyAuthority("ADMINISTRADOR")
-                        .requestMatchers("/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
-                        .requestMatchers("/api/convocatorias/**").authenticated()
+                        .requestMatchers(
+                                "/ws-sgac/**").permitAll()
+                        .requestMatchers(
+                                "/api/auth/login").permitAll()
+                        .requestMatchers(
+                                "/api/docente/dashboard/**").hasAuthority("DOCENTE")
+                        .requestMatchers(
+                                "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
+                        .requestMatchers(
+                                "/api/convocatorias/crear",
+                                "/api/convocatorias/editar/**").hasAnyAuthority("DECANO", "COORDINADOR")
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/tipos-rol/**",
+                                "/api/permisos/**").hasAnyAuthority("ADMINISTRADOR")
+                        .requestMatchers(
+                                "/api/sesiones/**").hasAuthority("AYUDANTE_CATEDRA")
+                        .requestMatchers(
+                                "/api/notificaciones/**").authenticated()
+                        .requestMatchers(
+                                "/api/evaluacion-seleccion/oposicion/postulacion/**",
+                                "/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
+                        .requestMatchers(
+                                "/api/convocatorias/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

@@ -1,14 +1,19 @@
 package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
-@Entity
-@Table(name = "notificacion", schema = "notificacion")
 @Getter
 @Setter
+@Entity
+@Table(name = "notificacion", schema = "notificacion")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,24 +21,53 @@ public class Notificacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_notificacion")
+    @Column(name = "id_notificacion", nullable = false)
     private Integer idNotificacion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario_destino", nullable = false)
-    private Usuario usuarioDestino;
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
 
-    @Column(name = "mensaje", nullable = false, length = 255)
+    @Size(max = 150)
+    @NotNull
+    @Column(name = "titulo", nullable = false, length = 150)
+    private String titulo;
+
+    @NotNull
+    @Column(name = "mensaje", nullable = false, length = Integer.MAX_VALUE)
     private String mensaje;
 
-    @Column(name = "fecha_envio", nullable = false)
-    @Builder.Default
-    private LocalDateTime fechaEnvio = LocalDateTime.now();
+    @Size(max = 30)
+    @NotNull
+    @Column(name = "tipo", nullable = false, length = 50)
+    private String tipo;
 
-    @Column(name = "leido", nullable = false)
+    @Column(name = "id_referencia")
+    private Integer idReferencia;
+
+    @ColumnDefault("false")
+    @Column(name = "leido")
     @Builder.Default
     private Boolean leido = false;
 
-    @Column(name = "tipo", length = 50)
-    private String tipo;
+    // OJO: en Postgres la columna real es `fecha_creacion`.
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "fecha_creacion")
+    private Instant fechaCreacion;
+
+    // OJO: en Postgres la columna real es `fecha_lectura`.
+    @Column(name = "fecha_lectura")
+    private Instant fechaLectura;
+
+
+    /** P10 — clasificación de notificación: INDIVIDUAL | MASIVA_ROL | MASIVA_TODOS */
+    @Column(name = "tipo_notificacion", length = 30)
+    @Builder.Default
+    private String tipoNotificacion = "INDIVIDUAL";
+
+    /** P10 — convocatoria asociada (puede ser null) */
+    @Column(name = "id_convocatoria")
+    private Integer idConvocatoria;
 }

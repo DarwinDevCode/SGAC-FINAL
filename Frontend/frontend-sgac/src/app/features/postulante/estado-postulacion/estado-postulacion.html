@@ -85,7 +85,57 @@
                     <lucide-icon name="users" size="16"></lucide-icon>
                     Ver Oposición
                 </a>
+                <button type="button" class="btn-secondary-small" (click)="toggleDocumentos(p.idPostulacion)">
+                    <lucide-icon name="file-text" size="16"></lucide-icon>
+                    {{ expandidoPostulacion[p.idPostulacion] ? 'Ocultar Documentos' : 'Ver Documentos' }}
+                </button>
             </div>
+
+            <!-- Panel de documentos -->
+            @if (expandidoPostulacion[p.idPostulacion]) {
+            <div class="docs-panel">
+                <h4 class="docs-title"><lucide-icon name="paperclip" size="16"></lucide-icon> Documentos Adjuntos</h4>
+                @if (!documentosPorPostulacion[p.idPostulacion]) {
+                <p style="color:#94a3b8;font-size:.85rem;text-align:center;padding:.75rem">Cargando documentos...</p>
+                } @else if (documentosPorPostulacion[p.idPostulacion].length === 0) {
+                <p style="color:#94a3b8;font-size:.85rem;text-align:center;padding:.75rem">No hay documentos adjuntos.
+                </p>
+                } @else {
+                <div class="docs-list">
+                    @for (doc of documentosPorPostulacion[p.idPostulacion]; track doc.idRequisitoAdjunto) {
+                    <div class="doc-row">
+                        <div class="doc-info">
+                            <span class="doc-nombre">{{ doc.nombreRequisito || 'Requisito' }}</span>
+                            <span class="doc-archivo">{{ doc.nombreArchivo }}</span>
+                        </div>
+                        <span [class]="getEstadoClass(doc.nombreEstado)">{{ doc.nombreEstado }}</span>
+                        <button type="button" class="btn-ver-doc" (click)="verDocumento(doc.idRequisitoAdjunto)"
+                            title="Ver/Descargar documento">
+                            <lucide-icon name="eye" size="14"></lucide-icon>
+                        </button>
+                        @if (doc.observacion) {
+                        <span class="doc-obs">💬 {{ doc.observacion }}</span>
+                        }
+                        @if (doc.nombreEstado === 'OBSERVADO' || doc.nombreEstado === 'RECHAZADO') {
+                        <div class="reemplazar-wrapper">
+                            <label class="btn-reemplazar" [title]="'Reemplazar: ' + doc.nombreArchivo">
+                                <lucide-icon name="upload" size="14"></lucide-icon>
+                                {{ subiendoRequisito[doc.idRequisitoAdjunto] ? 'Subiendo...' : 'Reemplazar' }}
+                                <input type="file" class="hidden-input"
+                                    (change)="onArchivoReemplazo($event, doc.idRequisitoAdjunto)"
+                                    accept=".pdf,.doc,.docx,.png,.jpg" />
+                            </label>
+                            @if (mensajeReemplazo[doc.idRequisitoAdjunto]) {
+                            <span class="msg-reemplazo">{{ mensajeReemplazo[doc.idRequisitoAdjunto] }}</span>
+                            }
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+            }
         </div>
         }
     </div>

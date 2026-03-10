@@ -87,4 +87,11 @@ public class PeriodoAcademicoRequisitoPostulacionServiceImpl implements IPeriodo
                 .activo(entidad.getActivo())
                 .build();
     }
+
+    @Override
+    @Transactional
+    public int importarDeOtroPeriodo(Integer idPeriodoOrigen, Integer idPeriodoDestino) {
+        Integer resultado = repository.importarRequisitosDeOtroPeriodo(idPeriodoOrigen, idPeriodoDestino);
+        return resultado != null ? resultado : 0;
+    }
 }

@@ -48,10 +48,163 @@
 .score-pending {
     font-size: 0.9rem;
     font-style: italic;
-    color: #94a3b8;
+    color: #64748b;
+    max-width: 420px;
 }
 
 .card-actions {
     border-top: none;
     padding-top: 0;
+}
+
+/* ── Panel de Resultado publicado ─────────────────────────────── */
+.resultado-panel {
+    margin: 1rem -1.5rem -1.5rem;
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid;
+    border-bottom-left-radius: 0.75rem;
+    border-bottom-right-radius: 0.75rem;
+}
+
+/* Estados */
+.resultado-ganador {
+    background: #f0fdf4;
+    border-color: #86efac;
+}
+
+.resultado-apto {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+.resultado-no-apto {
+    background: #fef2f2;
+    border-color: #fca5a5;
+}
+
+.resultado-desierto {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+.resultado-pendiente {
+    background: #fefce8;
+    border-color: #fde047;
+}
+
+.resultado-veredicto {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.resultado-ganador .resultado-veredicto {
+    color: #16a34a;
+}
+
+.resultado-apto .resultado-veredicto {
+    color: #2563eb;
+}
+
+.resultado-no-apto .resultado-veredicto {
+    color: #dc2626;
+}
+
+.resultado-desierto .resultado-veredicto {
+    color: #64748b;
+}
+
+/* Grid de puntajes */
+.puntajes-grid {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.puntaje-item {
+    background: rgba(255, 255, 255, .7);
+    border-radius: 8px;
+    padding: .5rem .9rem;
+    text-align: center;
+    min-width: 90px;
+    border: 1px solid rgba(0, 0, 0, .06);
+}
+
+.punt-label {
+    display: block;
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #64748b;
+}
+
+.punt-valor {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.punt-valor small {
+    font-size: .7rem;
+    font-weight: 400;
+    color: #94a3b8;
+    margin-left: 2px;
+}
+
+.puntaje-total .punt-valor.total {
+    font-size: 1.5rem;
+}
+
+/* Barra de progreso */
+.score-bar-container {
+    margin-top: 0.25rem;
+}
+
+.score-bar-track {
+    position: relative;
+    background: #e2e8f0;
+    border-radius: 99px;
+    height: 8px;
+    overflow: visible;
+}
+
+.score-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .6s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.fill-aprobado {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+}
+
+.fill-rechazado {
+    background: linear-gradient(90deg, #f87171, #dc2626);
+}
+
+/* Marcador de puntaje mínimo */
+.score-bar-threshold {
+    position: absolute;
+    top: -4px;
+    bottom: -4px;
+    width: 2px;
+    background: #f59e0b;
+    z-index: 2;
+}
+
+.threshold-label {
+    position: absolute;
+    top: -1.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: .65rem;
+    font-weight: 600;
+    color: #d97706;
+    white-space: nowrap;
 }

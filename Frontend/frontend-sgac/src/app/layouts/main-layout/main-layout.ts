@@ -15,10 +15,14 @@ import { filter } from 'rxjs/operators';
 export class MainLayoutComponent implements OnInit {
   private router = inject(Router);
   private auth = inject(AuthService);
+  authService = inject(AuthService);
 
   breadcrumbs = signal<string[]>(['Inicio']);
 
   ngOnInit() {
+
+    console.log(this.authService.getUser()?.rolActual);
+
     this.buildBreadcrumbs(this.router.url);
 
     this.router.events

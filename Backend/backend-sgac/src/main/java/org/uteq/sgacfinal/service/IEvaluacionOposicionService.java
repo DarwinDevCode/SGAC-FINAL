@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.service;
 
+import org.uteq.sgacfinal.dto.Request.AsignarComisionRequestDTO;
 import org.uteq.sgacfinal.dto.Request.EvaluacionOposicionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.EvaluacionOposicionResponseDTO;
 import java.util.List;
@@ -15,4 +16,6 @@ public interface IEvaluacionOposicionService {
     EvaluacionOposicionResponseDTO buscarPorPostulacion(Integer idPostulacion);
 
     List<EvaluacionOposicionResponseDTO> listarTodas();
+
+    EvaluacionOposicionResponseDTO asignarComisionAPostulacion(AsignarComisionRequestDTO request);
 }

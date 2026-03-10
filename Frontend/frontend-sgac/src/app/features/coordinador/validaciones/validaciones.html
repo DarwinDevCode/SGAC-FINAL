@@ -27,6 +27,39 @@
     </div>
     } @else {
 
+    <!-- Tabs -->
+    <div class="tabs-container"
+        style="display:flex;gap:0;border-bottom:2px solid hsl(var(--border));margin-bottom:1.5rem">
+        <button (click)="cambiarTab('pendientes')"
+            style="padding:.6rem 1.4rem;font-size:.875rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s"
+            [style.border-bottom-color]="tabActivo === 'pendientes' ? 'hsl(var(--primary))' : 'transparent'"
+            [style.color]="tabActivo === 'pendientes' ? 'hsl(var(--primary))' : '#64748b'">
+            <span style="display:inline-flex;align-items:center;gap:.4rem">
+                <lucide-icon name="clock" size="14"></lucide-icon>
+                Pendientes de Revisión
+                @if (postulantes.length > 0) {
+                <span style="background:#ef4444;color:white;border-radius:999px;padding:.1rem .45rem;font-size:.7rem">{{
+                    postulantes.length }}</span>
+                }
+            </span>
+        </button>
+        <button (click)="cambiarTab('en-evaluacion')"
+            style="padding:.6rem 1.4rem;font-size:.875rem;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s"
+            [style.border-bottom-color]="tabActivo === 'en-evaluacion' ? 'hsl(var(--primary))' : 'transparent'"
+            [style.color]="tabActivo === 'en-evaluacion' ? 'hsl(var(--primary))' : '#64748b'">
+            <span style="display:inline-flex;align-items:center;gap:.4rem">
+                <lucide-icon name="Users" size="14"></lucide-icon>
+                Aprobados — En Evaluación
+                @if (enEvaluacion.length > 0) {
+                <span style="background:#16a34a;color:white;border-radius:999px;padding:.1rem .45rem;font-size:.7rem">{{
+                    enEvaluacion.length }}</span>
+                }
+            </span>
+        </button>
+    </div>
+
+    <!-- TAB: PENDIENTES -->
+    @if (tabActivo === 'pendientes') {
     <div class="table-card">
         @if (postulantes.length === 0) {
         <div class="info-message">
@@ -70,6 +103,68 @@
         }
     </div>
     }
+
+    <!-- TAB: EN EVALUACION -->
+    @if (tabActivo === 'en-evaluacion') {
+    <div class="table-card">
+        @if (loadingEval) {
+        <div class="info-message">
+            <lucide-icon name="loader-2" class="animate-spin" size="24"></lucide-icon>
+            <p style="margin-top:.5rem;font-size:.9rem">Cargando...</p>
+        </div>
+        } @else if (enEvaluacion.length === 0) {
+        <div class="info-message">
+            <lucide-icon name="Users" size="40" style="color:hsl(var(--primary));opacity:.5"></lucide-icon>
+            <p style="margin-top:.75rem">No hay postulantes aprobados para evaluación.</p>
+            <p style="font-size:.8rem;color:#94a3b8">Revisa y aprueba postulantes desde la pestaña "Pendientes".</p>
+        </div>
+        } @else {
+        <div class="alert-banner"
+            style="margin:1rem 1rem 0 1rem;border-radius:var(--radius);background:#f0fdf4;border-color:#86efac;color:#15803d">
+            <lucide-icon name="Users" size="16"></lucide-icon>
+            {{ enEvaluacion.length }} postulante(s) aprobado(s) — pendientes de asignación de comisión
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Estudiante</th>
+                    <th>Matrícula</th>
+                    <th>Convocatoria / Asignatura</th>
+                    <th>Fecha Postulación</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (p of enEvaluacion; track p.idPostulacion) {
+                <tr>
+                    <td><span class="full-name">{{ p.nombreCompletoEstudiante }}</span></td>
+                    <td style="font-family:monospace;font-size:.85rem">{{ p.matriculaEstudiante }}</td>
+                    <td>{{ p.asignaturaConvocatoria }}</td>
+                    <td>{{ p.fechaPostulacion | date:'dd/MM/yyyy' }}</td>
+                    <td>
+                        @if (p.comisionAsignada) {
+                        <span
+                            style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .85rem;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:var(--radius);font-size:.82rem;font-weight:600;">
+                            <lucide-icon name="check" size="13"></lucide-icon>
+                            Comisión Asignada
+                        </span>
+                        } @else {
+                        <button (click)="abrirModalAsignacion(p)"
+                            style="background:#16a34a;color:white;border:none;border-radius:var(--radius);padding:.3rem .85rem;font-size:.82rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.35rem">
+                            <lucide-icon name="Users" size="13"></lucide-icon>
+                            Asignar Comisión
+                        </button>
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+        }
+    </div>
+    }
+
+    }
 </div>
 
 <!-- Modal de decisión — el backdrop centra el modal-box dentro de sí mismo -->
@@ -92,29 +187,72 @@
 
             <!-- Documentos adjuntos -->
             <div style="margin-bottom:1.25rem">
-                <p style="font-size:.8rem;font-weight:600;color:#475569;margin-bottom:.6rem">
-                    Documentos adjuntos
+                <p
+                    style="font-size:.8rem;font-weight:600;color:#475569;margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem">
+                    <lucide-icon name="paperclip" size="14"></lucide-icon> Documentos adjuntos
                 </p>
                 @if (loadingDocs) {
                 <p style="font-size:.8rem;color:#94a3b8">Cargando documentos...</p>
                 } @else if (documentos.length === 0) {
-                <p style="font-size:.8rem;color:#94a3b8">Sin documentos adjuntos.</p>
+                <p style="font-size:.8rem;color:#94a3b8;font-style:italic">Sin documentos adjuntos.</p>
                 } @else {
                 <div style="display:flex;flex-direction:column;gap:.5rem">
                     @for (doc of documentos; track doc.idRequisitoAdjunto) {
-                    <a [href]="getUrlDescarga(doc.idRequisitoAdjunto)" target="_blank" style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem;
-                               border:1px solid hsl(var(--border));border-radius:var(--radius);
-                               text-decoration:none;color:hsl(var(--foreground));font-size:.85rem;
-                               background:hsl(var(--card));transition:background .12s;"
-                        onmouseover="this.style.background='hsl(var(--secondary))'"
-                        onmouseout="this.style.background='hsl(var(--card))'">
-                        <lucide-icon name="file-text" size="16"
-                            style="color:hsl(var(--primary));flex-shrink:0"></lucide-icon>
-                        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                            {{ doc.nombreArchivo || 'Documento' }}
-                        </span>
-                        <lucide-icon name="external-link" size="14" style="color:#94a3b8;flex-shrink:0"></lucide-icon>
-                    </a>
+                    <div
+                        style="border:1px solid hsl(var(--border));border-radius:var(--radius);overflow:hidden;background:hsl(var(--card))">
+                        <!-- Fila principal: nombre + estado + descargar -->
+                        <div style="display:flex;align-items:center;gap:.6rem;padding:.5rem .75rem">
+                            <lucide-icon name="file-text" size="16"
+                                style="color:hsl(var(--primary));flex-shrink:0"></lucide-icon>
+                            <span
+                                style="flex:1;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{
+                                doc.nombreRequisito || 'Requisito' }}</span>
+                            <!-- Badge de estado -->
+                            <span
+                                style="padding:.1rem .45rem;border-radius:999px;font-size:.65rem;font-weight:700;text-transform:uppercase;flex-shrink:0"
+                                [ngStyle]="{
+                                  'background': doc.nombreEstado === 'APROBADO' ? '#dcfce7' : doc.nombreEstado === 'OBSERVADO' ? '#fef3c7' : '#f1f5f9',
+                                  'color': doc.nombreEstado === 'APROBADO' ? '#15803d' : doc.nombreEstado === 'OBSERVADO' ? '#92400e' : '#64748b'
+                                }">
+                                {{ doc.nombreEstado }}
+                            </span>
+                            <a href="#" (click)="verDocumento($event, doc.idRequisitoAdjunto)"
+                                style="display:inline-flex;align-items:center;gap:.25rem;font-size:.72rem;color:#2563eb;flex-shrink:0;text-decoration:none">
+                                <lucide-icon name="eye" size="12"></lucide-icon> Ver
+                            </a>
+                        </div>
+                        <!-- Observación existente -->
+                        @if (doc.observacion) {
+                        <div style="padding:.3rem .75rem .4rem;border-top:1px dashed hsl(var(--border));">
+                            <p style="font-size:.72rem;color:#ef4444;margin:0">💬 {{ doc.observacion }}</p>
+                        </div>
+                        }
+                        <!-- Acción: Observar este documento -->
+                        @if (docObservandoId === doc.idRequisitoAdjunto) {
+                        <div style="padding:.5rem .75rem;border-top:1px solid hsl(var(--border));background:#fffbeb">
+                            <textarea [(ngModel)]="docObservacion" rows="2"
+                                style="width:100%;font-size:.8rem;border:1px solid #fcd34d;border-radius:.3rem;padding:.3rem .5rem;resize:none"
+                                placeholder="Escribe la observación para este documento..."></textarea>
+                            <div style="display:flex;gap:.5rem;margin-top:.35rem;justify-content:flex-end">
+                                <button
+                                    style="font-size:.72rem;padding:.2rem .6rem;background:white;border:1px solid #cbd5e1;border-radius:.3rem;cursor:pointer"
+                                    (click)="docObservandoId = null">Cancelar</button>
+                                <button
+                                    style="font-size:.72rem;padding:.2rem .6rem;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;border-radius:.3rem;cursor:pointer;font-weight:600"
+                                    (click)="observarDocumento(doc)">
+                                    {{ guardandoObs ? 'Guardando...' : 'Guardar obs.' }}
+                                </button>
+                            </div>
+                        </div>
+                        } @else {
+                        <div style="padding:.25rem .75rem .35rem;border-top:1px dashed hsl(var(--border))">
+                            <button (click)="docObservandoId = doc.idRequisitoAdjunto; docObservacion = ''"
+                                style="font-size:.7rem;color:#92400e;background:#fef3c7;border:1px solid #fcd34d;border-radius:.3rem;padding:.15rem .5rem;cursor:pointer;display:inline-flex;align-items:center;gap:.25rem">
+                                <lucide-icon name="message-square" size="11"></lucide-icon> Observar doc
+                            </button>
+                        </div>
+                        }
+                    </div>
                     }
                 </div>
                 }
@@ -150,6 +288,99 @@
                     <lucide-icon name="check" size="14"></lucide-icon>
                     }
                     Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Asignar Comisión -->
+@if (mostrarModalAsignacion && postulacionParaAsignar) {
+<div class="modal-backdrop" (click)="cerrarModalAsignacion()">
+    <div class="modal-box" style="max-width:520px" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 style="font-size:1rem;font-weight:700;margin:0;display:flex;align-items:center;gap:.5rem">
+                <lucide-icon name="Users" size="18"></lucide-icon>
+                Asignar Comisión de Evaluación
+            </h3>
+            <button class="btn-icon" (click)="cerrarModalAsignacion()">
+                <lucide-icon name="x" size="18"></lucide-icon>
+            </button>
+        </div>
+        <div style="padding:1.5rem">
+            <p style="font-size:.85rem;color:#64748b;margin-bottom:1.25rem">
+                Asignando comisión para: <strong>{{ postulacionParaAsignar.nombreCompletoEstudiante }}</strong>
+                — <em>{{ postulacionParaAsignar.asignaturaConvocatoria }}</em>
+            </p>
+
+            <!-- Selector de comisión -->
+            <div class="form-group" style="margin-bottom:1rem">
+                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Comisión
+                    <span style="color:red">*</span></label>
+                @if (loadingComisiones) {
+                <p style="font-size:.8rem;color:#94a3b8">Cargando comisiones...</p>
+                } @else if (comisionesDisponibles.length === 0) {
+                <p style="font-size:.8rem;color:#ef4444">No hay comisiones activas para esta convocatoria. El Decano
+                    debe crear una primero.</p>
+                } @else {
+                <select class="input-field" [(ngModel)]="asignacionForm.idComisionSeleccion">
+                    <option [ngValue]="null" disabled>— Seleccionar comisión —</option>
+                    @for (c of comisionesDisponibles; track c.idComisionSeleccion) {
+                    <option [ngValue]="c.idComisionSeleccion">{{ c.nombreComision }}</option>
+                    }
+                </select>
+                }
+            </div>
+
+            <!-- Tema de la exposición -->
+            <div class="form-group" style="margin-bottom:1rem">
+                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Tema de
+                    la Exposición <span style="color:red">*</span></label>
+                <input type="text" class="input-field" [(ngModel)]="asignacionForm.temaExposicion"
+                    placeholder="Ej. Estructuras de Datos y Algoritmia" />
+            </div>
+
+            <!-- Fecha y horario -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1rem">
+                <div class="form-group" style="margin:0">
+                    <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">
+                        <lucide-icon name="Calendar" size="12"></lucide-icon> Fecha *
+                    </label>
+                    <input type="date" class="input-field" [(ngModel)]="asignacionForm.fechaEvaluacion" />
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Hora
+                        inicio</label>
+                    <input type="time" class="input-field" [(ngModel)]="asignacionForm.horaInicio" />
+                </div>
+                <div class="form-group" style="margin:0">
+                    <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Hora
+                        fin</label>
+                    <input type="time" class="input-field" [(ngModel)]="asignacionForm.horaFin" />
+                </div>
+            </div>
+
+            <!-- Lugar -->
+            <div class="form-group" style="margin-bottom:1.5rem">
+                <label style="display:block;font-size:.8rem;font-weight:600;margin-bottom:.4rem;color:#475569">Lugar
+                    <span style="color:red">*</span></label>
+                <input type="text" class="input-field" [(ngModel)]="asignacionForm.lugar"
+                    placeholder="Ej. Aula A-201, Bloque Académico" />
+            </div>
+
+            <div style="display:flex;gap:.75rem;justify-content:flex-end">
+                <button class="btn-secondary" (click)="cerrarModalAsignacion()">Cancelar</button>
+                <button class="btn-primary" (click)="confirmarAsignacion()"
+                    [disabled]="asignando || comisionesDisponibles.length === 0"
+                    style="display:inline-flex;align-items:center;gap:.5rem">
+                    @if (asignando) {
+                    <lucide-icon name="loader-2" class="animate-spin" size="14"></lucide-icon>
+                    Asignando...
+                    } @else {
+                    <lucide-icon name="Users" size="14"></lucide-icon>
+                    Asignar Comisión
+                    }
                 </button>
             </div>
         </div>

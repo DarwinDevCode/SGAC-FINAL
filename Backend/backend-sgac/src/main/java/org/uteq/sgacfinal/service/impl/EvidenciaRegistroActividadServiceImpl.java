@@ -80,7 +80,7 @@ public class EvidenciaRegistroActividadServiceImpl implements IEvidenciaRegistro
                 .idEvidenciaRegistroActividad(entidad.getIdEvidenciaRegistroActividad())
                 .idRegistroActividad(entidad.getRegistroActividad().getIdRegistroActividad())
                 .descripcionActividad(entidad.getRegistroActividad().getDescripcionActividad()) // Dato útil del padre
-                .tipoEvidencia(entidad.getTipoEvidencia())
+                .tipoEvidencia(entidad.getIdTipoEvidencia().getExtensionPermitida())
                 .nombreArchivo(entidad.getNombreArchivo())
                 .fechaSubida(entidad.getFechaSubida())
                 .activo(entidad.getActivo())

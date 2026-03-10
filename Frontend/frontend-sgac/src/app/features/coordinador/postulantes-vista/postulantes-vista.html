@@ -91,6 +91,7 @@
                         <th style="font-weight:600; color:#475569">Matrícula</th>
                         <th style="font-weight:600; color:#475569">Fecha</th>
                         <th style="font-weight:600; color:#475569">Estado</th>
+                        <th style="font-weight:600; color:#475569">Documentos</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,7 +109,49 @@
                 'yellow': p.estadoPostulacion === 'PENDIENTE' || p.estadoPostulacion === 'EVALUACION'
               }">{{ p.estadoPostulacion }}</span>
                         </td>
+                        <td>
+                            <button type="button" class="pv-btn-docs" (click)="toggleDocumentos(p.idPostulacion)">
+                                <lucide-icon name="file-text" size="14"></lucide-icon>
+                                {{ expandidoPostulacion[p.idPostulacion] ? 'Ocultar' : 'Ver Docs' }}
+                            </button>
+                        </td>
                     </tr>
+                    <!-- Panel expansible de documentos -->
+                    @if (expandidoPostulacion[p.idPostulacion]) {
+                    <tr class="pv-docs-row">
+                        <td colspan="6">
+                            @if (!documentosPorPostulacion[p.idPostulacion]) {
+                            <p style="color:#94a3b8;font-size:.8rem;padding:.5rem">Cargando documentos...</p>
+                            } @else if (documentosPorPostulacion[p.idPostulacion].length === 0) {
+                            <p style="color:#94a3b8;font-size:.8rem;padding:.5rem">Sin documentos adjuntos.</p>
+                            } @else {
+                            <div class="pv-doc-grid">
+                                @for (doc of documentosPorPostulacion[p.idPostulacion]; track doc.idRequisitoAdjunto) {
+                                <div class="pv-doc-card">
+                                    <div class="pv-doc-header">
+                                        <span style="font-weight:600;font-size:.8rem">{{ doc.nombreRequisito }}</span>
+                                        <span class="pv-doc-estado" [ngClass]="{
+                                          'obs': doc.nombreEstado === 'OBSERVADO',
+                                          'ok': doc.nombreEstado === 'APROBADO',
+                                          'pend': doc.nombreEstado === 'PENDIENTE'
+                                        }">{{ doc.nombreEstado }}</span>
+                                    </div>
+                                    <p style="font-size:.75rem;color:#64748b;margin:.2rem 0">{{ doc.nombreArchivo }}</p>
+                                    @if (doc.observacion) {
+                                    <p style="font-size:.75rem;color:#ef4444;margin:.15rem 0">💬 {{ doc.observacion }}
+                                    </p>
+                                    }
+                                    <button type="button" class="pv-btn-ver"
+                                        (click)="verDocumento(doc.idRequisitoAdjunto)">
+                                        <lucide-icon name="eye" size="12"></lucide-icon> Ver
+                                    </button>
+                                </div>
+                                }
+                            </div>
+                            }
+                        </td>
+                    </tr>
+                    }
                     }
                 </tbody>
             </table>

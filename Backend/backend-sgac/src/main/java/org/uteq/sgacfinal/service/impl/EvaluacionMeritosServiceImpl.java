@@ -23,8 +23,7 @@ public class EvaluacionMeritosServiceImpl implements IEvaluacionMeritosService {
                 request.getNotaAsignatura(),
                 request.getNotaSemestres(),
                 request.getNotaEventos(),
-                request.getNotaExperiencia(),
-                request.getFechaEvaluacion()
+                request.getNotaExperiencia()
         );
 
         if (idGenerado == -1) {
@@ -52,6 +51,14 @@ public class EvaluacionMeritosServiceImpl implements IEvaluacionMeritosService {
     }
 
     @Override
+    public void eliminar(Integer id) {
+        Integer res = evaluacionMeritosRepository.eliminarEvaluacionMeritos(id);
+        if (res == -1 || res == 0) {
+            throw new RuntimeException("Error al eliminar la evaluación de méritos o no existe.");
+        }
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public EvaluacionMeritosResponseDTO buscarPorId(Integer id) {
         EvaluacionMeritos evaluacion = evaluacionMeritosRepository.findById(id)
@@ -62,7 +69,7 @@ public class EvaluacionMeritosServiceImpl implements IEvaluacionMeritosService {
     @Override
     @Transactional(readOnly = true)
     public EvaluacionMeritosResponseDTO buscarPorPostulacion(Integer idPostulacion) {
-        EvaluacionMeritos evaluacion = evaluacionMeritosRepository.obtenerPorPostulacionSP(idPostulacion)
+        EvaluacionMeritos evaluacion = evaluacionMeritosRepository.findFirstByPostulacion_IdPostulacionOrderByIdEvaluacionMeritosDesc(idPostulacion)
                 .orElseThrow(() -> new RuntimeException("No existe evaluación de méritos para la postulación ID: " + idPostulacion));
         return mapearADTO(evaluacion);
     }
@@ -75,7 +82,6 @@ public class EvaluacionMeritosServiceImpl implements IEvaluacionMeritosService {
                 .notaSemestres(entidad.getNotaSemestres())
                 .notaEventos(entidad.getNotaEventos())
                 .notaExperiencia(entidad.getNotaExperiencia())
-                .fechaEvaluacion(entidad.getFechaEvaluacion())
                 .build();
     }
 }

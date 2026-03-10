@@ -29,6 +29,9 @@ public class TipoRequisitoPostulacion {
     @Column(name = "activo")
     private Boolean activo;
 
+    @Column(name = "tipo_documento_permitido", length = 100)
+    private String tipoDocumentoPermitido;
+
     @OneToMany(mappedBy = "tipoRequisitoPostulacion", cascade = CascadeType.ALL)
     private List<PeriodoAcademicoRequisitoPostulacion> configuracionesPeriodo = new ArrayList<>();
 

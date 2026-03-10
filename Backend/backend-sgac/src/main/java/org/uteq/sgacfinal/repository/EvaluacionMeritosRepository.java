@@ -13,21 +13,25 @@ import java.util.Optional;
 @Repository
 public interface EvaluacionMeritosRepository extends JpaRepository<EvaluacionMeritos, Integer> {
 
-    @Query(value = "SELECT public.sp_crear_evaluacion_meritos(:idPostulacion, :notaAsig, :notaSem, :notaEventos, :notaExp, :fecha)", nativeQuery = true)
+    @Query(value = "SELECT CAST(public.sp_crear_evaluacion_meritos(:idPostulacion, :notaAsig, :notaSem, :notaEventos, :notaExp) AS INTEGER)", nativeQuery = true)
     Integer registrarEvaluacionMeritos(@Param("idPostulacion") Integer idPostulacion,
                                        @Param("notaAsig") BigDecimal notaAsignatura,
                                        @Param("notaSem") BigDecimal notaSemestres,
                                        @Param("notaEventos") BigDecimal notaEventos,
-                                       @Param("notaExp") BigDecimal notaExperiencia,
-                                       @Param("fecha") LocalDate fechaEvaluacion);
+                                       @Param("notaExp") BigDecimal notaExperiencia);
 
-    @Query(value = "SELECT public.sp_actualizar_evaluacion_meritos(:id, :notaAsig, :notaSem, :notaEventos, :notaExp)", nativeQuery = true)
+    @Query(value = "SELECT CAST(public.sp_actualizar_evaluacion_meritos(:id, :notaAsig, :notaSem, :notaEventos, :notaExp) AS INTEGER)", nativeQuery = true)
     Integer actualizarEvaluacionMeritos(@Param("id") Integer idEvaluacion,
                                         @Param("notaAsig") BigDecimal notaAsignatura,
                                         @Param("notaSem") BigDecimal notaSemestres,
                                         @Param("notaEventos") BigDecimal notaEventos,
                                         @Param("notaExp") BigDecimal notaExperiencia);
 
+    @Query(value = "SELECT public.sp_eliminar_evaluacion_meritos(:id)", nativeQuery = true)
+    Integer eliminarEvaluacionMeritos(@Param("id") Integer idEvaluacion);
+
     @Query(value = "SELECT * FROM public.sp_obtener_evaluacion_meritos(:idPostulacion)", nativeQuery = true)
     Optional<EvaluacionMeritos> obtenerPorPostulacionSP(@Param("idPostulacion") Integer idPostulacion);
+
+    Optional<EvaluacionMeritos> findFirstByPostulacion_IdPostulacionOrderByIdEvaluacionMeritosDesc(Integer idPostulacion);
 }

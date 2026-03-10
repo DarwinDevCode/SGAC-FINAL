@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SGAC-FINAL.iml" filepath="$PROJECT_DIR$/.idea/SGAC-FINAL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Backend/backend-sgac/sgac-final.iml" filepath="$PROJECT_DIR$/Backend/backend-sgac/sgac-final.iml" />
     </modules>
   </component>
 </project>
