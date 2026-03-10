@@ -31,6 +31,8 @@ export interface DetallePostulacionCoordinador {
   documentos: DocumentoEvaluacion[];
   resumen_documentos: ResumenDocumentosEvaluacion;
   puede_aprobar: boolean;
+  /** Indica si el servicio de evaluación está activo (periodo activo y fase correcta) */
+  servicio_evaluacion_activo?: boolean;
 }
 
 export interface PostulacionInfoCoordinador {
@@ -66,9 +68,14 @@ export interface DocumentoEvaluacion {
   nombre_archivo: string;
   fecha_subida: string;
   estado_codigo: string;
+  estado_nombre?: string;
   id_tipo_estado_requisito: number;
   observacion?: string;
   tiene_archivo: boolean;
+  // Campos para gestión de ventana de 24 horas
+  fecha_observacion?: string;
+  fecha_limite_subsanacion?: string;
+  plazo_expirado?: boolean;
 }
 
 export interface ResumenDocumentosEvaluacion {
@@ -77,6 +84,7 @@ export interface ResumenDocumentosEvaluacion {
   aprobados: number;
   observados: number;
   rechazados: number;
+  corregidos?: number;
 }
 
 // Request para evaluar documento
@@ -96,6 +104,8 @@ export interface EvaluacionDocumentoResponse {
   tiene_observados?: boolean;
   todos_validados?: boolean;
   puede_aprobar_postulacion?: boolean;
+  // Campo para mostrar fecha límite cuando se observa
+  fecha_limite_subsanacion?: string;
 }
 
 // Request para dictaminar postulación

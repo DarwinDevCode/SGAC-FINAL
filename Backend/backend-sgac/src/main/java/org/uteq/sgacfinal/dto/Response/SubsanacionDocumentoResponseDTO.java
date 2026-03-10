@@ -50,6 +50,18 @@ public class SubsanacionDocumentoResponseDTO {
     private Boolean notificacionEnviada;
 
     /**
+     * Fecha y hora en que se observó el documento (para cálculo de ventana 24h)
+     */
+    @JsonProperty("fecha_observacion")
+    private String fechaObservacion;
+
+    /**
+     * Fecha y hora límite para subsanar el documento
+     */
+    @JsonProperty("fecha_limite")
+    private String fechaLimite;
+
+    /**
      * Método de fábrica para crear respuesta de error
      */
     public static SubsanacionDocumentoResponseDTO error(String codigo, String mensaje) {

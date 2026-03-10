@@ -1,17 +1,17 @@
 package org.uteq.sgacfinal.dto.Response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConvocatoriaPostulacionDTO {
 
     @JsonProperty("id_convocatoria")
@@ -32,12 +32,6 @@ public class ConvocatoriaPostulacionDTO {
     @JsonProperty("cupos_disponibles")
     private Integer cuposDisponibles;
 
-    @JsonProperty("estado_convocatoria")
-    private String estadoConvocatoria;
-
-    @JsonProperty("fecha_publicacion")
-    private LocalDate fechaPublicacion;
-
-    @JsonProperty("fecha_cierre")
-    private LocalDate fechaCierre;
+    @JsonProperty("estado_admin")
+    private String estadoAdmin;
 }

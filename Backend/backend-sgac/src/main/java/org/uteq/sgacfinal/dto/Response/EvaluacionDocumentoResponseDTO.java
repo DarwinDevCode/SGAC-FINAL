@@ -36,5 +36,12 @@ public class EvaluacionDocumentoResponseDTO {
 
     @JsonProperty("puede_aprobar_postulacion")
     private Boolean puedeAprobarPostulacion;
+
+    /**
+     * Fecha y hora límite para que el estudiante subsane el documento (si fue OBSERVADO).
+     * Solo tiene valor cuando la acción fue OBSERVAR.
+     */
+    @JsonProperty("fecha_limite_subsanacion")
+    private String fechaLimiteSubsanacion;
 }
 

@@ -315,6 +315,14 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
     confirmarDictamen(): void {
         if (!this.idUsuario || !this.detallePostulacion || !this.accionDictamen) return;
 
+        // Validar que la postulación no esté ya finalizada
+        if (this.esPostulacionFinalizada()) {
+            this.errorMensaje = 'Esta postulación ya fue dictaminada y no se pueden realizar más acciones.';
+            this.cerrarModalDictamen();
+            setTimeout(() => this.errorMensaje = '', 5000);
+            return;
+        }
+
         if (this.accionDictamen === 'RECHAZAR' && !this.observacionDictamen.trim()) {
             this.errorMensaje = 'Debe ingresar un motivo para rechazar la postulación';
             setTimeout(() => this.errorMensaje = '', 3000);
@@ -322,6 +330,7 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
         }
 
         this.loadingDictamen = true;
+        this.errorMensaje = ''; // Limpiar errores previos
 
         const request: DictaminarPostulacionRequest = {
             id_postulacion: this.detallePostulacion.postulacion.id_postulacion,
@@ -338,17 +347,20 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
                         this.cerrarModalDictamen();
                         this.volverALista();
                     } else {
-                        this.errorMensaje = resp.mensaje;
+                        // Mostrar error pero NO cerrar el modal - el usuario puede cancelar manualmente
+                        this.errorMensaje = resp.mensaje || 'No se pudo procesar la solicitud';
+                        this.cerrarModalDictamen(); // Cerrar modal para que vea el error en la vista principal
                     }
                     setTimeout(() => {
                         this.successMensaje = '';
                         this.errorMensaje = '';
-                    }, 4000);
+                    }, 6000);
                 },
                 error: (err) => {
                     this.loadingDictamen = false;
                     this.errorMensaje = err.error?.mensaje || 'Error al dictaminar la postulación';
-                    setTimeout(() => this.errorMensaje = '', 4000);
+                    this.cerrarModalDictamen(); // Cerrar modal para mostrar error
+                    setTimeout(() => this.errorMensaje = '', 6000);
                 }
             })
         );
@@ -377,13 +389,48 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
     }
 
     puedeEvaluarDocumento(doc: DocumentoEvaluacion): boolean {
-        const estado = doc.estado_codigo?.toUpperCase() || '';
+        // Si la postulación ya está finalizada, no se pueden evaluar documentos
+        if (this.esPostulacionFinalizada()) {
+            return false;
+        }
+
+        const estado = (doc.estado_nombre || doc.estado_codigo)?.toUpperCase() || '';
+        // Solo se pueden evaluar documentos PENDIENTES o CORREGIDOS
+        // RECHAZADO y APROBADO son estados finales irreversibles
+        if (estado.includes('RECHAZADO') || estado.includes('APROBADO') || estado.includes('VALIDADO')) {
+            return false;
+        }
         return estado.includes('PENDIENTE') || estado.includes('CORREGIDO');
+    }
+
+    /**
+     * Verifica si la postulación ya fue dictaminada (APROBADA o RECHAZADA).
+     * Si es así, no se permiten más acciones.
+     */
+    esPostulacionFinalizada(): boolean {
+        if (!this.detallePostulacion) return false;
+        const estado = this.detallePostulacion.postulacion?.estado_codigo?.toUpperCase() || '';
+        return estado === 'APROBADA' || estado === 'RECHAZADA';
     }
 
     formatearFecha(fecha: string): string {
         if (!fecha) return '—';
         const date = new Date(fecha);
         return date.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    /**
+     * Formatea fecha con hora para mostrar plazos de subsanación.
+     */
+    formatearFechaHora(fecha: string): string {
+        if (!fecha) return '—';
+        const date = new Date(fecha);
+        return date.toLocaleString('es-EC', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 }

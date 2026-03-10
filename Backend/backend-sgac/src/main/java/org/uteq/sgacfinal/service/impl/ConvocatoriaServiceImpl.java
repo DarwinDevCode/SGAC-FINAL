@@ -95,8 +95,6 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
 
     private void mapDtoToEntity(ConvocatoriaRequestDTO dto, Convocatoria entity) {
         entity.setCuposDisponibles(dto.getCuposDisponibles());
-        entity.setFechaPublicacion(dto.getFechaPublicacion());
-        entity.setFechaCierre(dto.getFechaCierre());
         entity.setEstado(dto.getEstado());
         entity.setActivo(dto.getActivo());
 

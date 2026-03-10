@@ -7,10 +7,7 @@ import { PostulanteService } from '../../../core/services/postulante-service';
 import { ConvocatoriaService } from '../../../core/services/convocatoria-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { TipoRequisitoPostulacionResponseDTO } from '../../../core/dto/postulacion';
-import {
-  ConvocatoriaEstudianteDTO,
-  ConvocatoriasEstudianteWrapperDTO
-} from '../../../core/dto/convocatoria-estudiante';
+import { ConvocatoriaEstudianteDTO } from '../../../core/dto/convocatoria-estudiante';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
@@ -93,30 +90,31 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     this.esElegible = true;
 
     this.subs.add(
-      this.convocatoriaService.getMisConvocatoriasElegibles().subscribe({
-        next: (response: ConvocatoriasEstudianteWrapperDTO) => {
-          if (response.exito) {
-            this.convocatoriasList = response.convocatorias || [];
-            this.aplicarFiltro(this.busqueda);
+      this.convocatoriaService.listarConvocatoriasElegibles(this.idEstudianteBase).subscribe({
+        next: (convocatorias: ConvocatoriaEstudianteDTO[]) => {
+          this.convocatoriasList = convocatorias || [];
+          this.aplicarFiltro(this.busqueda);
 
-            if (this.convocatoriasList.length === 0) {
-              this.mensajeInfo = 'No hay convocatorias disponibles para tu carrera y nivel académico en este momento.';
-            }
-
-            // Verificar cuáles ya tiene postulación
-            this.checkPostulacionesGranulares();
-          } else {
-            // Error de negocio (no cumple requisitos)
-            this.esElegible = false;
-            this.mensajeError = response.mensaje;
-            this.convocatoriasList = [];
-            this.convocatoriasFiltradas = [];
+          if (this.convocatoriasList.length === 0) {
+            this.mensajeInfo = 'No hay convocatorias disponibles para tu carrera y nivel académico en este momento.';
           }
+
+          // Verificar cuáles ya tiene postulación
+          this.checkPostulacionesGranulares();
           this.loading = false;
         },
         error: (err: HttpErrorResponse) => {
           console.error('Error al cargar convocatorias:', err);
-          this.mensajeError = 'Error al cargar las convocatorias. Por favor, intenta de nuevo.';
+          // Verificar si es un error de negocio (no cumple requisitos)
+          const errorMsg = err.error?.message || err.error || err.message;
+          if (errorMsg && (errorMsg.includes('Requisito no cumplido') || errorMsg.includes('Acceso denegado'))) {
+            this.esElegible = false;
+            this.mensajeError = errorMsg;
+          } else {
+            this.mensajeError = 'Error al cargar las convocatorias. Por favor, intenta de nuevo.';
+          }
+          this.convocatoriasList = [];
+          this.convocatoriasFiltradas = [];
           this.loading = false;
         }
       })

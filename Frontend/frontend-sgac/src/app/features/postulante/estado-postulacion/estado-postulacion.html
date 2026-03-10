@@ -38,8 +38,8 @@
                     <h3 class="asignatura-nombre">{{ convocatoria?.nombre_asignatura }}</h3>
                     <span class="carrera-badge">{{ convocatoria?.nombre_carrera }}</span>
                 </div>
-                <span [class]="getEstadoPostulacionClase(postulacion?.estado_postulacion || '')">
-                    {{ postulacion?.estado_postulacion }}
+                <span [class]="getEstadoPostulacionClase(postulacion?.estado_nombre || '')">
+                    {{ postulacion?.estado_nombre }}
                 </span>
             </div>
 
@@ -89,16 +89,16 @@
             </h4>
 
             <div class="timeline">
-                @for (etapa of cronograma; track etapa.numero; let last = $last) {
+                @for (etapa of cronograma; track etapa.codigo; let i = $index; let last = $last) {
                 <div class="timeline-item" [class]="getEtapaClase(etapa.estado)">
                     <div class="timeline-marker">
                         <div class="marker-circle">
-                            @if (etapa.estado === 'COMPLETADA') {
+                            @if (etapa.estado === 'FINALIZADA') {
                             <lucide-icon name="check-circle" size="16"></lucide-icon>
-                            } @else if (etapa.estado === 'EN_CURSO') {
+                            } @else if (etapa.estado === 'EN CURSO') {
                             <lucide-icon name="clock" size="16"></lucide-icon>
                             } @else {
-                            <span class="marker-number">{{ etapa.numero }}</span>
+                            <span class="marker-number">{{ i + 1 }}</span>
                             }
                         </div>
                         @if (!last) {
@@ -106,12 +106,12 @@
                         }
                     </div>
                     <div class="timeline-content">
-                        <h5 class="etapa-nombre">{{ etapa.nombre }}</h5>
-                        <p class="etapa-descripcion">{{ etapa.descripcion }}</p>
+                        <h5 class="etapa-nombre">{{ etapa.fase }}</h5>
+                        <span class="etapa-codigo">{{ etapa.codigo }}</span>
                         <div class="etapa-fechas">
-                            <span><lucide-icon name="calendar" size="12"></lucide-icon> {{ formatearFecha(etapa.fecha_inicio) }}</span>
+                            <span><lucide-icon name="calendar" size="12"></lucide-icon> {{ formatearFecha(etapa.inicio) }}</span>
                             <span>→</span>
-                            <span>{{ formatearFecha(etapa.fecha_fin) }}</span>
+                            <span>{{ formatearFecha(etapa.fin) }}</span>
                         </div>
                     </div>
                 </div>
@@ -135,6 +135,9 @@
                     @if (resumenDocumentos.pendientes > 0) {
                     <span class="badge-mini pendiente">{{ resumenDocumentos.pendientes }} pendientes</span>
                     }
+                    @if (resumenDocumentos.corregidos > 0) {
+                    <span class="badge-mini corregido">{{ resumenDocumentos.corregidos }} corregidos</span>
+                    }
                     @if (resumenDocumentos.observados > 0) {
                     <span class="badge-mini observado">{{ resumenDocumentos.observados }} observados</span>
                     }
@@ -146,29 +149,48 @@
             </div>
 
             <div class="documentos-lista">
-                @for (doc of documentos; track doc.id_requisito_adjunto) {
-                <div class="documento-item" [class.editable]="doc.es_editable">
+                @for (doc of documentosDetalle; track doc.id_requisito_adjunto) {
+                <div class="documento-item" [class.editable]="doc.es_editable" [class.plazo-expirado]="doc.plazo_expirado">
                     <div class="doc-info">
                         <div class="doc-icono">
                             <lucide-icon name="file-text" size="20"></lucide-icon>
                         </div>
                         <div class="doc-detalles">
-                            <span class="doc-nombre">{{ doc.nombre_requisito }}</span>
+                            <span class="doc-nombre">{{ doc.tipo_requisito }}</span>
                             <span class="doc-archivo">{{ doc.nombre_archivo }}</span>
                             <span class="doc-fecha">Subido: {{ formatearFecha(doc.fecha_subida) }}</span>
                         </div>
                     </div>
 
                     <div class="doc-acciones">
-                        <span [class]="getEstadoDocumentoClase(doc.estado)">
-                            <lucide-icon [name]="getEstadoDocumentoIcono(doc.estado)" size="14"></lucide-icon>
-                            {{ doc.estado }}
+                        <span [class]="getEstadoDocumentoClase(doc.estado_nombre)">
+                            <lucide-icon [name]="getEstadoDocumentoIcono(doc.estado_nombre)" size="14"></lucide-icon>
+                            {{ doc.estado_nombre }}
                         </span>
 
                         <button type="button" class="btn-ver-doc" (click)="verDocumento(doc.id_requisito_adjunto)" title="Ver documento">
                             <lucide-icon name="eye" size="16"></lucide-icon>
                         </button>
                     </div>
+
+                    <!-- Temporizador de 24 horas para documentos observados -->
+                    @if (tieneTemporizadorActivo(doc)) {
+                    <div class="temporizador-24h">
+                        <lucide-icon name="timer" size="16"></lucide-icon>
+                        <span class="tiempo-restante">
+                            Tiempo restante: <strong>{{ getTiempoRestanteFormateado(doc.id_requisito_adjunto) }}</strong>
+                        </span>
+                        <span class="aviso-plazo">Tienes 24 horas desde la observación para corregir este documento.</span>
+                    </div>
+                    }
+
+                    <!-- Mensaje cuando el plazo de 24h expiró -->
+                    @if (doc.plazo_expirado) {
+                    <div class="plazo-expirado-msg">
+                        <lucide-icon name="x-circle" size="14"></lucide-icon>
+                        <span>{{ mensajePlazo24hExpirado }}</span>
+                    </div>
+                    }
 
                     <!-- Observación del coordinador -->
                     @if (doc.observacion) {
@@ -178,10 +200,10 @@
                     </div>
                     }
 
-                    <!-- Botón de reemplazo (solo si es editable y postulación no rechazada) -->
-                    @if (esDocumentoEditable(doc)) {
+                    <!-- Botón de reemplazo (solo si es editable, en periodo y plazo no expirado) -->
+                    @if (esDocumentoDetalleEditable(doc)) {
                     <div class="doc-reemplazo">
-                        <label class="btn-reemplazar">
+                        <label class="btn-reemplazar" [title]="'Subir un archivo para reemplazar el documento observado'">
                             <lucide-icon name="upload" size="14"></lucide-icon>
                             {{ subiendoRequisito[doc.id_requisito_adjunto] ? 'Subiendo...' : 'Reemplazar documento' }}
                             <input type="file" class="hidden-input"
@@ -194,6 +216,14 @@
                             {{ mensajeReemplazo[doc.id_requisito_adjunto] }}
                         </span>
                         }
+                    </div>
+                    }
+
+                    <!-- Mensaje cuando el documento está observado pero el periodo de subsanación ha expirado -->
+                    @if (doc.es_editable && !esPeriodoSubsanacion && !postulacionRechazada && !doc.plazo_expirado) {
+                    <div class="periodo-expirado-msg" [title]="'Contacte al coordinador si necesita asistencia'">
+                        <lucide-icon name="clock" size="14"></lucide-icon>
+                        <span>{{ mensajePeriodoExpirado }}</span>
                     </div>
                     }
                 </div>

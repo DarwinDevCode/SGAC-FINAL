@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.ConvocatoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Response.ConvocatoriaResponseDTO;
+import org.uteq.sgacfinal.dto.Response.estudiante.ConvocatoriaEstudianteDTO;
+import org.uteq.sgacfinal.repository.estudiante.IGestionConvocatoria;
 import org.uteq.sgacfinal.service.IConvocatoriaService;
 
 import java.util.List;
@@ -16,6 +18,7 @@ import java.util.List;
 public class ConvocatoriaController {
 
     private final IConvocatoriaService convocatoriaService;
+    private final IGestionConvocatoria gestionConvocatoria;
 
     @GetMapping("/listar-vista")
     public ResponseEntity<List<ConvocatoriaResponseDTO>> listarTodo() {
@@ -41,5 +44,10 @@ public class ConvocatoriaController {
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         convocatoriaService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/listar-por-estudiante/{idUsuario}")
+    public ResponseEntity<List<ConvocatoriaEstudianteDTO>> listarPorEstudiante(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(gestionConvocatoria.listarConvocatoriasEstudiante(idUsuario));
     }
 }

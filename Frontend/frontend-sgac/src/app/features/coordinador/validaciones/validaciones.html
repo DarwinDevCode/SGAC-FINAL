@@ -267,7 +267,7 @@
 
             <div class="documentos-lista">
                 @for (doc of detallePostulacion.documentos; track doc.id_requisito_adjunto) {
-                <div class="documento-item" [class]="getDocumentoEstadoClase(doc.estado_codigo)">
+                <div class="documento-item" [class]="getDocumentoEstadoClase(doc.estado_nombre || doc.estado_codigo)">
                     <div class="doc-info">
                         <div class="doc-icono">
                             <lucide-icon name="file-text" size="20"></lucide-icon>
@@ -280,8 +280,22 @@
                     </div>
 
                     <div class="doc-estado-badge">
-                        <span class="estado-texto">{{ doc.estado_codigo }}</span>
+                        <span class="estado-texto">{{ doc.estado_nombre || doc.estado_codigo }}</span>
                     </div>
+
+                    <!-- Información de plazo de 24h para documentos observados -->
+                    @if (doc.fecha_limite_subsanacion && !doc.plazo_expirado) {
+                    <div class="doc-plazo-info">
+                        <lucide-icon name="clock" size="14"></lucide-icon>
+                        <span>Plazo subsanación: {{ formatearFechaHora(doc.fecha_limite_subsanacion) }}</span>
+                    </div>
+                    }
+                    @if (doc.plazo_expirado) {
+                    <div class="doc-plazo-expirado">
+                        <lucide-icon name="alert-circle" size="14"></lucide-icon>
+                        <span>Plazo de 24h expirado - Documento no subsanado</span>
+                    </div>
+                    }
 
                     @if (doc.observacion) {
                     <div class="doc-observacion">
@@ -323,6 +337,7 @@
         </div>
 
         <!-- Acciones Finales -->
+        @if (!esPostulacionFinalizada()) {
         <div class="acciones-finales">
             <button class="btn-dictamen rechazar" (click)="abrirModalDictamen('RECHAZAR')">
                 <lucide-icon name="x-circle" size="18"></lucide-icon>
@@ -336,6 +351,14 @@
         </div>
         @if (!detallePostulacion.puede_aprobar) {
         <p class="aviso-aprobar">* Todos los documentos deben estar validados para aprobar la postulación</p>
+        }
+        } @else {
+        <div class="estado-finalizado">
+            <div class="estado-finalizado-badge" [class]="getEstadoClase(detallePostulacion.postulacion.estado_codigo)">
+                <lucide-icon [name]="detallePostulacion.postulacion.estado_codigo === 'APROBADA' ? 'check-circle' : 'x-circle'" size="20"></lucide-icon>
+                <span>Esta postulación ya fue {{ detallePostulacion.postulacion.estado_nombre }}. No se permiten más acciones.</span>
+            </div>
+        </div>
         }
     </div>
     }

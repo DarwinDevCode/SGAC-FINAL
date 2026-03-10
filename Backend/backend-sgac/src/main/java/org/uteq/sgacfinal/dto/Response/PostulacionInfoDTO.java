@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.dto.Response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PostulacionInfoDTO {
 
     @JsonProperty("id_postulacion")
@@ -20,8 +22,11 @@ public class PostulacionInfoDTO {
     @JsonProperty("fecha_postulacion")
     private LocalDate fechaPostulacion;
 
-    @JsonProperty("estado_postulacion")
-    private String estadoPostulacion;
+    @JsonProperty("estado_codigo")
+    private String estadoCodigo;
+
+    @JsonProperty("estado_nombre")
+    private String estadoNombre;
 
     private String observaciones;
 }

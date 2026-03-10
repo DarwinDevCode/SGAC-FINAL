@@ -53,9 +53,18 @@
             <!-- Header de la card -->
             <div class="card-header">
                 <h3 class="card-title">{{ conv.nombreAsignatura }}</h3>
-                @if (conv.cuposDisponibles === 0) {
-                <span class="badge-sin-cupo">Sin cupo</span>
-                }
+                <div class="card-badges">
+                    @if (conv.estadoConvocatoria === 'PROXIMAMENTE') {
+                    <span class="badge badge-proximamente">Próximamente</span>
+                    } @else if (conv.estadoConvocatoria === 'ABIERTA') {
+                    <span class="badge badge-abierta">Abierta</span>
+                    } @else if (conv.estadoConvocatoria === 'FINALIZADA') {
+                    <span class="badge badge-finalizada">Finalizada</span>
+                    }
+                    @if (conv.cuposDisponibles === 0) {
+                    <span class="badge badge-sin-cupo">Sin cupo</span>
+                    }
+                </div>
             </div>
 
             <!-- Contenido de la card -->
@@ -76,8 +85,8 @@
                         <span class="info-value">{{ conv.semestreAsignatura }}°</span>
                     </div>
                     <div class="info-row">
-                        <span class="info-label">Cierra:</span>
-                        <span class="info-value">{{ formatearFecha(conv.fechaCierre) }}</span>
+                        <span class="info-label">Postulación:</span>
+                        <span class="info-value">{{ formatearFecha(conv.fechaInicioPostulacion) }} - {{ formatearFecha(conv.fechaFinPostulacion) }}</span>
                     </div>
                 </div>
             </div>
@@ -89,12 +98,24 @@
                     <lucide-icon name="check-circle" size="16"></lucide-icon>
                     Ya Postulado
                 </button>
+                } @else if (!conv.puedePostular) {
+                <button type="button" class="btn-card btn-disabled" disabled
+                    [title]="conv.estadoConvocatoria === 'PROXIMAMENTE' ? 'La postulación aún no ha iniciado' : 'El periodo de postulación ha finalizado'">
+                    @if (conv.estadoConvocatoria === 'PROXIMAMENTE') {
+                    <lucide-icon name="clock" size="16"></lucide-icon>
+                    Próximamente
+                    } @else {
+                    <lucide-icon name="lock" size="16"></lucide-icon>
+                    Cerrada
+                    }
+                </button>
                 } @else if (conv.cuposDisponibles === 0) {
-                <button type="button" class="btn-card btn-disabled" disabled>
-                    Postular
+                <button type="button" class="btn-card btn-disabled" disabled title="No hay cupos disponibles">
+                    Sin Cupos
                 </button>
                 } @else {
                 <button type="button" class="btn-card btn-postular" (click)="abrirModalPostulacion(conv)">
+                    <lucide-icon name="send" size="16"></lucide-icon>
                     Postular
                 </button>
                 }

@@ -231,6 +231,9 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$ LANGUAGE plpgsql;
 
+
+
+
 -- ============================================================
 -- C. FUNCIÓN DE ACCIÓN: fn_evaluar_documento_individual
 -- Evalúa un documento individual (VALIDAR, OBSERVAR, RECHAZAR)

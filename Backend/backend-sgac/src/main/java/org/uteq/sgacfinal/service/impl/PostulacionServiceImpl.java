@@ -118,7 +118,6 @@ public class PostulacionServiceImpl implements IPostulacionService {
         Postulacion postulacion = postulacionRepository.findById(idPostulacion)
                 .orElseThrow(() -> new RuntimeException("Postulación no encontrada"));
 
-        postulacion.setEstadoPostulacion(nuevoEstado);
         postulacion.setObservaciones(observacion);
         
         try {
@@ -161,7 +160,6 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 .nombreCompletoEstudiante(nombreEstudiante)
                 .matriculaEstudiante(matricula)
                 .fechaPostulacion(entidad.getFechaPostulacion())
-                .estadoPostulacion(entidad.getEstadoPostulacion())
                 .observaciones(entidad.getObservaciones())
                 .activo(entidad.getActivo())
                 .comisionAsignada(entidad.getEvaluacionesOposicion() != null && !entidad.getEvaluacionesOposicion().isEmpty())
@@ -259,7 +257,27 @@ public class PostulacionServiceImpl implements IPostulacionService {
                         .build();
             }
 
-            return parsearRespuestaPostulacion(jsonResultado);
+            DetallePostulacionResponseDTO response = parsearRespuestaPostulacion(jsonResultado);
+
+            // Si la respuesta es exitosa y tiene convocatoria, verificar si es periodo de subsanación
+            if (response.getExito() != null && response.getExito()
+                && response.getConvocatoria() != null
+                && response.getConvocatoria().getIdConvocatoria() != null) {
+
+                try {
+                    Boolean esPeriodoSubsanacion = postulacionRepository.esPeriodoSubsanacion(
+                        response.getConvocatoria().getIdConvocatoria()
+                    );
+                    response.setEsPeriodoSubsanacion(esPeriodoSubsanacion != null ? esPeriodoSubsanacion : false);
+                } catch (Exception e) {
+                    log.warn("No se pudo verificar periodo de subsanación: {}", e.getMessage());
+                    response.setEsPeriodoSubsanacion(false);
+                }
+            } else {
+                response.setEsPeriodoSubsanacion(false);
+            }
+
+            return response;
 
         } catch (Exception e) {
             log.error("Error al obtener detalle de postulación: {}", e.getMessage());
@@ -270,6 +288,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                         .exito(false)
                         .codigo("ERROR_SISTEMA")
                         .mensaje(mensajeError)
+                        .esPeriodoSubsanacion(false)
                         .build();
             }
 
@@ -277,12 +296,22 @@ public class PostulacionServiceImpl implements IPostulacionService {
                     .exito(false)
                     .codigo("ERROR")
                     .mensaje("Error al consultar la postulación: " + mensajeError)
+                    .esPeriodoSubsanacion(false)
                     .build();
         }
     }
 
     /**
      * Parsea la respuesta JSON de la función PostgreSQL fn_ver_detalle_postulacion.
+     * La función retorna un JSONB estructurado con:
+     * - exito, mensaje, codigo (para errores)
+     * - postulacion: {id_postulacion, fecha_postulacion, estado_codigo, estado_nombre, observaciones}
+     * - convocatoria: {id_convocatoria, nombre_asignatura, semestre_asignatura, nombre_carrera, nombre_docente, cupos_disponibles}
+     * - cronograma: Array de {fase, codigo, inicio, fin, estado}
+     * - documentos: Array de documentos con plazos de 24h
+     * - resumen_documentos: {pendientes, aprobados, observados, rechazados, corregidos}
+     * - es_periodo_subsanacion: Boolean
+     * - es_postulacion_rechazada: Boolean
      */
     private DetallePostulacionResponseDTO parsearRespuestaPostulacion(String json) {
         try {
@@ -312,7 +341,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 convocatoria = objectMapper.treeToValue(convocatoriaNode, ConvocatoriaPostulacionDTO.class);
             }
 
-            // Parsear cronograma
+            // Parsear cronograma (nuevo formato: fase, codigo, inicio, fin, estado)
             List<EtapaCronogramaDTO> cronograma = Collections.emptyList();
             JsonNode cronogramaNode = root.path("cronograma");
             if (cronogramaNode.isArray()) {
@@ -322,7 +351,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 );
             }
 
-            // Parsear documentos
+            // Parsear documentos (nuevo en V47)
             List<DocumentoPostulacionDTO> documentos = Collections.emptyList();
             JsonNode documentosNode = root.path("documentos");
             if (documentosNode.isArray()) {
@@ -332,12 +361,16 @@ public class PostulacionServiceImpl implements IPostulacionService {
                 );
             }
 
-            // Parsear resumen de documentos
+            // Parsear resumen de documentos (ahora incluye 'corregidos')
             ResumenDocumentosDTO resumen = null;
             JsonNode resumenNode = root.path("resumen_documentos");
             if (!resumenNode.isMissingNode()) {
                 resumen = objectMapper.treeToValue(resumenNode, ResumenDocumentosDTO.class);
             }
+
+            // Obtener indicadores booleanos
+            Boolean esPeriodoSubsanacion = root.path("es_periodo_subsanacion").asBoolean(false);
+            Boolean esPostulacionRechazada = root.path("es_postulacion_rechazada").asBoolean(false);
 
             return DetallePostulacionResponseDTO.builder()
                     .exito(true)
@@ -346,8 +379,9 @@ public class PostulacionServiceImpl implements IPostulacionService {
                     .convocatoria(convocatoria)
                     .cronograma(cronograma)
                     .documentos(documentos)
-                    .totalDocumentos(root.path("total_documentos").asInt(0))
                     .resumenDocumentos(resumen)
+                    .esPeriodoSubsanacion(esPeriodoSubsanacion)
+                    .esPostulacionRechazada(esPostulacionRechazada)
                     .build();
 
         } catch (Exception e) {

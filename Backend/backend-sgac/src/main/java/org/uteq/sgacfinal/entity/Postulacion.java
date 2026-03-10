@@ -32,9 +32,6 @@ public class Postulacion {
     @Column(name = "fecha_postulacion")
     private LocalDate fechaPostulacion;
 
-    @Column(name = "estado_postulacion", length = 30)
-    private String estadoPostulacion;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_estado_postulacion")
     private TipoEstadoPostulacion tipoEstadoPostulacion;

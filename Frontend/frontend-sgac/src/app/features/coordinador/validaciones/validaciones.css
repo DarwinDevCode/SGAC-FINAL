@@ -962,6 +962,71 @@
     background: #16a34a;
 }
 
+/* Plazo de Subsanación 24h */
+.doc-plazo-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    color: #92400e;
+    grid-column: 1 / -1;
+}
+
+.doc-plazo-info lucide-icon {
+    color: #f59e0b;
+    flex-shrink: 0;
+}
+
+.doc-plazo-expirado {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    border: 1px solid #fecaca;
+    border-radius: 0.375rem;
+    font-size: 0.8rem;
+    color: #991b1b;
+    font-weight: 500;
+    grid-column: 1 / -1;
+}
+
+.doc-plazo-expirado lucide-icon {
+    color: #dc2626;
+    flex-shrink: 0;
+}
+
+/* Estado Finalizado de Postulación */
+.estado-finalizado {
+    margin-top: 1rem;
+}
+
+.estado-finalizado-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.estado-finalizado-badge.status-aprobada {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.estado-finalizado-badge.status-rechazada {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .section-header {

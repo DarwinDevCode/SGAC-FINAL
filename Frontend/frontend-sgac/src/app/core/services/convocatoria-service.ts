@@ -76,9 +76,27 @@ export class ConvocatoriaService {
   // ==================================================================================
 
   /**
-   * Lista las convocatorias elegibles para el estudiante autenticado.
-   * Aplica filtros de carrera, nivel de asignatura, estado y fecha.
-   * @returns Wrapper con lista de convocatorias y metadatos
+   * Lista las convocatorias elegibles para un estudiante específico.
+   * Endpoint: GET /api/convocatorias/listar-por-estudiante/{idUsuario}
+   *
+   * La función de PostgreSQL aplica los siguientes filtros:
+   * - Valida que el usuario sea un estudiante activo
+   * - Valida que esté en 6to semestre o superior
+   * - Filtra convocatorias de su carrera
+   * - Filtra asignaturas de semestres inferiores al del estudiante
+   * - Calcula el estado y si puede postular según las fechas de la fase POSTULACION
+   *
+   * @param idUsuario ID del usuario logueado
+   * @returns Lista de convocatorias elegibles con información de estado y habilitación
+   */
+  listarConvocatoriasElegibles(idUsuario: number): Observable<ConvocatoriaEstudianteDTO[]> {
+    return this.http.get<ConvocatoriaEstudianteDTO[]>(
+      `${this.apiUrl}/listar-por-estudiante/${idUsuario}`
+    );
+  }
+
+  /**
+   * @deprecated Usar listarConvocatoriasElegibles en su lugar
    */
   getMisConvocatoriasElegibles(): Observable<ConvocatoriasEstudianteWrapperDTO> {
     return this.http.get<ConvocatoriasEstudianteWrapperDTO>(

@@ -9,9 +9,10 @@ export interface ConvocatoriaEstudianteDTO {
   nombreCarrera: string;
   nombreDocente: string;
   cuposDisponibles: number;
-  fechaPublicacion: string;
-  fechaCierre: string;
-  estado: string;
+  fechaInicioPostulacion: string;  // ISO date string (YYYY-MM-DD)
+  fechaFinPostulacion: string;     // ISO date string (YYYY-MM-DD)
+  estadoConvocatoria: 'PROXIMAMENTE' | 'ABIERTA' | 'FINALIZADA' | string;
+  puedePostular: boolean;
 }
 
 /**
@@ -34,8 +35,8 @@ export interface ValidacionElegibilidadAcademicaDTO {
 }
 
 /**
- * Wrapper para la respuesta del listado de convocatorias del estudiante.
- * Incluye metadatos sobre el resultado de la consulta.
+ * @deprecated Ya no se usa un wrapper, el endpoint retorna directamente el array.
+ * Se mantiene por compatibilidad con código existente.
  */
 export interface ConvocatoriasEstudianteWrapperDTO {
   exito: boolean;

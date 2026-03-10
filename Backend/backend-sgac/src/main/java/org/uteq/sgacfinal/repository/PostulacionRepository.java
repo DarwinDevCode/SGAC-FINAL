@@ -28,15 +28,14 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
 
     List<Postulacion> findByConvocatoria_IdConvocatoria(Integer idConvocatoria);
 
-    @Query("SELECT COUNT(p) FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante AND p.activo = true AND p.estadoPostulacion NOT IN ('RECHAZADO')")
+    @Query("SELECT COUNT(p) FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante AND p.activo = true")
     long contarPostulacionesActivasPorEstudiante(@Param("idEstudiante") Integer idEstudiante);
 
     /** Verifica si el estudiante ya se postuló a UNA convocatoria específica (granular por convocatoria) */
     @Query("SELECT COUNT(p) > 0 FROM Postulacion p " +
            "WHERE p.estudiante.idEstudiante = :idEstudiante " +
            "AND p.convocatoria.idConvocatoria = :idConvocatoria " +
-           "AND p.activo = true " +
-           "AND p.estadoPostulacion NOT IN ('RECHAZADO')")
+           "AND p.activo = true ")
     boolean existePostulacionActiva(@Param("idEstudiante") Integer idEstudiante,
                                      @Param("idConvocatoria") Integer idConvocatoria);
 
@@ -44,8 +43,8 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     Postulacion findByIdPostulacion(Integer idPostulacion);
 
     // Lista postulaciones por estado filtradas por carrera de la convocatoria
-    @Query("SELECT p FROM Postulacion p WHERE p.estadoPostulacion = :estado " +
-           "AND p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
+    @Query("SELECT p FROM Postulacion p " +
+           "where p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
     List<Postulacion> findByEstadoAndCarrera(@Param("estado") String estado,
                                              @Param("idCarrera") Integer idCarrera);
 
@@ -74,4 +73,11 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
 
     @Query(value = "SELECT postulacion.fn_ver_detalle_postulacion(:idUsuario)", nativeQuery = true)
     String obtenerDetallePostulacion(@Param("idUsuario") Integer idUsuario);
+
+    /**
+     * Verifica si actualmente es periodo de subsanación para una convocatoria.
+     * Devuelve TRUE si estamos en las fases POSTULACION o EVALUACION_REQUISITOS.
+     */
+    @Query(value = "SELECT convocatoria.fn_es_periodo_subsanacion(:idConvocatoria)", nativeQuery = true)
+    Boolean esPeriodoSubsanacion(@Param("idConvocatoria") Integer idConvocatoria);
 }

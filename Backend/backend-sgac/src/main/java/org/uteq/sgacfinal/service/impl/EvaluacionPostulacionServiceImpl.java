@@ -183,10 +183,11 @@ public class EvaluacionPostulacionServiceImpl implements IEvaluacionPostulacionS
                     .codigo(getJsonString(rootNode, "codigo"))
                     .mensaje(getJsonString(rootNode, "mensaje"))
                     .idRequisitoAdjunto(getJsonInt(rootNode, "id_requisito_adjunto"))
-                    .nuevoEstado(getJsonString(rootNode, "nuevo_estado"))
+                    .nuevoEstado(getJsonString(rootNode, "nuevo_estado_documento"))
                     .tieneObservados(getJsonBoolean(rootNode, "tiene_observados"))
                     .todosValidados(getJsonBoolean(rootNode, "todos_validados"))
-                    .puedeAprobarPostulacion(getJsonBoolean(rootNode, "puede_aprobar_postulacion"))
+                    .puedeAprobarPostulacion(getJsonBoolean(rootNode, "todos_validados"))
+                    .fechaLimiteSubsanacion(getJsonString(rootNode, "fecha_limite_subsanacion"))
                     .build();
 
         } catch (Exception e) {

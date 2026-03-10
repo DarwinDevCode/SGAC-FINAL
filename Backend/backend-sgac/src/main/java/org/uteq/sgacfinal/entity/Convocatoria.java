@@ -37,12 +37,6 @@ public class Convocatoria {
     @Column(name = "cupos_disponibles", nullable = false)
     private Integer cuposDisponibles;
 
-    @Column(name = "fecha_publicacion")
-    private LocalDate fechaPublicacion;
-
-    @Column(name = "fecha_cierre")
-    private LocalDate fechaCierre;
-
     @Column(name = "estado", length = 30)
     private String estado;
 

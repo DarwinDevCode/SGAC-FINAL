@@ -94,15 +94,39 @@
     line-height: 1.3;
 }
 
-.badge-sin-cupo {
+.card-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
     flex-shrink: 0;
-    background: #fee2e2;
-    color: #dc2626;
+}
+
+.badge {
     padding: 0.25rem 0.6rem;
     border-radius: 999px;
     font-size: 0.7rem;
     font-weight: 600;
     white-space: nowrap;
+}
+
+.badge-proximamente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-abierta {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.badge-finalizada {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.badge-sin-cupo {
+    background: #fee2e2;
+    color: #dc2626;
 }
 
 /* Card Body */

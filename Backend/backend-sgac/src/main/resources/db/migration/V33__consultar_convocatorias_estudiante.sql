@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION seguridad.fn_validar_contexto_estudiante(
-    _id_usuario INTEGER,
+    p_id_usuario INTEGER,
     OUT p_id_estudiante INTEGER,
     OUT p_es_valido BOOLEAN,
     OUT p_mensaje TEXT
@@ -16,7 +16,7 @@ BEGIN
         SELECT 1
         FROM seguridad.usuario_tipo_rol utr
                  INNER JOIN seguridad.tipo_rol tr ON tr.id_tipo_rol = utr.id_tipo_rol
-        WHERE utr.id_usuario = _id_usuario
+        WHERE utr.id_usuario = p_id_usuario
           AND UPPER(tr.nombre_tipo_rol) = 'ESTUDIANTE'
           AND tr.activo = TRUE
     ) INTO v_tiene_rol;
@@ -29,7 +29,7 @@ BEGIN
     SELECT e.id_estudiante
     INTO p_id_estudiante
     FROM academico.estudiante e
-    WHERE e.id_usuario = _id_usuario;
+    WHERE e.id_usuario = p_id_usuario;
 
     IF p_id_estudiante IS NULL THEN
         p_mensaje := 'Aviso: No existe registro de estudiante para este usuario';
@@ -49,26 +49,22 @@ $$;
 -- ==================================================================================
 
 CREATE OR REPLACE FUNCTION academico.fn_verificar_elegibilidad_academica(
-    _id_estudiante INTEGER,
-    OUT p_es_elegible BOOLEAN,
-    OUT p_mensaje TEXT
-)
-    LANGUAGE plpgsql
-AS $$
+    p_id_estudiante integer,
+    OUT p_es_elegible boolean,
+    OUT p_mensaje text
+) RETURNS record LANGUAGE plpgsql AS $$
 DECLARE
     v_semestre_actual INTEGER;
-    v_semestre_minimo CONSTANT INTEGER := 6;
+    v_semestre_minimo INTEGER := 6;
 BEGIN
     p_es_elegible := FALSE;
 
-    -- Obtener semestre actual del estudiante
-    SELECT e.semestre
-    INTO v_semestre_actual
+    SELECT e.semestre INTO v_semestre_actual
     FROM academico.estudiante e
-    WHERE e.id_estudiante = _id_estudiante;
+    WHERE e.id_estudiante = p_id_estudiante;
 
     IF v_semestre_actual IS NULL THEN
-        p_mensaje := 'Aviso: No se encontró información académica del estudiante';
+        p_mensaje := 'Aviso: No se encontró información académica del estudiante o el estudiante no existe.';
         RETURN;
     END IF;
 
@@ -87,10 +83,10 @@ EXCEPTION WHEN OTHERS THEN
 END;
 $$;
 
--- ==================================================================================
+
 
 CREATE OR REPLACE FUNCTION convocatoria.fn_listar_convocatorias_estudiante(
-    _id_usuario INTEGER
+    p_id_usuario INTEGER
 )
     RETURNS TABLE(
                      id_convocatoria INTEGER,
@@ -99,68 +95,81 @@ CREATE OR REPLACE FUNCTION convocatoria.fn_listar_convocatorias_estudiante(
                      nombre_carrera VARCHAR,
                      nombre_docente VARCHAR,
                      cupos_disponibles INTEGER,
-                     fecha_publicacion DATE,
-                     fecha_cierre DATE,
-                     estado VARCHAR
+                     fecha_inicio_postulacion DATE,
+                     fecha_fin_postulacion DATE,
+                     estado_convocatoria VARCHAR,
+                     puede_postular BOOLEAN
                  )
     LANGUAGE plpgsql
+    STABLE
 AS $$
 DECLARE
     v_id_estudiante INTEGER;
-    v_es_valido BOOLEAN;
-    v_mensaje TEXT;
-    v_es_elegible BOOLEAN;
     v_id_carrera INTEGER;
     v_semestre_estudiante INTEGER;
+    v_semestre_minimo CONSTANT INTEGER := 6;
 BEGIN
-    -- Paso 1: Validación de identidad
-    SELECT * INTO v_id_estudiante, v_es_valido, v_mensaje
-    FROM seguridad.fn_validar_contexto_estudiante(_id_usuario);
+    SELECT e.id_estudiante, e.id_carrera, e.semestre
+    INTO v_id_estudiante, v_id_carrera, v_semestre_estudiante
+    FROM seguridad.fn_identidad_usuario(p_id_usuario) u
+             JOIN academico.estudiante e ON e.id_estudiante = u.id_rol_especifico
+    WHERE u.nombre_rol = 'ESTUDIANTE'
+    LIMIT 1;
 
-    IF NOT v_es_valido THEN
-        RAISE EXCEPTION '%', v_mensaje;
+    IF v_id_estudiante IS NULL THEN
+        RAISE EXCEPTION 'Acceso denegado: El usuario no es un estudiante activo.';
     END IF;
 
-    -- Paso 2: Validación académica
-    SELECT * INTO v_es_elegible, v_mensaje
-    FROM academico.fn_verificar_elegibilidad_academica(v_id_estudiante);
-
-    IF NOT v_es_elegible THEN
-        RAISE EXCEPTION '%', v_mensaje;
+    IF v_semestre_estudiante < v_semestre_minimo THEN
+        RAISE EXCEPTION 'Requisito no cumplido: Debes estar en 6to semestre o superior.';
     END IF;
 
-    -- Obtener datos del estudiante para filtros
-    SELECT e.id_carrera, e.semestre
-    INTO v_id_carrera, v_semestre_estudiante
-    FROM academico.estudiante e
-    WHERE e.id_estudiante = v_id_estudiante;
-
-    -- Paso 3: Consulta de convocatorias filtradas
     RETURN QUERY
+        WITH ventana_postulacion AS (
+            SELECT
+                pa.id_periodo_academico,
+                MAX(CASE WHEN tf.codigo = 'POSTULACION' THEN pf.fecha_inicio END) as inicio,
+                MAX(CASE WHEN tf.codigo = 'POSTULACION' THEN pf.fecha_fin END) as fin
+            FROM academico.periodo_academico pa
+                     JOIN planificacion.periodo_fase pf ON pf.id_periodo_academico = pa.id_periodo_academico
+                     JOIN planificacion.tipo_fase tf ON tf.id_tipo_fase = pf.id_tipo_fase
+            WHERE pa.activo = TRUE
+              AND pa.estado = 'EN PROCESO'
+            GROUP BY pa.id_periodo_academico
+        )
         SELECT
             c.id_convocatoria,
-            a.nombre_asignatura,
-            a.semestre AS semestre_asignatura,
-            ca.nombre_carrera,
-            CONCAT(u.nombres, ' ', u.apellidos)::VARCHAR AS nombre_docente,
+            a.nombre_asignatura::VARCHAR,
+            a.semestre::INTEGER,
+            ca.nombre_carrera::VARCHAR,
+            (u.nombres || ' ' || u.apellidos)::VARCHAR AS nombre_docente,
             c.cupos_disponibles,
-            c.fecha_publicacion,
-            c.fecha_cierre,
-            c.estado
+            vp.inicio::DATE      AS fecha_inicio_postulacion,
+            vp.fin::DATE         AS fecha_fin_postulacion,
+
+            CASE
+                WHEN CURRENT_DATE < vp.inicio THEN 'SE HABILITARÁ PROXIMAMENTE'
+                WHEN CURRENT_DATE BETWEEN vp.inicio AND vp.fin THEN 'ABIERTA'
+                ELSE 'FINALIZADA'
+                END::VARCHAR AS estado_convocatoria,
+
+            COALESCE((CURRENT_DATE BETWEEN vp.inicio AND vp.fin), FALSE)::BOOLEAN AS puede_postular
+
         FROM convocatoria.convocatoria c
-                 INNER JOIN academico.asignatura a ON a.id_asignatura = c.id_asignatura
-                 INNER JOIN academico.carrera ca ON ca.id_carrera = a.id_carrera
-                 INNER JOIN academico.docente d ON d.id_docente = c.id_docente
-                 INNER JOIN seguridad.usuario u ON u.id_usuario = d.id_usuario
+                 INNER JOIN ventana_postulacion vp       ON vp.id_periodo_academico = c.id_periodo_academico
+                 INNER JOIN academico.asignatura a       ON a.id_asignatura = c.id_asignatura
+                 INNER JOIN academico.carrera ca         ON ca.id_carrera = a.id_carrera
+                 INNER JOIN academico.docente d          ON d.id_docente = c.id_docente
+                 INNER JOIN seguridad.usuario u          ON u.id_usuario = d.id_usuario
+
         WHERE c.activo = TRUE
-          AND c.estado = 'ABIERTA'
-          AND a.id_carrera = v_id_carrera
+          AND (c.estado = 'PUBLICADA' OR c.estado = 'ABIERTA')
+          AND ca.id_carrera = v_id_carrera
           AND a.semestre < v_semestre_estudiante
-          AND c.fecha_cierre >= CURRENT_DATE
-        ORDER BY c.fecha_cierre ASC;
+
+        ORDER BY a.semestre ASC, a.nombre_asignatura ASC;
 
 EXCEPTION WHEN OTHERS THEN
-    RAISE EXCEPTION 'ERROR SISTEMA [%]: %', SQLSTATE, SQLERRM;
+    RAISE EXCEPTION 'Error al listar convocatorias: %', SQLERRM;
 END;
 $$;
-
