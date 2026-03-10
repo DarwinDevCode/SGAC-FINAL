@@ -52,7 +52,7 @@ export class OposicionComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.evaluacion = data;
 
-          this.http.get<any>(`http://localhost:8080/api/evaluaciones/resultado-postulante/${id}`).subscribe({
+          this.http.get<any>(`http://localhost:8080/api/evaluacion-seleccion/resultado-postulante/${id}`).subscribe({
             next: (res) => {
               this.resultado = res;
               this.loading = false;

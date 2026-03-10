@@ -12,6 +12,7 @@ import org.uteq.sgacfinal.entity.CalificacionOposicionIndividual;
 import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.entity.SorteoOposicion;
 import org.uteq.sgacfinal.repository.CalificacionOposicionIndividualRepository;
+import org.uteq.sgacfinal.repository.EvaluacionOposicionRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.repository.ResumenEvaluacionRepository;
 import org.uteq.sgacfinal.repository.SorteoOposicionRepository;
@@ -33,6 +34,7 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
     private final SorteoOposicionRepository sorteoRepo;
     private final PostulacionRepository postulacionRepo;
     private final INotificacionService notificacionService;
+    private final EvaluacionOposicionRepository evaluacionOposicionRepo;
 
     @Override
     public CalificacionOposicionResponseDTO guardarNota(CalificacionOposicionRequestDTO req) {
@@ -125,7 +127,9 @@ public class CalificacionOposicionServiceImpl implements ICalificacionOposicionS
 
         String temaSorteado = sorteoRepo.findByIdPostulacion(idPostulacion)
                 .map(SorteoOposicion::getTemaSorteado)
-                .orElse("Pendiente de sorteo");
+                .orElseGet(() -> evaluacionOposicionRepo.findByPostulacion_IdPostulacion(idPostulacion)
+                        .map(org.uteq.sgacfinal.entity.EvaluacionOposicion::getTemaExposicion)
+                        .orElse("Pendiente de sorteo"));
 
         return OposicionEstadoResponseDTO.builder()
                 .idPostulacion(idPostulacion)

@@ -9,9 +9,12 @@ import org.uteq.sgacfinal.entity.EvaluacionOposicion;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EvaluacionOposicionRepository extends JpaRepository<EvaluacionOposicion, Integer> {
+
+    Optional<EvaluacionOposicion> findByPostulacion_IdPostulacion(Integer idPostulacion);
 
     @Query(value = "SELECT public.sp_crear_evaluacion_oposicion(:idPostulacion, :tema, :fecha, :inicio, :fin, :lugar, :estado)", nativeQuery = true)
     Integer registrarEvaluacionOposicion(@Param("idPostulacion") Integer idPostulacion,
