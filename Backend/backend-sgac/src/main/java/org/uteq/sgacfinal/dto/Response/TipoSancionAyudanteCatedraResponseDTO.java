@@ -1,5 +1,7 @@
 package org.uteq.sgacfinal.dto.Response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
@@ -7,8 +9,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TipoSancionAyudanteCatedraResponseDTO {
-    private Integer idTipoSancionAyudanteCatedra;
+
+    @JsonProperty("id")
+    private Integer id;
+
+    @JsonProperty("nombre_tipo_sancion")
     private String nombreTipoSancion;
+
+    @JsonProperty("codigo")
+    private String codigo;
+
+    @JsonProperty("activo")
     private Boolean activo;
 }

@@ -1,6 +1,8 @@
 package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -31,4 +33,10 @@ public class TipoEstadoRequisito {
 
     @OneToMany(mappedBy = "tipoEstadoRequisito", cascade = CascadeType.ALL)
     private List<RequisitoAdjunto> requisitosAdjuntos = new ArrayList<>();
+
+    @Size(max = 25)
+    @NotNull
+    @Column(name = "codigo", nullable = false, length = 25)
+    private String codigo;
+
 }

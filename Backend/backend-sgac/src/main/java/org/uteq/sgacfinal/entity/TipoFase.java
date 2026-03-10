@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -38,5 +41,8 @@ public class TipoFase {
     @ColumnDefault("true")
     @Column(name = "activo", nullable = false)
     private Boolean activo = false;
+
+    @OneToMany(mappedBy = "idTipoFase")
+    private Set<PeriodoFase> periodoFases = new LinkedHashSet<>();
 
 }

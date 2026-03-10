@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -40,5 +42,8 @@ public class TipoEstadoPostulacion {
     @ColumnDefault("now()")
     @Column(name = "fecha_creacion")
     private Instant fechaCreacion;
+
+    @OneToMany(mappedBy = "tipoEstadoPostulacion")
+    private Set<Postulacion> postulacions = new LinkedHashSet<>();
 
 }

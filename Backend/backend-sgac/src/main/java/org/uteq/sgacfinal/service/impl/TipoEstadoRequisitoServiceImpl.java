@@ -57,7 +57,7 @@ public class TipoEstadoRequisitoServiceImpl implements ITipoEstadoRequisitoServi
 
     private TipoEstadoRequisitoResponseDTO mapearADTO(TipoEstadoRequisito entidad) {
         return TipoEstadoRequisitoResponseDTO.builder()
-                .idTipoEstadoRequisito(entidad.getIdTipoEstadoRequisito())
+                .id(entidad.getIdTipoEstadoRequisito())
                 .nombreEstado(entidad.getNombreEstado())
                 .activo(entidad.getActivo())
                 .build();

@@ -52,7 +52,7 @@ public class TipoSancionAyudanteCatedraServiceImpl implements ITipoSancionAyudan
 
     private TipoSancionAyudanteCatedraResponseDTO mapToDTO(TipoSancionAyudanteCatedra entity) {
         return TipoSancionAyudanteCatedraResponseDTO.builder()
-                .idTipoSancionAyudanteCatedra(entity.getIdTipoSancionAyudanteCatedra())
+                .id(entity.getIdTipoSancionAyudanteCatedra())
                 .nombreTipoSancion(entity.getNombreTipoSancion())
                 .activo(entity.getActivo())
                 .build();

@@ -27,4 +27,9 @@ public class TipoEstadoAyudantia {
     @Column(name = "activo")
     private Boolean activo;
 
+    @Size(max = 25)
+    @NotNull
+    @Column(name = "codigo", nullable = false, length = 25)
+    private String codigo;
+
 }

@@ -1,6 +1,7 @@
 package org.uteq.sgacfinal.dto.Request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -9,7 +10,12 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class TipoSancionAyudanteCatedraRequestDTO {
-    @NotBlank
+
+    @NotBlank(message = "El nombre del tipo de sanción es requerido")
+    @Size(max = 100, message = "El nombre no puede exceder 100 caracteres")
     private String nombreTipoSancion;
-    private Boolean activo;
+
+    @NotBlank(message = "El código es requerido")
+    @Size(max = 25, message = "El código no puede exceder 25 caracteres")
+    private String codigo;
 }
