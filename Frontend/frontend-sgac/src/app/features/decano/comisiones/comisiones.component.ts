@@ -79,6 +79,7 @@ export class ComisionesDecanoComponent implements OnInit {
     docentes: DocenteDTO[] = [];
 
     // Control de vista
+    tabActivo: 'sin-asignar' | 'asignadas' = 'sin-asignar';
     vistaDetalle = false;
     convocatoriaDetalle: ConvocatoriaDTO | null = null;
 
@@ -153,12 +154,26 @@ export class ComisionesDecanoComponent implements OnInit {
 
         this.coordinadorService.listarActivos().subscribe(res => this.coordinadores = res);
         this.docenteService.listarActivos().subscribe(res => this.docentes = res);
+    }
 
-        // Opcional: Para cargar el estado real de "Asignada" o no,
-        // esto requiere que el backend lo devuelva en la vista. Si no lo devuelve,
-        // asumiremos que dice "Vigente" hasta que entre o se agregue otro endpoint.
-        // Como solución temporal, lo evaluaremos usando una verificación rápida en la UI
-        // basada en la propiedad interna o en si decidimos pre-cargar.
+    get convocatoriasFiltradas(): ConvocatoriaDTO[] {
+        if (this.tabActivo === 'sin-asignar') {
+            return this.convocatorias.filter(c => !c._tieneComisiones);
+        } else {
+            return this.convocatorias.filter(c => c._tieneComisiones);
+        }
+    }
+
+    get contadorSinAsignar(): number {
+        return this.convocatorias.filter(c => !c._tieneComisiones).length;
+    }
+
+    get contadorAsignadas(): number {
+        return this.convocatorias.filter(c => c._tieneComisiones).length;
+    }
+
+    cambiarTab(tab: 'sin-asignar' | 'asignadas'): void {
+        this.tabActivo = tab;
     }
 
     seleccionarConvocatoria(): void {

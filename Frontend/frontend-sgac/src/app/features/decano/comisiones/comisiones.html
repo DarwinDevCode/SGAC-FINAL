@@ -8,9 +8,23 @@
             <p class="subtitle">Selecciona una convocatoria de tu facultad para gestionar sus comisiones de selección.
             </p>
         </div>
-        <button class="btn-refresh" (click)="ngOnInit()" [disabled]="loadingConvocatorias">
-            <lucide-icon name="refresh-cw" [class.spin]="loadingConvocatorias" size="16"></lucide-icon>
-            Actualizar
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <button class="tab-btn" [class.active]="tabActivo === 'sin-asignar'" (click)="cambiarTab('sin-asignar')">
+            <lucide-icon name="AlertTriangle" size="16"></lucide-icon>
+            Sin Asignar
+            @if (contadorSinAsignar > 0) {
+            <span class="badge-count-warning">{{ contadorSinAsignar }}</span>
+            }
+        </button>
+        <button class="tab-btn" [class.active]="tabActivo === 'asignadas'" (click)="cambiarTab('asignadas')">
+            <lucide-icon name="CheckCircle2" size="16"></lucide-icon>
+            Asignadas
+            @if (contadorAsignadas > 0) {
+            <span class="badge-count-success">{{ contadorAsignadas }}</span>
+            }
         </button>
     </div>
 
@@ -32,7 +46,7 @@
 
     <!-- Cards Grid -->
     <div class="cards-grid">
-        @for (c of convocatorias; track c.idConvocatoria) {
+        @for (c of convocatoriasFiltradas; track c.idConvocatoria) {
         <div class="postulacion-card">
             <div class="card-header">
                 <div class="estudiante-info">
@@ -73,7 +87,8 @@
         } @empty {
         <div class="empty-state-container">
             <lucide-icon name="FolderOpen" size="48"></lucide-icon>
-            <p>No hay convocatorias activas en tu facultad.</p>
+            <p>{{ tabActivo === 'sin-asignar' ? 'No hay convocatorias pendientes de asignación.' : 'No hay convocatorias
+                con comisión asignada aún.' }}</p>
         </div>
         }
     </div>

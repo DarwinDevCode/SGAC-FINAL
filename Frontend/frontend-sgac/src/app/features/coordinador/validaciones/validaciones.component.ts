@@ -60,7 +60,7 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
     filtroBusqueda = '';
 
     // Tabs
-    tabActivo: 'requiere-atencion' | 'todas' | 'aprobados' = 'requiere-atencion';
+    tabActivo: 'requiere-atencion' | 'todas' | 'pendientes-comision' | 'en-evaluacion' = 'requiere-atencion';
 
     // Vista detalle
     vistaDetalle = false;
@@ -134,8 +134,10 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
         // Filtro por tab
         if (this.tabActivo === 'requiere-atencion') {
             lista = lista.filter(p => p.requiere_atencion);
-        } else if (this.tabActivo === 'aprobados') {
-            lista = lista.filter(p => p.estado_codigo === 'APROBADA' || p.estado_codigo === 'EN_EVALUACION');
+        } else if (this.tabActivo === 'pendientes-comision') {
+            lista = lista.filter(p => p.estado_codigo === 'APROBADA');
+        } else if (this.tabActivo === 'en-evaluacion') {
+            lista = lista.filter(p => p.estado_codigo === 'EN_EVALUACION');
         }
 
         // Filtro por estado
@@ -164,11 +166,15 @@ export class ValidacionesComponent implements OnInit, OnDestroy {
         return this.postulaciones.filter(p => p.requiere_atencion).length;
     }
 
-    get contadorAprobados(): number {
-        return this.postulaciones.filter(p => p.estado_codigo === 'APROBADA' || p.estado_codigo === 'EN_EVALUACION').length;
+    get contadorPendientesComision(): number {
+        return this.postulaciones.filter(p => p.estado_codigo === 'APROBADA').length;
     }
 
-    cambiarTab(tab: 'requiere-atencion' | 'todas' | 'aprobados'): void {
+    get contadorEnEvaluacion(): number {
+        return this.postulaciones.filter(p => p.estado_codigo === 'EN_EVALUACION').length;
+    }
+
+    cambiarTab(tab: 'requiere-atencion' | 'todas' | 'pendientes-comision' | 'en-evaluacion'): void {
         this.tabActivo = tab;
     }
 

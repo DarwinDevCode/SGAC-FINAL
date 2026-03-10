@@ -42,11 +42,19 @@
             Todas las Postulaciones
             <span class="badge-count-secondary">{{ postulaciones.length }}</span>
         </button>
-        <button class="tab-btn" [class.active]="tabActivo === 'aprobados'" (click)="cambiarTab('aprobados')">
-            <lucide-icon name="check-circle" size="16"></lucide-icon>
-            Aprobados — En Evaluación
-            @if (contadorAprobados > 0) {
-            <span class="badge-count-success">{{ contadorAprobados }}</span>
+        <button class="tab-btn" [class.active]="tabActivo === 'pendientes-comision'"
+            (click)="cambiarTab('pendientes-comision')">
+            <lucide-icon name="user-check" size="16"></lucide-icon>
+            Sin Asignar
+            @if (contadorPendientesComision > 0) {
+            <span class="badge-count-success">{{ contadorPendientesComision }}</span>
+            }
+        </button>
+        <button class="tab-btn" [class.active]="tabActivo === 'en-evaluacion'" (click)="cambiarTab('en-evaluacion')">
+            <lucide-icon name="calendar-check" size="16"></lucide-icon>
+            Asignadas
+            @if (contadorEnEvaluacion > 0) {
+            <span class="badge-count-secondary-dark">{{ contadorEnEvaluacion }}</span>
             }
         </button>
     </div>
@@ -79,10 +87,10 @@
     } @else {
 
     <!-- Contenido Principal: Cards o Tabla -->
-    @if (tabActivo === 'aprobados') {
+    @if (tabActivo === 'pendientes-comision' || tabActivo === 'en-evaluacion') {
     <div class="aprobados-header">
-        <h3>{{ postulacionesFiltradas.length }} postulante(s) aprobados — pendientes de asignación de comisión de
-            oposición y méritos</h3>
+        <h3>{{ tabActivo === 'pendientes-comision' ? 'Postulaciones pendientes de asignación' : 'Postulaciones con
+            comisión asignada' }}</h3>
     </div>
 
     <div class="table-container">
@@ -127,7 +135,8 @@
                 } @empty {
                 <tr>
                     <td colspan="4" class="empty-row text-center">
-                        No hay postulantes aprobados pendientes de asignación.
+                        {{ tabActivo === 'pendientes-comision' ? 'No hay postulantes aprobados pendientes de
+                        asignación.' : 'No hay postulantes con comisión asignada aún.' }}
                     </td>
                 </tr>
                 }
