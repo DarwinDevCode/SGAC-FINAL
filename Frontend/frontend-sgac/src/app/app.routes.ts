@@ -48,6 +48,8 @@ import { DocenteDashboardComponent } from './features/docente/dashboard/docente-
 import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayudantes.component';
 // Docente
 import { ActividadesAyudanteComponent } from './features/docente/actividades-ayudante/actividades-ayudante';
+import { CronogramaActivoComponent} from './features/General/cronograma-activo/cronograma-activo.component';
+
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -58,6 +60,7 @@ export const routes: Routes = [
     children: [
       // Global
       { path: 'notificaciones', component: NotificacionesPageComponent },
+      { path: 'cronograma', component: CronogramaActivoComponent },
 
       // Admin
       { path: 'admin/dashboard', component: AdminDashboard },
@@ -65,7 +68,6 @@ export const routes: Routes = [
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
       { path: 'admin/rol-permiso', component: GestionPermisosComponent },
       { path: 'admin/periodos', component: GestionPeriodosComponent },
-      { path: 'admin/notifications', component: PostulanteNotificaciones },
 
       // Postulante / Estudiante (routes for ESTUDIANTE role sidebar)
       { path: 'postulante/dashboard', component: PostulanteDashboard },
@@ -74,7 +76,6 @@ export const routes: Routes = [
       { path: 'postulante/resultados', component: ResultadosComponent },
       { path: 'postulante/meritos/:id', component: MeritosComponent },
       { path: 'postulante/oposicion/:id', component: OposicionComponent },
-      { path: 'postulante/notificaciones', component: PostulanteNotificaciones },
 
       // Decano
       { path: 'decano/dashboard', component: DecanoDashboard },
@@ -82,7 +83,6 @@ export const routes: Routes = [
       { path: 'decano/postulantes/:idConvocatoria', component: DecanoPostulantes },
       { path: 'decano/comisiones', component: ComisionesDecanoComponent },
       { path: 'decano/reportes', component: DecanoAuditoria },
-      { path: 'decano/notifications', component: PostulanteNotificaciones },
 
       // Coordinador
       { path: 'coordinador/dashboard', component: CoordinadorDashboard },
@@ -91,27 +91,20 @@ export const routes: Routes = [
       { path: 'coordinador/validaciones', component: ValidacionesComponent },
       { path: 'coordinador/seguimiento', component: SeguimientoComponent },
       { path: 'coordinador/resoluciones', component: ResolucionesComponent },
-      { path: 'coordinador/evaluaciones', component: EvaluacionesComponent }, // P13 (ítem 15)
-      { path: 'coordinador/notifications', component: PostulanteNotificaciones },
+      { path: 'coordinador/evaluaciones', component: EvaluacionesComponent },
+
 
       // Ayudante
       { path: 'ayudante/dashboard', component: AyudanteDashboard },
       { path: 'ayudante/actividades', component: AyudanteActividades },
       { path: 'ayudante/informes', component: AyudanteInformes },
-      { path: 'ayudante/notifications', component: AyudanteNotificacionesComponent },
       { path: 'ayudante/sesiones', component: SesionesComponent },
 
       // Docente
       { path: 'docente/dashboard', component: DocenteDashboardComponent },
       { path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
-
-
-      // Docente
-      //{ path: 'docente/dashboard', component: DocenteDashboardComponent },
-      //{ path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
       { path: 'docente/aprobar-informes', component: MisAyudantesComponent },
       { path: 'docente/mis-ayudantes/:idAyudantia/actividades', component: ActividadesAyudanteComponent },
-      { path: 'docente/notifications', component: PostulanteNotificaciones },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]

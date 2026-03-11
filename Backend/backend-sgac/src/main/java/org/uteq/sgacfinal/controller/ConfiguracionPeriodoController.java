@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.configuracion.AjusteCronogramaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.configuracion.PeriodoAcademicoRequestDTO;
 import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.Response.configuracion.CronogramaActivoResponseDTO;
 import org.uteq.sgacfinal.dto.Response.configuracion.PeriodoFaseResponseDTO;
 import org.uteq.sgacfinal.service.configuracion.ICronogramaService;
 import org.uteq.sgacfinal.service.configuracion.IPeriodoAcademicoService;
@@ -43,5 +44,10 @@ public class ConfiguracionPeriodoController {
     public ResponseEntity<StandardResponseDTO<Integer>> iniciarPeriodo(
             @PathVariable Integer id) {
         return ResponseEntity.ok(periodoService.iniciarPeriodo(id));
+    }
+
+    @GetMapping("/actual")
+    public ResponseEntity<CronogramaActivoResponseDTO> obtenerActual() {
+        return ResponseEntity.ok(cronogramaService.obtenerCronogramaActivo());
     }
 }

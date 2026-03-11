@@ -31,4 +31,7 @@ public interface ICronogramaRepository extends JpaRepository<PeriodoFase, Intege
             "JOIN planificacion.tipo_fase tf ON tf.id_tipo_fase = pf.id_tipo_fase " +
             "WHERE pf.id_periodo_academico = :idPeriodo", nativeQuery = true)
     String listarCronogramaPorPeriodo(@Param("idPeriodo") Integer idPeriodo);
+
+    @Query(value = "SELECT planificacion.fn_obtener_cronograma_activo()", nativeQuery = true)
+    String obtenerCronogramaActivo();
 }

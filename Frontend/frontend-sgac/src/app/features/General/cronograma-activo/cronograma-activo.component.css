@@ -1,0 +1,287 @@
+/* =========================================================
+   CRONOGRAMA ACTIVO — Estilos
+   ========================================================= */
+
+@keyframes spin { from { transform:rotate(0); } to { transform:rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; display: inline-flex; }
+
+/* ── Estado: cargando ────────────────────────────────────── */
+.ca-loading {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 1rem;
+  padding: 5rem 2rem; color: #64748b; font-size: 0.9rem;
+}
+
+/* ── Estado: vacío / error ───────────────────────────────── */
+.ca-empty-state {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 0.75rem;
+  padding: 5rem 2rem; text-align: center;
+}
+.ca-empty-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: #f1f5f9; display: flex; align-items: center;
+  justify-content: center; color: #94a3b8; margin-bottom: 0.5rem;
+}
+.ca-empty-state h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0; }
+.ca-empty-state p  { color: #64748b; font-size: 0.9rem; max-width: 360px; margin: 0; }
+
+/* ── Raíz ────────────────────────────────────────────────── */
+.ca-root { display: flex; flex-direction: column; gap: 1.25rem; padding: 1rem; }
+
+/* ── Tarjeta cabecera ────────────────────────────────────── */
+.ca-header-card {
+  background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+  padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.ca-header-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;
+}
+.ca-header-left { display: flex; flex-direction: column; gap: 0.4rem; }
+.ca-badge-proceso {
+  display: inline-block; padding: .2rem .7rem; border-radius: 999px;
+  background: #dcfce7; color: #15803d;
+  font-size: .72rem; font-weight: 700; letter-spacing: .05em; width: fit-content;
+}
+.ca-titulo  { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0; }
+.ca-fechas  { display: flex; align-items: center; gap: .4rem; font-size: .83rem; color: #64748b; margin: 0; }
+.ca-arrow   { color: #94a3b8; margin: 0 2px; }
+
+/* Anillo SVG */
+.ca-progress-ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
+.ca-ring { width: 80px; height: 80px; transform: rotate(-90deg); }
+.ca-ring-bg   { fill: none; stroke: #e2e8f0; stroke-width: 5; }
+.ca-ring-fill {
+  fill: none; stroke: #15803d; stroke-width: 5; stroke-linecap: round;
+  stroke-dasharray: 163.4; transition: stroke-dashoffset .8s ease;
+}
+.ca-ring-label {
+  position: absolute; inset: 0; display: flex;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.ca-ring-pct { font-size: 1rem; font-weight: 800; color: #15803d; line-height: 1; }
+.ca-ring-sub { font-size: .58rem; color: #64748b; text-transform: uppercase; letter-spacing:.04em; }
+
+/* Barra lineal */
+.ca-progress-bar-wrap  { display: flex; flex-direction: column; gap: .4rem; }
+.ca-progress-bar       { height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
+.ca-progress-fill      { height: 100%; background: linear-gradient(90deg,#22c55e,#15803d); border-radius: 999px; transition: width .8s ease; }
+.ca-progress-labels    { display: flex; justify-content: space-between; font-size: .74rem; color: #94a3b8; }
+
+/* ── Tarjeta fase actual ─────────────────────────────────── */
+.ca-fase-actual-card {
+  background: white; border: 1px solid #e2e8f0; border-left: 4px solid #15803d;
+  border-radius: 10px; padding: 1.1rem 1.25rem;
+  display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.ca-fa-dot     { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
+.ca-fa-info    { flex: 1; min-width: 160px; }
+.ca-fa-label   { font-size:.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.25rem; }
+.ca-fa-nombre  { font-size:1rem; font-weight:700; color:#0f172a; margin-bottom:.25rem; }
+.ca-fa-desc    { font-size:.82rem; color:#64748b; line-height:1.4; }
+.ca-fa-fechas  { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
+.ca-fa-date-block { display:flex; flex-direction:column; align-items:center; }
+.ca-fa-date-label { font-size:.68rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
+.ca-fa-date-val   { font-size:.92rem; font-weight:700; color:#1e293b; }
+.ca-fa-dias       { margin-left:.5rem; }
+
+/* ── Secciones ───────────────────────────────────────────── */
+.ca-section {
+  background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+  overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05);
+}
+.ca-section-title {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .75rem 1.25rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+  font-size: .78rem; font-weight: 700; color: #475569;
+  text-transform: uppercase; letter-spacing: .05em;
+}
+
+/* =========================================================
+   GANTT UNIFICADO
+   Solo 2 columnas fijas (# y FASE). El Gantt expande al máximo.
+   ========================================================= */
+.ca-gantt-scroll { overflow-x: auto; overflow-y: visible; }
+
+.ca-unified-table {
+  width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 520px;
+}
+
+/* ── Anchos de columnas ──────────────────────────────────── */
+.cau-col-num   { width: 46px; }
+.cau-col-fase  { width: 200px; }   /* más ancho al ganar el espacio de 3 cols */
+.cau-col-gantt { width: auto; }    /* se lleva todo el espacio restante       */
+
+/* ── Celdas de cabecera ──────────────────────────────────── */
+.cau-th {
+  background: #f1f5f9;
+  font-size: .68rem; font-weight: 700; letter-spacing: .05em;
+  text-transform: uppercase; color: #64748b;
+  padding: .6rem .75rem;
+  border-bottom: 2px solid #e2e8f0;
+  position: sticky; top: 0; z-index: 10;
+  white-space: nowrap;
+}
+
+/* ── Celdas de datos ─────────────────────────────────────── */
+.cau-td {
+  padding: .55rem .75rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+  background: white;
+}
+.cau-row-actual .cau-td { background: #f0fdf4 !important; }
+
+/* ── Sticky columns ──────────────────────────────────────── */
+.cau-sticky-num  { position: sticky; left: 0;     z-index: 5; }
+.cau-sticky-fase { position: sticky; left: 46px;  z-index: 5; }
+
+/* Separador entre columnas fijas y el Gantt */
+.cau-separator {
+  box-shadow: 3px 0 6px -2px rgba(0,0,0,.10);
+}
+
+/* ── Celda de orden ──────────────────────────────────────── */
+.cau-orden-cell { display: flex; align-items: center; gap: 5px; }
+.cau-orden-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.cau-orden-num  { font-size: .78rem; font-weight: 700; color: #64748b; }
+
+/* ── Nombre de fase ──────────────────────────────────────── */
+.cau-fase-nombre-wrap { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.cau-fase-nombre      { font-size: .85rem; font-weight: 500; color: #1e293b; }
+.cau-fase-actual-label{ color: #15803d; font-weight: 700; }
+.cau-badge-actual {
+  font-size: .62rem; font-weight: 800; letter-spacing: .06em;
+  background: #dcfce7; color: #15803d;
+  border-radius: 999px; padding: .1rem .45rem; flex-shrink: 0;
+}
+
+/* ── Columna Gantt ───────────────────────────────────────── */
+.cau-gantt-th {
+  position: relative; overflow: hidden;
+  padding: 0 !important; height: 36px;
+}
+.cau-gantt-header { position: relative; width: 100%; height: 100%; }
+.cau-gantt-col-hdr {
+  position: absolute; top: 0; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-right: 1px dashed #d1d5db;
+  overflow: hidden; white-space: nowrap;
+}
+.cgh-label { font-size: .67rem; font-weight: 700; color: #475569; }
+.cgh-sub   { font-size: .58rem; color: #94a3b8; }
+
+.cau-gantt-td {
+  position: relative; height: 40px;
+  padding: 0 !important; overflow: visible;
+}
+.cau-row-actual .cau-gantt-td { background: #f0fdf4 !important; }
+
+/* Líneas verticales de cuadrícula */
+.cau-vline {
+  position: absolute; top: 0; bottom: 0;
+  width: 1px; background: #e8edf2; pointer-events: none;
+}
+
+/* ── Barra de la fase ────────────────────────────────────── */
+.cau-bar-wrap { position: absolute; top: 6px; bottom: 6px; min-width: 4px; }
+.cau-bar {
+  position: absolute; inset: 0;
+  border-radius: 5px;
+  display: flex; align-items: center;
+  padding: 0 7px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  cursor: default;
+  transition: filter .12s;
+}
+.cau-bar:hover        { filter: brightness(1.08); }
+.cau-bar-actual       { box-shadow: 0 0 0 2px white, 0 0 0 3.5px currentColor; }
+.cau-bar-text {
+  font-size: .62rem; font-weight: 700;
+  color: rgba(255,255,255,.92);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0,0,0,.18);
+}
+
+/* ── Línea "Hoy" ─────────────────────────────────────────── */
+/* La línea roja recorre todas las filas de arriba a abajo.
+   El punto y la etiqueta "Hoy" se muestran UNA SOLA VEZ
+   (en la primera fila, controlado por i===0 en la plantilla). */
+.cau-hoy-line {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px; background: #dc2626;
+  z-index: 8; pointer-events: none;
+}
+.cau-hoy-dot {
+  position: absolute; top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50%; background: #dc2626;
+}
+.cau-hoy-label {
+  position: absolute;
+  /* Encima de la cabecera: sale hacia arriba de la primera fila */
+  top: -22px;
+  left: 50%; transform: translateX(-50%);
+  background: #dc2626; color: white;
+  font-size: .62rem; font-weight: 800; letter-spacing: .05em;
+  padding: 2px 6px; border-radius: 4px; white-space: nowrap;
+  /* Sombra para que se lea sobre el fondo claro de la cabecera */
+  box-shadow: 0 1px 4px rgba(220,38,38,.35);
+}
+
+/* Badge días */
+.cau-dias-badge  { font-size: .8rem; font-weight: 700; color: #64748b; }
+.cau-dias-actual { color: #15803d; }
+
+/* =========================================================
+   TABLA DE DETALLE
+   ========================================================= */
+.ca-detail-table-wrap { overflow-x: auto; }
+.ca-detail-table {
+  width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 600px;
+}
+.ca-detail-table th {
+  background: #f8fafc;
+  font-size: .7rem; text-transform: uppercase; letter-spacing: .04em;
+  font-weight: 700; color: #64748b;
+  padding: .6rem .75rem; border-bottom: 2px solid #e2e8f0; text-align: left;
+}
+.ca-detail-table td {
+  padding: .6rem .75rem; border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle; font-size: .87rem; color: #334155;
+}
+.ca-dt-row-actual td   { background: #f0fdf4 !important; }
+.ca-dt-nombre          { font-weight: 250; color: #1e293b; }
+.ca-dt-nombre-actual   { color: #15803d; }
+.ca-dt-fecha           { font-size: .83rem; color: #475569; white-space: nowrap; }
+.ca-dt-desc            { font-size: .82rem; color: #64748b; }
+
+/* Pills de estado */
+.ca-pill-actual    { background:#dcfce7; color:#15803d; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:700; }
+.ca-pill-pasada    { background:#f1f5f9; color:#64748b; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:600; }
+.ca-pill-pendiente { background:#e0f2fe; color:#0369a1; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:600; }
+
+/* ── Pie ─────────────────────────────────────────────────── */
+.ca-footer {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .78rem; color: #94a3b8; padding: .25rem 0;
+}
+.btn-ghost-sm {
+  margin-left: auto; padding: .35rem .8rem;
+  border: 1px solid #e2e8f0; border-radius: 6px;
+  background: white; color: #64748b; font-size: .78rem;
+  cursor: pointer; display: inline-flex; align-items: center; gap: .35rem;
+  transition: all .15s;
+}
+.btn-ghost-sm:hover { background: #f8fafc; color: #1e293b; }
+
+.btn-ghost {
+  padding: .5rem 1rem; border: 1px solid #e2e8f0; border-radius: 6px;
+  background: transparent; color: #64748b; font-size: .875rem;
+  cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
+  font-weight: 500; transition: all .15s;
+}
+.btn-ghost:hover { background: #f1f5f9; color: #475569; }

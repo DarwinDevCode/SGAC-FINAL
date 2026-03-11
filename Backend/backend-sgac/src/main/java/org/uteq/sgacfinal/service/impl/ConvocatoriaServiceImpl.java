@@ -40,8 +40,6 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
         mapDtoToEntity(dto, convocatoria);
 
         Convocatoria saved = convocatoriaRepo.save(convocatoria);
-
-        // Publicar evento: notificaciones se envían AFTER_COMMIT
         eventPublisher.publishEvent(new ConvocatoriaCreadaEvent(saved));
 
         return ConvocatoriaMapper.toDTO(saved);

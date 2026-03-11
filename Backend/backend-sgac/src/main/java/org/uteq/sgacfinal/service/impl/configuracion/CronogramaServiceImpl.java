@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.configuracion.AjusteCronogramaRequestDTO;
 import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.Response.configuracion.CronogramaActivoResponseDTO;
 import org.uteq.sgacfinal.dto.Response.configuracion.PeriodoFaseResponseDTO;
 import org.uteq.sgacfinal.repository.configuracion.ICronogramaRepository;
 import org.uteq.sgacfinal.service.configuracion.ICronogramaService;
@@ -50,6 +51,21 @@ public class CronogramaServiceImpl implements ICronogramaService {
             return StandardResponseDTO.<Integer>builder()
                     .exito(false)
                     .mensaje("Error de validación: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CronogramaActivoResponseDTO obtenerCronogramaActivo() {
+        try {
+            String json = repository.obtenerCronogramaActivo();
+            return objectMapper.readValue(json, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.error("Error al obtener cronograma activo: {}", e.getMessage());
+            return CronogramaActivoResponseDTO.builder()
+                    .exito(false)
+                    .mensaje("Error técnico al obtener el cronograma: " + e.getMessage())
                     .build();
         }
     }

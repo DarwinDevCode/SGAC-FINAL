@@ -6,6 +6,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, forkJoin, catchError, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+
+
 import { CoordinadorService } from '../../../core/services/coordinador-service';
 import { PeriodoAcademicoService } from '../../../core/services/periodo-academico-service';
 import { AuthService } from '../../../core/services/auth-service';

@@ -38,10 +38,6 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
     List<Object[]> listarConvocatoriasActivasSP();
 
     List<Convocatoria> findByPeriodoAcademico_IdPeriodoAcademico(Integer idPeriodo);
-
-//    @Query(value = "SELECT * FROM public.fn_listar_convocatorias_vista()", nativeQuery = true)
-//    List<Object[]> listarConvocatoriasVista();
-
     List<Convocatoria> findByActivoTrue();
     List<Convocatoria> findByActivoFalse();
 }

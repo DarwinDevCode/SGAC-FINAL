@@ -538,10 +538,6 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     }));
   }
 
-  /**
-   * Servicios maestros: siempre HTTP 200, el fallo de negocio está en response.exito === false.
-   * Si se evaluara sólo el callback "error", nunca se vería el mensaje de restricción de la BD.
-   */
   private procesarGuardadoMaestro(peticion: any, entidad: string): void {
     this.subs.add(peticion.subscribe({
       next: (response: StandardModificacionResponse) => {

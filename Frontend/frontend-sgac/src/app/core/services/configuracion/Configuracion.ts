@@ -8,6 +8,7 @@ import {
   PeriodoFaseResponse,
   AjusteCronogramaRequest
 } from '../../models/configuracion/Configuracion';
+import {CronogramaActivoResponse, PeriodoInfo, FaseInfo} from '../../models/Cronograma';
 
 @Injectable({
   providedIn: 'root'
@@ -41,5 +42,9 @@ export class ConfiguracionService {
     return this.http.post<StandardResponse<number>>(
       `${this.baseUrl}/admin/configuracion/periodos/${idPeriodo}/iniciar`, {}
     );
+  }
+
+  obtenerCronogramaActual(): Observable<CronogramaActivoResponse> {
+    return this.http.get<CronogramaActivoResponse>(`${this.baseUrl}/admin/configuracion/actual`);
   }
 }
