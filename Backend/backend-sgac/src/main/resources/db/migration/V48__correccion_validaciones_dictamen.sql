@@ -71,7 +71,7 @@ BEGIN
                 SELECT 1 FROM postulacion.requisito_adjunto ra
                 JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
                 WHERE ra.id_postulacion = p_id_postulacion
-                  AND UPPER(ter.nombre_estado) NOT IN ('APROBADO', 'VALIDADO')
+                  AND UPPER(ter.codigo) NOT IN ('APROBADO', 'VALIDADO')
             ) INTO v_todos_validados;
 
             IF NOT v_todos_validados THEN
@@ -191,11 +191,11 @@ BEGIN
         SELECT
             ra.id_postulacion,
             COUNT(*) as total,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'PENDIENTE') as pendientes,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) IN ('APROBADO', 'VALIDADO')) as aprobados,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'OBSERVADO') as observados,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'RECHAZADO') as rechazados,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'CORREGIDO') as corregidos
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'PENDIENTE') as pendientes,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) IN ('APROBADO', 'VALIDADO')) as aprobados,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'OBSERVADO') as observados,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'RECHAZADO') as rechazados,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'CORREGIDO') as corregidos
         FROM postulacion.requisito_adjunto ra
         JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
         WHERE ra.id_postulacion = p_id_postulacion
@@ -233,8 +233,8 @@ BEGIN
                     'nombre_archivo', ra.nombre_archivo,
                     'fecha_subida', ra.fecha_subida,
                     -- CORREGIDO: Incluir ambos campos
-                    'estado_codigo', UPPER(ter.nombre_estado),
-                    'estado_nombre', ter.nombre_estado,
+                    'estado_codigo', UPPER(ter.codigo),
+                    'estado_nombre', ter.codigo,
                     'observacion', ra.observacion,
                     'tiene_archivo', (ra.archivo IS NOT NULL)
                 )

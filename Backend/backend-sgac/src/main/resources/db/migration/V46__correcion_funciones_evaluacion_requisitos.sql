@@ -48,9 +48,7 @@ BEGIN
             p.fecha_postulacion,
             tep.codigo::VARCHAR AS estado_codigo,
             tep.nombre::VARCHAR AS estado_nombre,
-            -- Requiere atención si está PENDIENTE o CORREGIDA
             (tep.codigo IN ('PENDIENTE', 'CORREGIDA'))::BOOLEAN AS requiere_atencion,
-            -- Conteo de documentos
             COALESCE((
                          SELECT COUNT(*)
                          FROM postulacion.requisito_adjunto ra
@@ -61,21 +59,21 @@ BEGIN
                          FROM postulacion.requisito_adjunto ra
                                   JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
                          WHERE ra.id_postulacion = p.id_postulacion
-                           AND UPPER(ter.nombre_estado) = 'PENDIENTE'
+                           AND UPPER(ter.codigo) = 'PENDIENTE'
                      ), 0)::BIGINT AS documentos_pendientes,
             COALESCE((
                          SELECT COUNT(*)
                          FROM postulacion.requisito_adjunto ra
                                   JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
                          WHERE ra.id_postulacion = p.id_postulacion
-                           AND UPPER(ter.nombre_estado) IN ('APROBADO', 'VALIDADO')
+                           AND UPPER(ter.codigo) IN ('APROBADO', 'VALIDADO')
                      ), 0)::BIGINT AS documentos_aprobados,
             COALESCE((
                          SELECT COUNT(*)
                          FROM postulacion.requisito_adjunto ra
                                   JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
                          WHERE ra.id_postulacion = p.id_postulacion
-                           AND UPPER(ter.nombre_estado) = 'OBSERVADO'
+                           AND UPPER(ter.codigo) = 'OBSERVADO'
                      ), 0)::BIGINT AS documentos_observados,
             p.observaciones::VARCHAR
         FROM postulacion.postulacion p
@@ -108,7 +106,6 @@ DECLARE
     v_resultado JSONB;
     v_postulacion_carrera INTEGER;
 BEGIN
-    -- 1. Validar que el usuario sea un coordinador activo
     SELECT c.id_coordinador, c.id_carrera
     INTO v_id_coordinador, v_id_carrera
     FROM academico.coordinador c
@@ -119,7 +116,6 @@ BEGIN
         RAISE EXCEPTION 'AVISO: El usuario no tiene rol de coordinador activo asignado';
     END IF;
 
-    -- 2. Validar que la postulación existe y pertenece a la carrera del coordinador
     SELECT a.id_carrera INTO v_postulacion_carrera
     FROM postulacion.postulacion p
              JOIN convocatoria.convocatoria cv ON p.id_convocatoria = cv.id_convocatoria
@@ -150,11 +146,11 @@ BEGIN
              SELECT
                  ra.id_postulacion,
                  COUNT(*) as total,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'PENDIENTE') as pendientes,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) IN ('APROBADO', 'VALIDADO')) as aprobados,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'OBSERVADO') as observados,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'RECHAZADO') as rechazados,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'CORREGIDO') as corregidos
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'PENDIENTE') as pendientes,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) IN ('APROBADO', 'VALIDADO')) as aprobados,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'OBSERVADO') as observados,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'RECHAZADO') as rechazados,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'CORREGIDO') as corregidos
              FROM postulacion.requisito_adjunto ra
                       JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
              WHERE ra.id_postulacion = p_id_postulacion
@@ -192,7 +188,7 @@ BEGIN
                                                        'tipo_requisito', trp.nombre_requisito,
                                                        'nombre_archivo', ra.nombre_archivo,
                                                        'fecha_subida', ra.fecha_subida,
-                                                       'estado_nombre', ter.nombre_estado,
+                                                       'estado_nombre', ter.codigo,
                                                        'observacion', ra.observacion,
                                                        'tiene_archivo', (ra.archivo IS NOT NULL)
                                                )
@@ -210,7 +206,6 @@ BEGIN
                            'rechazados', COALESCE(cd.rechazados, 0),
                            'corregidos', COALESCE(cd.corregidos, 0)
                                          ),
-               -- Lógica de aprobación: Solo si todos están aprobados y hay al menos uno
                    'puede_aprobar', COALESCE(cd.total > 0 AND cd.total = cd.aprobados, FALSE)
            ) INTO v_resultado
     FROM postulacion.postulacion p
@@ -281,27 +276,26 @@ BEGIN
 
     CASE UPPER(p_accion)
         WHEN 'VALIDAR' THEN
-            SELECT id_tipo_estado_requisito, nombre_estado INTO v_id_nuevo_estado, v_nombre_estado_req
+            SELECT id_tipo_estado_requisito, codigo INTO v_id_nuevo_estado, v_nombre_estado_req
             FROM convocatoria.tipo_estado_requisito
-            WHERE UPPER(nombre_estado) IN ('APROBADO', 'VALIDADO') AND activo = TRUE LIMIT 1;
+            WHERE UPPER(codigo) IN ('APROBADO', 'VALIDADO') AND activo = TRUE LIMIT 1;
 
         WHEN 'OBSERVAR' THEN
             IF p_observacion IS NULL OR TRIM(p_observacion) = '' THEN
                 RETURN jsonb_build_object('exito', FALSE, 'mensaje', 'Debe indicar una observación');
             END IF;
-            SELECT id_tipo_estado_requisito, nombre_estado INTO v_id_nuevo_estado, v_nombre_estado_req
+            SELECT id_tipo_estado_requisito, codigo INTO v_id_nuevo_estado, v_nombre_estado_req
             FROM convocatoria.tipo_estado_requisito
-            WHERE UPPER(nombre_estado) = 'OBSERVADO' AND activo = TRUE LIMIT 1;
+            WHERE UPPER(codigo) = 'OBSERVADO' AND activo = TRUE LIMIT 1;
 
         WHEN 'RECHAZAR' THEN
-            SELECT id_tipo_estado_requisito, nombre_estado INTO v_id_nuevo_estado, v_nombre_estado_req
+            SELECT id_tipo_estado_requisito, codigo INTO v_id_nuevo_estado, v_nombre_estado_req
             FROM convocatoria.tipo_estado_requisito
-            WHERE UPPER(nombre_estado) = 'RECHAZADO' AND activo = TRUE LIMIT 1;
+            WHERE UPPER(codigo) = 'RECHAZADO' AND activo = TRUE LIMIT 1;
         ELSE
             RETURN jsonb_build_object('exito', FALSE, 'mensaje', 'Acción no permitida');
         END CASE;
 
-    -- 4. Actualizar el Requisito Adjunto
     UPDATE postulacion.requisito_adjunto
     SET id_tipo_estado_requisito = v_id_nuevo_estado,
         observacion = CASE WHEN UPPER(p_accion) = 'OBSERVAR' THEN p_observacion ELSE NULL END
@@ -324,14 +318,14 @@ BEGIN
     SELECT EXISTS (
         SELECT 1 FROM postulacion.requisito_adjunto ra
                           JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
-        WHERE ra.id_postulacion = v_id_postulacion AND UPPER(ter.nombre_estado) = 'OBSERVADO'
+        WHERE ra.id_postulacion = v_id_postulacion AND UPPER(ter.codigo) = 'OBSERVADO'
     ) INTO v_tiene_observados;
 
     SELECT NOT EXISTS (
         SELECT 1 FROM postulacion.requisito_adjunto ra
                           JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
         WHERE ra.id_postulacion = v_id_postulacion
-          AND UPPER(ter.nombre_estado) NOT IN ('APROBADO', 'VALIDADO')
+          AND UPPER(ter.codigo) NOT IN ('APROBADO', 'VALIDADO')
     ) INTO v_todos_validados;
 
     RETURN jsonb_build_object(
@@ -351,7 +345,7 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION postulacion.fn_dictaminar_postulacion(
     p_id_usuario INTEGER,
     p_id_postulacion INTEGER,
-    p_accion VARCHAR(20),  -- 'APROBAR', 'RECHAZAR'
+    p_accion VARCHAR(20),
     p_observacion TEXT DEFAULT NULL
 )
     RETURNS JSONB AS $$
@@ -365,7 +359,6 @@ DECLARE
     v_id_nuevo_estado INTEGER;
     v_estado_codigo VARCHAR;
 BEGIN
-    -- 1. Validar que el usuario sea un coordinador activo
     SELECT c.id_coordinador, c.id_carrera
     INTO v_id_coordinador, v_id_carrera
     FROM academico.coordinador c
@@ -393,15 +386,13 @@ BEGIN
         RETURN jsonb_build_object('exito', FALSE, 'mensaje', 'No tiene permisos para dictaminar esta postulación');
     END IF;
 
-    -- 3. Lógica según la acción (APROBAR o RECHAZAR)
     CASE UPPER(p_accion)
         WHEN 'APROBAR' THEN
-            -- Verificamos que no existan documentos que NO estén APROBADOS o VALIDADOS
             SELECT NOT EXISTS (
                 SELECT 1 FROM postulacion.requisito_adjunto ra
                                   JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
                 WHERE ra.id_postulacion = p_id_postulacion
-                  AND UPPER(ter.nombre_estado) NOT IN ('APROBADO', 'VALIDADO')
+                  AND UPPER(ter.codigo) NOT IN ('APROBADO', 'VALIDADO')
             ) INTO v_todos_validados;
 
             IF NOT v_todos_validados THEN
@@ -420,7 +411,6 @@ BEGIN
             RETURN jsonb_build_object('exito', FALSE, 'mensaje', 'Acción no válida. Use APROBAR o RECHAZAR');
         END CASE;
 
-    -- 4. Obtener ID del estado desde el catálogo (postulacion.tipo_estado_postulacion)
     SELECT id_tipo_estado_postulacion INTO v_id_nuevo_estado
     FROM postulacion.tipo_estado_postulacion
     WHERE UPPER(codigo) = v_estado_codigo;
@@ -475,7 +465,6 @@ DECLARE
     v_estado_actual_codigo VARCHAR;
     v_id_estado_revision INTEGER;
 BEGIN
-    -- 1. Validar que el usuario sea un coordinador activo
     SELECT c.id_coordinador, c.id_carrera
     INTO v_id_coordinador, v_id_carrera
     FROM academico.coordinador c

@@ -44,7 +44,7 @@ BEGIN
                       JOIN academico.asignatura a      ON cv.id_asignatura   = a.id_asignatura
                       JOIN academico.periodo_academico pa ON cv.id_periodo_academico = pa.id_periodo_academico
              WHERE a.id_carrera = p_id_carrera
-               AND UPPER(tep.nombre) = 'PENDIENTE'
+               AND UPPER(tep.codigo) = 'PENDIENTE'
                AND pa.activo = TRUE)::BIGINT,
 
             (SELECT COUNT(*)
@@ -54,7 +54,7 @@ BEGIN
                       JOIN academico.asignatura a      ON cv.id_asignatura   = a.id_asignatura
                       JOIN academico.periodo_academico pa ON cv.id_periodo_academico = pa.id_periodo_academico
              WHERE a.id_carrera = p_id_carrera
-               AND UPPER(tep.nombre) = 'APROBADO'
+               AND UPPER(tep.codigo) = 'APROBADO'
                AND pa.activo = TRUE)::BIGINT;
 END;
 $$;

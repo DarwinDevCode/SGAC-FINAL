@@ -50,11 +50,11 @@ BEGIN
              SELECT
                  ra.id_postulacion,
                  COUNT(*) as total,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'PENDIENTE') as pendientes,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) IN ('APROBADO', 'VALIDADO')) as aprobados,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'OBSERVADO') as observados,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'RECHAZADO') as rechazados,
-                 COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'CORREGIDO') as corregidos
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'PENDIENTE') as pendientes,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) IN ('APROBADO', 'VALIDADO')) as aprobados,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'OBSERVADO') as observados,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'RECHAZADO') as rechazados,
+                 COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'CORREGIDO') as corregidos
              FROM postulacion.requisito_adjunto ra
                       JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
              WHERE ra.id_postulacion = p_id_postulacion
@@ -64,7 +64,7 @@ BEGIN
                    'postulacion', jsonb_build_object(
                     'id_postulacion', p.id_postulacion,
                     'fecha_postulacion', p.fecha_postulacion,
-                    'estado_nombre', tep.nombre,
+                    'estado_nombre', tep.codigo,
                     'observaciones', COALESCE(p.observaciones, '')
                                   ),
                    'estudiante', jsonb_build_object(
@@ -88,7 +88,7 @@ BEGIN
                                                        'id_requisito_adjunto', ra.id_requisito_adjunto,
                                                        'tipo_requisito', trp.nombre_requisito,
                                                        'nombre_archivo', ra.nombre_archivo,
-                                                       'estado', ter.nombre_estado,
+                                                       'estado', ter.codigo,
                                                        'observacion', ra.observacion,
                                                        'tiene_archivo', (ra.archivo IS NOT NULL)
                                                )

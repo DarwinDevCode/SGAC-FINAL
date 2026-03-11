@@ -13,11 +13,6 @@
 -- ============================================================
 -- TAREA 1: DDL - Añadir columna fecha_observacion
 -- ============================================================
-ALTER TABLE postulacion.requisito_adjunto
-    ADD COLUMN IF NOT EXISTS fecha_observacion TIMESTAMP DEFAULT NULL;
-
-COMMENT ON COLUMN postulacion.requisito_adjunto.fecha_observacion IS
-    'Timestamp del momento en que el coordinador marcó el documento como OBSERVADO. Usado para calcular la ventana de 24h de subsanación.';
 
 -- ============================================================
 -- TAREA 2: fn_es_periodo_subsanacion (Validación de Periodo Activo)
@@ -116,7 +111,7 @@ BEGIN
 
     -- 2. Obtener información del documento y estado actual
     SELECT ra.id_postulacion, car.id_carrera, e.id_usuario,
-           UPPER(ter.nombre_estado), cv.id_convocatoria
+           UPPER(ter.codigo), cv.id_convocatoria
     INTO v_id_postulacion, v_postulacion_carrera, v_id_usuario_estudiante,
          v_estado_actual, v_id_convocatoria
     FROM postulacion.requisito_adjunto ra
@@ -167,7 +162,7 @@ BEGIN
         WHEN 'VALIDAR' THEN
             SELECT id_tipo_estado_requisito, nombre_estado INTO v_id_nuevo_estado, v_nombre_estado_req
             FROM convocatoria.tipo_estado_requisito
-            WHERE UPPER(nombre_estado) IN ('APROBADO', 'VALIDADO') AND activo = TRUE LIMIT 1;
+            WHERE UPPER(codigo) IN ('APROBADO', 'VALIDADO') AND activo = TRUE LIMIT 1;
 
         WHEN 'OBSERVAR' THEN
             -- Validar que no esté ya aprobado
@@ -181,12 +176,12 @@ BEGIN
 
             SELECT id_tipo_estado_requisito, nombre_estado INTO v_id_nuevo_estado, v_nombre_estado_req
             FROM convocatoria.tipo_estado_requisito
-            WHERE UPPER(nombre_estado) = 'OBSERVADO' AND activo = TRUE LIMIT 1;
+            WHERE UPPER(codigo) = 'OBSERVADO' AND activo = TRUE LIMIT 1;
 
         WHEN 'RECHAZAR' THEN
             SELECT id_tipo_estado_requisito, nombre_estado INTO v_id_nuevo_estado, v_nombre_estado_req
             FROM convocatoria.tipo_estado_requisito
-            WHERE UPPER(nombre_estado) = 'RECHAZADO' AND activo = TRUE LIMIT 1;
+            WHERE UPPER(codigo) = 'RECHAZADO' AND activo = TRUE LIMIT 1;
 
         ELSE
             RETURN jsonb_build_object('exito', FALSE, 'mensaje', 'Acción no permitida. Use: VALIDAR, OBSERVAR o RECHAZAR');
@@ -228,14 +223,14 @@ BEGIN
     SELECT EXISTS (
         SELECT 1 FROM postulacion.requisito_adjunto ra
         JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
-        WHERE ra.id_postulacion = v_id_postulacion AND UPPER(ter.nombre_estado) = 'OBSERVADO'
+        WHERE ra.id_postulacion = v_id_postulacion AND UPPER(ter.codigo) = 'OBSERVADO'
     ) INTO v_tiene_observados;
 
     SELECT NOT EXISTS (
         SELECT 1 FROM postulacion.requisito_adjunto ra
         JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
         WHERE ra.id_postulacion = v_id_postulacion
-          AND UPPER(ter.nombre_estado) NOT IN ('APROBADO', 'VALIDADO')
+          AND UPPER(ter.codigo) NOT IN ('APROBADO', 'VALIDADO')
     ) INTO v_todos_validados;
 
     RETURN jsonb_build_object(
@@ -275,7 +270,6 @@ DECLARE
     v_id_estudiante INTEGER;
     v_id_usuario_estudiante INTEGER;
     v_todos_validados BOOLEAN;
-    v_tiene_rechazados BOOLEAN;
     v_id_nuevo_estado INTEGER;
     v_estado_codigo VARCHAR;
     v_es_periodo_activo BOOLEAN;
@@ -325,7 +319,7 @@ BEGIN
                 SELECT 1 FROM postulacion.requisito_adjunto ra
                 JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
                 WHERE ra.id_postulacion = p_id_postulacion
-                  AND UPPER(ter.nombre_estado) NOT IN ('APROBADO', 'VALIDADO')
+                  AND UPPER(ter.codigo) NOT IN ('APROBADO', 'VALIDADO')
             ) INTO v_todos_validados;
 
             IF NOT v_todos_validados THEN
@@ -435,7 +429,7 @@ BEGIN
     SELECT
         ra.id_requisito_adjunto,
         ra.id_postulacion,
-        ter.nombre_estado AS estado_actual,
+        ter.codigo AS estado_actual,
         trp.nombre_requisito,
         p.id_estudiante AS estudiante_postulacion,
         c.id_convocatoria,
@@ -487,7 +481,7 @@ BEGIN
             SET id_tipo_estado_requisito = (
                 SELECT id_tipo_estado_requisito
                 FROM convocatoria.tipo_estado_requisito
-                WHERE UPPER(nombre_estado) = 'RECHAZADO'
+                WHERE UPPER(codigo) = 'RECHAZADO'
                 LIMIT 1
             )
             WHERE id_requisito_adjunto = p_id_requisito_adjunto;
@@ -516,13 +510,13 @@ BEGIN
     -- 8. Obtener ID del estado CORREGIDO
     SELECT id_tipo_estado_requisito INTO v_id_estado_corregido
     FROM convocatoria.tipo_estado_requisito
-    WHERE UPPER(nombre_estado) = 'CORREGIDO'
+    WHERE UPPER(codigo) = 'CORREGIDO'
     LIMIT 1;
 
     IF v_id_estado_corregido IS NULL THEN
         SELECT id_tipo_estado_requisito INTO v_id_estado_corregido
         FROM convocatoria.tipo_estado_requisito
-        WHERE UPPER(nombre_estado) = 'PENDIENTE'
+        WHERE UPPER(codigo) = 'PENDIENTE'
         LIMIT 1;
     END IF;
 
@@ -637,11 +631,11 @@ BEGIN
         SELECT
             ra.id_postulacion,
             COUNT(*) as total,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'PENDIENTE') as pendientes,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) IN ('APROBADO', 'VALIDADO')) as aprobados,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'OBSERVADO') as observados,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'RECHAZADO') as rechazados,
-            COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'CORREGIDO') as corregidos
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'PENDIENTE') as pendientes,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) IN ('APROBADO', 'VALIDADO')) as aprobados,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'OBSERVADO') as observados,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'RECHAZADO') as rechazados,
+            COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'CORREGIDO') as corregidos
         FROM postulacion.requisito_adjunto ra
         JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito
         WHERE ra.id_postulacion = p_id_postulacion
@@ -684,12 +678,12 @@ BEGIN
                     -- NUEVO: Campos para gestión de 24h
                     'fecha_observacion', ra.fecha_observacion,
                     'fecha_limite_subsanacion', CASE
-                        WHEN UPPER(ter.nombre_estado) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
+                        WHEN UPPER(ter.codigo) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
                         THEN (ra.fecha_observacion + INTERVAL '24 hours')::TEXT
                         ELSE NULL
                     END,
                     'plazo_expirado', CASE
-                        WHEN UPPER(ter.nombre_estado) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
+                        WHEN UPPER(ter.codigo) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
                         THEN (CURRENT_TIMESTAMP > (ra.fecha_observacion + INTERVAL '24 hours'))
                         ELSE FALSE
                     END
@@ -800,7 +794,6 @@ BEGIN
         );
     END IF;
 
-    -- 3. Obtener cronograma del periodo
     SELECT COALESCE(jsonb_agg(
         jsonb_build_object(
             'fase', tf.nombre,
@@ -826,24 +819,24 @@ BEGIN
             'tipo_requisito', trp.nombre_requisito,
             'nombre_archivo', ra.nombre_archivo,
             'fecha_subida', ra.fecha_subida,
-            'estado_nombre', ter.nombre_estado,
+            'estado_nombre', ter.codigo,
             'observacion', ra.observacion,
             'tiene_archivo', (ra.archivo IS NOT NULL),
-            'es_editable', (UPPER(ter.nombre_estado) = 'OBSERVADO'),
+            'es_editable', (UPPER(ter.codigo) = 'OBSERVADO'),
             -- NUEVO: Campos para gestión de 24h
             'fecha_observacion', ra.fecha_observacion,
             'fecha_limite_subsanacion', CASE
-                WHEN UPPER(ter.nombre_estado) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
+                WHEN UPPER(ter.codigo) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
                 THEN (ra.fecha_observacion + INTERVAL '24 hours')::TEXT
                 ELSE NULL
             END,
             'tiempo_restante_segundos', CASE
-                WHEN UPPER(ter.nombre_estado) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
+                WHEN UPPER(ter.codigo) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
                 THEN GREATEST(0, EXTRACT(EPOCH FROM ((ra.fecha_observacion + INTERVAL '24 hours') - CURRENT_TIMESTAMP))::INTEGER)
                 ELSE NULL
             END,
             'plazo_expirado', CASE
-                WHEN UPPER(ter.nombre_estado) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
+                WHEN UPPER(ter.codigo) = 'OBSERVADO' AND ra.fecha_observacion IS NOT NULL
                 THEN (CURRENT_TIMESTAMP > (ra.fecha_observacion + INTERVAL '24 hours'))
                 ELSE FALSE
             END
@@ -857,11 +850,11 @@ BEGIN
 
     -- 5. Calcular resumen
     SELECT jsonb_build_object(
-        'pendientes', COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'PENDIENTE'),
-        'aprobados', COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) IN ('APROBADO', 'VALIDADO')),
-        'observados', COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'OBSERVADO'),
-        'rechazados', COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'RECHAZADO'),
-        'corregidos', COUNT(*) FILTER (WHERE UPPER(ter.nombre_estado) = 'CORREGIDO')
+        'pendientes', COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'PENDIENTE'),
+        'aprobados', COUNT(*) FILTER (WHERE UPPER(ter.codigo) IN ('APROBADO', 'VALIDADO')),
+        'observados', COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'OBSERVADO'),
+        'rechazados', COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'RECHAZADO'),
+        'corregidos', COUNT(*) FILTER (WHERE UPPER(ter.codigo) = 'CORREGIDO')
     )
     INTO v_resumen
     FROM postulacion.requisito_adjunto ra

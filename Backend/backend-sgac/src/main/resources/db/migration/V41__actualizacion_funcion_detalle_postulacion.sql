@@ -22,7 +22,7 @@ BEGIN
         SELECT
             p.id_postulacion,
             p.fecha_postulacion,
-            tep.nombre AS nombre_estado_postulacion,
+            tep.codigo AS nombre_estado_postulacion,
             p.observaciones,
             c.id_convocatoria,
             c.cupos_disponibles,
@@ -66,11 +66,11 @@ BEGIN
          conteo_documentos AS (
              SELECT
                  jsonb_build_object(
-                         'pendientes', COUNT(*) FILTER (WHERE ter.nombre_estado = 'PENDIENTE'),
-                         'aprobados',   COUNT(*) FILTER (WHERE ter.nombre_estado = 'APROBADO'),
-                         'observados',  COUNT(*) FILTER (WHERE ter.nombre_estado = 'OBSERVADO'),
-                         'rechazados',  COUNT(*) FILTER (WHERE ter.nombre_estado = 'RECHAZADO'),
-                         'corregidos',  COUNT(*) FILTER (WHERE ter.nombre_estado = 'CORREGIDO')
+                         'pendientes', COUNT(*) FILTER (WHERE ter.codigo = 'PENDIENTE'),
+                         'aprobados',   COUNT(*) FILTER (WHERE ter.codigo = 'APROBADO'),
+                         'observados',  COUNT(*) FILTER (WHERE ter.codigo = 'OBSERVADO'),
+                         'rechazados',  COUNT(*) FILTER (WHERE ter.codigo = 'RECHAZADO'),
+                         'corregidos',  COUNT(*) FILTER (WHERE ter.codigo = 'CORREGIDO')
                  ) as resumen
              FROM postulacion.requisito_adjunto ra
                       INNER JOIN convocatoria.tipo_estado_requisito ter ON ra.id_tipo_estado_requisito = ter.id_tipo_estado_requisito

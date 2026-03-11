@@ -10,7 +10,6 @@ DECLARE
     v_fecha_inicio_postulacion DATE;
     v_fecha_fin_evaluacion DATE;
 BEGIN
-    -- 1. Obtener el periodo académico asociado a la convocatoria
     SELECT id_periodo_academico INTO v_id_periodo
     FROM convocatoria.convocatoria
     WHERE id_convocatoria = p_id_convocatoria;
@@ -18,7 +17,6 @@ BEGIN
     IF v_id_periodo IS NULL THEN
         RETURN FALSE;
     END IF;
-
 
     SELECT
         MIN(CASE WHEN tf.codigo = 'POSTULACION' THEN pf.fecha_inicio END),
@@ -31,8 +29,6 @@ BEGIN
     WHERE pf.id_periodo_academico = v_id_periodo
       AND tf.codigo IN ('POSTULACION', 'EVALUACION_REQUISITOS');
 
-    -- 3. Validar si hoy está dentro de ese rango
-    -- Esto permite subsanar mientras postula O mientras el coordinador evalúa
     RETURN (CURRENT_DATE BETWEEN v_fecha_inicio_postulacion AND v_fecha_fin_evaluacion);
 
 EXCEPTION WHEN OTHERS THEN
