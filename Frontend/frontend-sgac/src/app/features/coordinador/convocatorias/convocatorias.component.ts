@@ -217,15 +217,17 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   guardar() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loadingForm = true;
+    const idCoordinador = this.authService.getUser()?.idUsuario;
     const payload = {
       ...this.form.getRawValue(),
       idConvocatoria: this.modoEdicion ? this.convocatoriaEditId : undefined,
       idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? this.form.getRawValue().idPeriodoAcademico,
     };
 
+    const params = idCoordinador ? `?idCoordinador=${idCoordinador}` : '';
     const req = (this.modoEdicion && this.convocatoriaEditId)
-      ? this.http.put<ConvocatoriaDTO>(`${API_CONV}/actualizar`, payload)
-      : this.http.post<ConvocatoriaDTO>(`${API_CONV}/crear`, payload);
+      ? this.http.put<ConvocatoriaDTO>(`${API_CONV}/actualizar${params}`, payload)
+      : this.http.post<ConvocatoriaDTO>(`${API_CONV}/crear${params}`, payload);
 
     this.subs.add(req.subscribe({
       next: (resp) => {
@@ -249,8 +251,10 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
 
   eliminar(conv: ConvocatoriaDTO) {
     if (!confirm(`¿Eliminar "${conv.nombreAsignatura}"?`)) return;
+    const idCoordinador = this.authService.getUser()?.idUsuario;
+    const params = idCoordinador ? `?idCoordinador=${idCoordinador}` : '';
     this.subs.add(
-      this.http.delete(`${API_CONV}/${conv.idConvocatoria}`).subscribe({
+      this.http.delete(`${API_CONV}/${conv.idConvocatoria}${params}`).subscribe({
         next: () => {
           this.convocatorias = this.convocatorias.filter(c => c.idConvocatoria !== conv.idConvocatoria);
           this.showSuccess('Convocatoria eliminada.');

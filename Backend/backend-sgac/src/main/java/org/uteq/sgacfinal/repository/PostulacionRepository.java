@@ -53,6 +53,14 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     @Query("SELECT p FROM Postulacion p WHERE p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
     List<Postulacion> findByCarrera(@Param("idCarrera") Integer idCarrera);
 
+    @Query("SELECT p FROM Postulacion p WHERE p.convocatoria.asignatura.carrera.facultad.idFacultad = :idFacultad " +
+           "AND p.convocatoria.periodoAcademico.activo = true")
+    List<Postulacion> findByFacultadPropia(@Param("idFacultad") Integer idFacultad);
+
+    @Query("SELECT p FROM Postulacion p JOIN p.convocatoria.asignatura.carrera.coordinadores coord " +
+           "WHERE coord.usuario.idUsuario = :idUsuario AND coord.activo = true " +
+           "AND p.convocatoria.periodoAcademico.activo = true")
+    List<Postulacion> findByCoordinadorPropioActivo(@Param("idUsuario") Integer idUsuario);
 
     @Query(value = "SELECT public.sp_crear_postulacion(:idConv, :idEst, :fecha, :estado, :obs)", nativeQuery = true)
     Integer crearPostulacion(

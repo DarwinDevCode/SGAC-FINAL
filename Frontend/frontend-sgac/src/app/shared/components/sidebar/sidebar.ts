@@ -62,6 +62,7 @@ export class SidebarComponent {
       { label: 'Validar Postulantes', icon: 'CheckSquare', route: '/coordinador/validaciones' },
       { label: 'Seguimiento Mensual', icon: 'BarChart3', route: '/coordinador/seguimiento' },
       { label: 'Resoluciones y Actas', icon: 'FileSignature', route: '/coordinador/resoluciones' },
+      { label: 'Reportes y Consultas', icon: 'ClipboardList', route: '/coordinador/reportes' },
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     COMISION_SELECCION: [
@@ -78,7 +79,7 @@ export class SidebarComponent {
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     ADMINISTRADOR: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/admin/dashboard' },
+      { label: 'Consultas y Reportes', icon: 'BarChart3', route: '/admin/consulta' },
       { label: 'Gestión Usuarios', icon: 'Users', route: '/admin/usuarios' },
       { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
       { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },

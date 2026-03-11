@@ -29,4 +29,9 @@ public interface LogAuditoriaRepository extends JpaRepository<LogAuditoria, Inte
     List<Object[]> listarLogsSP();
 
     List<LogAuditoria> findByUsuario_IdUsuario(Integer idUsuario);
+
+    @Query("SELECT l FROM LogAuditoria l WHERE l.usuario.idUsuario IN " +
+           "(SELECT c.usuario.idUsuario FROM Coordinador c WHERE c.carrera.facultad.idFacultad = :idFacultad) " +
+           "ORDER BY l.fechaHora DESC")
+    List<LogAuditoria> findByFacultadCoordinadores(@Param("idFacultad") Integer idFacultad);
 }

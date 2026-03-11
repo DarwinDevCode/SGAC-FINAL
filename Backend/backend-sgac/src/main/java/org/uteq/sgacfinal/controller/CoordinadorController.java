@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.CoordinadorRequestDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorResponseDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
 import org.uteq.sgacfinal.service.ICoordinadorService;
 
 import java.util.List;
@@ -32,6 +34,21 @@ public class CoordinadorController {
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<CoordinadorResponseDTO> findByUsuario(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok(coordinadorService.buscarPorUsuario(idUsuario));
+    }
+
+    @GetMapping("/me/{idUsuario}/estadisticas")
+    public ResponseEntity<org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO> getEstadisticas(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(coordinadorService.obtenerEstadisticasPropias(idUsuario));
+    }
+
+    @GetMapping("/me/{idUsuario}/reportes/convocatorias")
+    public ResponseEntity<List<CoordinadorConvocatoriaReporteDTO>> getReporteConvocatorias(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(coordinadorService.reporteConvocatoriasPropias(idUsuario));
+    }
+
+    @GetMapping("/me/{idUsuario}/reportes/postulantes")
+    public ResponseEntity<List<CoordinadorPostulanteReporteDTO>> getReportePostulantes(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(coordinadorService.reportePostulantesPropios(idUsuario));
     }
 
     @PostMapping

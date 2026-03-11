@@ -9,6 +9,9 @@ import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
 import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
 import org.uteq.sgacfinal.service.IDecanoService;
 
+import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
+import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
 import java.util.List;
 
 @RestController
@@ -18,6 +21,21 @@ import java.util.List;
 public class DecanoController {
 
     private final IDecanoService decanoService;
+
+    @GetMapping("/facultad/{idFacultad}/estadisticas")
+    public ResponseEntity<DecanoEstadisticasDTO> getEstadisticas(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.obtenerEstadisticasPorFacultad(idFacultad));
+    }
+
+    @GetMapping("/facultad/{idFacultad}/reportes")
+    public ResponseEntity<List<ConvocatoriaReporteDTO>> getReportes(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.reporteConvocatoriasPorFacultad(idFacultad));
+    }
+
+    @GetMapping("/facultad/{idFacultad}/auditoria")
+    public ResponseEntity<List<LogAuditoriaDTO>> getAuditoria(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.reporteAuditoriaPorFacultad(idFacultad));
+    }
 
     @GetMapping
     public ResponseEntity<List<DecanoResponseDTO>> findAll() {

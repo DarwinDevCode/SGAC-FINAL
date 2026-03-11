@@ -8,3 +8,38 @@ export interface DecanoResponseDTO {
     fechaFinGestion: string;
     activo: boolean;
 }
+
+export interface ActividadCoordinadorDTO {
+    nombreCoordinador: string;
+    totalConvocatorias: number;
+}
+
+export interface DecanoEstadisticasDTO {
+    totalConvocatorias: number;
+    convocatoriasActivas: number;
+    convocatoriasInactivas: number;
+    totalPostulantes: number;
+    postulantesAprobados: number;
+    postulantesRechazados: number;
+    postulantesEnEvaluacion: number;
+    actividadPorCoordinador: ActividadCoordinadorDTO[];
+}
+
+export interface ConvocatoriaReporteDTO {
+    idConvocatoria: number;
+    nombreAsignatura: string;
+    nombreCarrera: string;
+    nombreCoordinador: string;
+    fechaInicio: string;  // se maneja como string ISO
+    fechaFin: string;     // se maneja como string ISO
+    estado: string;
+    numeroPostulantes: number;
+}
+
+export interface LogAuditoriaDTO {
+    idLog: number;
+    nombreUsuario: string;
+    accion: string;
+    tablaAfectada: string;
+    fechaHora: string; // LocalDateTime devuelto como string
+}

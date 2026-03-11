@@ -44,4 +44,14 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
 
     List<Convocatoria> findByActivoTrue();
     List<Convocatoria> findByActivoFalse();
+
+    @Query("SELECT c FROM Convocatoria c WHERE c.asignatura.carrera.facultad.idFacultad = :idFacultad " +
+           "AND c.periodoAcademico.activo = true")
+    List<Convocatoria> findByFacultadPropia(@Param("idFacultad") Integer idFacultad);
+
+    // Búsqueda de convocatorias para un coordinador específico (idUsuario del coordinador)
+    @Query("SELECT c FROM Convocatoria c JOIN c.asignatura.carrera.coordinadores coord " +
+           "WHERE coord.usuario.idUsuario = :idUsuario AND coord.activo = true " +
+           "AND c.periodoAcademico.activo = true")
+    List<Convocatoria> findByCoordinadorPropio(@Param("idUsuario") Integer idUsuario);
 }

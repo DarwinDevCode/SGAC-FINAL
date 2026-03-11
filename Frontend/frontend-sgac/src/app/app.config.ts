@@ -1,6 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 
 import {
@@ -62,7 +63,7 @@ import {
   Users,
   X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
   MousePointerClick, RefreshCw, FileX, Upload, Info, Megaphone,
-  CheckCheck, Copy, CalendarPlus, ChevronLeft, UserCheck, CalendarCheck, XCircle, ThumbsDown, ThumbsUp, Edit3, MessageSquare
+  CheckCheck, Copy, CalendarPlus, ChevronLeft, UserCheck, CalendarCheck, XCircle, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -73,6 +74,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    provideCharts(withDefaultRegisterables()),
     importProvidersFrom(
       LucideAngularModule.pick({
         AlertCircle,
@@ -132,7 +134,7 @@ export const appConfig: ApplicationConfig = {
         Users,
         X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
         MousePointerClick, RefreshCw, FileX, Upload, Info, Megaphone,
-        CheckCheck, Copy, CalendarPlus, ChevronLeft, UserCheck, CalendarCheck, XCircle, ThumbsDown, ThumbsUp, Edit3, MessageSquare
+        CheckCheck, Copy, CalendarPlus, ChevronLeft, UserCheck, CalendarCheck, XCircle, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet
       })
     )
   ]

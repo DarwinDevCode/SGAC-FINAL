@@ -32,6 +32,7 @@ import { ValidacionesComponent } from './features/coordinador/validaciones/valid
 import { SeguimientoComponent } from './features/coordinador/seguimiento/seguimiento.component';
 import { ResolucionesComponent } from './features/coordinador/resoluciones/resoluciones.component';
 import { EvaluacionesComponent } from './features/coordinador/evaluaciones/evaluaciones.component';
+import { ReportesComponent as CoordinadorReportes } from './features/coordinador/reportes/reportes';
 
 // Ayudante
 import { DashboardComponent as AyudanteDashboard } from './features/ayudante/dashboard/dashboard.component';
@@ -42,7 +43,7 @@ import { AyudanteNotificacionesComponent } from './features/ayudante/notificacio
 
 
 
-import {SesionesComponent} from './features/ayudante/sesiones/sesiones';
+import { SesionesComponent } from './features/ayudante/sesiones/sesiones';
 import { NotificacionesPageComponent } from './features/notificaciones/notificaciones-page.component';
 import { DocenteDashboardComponent } from './features/docente/dashboard/docente-dashboard.component';
 import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayudantes.component';
@@ -60,7 +61,7 @@ export const routes: Routes = [
       { path: 'notificaciones', component: NotificacionesPageComponent },
 
       // Admin
-      { path: 'admin/dashboard', component: AdminDashboard },
+      { path: 'admin/consulta', component: AdminDashboard },
       { path: 'admin/usuarios', component: GestionUsuarios },
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
       { path: 'admin/rol-permiso', component: GestionPermisosComponent },
@@ -92,6 +93,7 @@ export const routes: Routes = [
       { path: 'coordinador/seguimiento', component: SeguimientoComponent },
       { path: 'coordinador/resoluciones', component: ResolucionesComponent },
       { path: 'coordinador/evaluaciones', component: EvaluacionesComponent }, // P13 (ítem 15)
+      { path: 'coordinador/reportes', component: CoordinadorReportes },
       { path: 'coordinador/notifications', component: PostulanteNotificaciones },
 
       // Ayudante

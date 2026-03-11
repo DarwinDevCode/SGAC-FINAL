@@ -22,68 +22,74 @@
     </div>
     } @else {
 
-    <!-- Stats con KPIs reales del SP -->
-    @if (kpis) {
-    <div class="stats-grid cols-3">
+    <!-- Stats con KPIs reales -->
+    @if (estadisticas) {
+    <!-- Primera Fila: KPIs -->
+    <div class="stats-grid cols-3" style="margin-bottom: 2rem;">
         <div class="stat-card">
             <div class="stat-icon green"><lucide-icon name="file-text" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">{{ kpis.convocatoriasActivas }}</div>
-                <div class="stat-label">Convocatorias Activas</div>
+                <div class="stat-value">{{ estadisticas.totalConvocatoriasPropias }}</div>
+                <div class="stat-label">Convocatorias T.</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">{{ kpis.postulacionesPendientes }}</div>
-                <div class="stat-label">Postulantes Pendientes</div>
+                <div class="stat-value">{{ estadisticas.totalPostulantesRecibidos }}</div>
+                <div class="stat-label">Postulantes T.</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon violet"><lucide-icon name="graduation-cap" size="22"></lucide-icon></div>
+            <div class="stat-icon amber"><lucide-icon name="clock" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">{{ kpis.postulacionesAprobadas }}</div>
-                <div class="stat-label">Postulaciones Aprobadas</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon amber"><lucide-icon name="layers" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ kpis.totalConvocatorias }}</div>
-                <div class="stat-label">Total Convocatorias</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon rose"><lucide-icon name="bar-chart-3" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ kpis.totalPostulaciones }}</div>
-                <div class="stat-label">Total Postulaciones</div>
+                <div class="stat-value">{{ estadisticas.postulantesEnEvaluacion }}</div>
+                <div class="stat-label">En Evaluación</div>
             </div>
         </div>
     </div>
-    } @else {
-    <div class="stats-grid cols-3">
-        <div class="stat-card">
-            <div class="stat-icon green"><lucide-icon name="file-text" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">—</div>
-                <div class="stat-label">Convocatorias Activas</div>
+
+    <!-- Segunda Fila: Gráficos -->
+    <div class="charts-wrapper"
+        style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+
+        <!-- Bar Chart: Top Convocatorias -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Postulantes por Convocatoria Activa (Top 5)</h3>
+            </div>
+            <div class="chart-body" style="height: 300px; position: relative;">
+                @if (estadisticas.postulantesPorConvocatoria.length > 0) {
+                <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar">
+                </canvas>
+                } @else {
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b">
+                    No hay datos de postulantes
+                </div>
+                }
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">—</div>
-                <div class="stat-label">Postulantes Pendientes</div>
+
+        <!-- Doughnut Chart: Estado Convocatorias -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Estado Convocatorias</h3>
+            </div>
+            <div class="chart-body"
+                style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
+                <div style="width: 100%; height: 100%; padding-bottom: 1rem;">
+                    @if (estadisticas.totalConvocatoriasPropias > 0) {
+                    <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" type="doughnut">
+                    </canvas>
+                    } @else {
+                    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b">
+                        Sin convocatorias
+                    </div>
+                    }
+                </div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon violet"><lucide-icon name="graduation-cap" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">—</div>
-                <div class="stat-label">Postulaciones Aprobadas</div>
-            </div>
-        </div>
+
     </div>
     }
 
