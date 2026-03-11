@@ -1,182 +1,468 @@
+<!-- ============================================================ -->
+<!-- TOAST CONTAINER — sistema propio, sin PrimeNG               -->
+<!-- Posicionado en la esquina superior derecha con z-index alto  -->
+<!-- para aparecer por encima de modales y dialogs.               -->
+<!-- ============================================================ -->
+<div class="toast-container">
+  @for (t of toasts; track t.id) {
+    <div class="toast-item toast-{{ t.severity }}">
+      <div class="toast-body">
+        <div class="toast-icon">
+          @switch (t.severity) {
+            @case ('success') { <lucide-icon name="CheckCircle2" size="18"></lucide-icon> }
+            @case ('error')   { <lucide-icon name="XCircle"      size="18"></lucide-icon> }
+            @case ('warn')    { <lucide-icon name="AlertTriangle" size="18"></lucide-icon> }
+            @default          { <lucide-icon name="Info"          size="18"></lucide-icon> }
+          }
+        </div>
+        <div class="toast-text">
+          <strong class="toast-summary">{{ t.summary }}</strong>
+          <span   class="toast-detail">{{ t.detail }}</span>
+        </div>
+      </div>
+      <button class="toast-close" (click)="removeToast(t.id)">
+        <lucide-icon name="X" size="14"></lucide-icon>
+      </button>
+    </div>
+  }
+</div>
+
+
+<!-- ============================================================ -->
+<!-- VISTA PRINCIPAL: Listado de Periodos (funcionalidad original)-->
+<!-- ============================================================ -->
 <div class="gestion-container">
-    <div class="section-header" style="margin-bottom: 20px;">
-        <div>
-            <h2 class="title" style="margin-bottom: 5px;">Periodos Académicos</h2>
-            <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Gestiona los periodos, sus fechas de validez y la
-                importación de requisitos.</p>
-        </div>
 
-        <button class="btn-primary" (click)="abrirModalCrear()">
-            <lucide-icon name="Plus" size="18"></lucide-icon> Nuevo Periodo
+  <div class="section-header" style="margin-bottom: 20px;">
+    <div>
+      <h2 class="title" style="margin-bottom: 5px;">Periodos Académicos</h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
+        Gestiona los periodos, sus fechas de validez y la importación de requisitos.
+      </p>
+    </div>
+    <!-- "Nuevo Periodo" ahora abre el stepper de dos pasos -->
+    <button class="btn-primary" (click)="abrirDialogNuevoPeriodo()">
+      <lucide-icon name="Plus" size="18"></lucide-icon> Nuevo Periodo
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table" style="table-layout: fixed; width: 100%;">
+      <thead>
+      <tr>
+        <th>Nombre del Periodo</th>
+        <th style="width: 250px;">Fechas de validez</th>
+        <th style="width: 155px;">Estado</th>
+        <th style="width: 210px;" class="text-right">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (p of periodos; track p.idPeriodoAcademico) {
+          <tr>
+            <td style="font-weight: 500;">{{ p.nombrePeriodo }}</td>
+            <td style="font-size: 0.85rem; color: #64748b;">
+              {{ p.fechaInicio | date:'dd/MM/yyyy' }} — {{ p.fechaFin | date:'dd/MM/yyyy' }}
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="getEstadoClass(p.estado)">
+                {{ p.estado }}
+              </span>
+            </td>
+            <td class="text-right" style="display: flex; gap: 6px; justify-content: flex-end;">
+
+              <!-- Editar datos del periodo (modal simple, igual que antes) -->
+              <button class="btn-icon" title="Editar periodo"
+                      [disabled]="p.estado === 'INACTIVO'"
+                      (click)="abrirModalEditar(p)">
+                <lucide-icon name="Edit" size="16"></lucide-icon>
+              </button>
+
+              <!-- Botón de cronograma: solo visible para periodos configurables -->
+              @if (puedeConfigurarCronograma(p)) {
+                <button class="btn-icon btn-icon--calendar"
+                        title="Configurar cronograma de fases"
+                        (click)="abrirDialogCronograma(p)">
+                  <lucide-icon name="CalendarDays" size="16"></lucide-icon>
+                </button>
+              }
+
+              <!-- Importar requisitos de otro periodo -->
+              @if (p.estado !== 'INACTIVO') {
+                <button class="btn-icon" title="Importar Requisitos Anteriores"
+                        (click)="abrirModalImportar(p.idPeriodoAcademico ?? 0)">
+                  <lucide-icon name="Download" size="16"></lucide-icon>
+                </button>
+              }
+
+              <!-- Activar periodo -->
+              @if (p.estado !== 'EN PROCESO' && p.estado !== 'INACTIVO') {
+                <button class="btn-icon" title="Activar Periodo"
+                        (click)="cambiarEstado(p, true)">
+                  <lucide-icon name="CheckCircle" size="16"></lucide-icon>
+                </button>
+              }
+
+              <!-- Desactivar periodo -->
+              @if (p.estado === 'EN PROCESO') {
+                <button class="btn-icon" title="Desactivar Periodo"
+                        (click)="cambiarEstado(p, false)">
+                  <lucide-icon name="Power" size="16"></lucide-icon>
+                </button>
+              }
+
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
+              No hay periodos académicos registrados.
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ============================================================ -->
+<!-- DIALOG: Creación de Periodo + Configuración de Cronograma   -->
+<!--                                                              -->
+<!-- Stepper manual de dos pasos implementado con modal nativo    -->
+<!-- (mismo patrón modal-backdrop que usa el resto del proyecto). -->
+<!-- El ancho cambia dinámicamente según el paso activo.          -->
+<!-- ============================================================ -->
+@if (dialogCreacionVisible) {
+  <div class="modal-backdrop" (click)="$event.stopPropagation()">
+    <div class="modal-box dialog-box"
+         [class.dialog-box--wide]="pasoActivo === 1">
+
+      <!-- ── Header ─────────────────────────────────────── -->
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:1.05rem; color:#1e293b;
+                   display:flex; align-items:center; gap:8px;">
+          <lucide-icon [name]="pasoActivo === 0 ? 'CalendarPlus' : 'CalendarDays'" size="20"></lucide-icon>
+          {{ pasoActivo === 0 ? 'Nuevo Periodo Académico' : 'Configurar Cronograma' }}
+        </h3>
+        <button type="button" class="btn-icon"
+                [disabled]="abriendo || guardandoCronograma"
+                (click)="cerrarDialogCreacion()">
+          <lucide-icon name="X" size="18"></lucide-icon>
         </button>
-    </div>
+      </div>
 
-    <div class="table-card">
-        <table class="data-table" style="table-layout: fixed; width: 100%;">
-            <thead>
-                <tr>
-                    <!-- <th style="width: 80px;">ID</th> -->
-                    <th>Nombre del Periodo</th>
-                    <th style="width: 250px;">Fechas de validez</th>
-                    <th style="width: 150px;">Estado</th>
-                    <th style="width: 180px;" class="text-right">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (p of periodos; track p.idPeriodoAcademico) {
-                <tr>
-                    <!-- <td>{{ p.idPeriodoAcademico }}</td> -->
-                    <td style="font-weight: 500;">{{ p.nombrePeriodo }}</td>
-                    <td style="font-size: 0.85rem; color: #64748b;">
-                        {{ p.fechaInicio | date:'dd/MM/yyyy' }} - {{ p.fechaFin | date:'dd/MM/yyyy' }}
-                    </td>
-                    <td>
-                        <span class="status-pill" [class.planificado]="p.estado === 'PLANIFICADO'"
-                            [class.proceso]="p.estado === 'EN PROCESO'" [class.inactivo]="p.estado === 'INACTIVO'">
-                            {{ p.estado }}
-                        </span>
-                    </td>
-                    <td class="text-right" style="display: flex; gap: 8px; justify-content: flex-end;">
-                        <!-- Editar -->
-                        <button class="btn-icon" title="Editar" [disabled]="p.estado === 'INACTIVO'"
-                            (click)="abrirModalEditar(p)">
-                            <lucide-icon name="Edit" size="16"></lucide-icon>
-                        </button>
-
-                        <!-- Importar Requisitos -->
-                        @if (p.estado === 'PLANIFICADO' || p.estado === 'EN PROCESO') {
-                        <button class="btn-icon" title="Importar Requisitos Anteriores"
-                            (click)="abrirModalImportar(p.idPeriodoAcademico || 0)">
-                            <lucide-icon name="Download" size="16"></lucide-icon>
-                        </button>
-                        }
-
-                        <!-- Activar -->
-                        @if (p.estado !== 'EN PROCESO') {
-                        <button class="btn-icon" title="Activar Periodo" (click)="cambiarEstado(p, true)">
-                            <lucide-icon name="CheckCircle" size="16"></lucide-icon>
-                        </button>
-                        }
-
-                        <!-- Desactivar -->
-                        @if (p.estado === 'EN PROCESO') {
-                        <button class="btn-icon" title="Desactivar Periodo" (click)="cambiarEstado(p, false)">
-                            <lucide-icon name="Power" size="16"></lucide-icon>
-                        </button>
-                        }
-                    </td>
-                </tr>
-                } @empty {
-                <tr>
-                    <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
-                        No hay periodos académicos registrados.
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- ============================================== -->
-<!-- MODAL: Crear/Editar Periodo                    -->
-<!-- ============================================== -->
-@if (modalAbierto) {
-<div class="modal-backdrop">
-    <div class="modal-box">
-        <div class="modal-header">
-            <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                <lucide-icon [name]="modoEdicion ? 'Edit2' : 'CalendarPlus'" size="20"></lucide-icon>
-                {{ modoEdicion ? 'Editar Periodo' : 'Nuevo Periodo' }}
-            </h3>
-            <button type="button" class="btn-icon" (click)="cerrarModal()">
-                <lucide-icon name="X" size="18"></lucide-icon>
-            </button>
+      <!-- ── Indicador de pasos ─────────────────────────── -->
+      <div class="step-wizard">
+        <div class="sw-step" [class.sw-active]="pasoActivo === 0"
+             [class.sw-done]="pasoActivo > 0">
+          <div class="sw-bubble">
+            @if (pasoActivo > 0) { <lucide-icon name="Check" size="13"></lucide-icon> }
+            @else                { <span>1</span> }
+          </div>
+          <span class="sw-label">Apertura</span>
         </div>
+        <div class="sw-connector" [class.sw-done]="pasoActivo > 0"></div>
+        <div class="sw-step" [class.sw-active]="pasoActivo === 1">
+          <div class="sw-bubble"><span>2</span></div>
+          <span class="sw-label">Cronograma</span>
+        </div>
+      </div>
 
-        <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-            <div class="form-group">
-                <label>Nombre del Periodo</label>
-                <input type="text" [(ngModel)]="formulario.nombrePeriodo" class="input-field"
-                    placeholder="Ej. 2026-2027 CI">
-            </div>
+      <!-- ══════════════════════════════════════════════════
+           PASO 1 — Formulario de apertura
+           ══════════════════════════════════════════════════ -->
+      @if (pasoActivo === 0) {
+        <form [formGroup]="formularioPeriodo" class="step-content"
+              (ngSubmit)="confirmarApertura()">
 
-            <div style="display: flex; gap: 1rem;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Fecha de Inicio</label>
-                    <input type="date" [(ngModel)]="formulario.fechaInicio" class="input-field">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Fecha de Cierre</label>
-                    <input type="date" [(ngModel)]="formulario.fechaFin" class="input-field">
-                </div>
-            </div>
-
-            @if (modoEdicion) {
-            <div class="form-group">
-                <label>Estado Operativo</label>
-                <select [(ngModel)]="formulario.estado" class="input-field" style="background: #f8fafc;">
-                    <option value="PLANIFICADO">PLANIFICADO</option>
-                    <option value="EN PROCESO">EN PROCESO</option>
-                    <option value="INACTIVO" disabled>INACTIVO (Fin de vigencia automático)</option>
-                </select>
-            </div>
+          <div class="form-group">
+            <label for="nombrePeriodo">
+              Nombre del Periodo <span class="req">*</span>
+            </label>
+            <input id="nombrePeriodo" type="text" class="input-field"
+                   [class.input-invalid]="nombrePeriodoInvalido"
+                   formControlName="nombrePeriodo"
+                   placeholder="Ej. 2026-2027 CI"
+                   autocomplete="off">
+            @if (nombrePeriodoInvalido) {
+              <span class="field-error">
+                El nombre es obligatorio (mínimo 3 caracteres)
+              </span>
             }
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fechaInicio">Fecha de Inicio <span class="req">*</span></label>
+              <input id="fechaInicio" type="date" class="input-field"
+                     formControlName="fechaInicio">
+            </div>
+            <div class="form-group">
+              <label for="fechaFin">Fecha de Cierre <span class="req">*</span></label>
+              <input id="fechaFin" type="date" class="input-field"
+                     formControlName="fechaFin">
+            </div>
+          </div>
+
+          <div class="info-box">
+            <lucide-icon name="Info" size="15"></lucide-icon>
+            <p>
+              Al confirmar, el sistema creará el periodo en estado
+              <strong>PLANIFICACION</strong> e instanciará automáticamente
+              todas las fases activas con fechas temporales. Podrás ajustar
+              el cronograma en el siguiente paso.
+            </p>
+          </div>
+
+        </form>
+
+        <!-- Footer del Paso 1 -->
+        <div class="form-footer">
+          <button class="btn-ghost" (click)="cerrarDialogCreacion()"
+                  [disabled]="abriendo">
+            Cancelar
+          </button>
+          <button class="btn-primary" (click)="confirmarApertura()"
+                  [disabled]="abriendo">
+            @if (abriendo) {
+              <lucide-icon name="Loader" size="16" class="spin"></lucide-icon>
+              Abriendo…
+            } @else {
+              Siguiente <lucide-icon name="ArrowRight" size="16"></lucide-icon>
+            }
+          </button>
+        </div>
+      }
+
+      <!-- ══════════════════════════════════════════════════
+           PASO 2 — Tabla editable de cronograma
+           ══════════════════════════════════════════════════ -->
+      @if (pasoActivo === 1) {
+
+        <!-- Barra de contexto: muestra el periodo que se está configurando -->
+        <div class="periodo-context-bar">
+          <div class="pcb-info">
+            <lucide-icon name="Calendar" size="15"></lucide-icon>
+            <strong>{{ periodoNuevoNombre }}</strong>
+            <span class="pcb-sep">|</span>
+            <span>{{ periodoRangoInicio | date:'dd/MM/yyyy' }}</span>
+            <span>→</span>
+            <span>{{ periodoRangoFin | date:'dd/MM/yyyy' }}</span>
+          </div>
+          @if (tieneErroresCronograma) {
+            <div class="pcb-warn">
+              <lucide-icon name="AlertTriangle" size="13"></lucide-icon>
+              Corrige los errores antes de guardar
+            </div>
+          } @else {
+            <div class="pcb-ok">
+              <lucide-icon name="CheckCircle2" size="13"></lucide-icon>
+              Cronograma válido
+            </div>
+          }
         </div>
 
+        <!-- Estado de carga -->
+        @if (cargandoFases) {
+          <div class="loading-fases">
+            <lucide-icon name="Loader" size="22" class="spin"></lucide-icon>
+            <span>Cargando fases del periodo…</span>
+          </div>
+        }
+
+        <!-- Tabla de fases editables (HTML nativo, sin p-table) -->
+        @if (!cargandoFases && fasesEditables.length > 0) {
+          <div class="table-wrapper">
+            <table class="data-table cronograma-table">
+              <thead>
+              <tr>
+                <th style="width:50px; text-align:center;">#</th>
+                <th>Fase</th>
+                <th style="width:175px;">Fecha Inicio</th>
+                <th style="width:175px;">Fecha Fin</th>
+                <th>Estado</th>
+              </tr>
+              </thead>
+              <tbody>
+                @for (fase of fasesEditables; track fase.idTipoFase) {
+                  <tr [class.fase-row-error]="fase.tieneError">
+
+                    <!-- Número de orden -->
+                    <td style="text-align:center;">
+                      <span class="orden-badge">{{ fase.orden }}</span>
+                    </td>
+
+                    <!-- Nombre -->
+                    <td>
+                      <span class="fase-nombre">{{ fase.nombreFase }}</span>
+                    </td>
+
+                    <!-- Fecha inicio -->
+                    <td>
+                      <input type="date" class="date-input"
+                             [class.date-input-error]="fase.tieneError"
+                             [(ngModel)]="fase.fechaInicio"
+                             [min]="periodoRangoInicio"
+                             [max]="periodoRangoFin"
+                             (change)="validarCronograma()">
+                    </td>
+
+                    <!-- Fecha fin -->
+                    <td>
+                      <input type="date" class="date-input"
+                             [class.date-input-error]="fase.tieneError"
+                             [(ngModel)]="fase.fechaFin"
+                             [min]="fase.fechaInicio || periodoRangoInicio"
+                             [max]="periodoRangoFin"
+                             (change)="validarCronograma()">
+                    </td>
+
+                    <!-- Estado de la fila -->
+                    <td>
+                      @if (fase.tieneError) {
+                        <div class="row-error-msg">
+                          <lucide-icon name="AlertCircle" size="13"></lucide-icon>
+                          {{ fase.mensajeError }}
+                        </div>
+                      } @else if (fase.fechaInicio && fase.fechaFin) {
+                        <span class="row-ok-msg">
+                          <lucide-icon name="CheckCircle2" size="13"></lucide-icon> OK
+                        </span>
+                      }
+                    </td>
+
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Footer del Paso 2 -->
         <div class="form-footer">
-            <button class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
-            <button class="btn-primary" (click)="guardarPeriodo()">
-                <lucide-icon name="Save" size="16"></lucide-icon> Guardar Cambios
-            </button>
+          <button class="btn-ghost"
+                  (click)="pasoActivo = 0"
+                  [disabled]="guardandoCronograma">
+            <lucide-icon name="ArrowLeft" size="15"></lucide-icon> Volver
+          </button>
+          <span style="flex:1;"></span>
+          <button class="btn-ghost" (click)="cerrarDialogCreacion()"
+                  [disabled]="guardandoCronograma">
+            Cerrar
+          </button>
+          <button class="btn-primary"
+                  (click)="guardarCronograma()"
+                  [disabled]="tieneErroresCronograma || guardandoCronograma || cargandoFases">
+            @if (guardandoCronograma) {
+              <lucide-icon name="Loader" size="16" class="spin"></lucide-icon> Guardando…
+            } @else {
+              <lucide-icon name="Save" size="16"></lucide-icon> Guardar Cronograma
+            }
+          </button>
         </div>
+      }
+
     </div>
-</div>
+  </div>
 }
 
-<!-- ============================================== -->
-<!-- MODAL: Importar Requisitos                    -->
-<!-- ============================================== -->
-@if (modalImportarAbierto) {
-<div class="modal-backdrop">
+
+<!-- ============================================================ -->
+<!-- MODAL: Editar Periodo existente (funcionalidad conservada)  -->
+<!-- ============================================================ -->
+@if (modalEditarAbierto) {
+  <div class="modal-backdrop">
     <div class="modal-box">
-        <div class="modal-header">
-            <h3 style="margin: 0; font-size: 1.1rem; color: #1e293b; display: flex; align-items: center; gap: 8px;">
-                <lucide-icon name="Copy" size="20"></lucide-icon>
-                Clonar Requisitos
-            </h3>
-            <button type="button" class="btn-icon" (click)="cerrarModalImportar()">
-                <lucide-icon name="X" size="18"></lucide-icon>
-            </button>
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:1.1rem; color:#1e293b;
+                   display:flex; align-items:center; gap:8px;">
+          <lucide-icon name="Edit2" size="20"></lucide-icon>
+          Editar Periodo
+        </h3>
+        <button type="button" class="btn-icon" (click)="cerrarModalEditar()">
+          <lucide-icon name="X" size="18"></lucide-icon>
+        </button>
+      </div>
+      <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
+        <div class="form-group">
+          <label>Nombre del Periodo</label>
+          <input type="text" [(ngModel)]="formularioEdicion.nombrePeriodo"
+                 class="input-field" placeholder="Ej. 2026-2027 CI">
         </div>
-
-        <div style="padding: 1.5rem;">
-            <p style="font-size: 0.9rem; color: #64748b; margin-top: 0; margin-bottom: 1.5rem;">
-                Seleccione un período académico del historial para importar sus parámetros y requisitos activos a este
-                nuevo periodo.
-            </p>
-
-            <div class="form-group">
-                <label>Periodo Fuente</label>
-                <select [(ngModel)]="importarConfig.idFuente" class="input-field">
-                    <option [ngValue]="null">-- Elegir Origen --</option>
-                    @for (p of periodos; track p.idPeriodoAcademico) {
-                    @if (p.idPeriodoAcademico !== importarConfig.idDestino) {
-                    <option [ngValue]="p.idPeriodoAcademico">
-                        {{ p.nombrePeriodo }} ({{ p.estado }})
-                    </option>
-                    }
-                    }
-                </select>
-            </div>
+        <div style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
+            <label>Fecha de Inicio</label>
+            <input type="date" [(ngModel)]="formularioEdicion.fechaInicio" class="input-field">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>Fecha de Cierre</label>
+            <input type="date" [(ngModel)]="formularioEdicion.fechaFin" class="input-field">
+          </div>
         </div>
-
-        <div class="form-footer">
-            <button class="btn-ghost" (click)="cerrarModalImportar()">Cancelar</button>
-            <button class="btn-primary" [disabled]="!importarConfig.idFuente" (click)="confirmarImportacion()">
-                <lucide-icon name="Download" size="16"></lucide-icon> Iniciar Importación
-            </button>
+        <div class="form-group">
+          <label>Estado Operativo</label>
+          <select [(ngModel)]="formularioEdicion.estado" class="input-field"
+                  style="background:#f8fafc;">
+            <option value="PLANIFICACION">PLANIFICACION</option>
+            <option value="CONFIGURADO">CONFIGURADO</option>
+            <option value="EN PROCESO">EN PROCESO</option>
+            <option value="INACTIVO" disabled>INACTIVO (automático)</option>
+          </select>
         </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-ghost" (click)="cerrarModalEditar()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarEdicion()">
+          <lucide-icon name="Save" size="16"></lucide-icon> Guardar Cambios
+        </button>
+      </div>
     </div>
-</div>
+  </div>
+}
+
+
+<!-- ============================================================ -->
+<!-- MODAL: Importar Requisitos (sin cambios respecto al original)-->
+<!-- ============================================================ -->
+@if (modalImportarAbierto) {
+  <div class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 style="margin:0; font-size:1.1rem; color:#1e293b;
+                   display:flex; align-items:center; gap:8px;">
+          <lucide-icon name="Copy" size="20"></lucide-icon>
+          Clonar Requisitos
+        </h3>
+        <button type="button" class="btn-icon" (click)="cerrarModalImportar()">
+          <lucide-icon name="X" size="18"></lucide-icon>
+        </button>
+      </div>
+      <div style="padding:1.5rem;">
+        <p style="font-size:0.9rem; color:#64748b; margin-top:0; margin-bottom:1.5rem;">
+          Seleccione un período académico del historial para importar sus
+          parámetros y requisitos activos a este nuevo periodo.
+        </p>
+        <div class="form-group">
+          <label>Periodo Fuente</label>
+          <select [(ngModel)]="importarConfig.idFuente" class="input-field">
+            <option [ngValue]="null">-- Elegir Origen --</option>
+            @for (p of periodos; track p.idPeriodoAcademico) {
+              @if (p.idPeriodoAcademico !== importarConfig.idDestino) {
+                <option [ngValue]="p.idPeriodoAcademico">
+                  {{ p.nombrePeriodo }} ({{ p.estado }})
+                </option>
+              }
+            }
+          </select>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-ghost" (click)="cerrarModalImportar()">Cancelar</button>
+        <button class="btn-primary" [disabled]="!importarConfig.idFuente"
+                (click)="confirmarImportacion()">
+          <lucide-icon name="Download" size="16"></lucide-icon> Iniciar Importación
+        </button>
+      </div>
+    </div>
+  </div>
 }

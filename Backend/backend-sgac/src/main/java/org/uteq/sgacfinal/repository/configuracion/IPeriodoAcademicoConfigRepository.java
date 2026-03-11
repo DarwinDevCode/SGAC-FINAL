@@ -9,7 +9,7 @@ import org.uteq.sgacfinal.entity.PeriodoAcademico;
 import java.time.LocalDate;
 
 @Repository
-public interface IPeriodoAcademicoRepository extends JpaRepository<PeriodoAcademico, Integer> {
+public interface IPeriodoAcademicoConfigRepository extends JpaRepository<PeriodoAcademico, Integer> {
 
 
     @Query(value = "SELECT academico.fn_abrir_periodo_academico(:nombre, :inicio, :fin)", nativeQuery = true)
