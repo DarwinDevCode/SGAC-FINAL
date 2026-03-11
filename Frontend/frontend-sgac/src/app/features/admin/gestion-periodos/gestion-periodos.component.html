@@ -25,12 +25,10 @@
   }
 </div>
 
-
 <!-- ============================================================ -->
 <!-- VISTA PRINCIPAL                                              -->
 <!-- ============================================================ -->
 <div class="gestion-container">
-
   <div class="section-header" style="margin-bottom: 20px;">
     <div>
       <h2 class="title" style="margin-bottom: 5px;">Periodos Académicos</h2>
@@ -50,7 +48,7 @@
         <th>Nombre del Periodo</th>
         <th style="width: 250px;">Fechas de validez</th>
         <th style="width: 155px;">Estado</th>
-        <th style="width: 210px;" class="text-right">Acciones</th>
+        <th style="width: 230px;" class="text-right">Acciones</th>
       </tr>
       </thead>
       <tbody>
@@ -64,11 +62,15 @@
               <span class="status-pill" [ngClass]="getEstadoClass(p.estado)">{{ p.estado }}</span>
             </td>
             <td class="text-right" style="display: flex; gap: 6px; justify-content: flex-end;">
+
+              <!-- Editar -->
               <button class="btn-icon" title="Editar periodo"
                       [disabled]="p.estado === 'INACTIVO'"
                       (click)="abrirModalEditar(p)">
                 <lucide-icon name="Edit" size="16"></lucide-icon>
               </button>
+
+              <!-- Configurar cronograma (PLANIFICACION o CONFIGURADO) -->
               @if (puedeConfigurarCronograma(p)) {
                 <button class="btn-icon btn-icon--calendar"
                         title="Configurar cronograma"
@@ -76,28 +78,41 @@
                   <lucide-icon name="CalendarDays" size="16"></lucide-icon>
                 </button>
               }
+
+              <!-- ── NUEVO: Iniciar periodo (solo CONFIGURADO) ───────────
+                   Icono Play verde — visible únicamente cuando el periodo
+                   ya tiene cronograma aprobado y está listo para iniciar.
+                   ─────────────────────────────────────────────────────── -->
+              @if (puedeIniciar(p)) {
+                <button class="btn-icon btn-icon--iniciar"
+                        title="Iniciar periodo — pasar a EN PROCESO"
+                        (click)="abrirModalIniciar(p)">
+                  <lucide-icon name="PlayCircle" size="16"></lucide-icon>
+                </button>
+              }
+
+              <!-- Importar requisitos -->
               @if (p.estado !== 'INACTIVO') {
                 <button class="btn-icon" title="Importar Requisitos"
                         (click)="abrirModalImportar(p.idPeriodoAcademico ?? 0)">
                   <lucide-icon name="Download" size="16"></lucide-icon>
                 </button>
               }
-              @if (p.estado !== 'EN PROCESO' && p.estado !== 'INACTIVO') {
-                <button class="btn-icon" title="Activar Periodo" (click)="cambiarEstado(p, true)">
-                  <lucide-icon name="CheckCircle" size="16"></lucide-icon>
-                </button>
-              }
+
+              <!-- Desactivar (solo EN PROCESO) -->
               @if (p.estado === 'EN PROCESO') {
-                <button class="btn-icon" title="Desactivar Periodo" (click)="cambiarEstado(p, false)">
+                <button class="btn-icon" title="Desactivar Periodo"
+                        (click)="cambiarEstado(p, false)">
                   <lucide-icon name="Power" size="16"></lucide-icon>
                 </button>
               }
+
             </td>
           </tr>
         } @empty {
           <tr>
             <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
-              No hay periodos registrados.
+              No hay periodos académicos registrados.
             </td>
           </tr>
         }
@@ -108,46 +123,41 @@
 
 
 <!-- ============================================================ -->
-<!-- DIALOG: Stepper (Nuevo periodo + Cronograma)                 -->
+<!-- DIALOG: Stepper (Apertura + Cronograma)                     -->
 <!-- ============================================================ -->
 @if (dialogCreacionVisible) {
   <div class="modal-backdrop" (click)="$event.stopPropagation()">
     <div class="modal-box dialog-box" [class.dialog-box--wide]="pasoActivo === 1">
 
-      <!-- Header -->
       <div class="modal-header">
-        <h3 style="margin:0; font-size:1rem; font-weight:600; color:#1e293b;
-                   display:flex; align-items:center; gap:8px;">
+        <h3 class="modal-title">
           <lucide-icon [name]="pasoActivo === 0 ? 'CalendarPlus' : 'CalendarDays'" size="20"
                        style="color:#15803d;"></lucide-icon>
           {{ pasoActivo === 0
           ? 'Nuevo Periodo Académico'
           : 'Planificación de Periodo Académico: ' + periodoNuevoNombre }}
         </h3>
-        <button type="button" class="btn-icon"
-                [disabled]="abriendo || guardandoCronograma"
+        <button type="button" class="btn-icon" [disabled]="abriendo || guardandoCronograma"
                 (click)="cerrarDialogCreacion()">
           <lucide-icon name="X" size="18"></lucide-icon>
         </button>
       </div>
 
-      <!-- Step wizard -->
       <div class="step-wizard">
-        <div class="sw-step" [class.sw-active]="pasoActivo === 0" [class.sw-done]="pasoActivo > 0">
+        <div class="sw-step" [class.sw-active]="pasoActivo===0" [class.sw-done]="pasoActivo>0">
           <div class="sw-bubble">
             @if (pasoActivo > 0) { <lucide-icon name="Check" size="13"></lucide-icon> }
             @else { <span>1</span> }
           </div>
           <span class="sw-label">Apertura</span>
         </div>
-        <div class="sw-connector" [class.sw-done]="pasoActivo > 0"></div>
-        <div class="sw-step" [class.sw-active]="pasoActivo === 1">
+        <div class="sw-connector" [class.sw-done]="pasoActivo>0"></div>
+        <div class="sw-step" [class.sw-active]="pasoActivo===1">
           <div class="sw-bubble"><span>2</span></div>
           <span class="sw-label">Cronograma</span>
         </div>
       </div>
 
-      <!-- ══ PASO 1 ══════════════════════════════════════════ -->
       @if (pasoActivo === 0) {
         <form [formGroup]="formularioPeriodo" class="step-content" (ngSubmit)="confirmarApertura()">
           <div class="form-group">
@@ -155,51 +165,45 @@
             <input id="nombrePeriodo" type="text" class="input-field"
                    [class.input-invalid]="nombrePeriodoInvalido"
                    formControlName="nombrePeriodo"
-                   placeholder="Ej. 2026-2027 CI" autocomplete="off">
+                   placeholder="Ej. PAO 2026-I (Abril – Agosto)" autocomplete="off">
             @if (nombrePeriodoInvalido) {
               <span class="field-error">El nombre es obligatorio (mínimo 3 caracteres)</span>
             }
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="fechaInicio">Fecha de Inicio <span class="req">*</span></label>
-              <input id="fechaInicio" type="date" class="input-field" formControlName="fechaInicio">
+              <label>Fecha de Inicio <span class="req">*</span></label>
+              <input type="date" class="input-field" formControlName="fechaInicio">
             </div>
             <div class="form-group">
-              <label for="fechaFin">Fecha de Cierre <span class="req">*</span></label>
-              <input id="fechaFin" type="date" class="input-field" formControlName="fechaFin">
+              <label>Fecha de Cierre <span class="req">*</span></label>
+              <input type="date" class="input-field" formControlName="fechaFin">
             </div>
           </div>
           <div class="info-box">
             <lucide-icon name="Info" size="15"></lucide-icon>
-            <p>Al confirmar, el sistema creará el periodo en estado <strong>PLANIFICACION</strong>
-              e instanciará automáticamente todas las fases activas. Podrás ajustar el cronograma
-              en el siguiente paso.</p>
+            <p>Al confirmar se crea el periodo en estado <strong>PLANIFICACION</strong>
+              e instancia automáticamente todas las fases activas. Podrás ajustar el
+              cronograma en el siguiente paso y luego iniciarlo desde la tabla.</p>
           </div>
         </form>
         <div class="form-footer">
           <button class="btn-ghost" (click)="cerrarDialogCreacion()" [disabled]="abriendo">Cancelar</button>
           <button class="btn-primary" (click)="confirmarApertura()" [disabled]="abriendo">
-            @if (abriendo) {
-              <lucide-icon name="Loader" size="16" class="spin"></lucide-icon> Abriendo…
-            } @else {
-              Siguiente <lucide-icon name="ArrowRight" size="16"></lucide-icon>
-            }
+            @if (abriendo) { <lucide-icon name="Loader" size="16" class="spin"></lucide-icon> Abriendo… }
+            @else { Siguiente <lucide-icon name="ArrowRight" size="16"></lucide-icon> }
           </button>
         </div>
       }
 
-      <!-- ══ PASO 2 ══════════════════════════════════════════ -->
       @if (pasoActivo === 1) {
-
-        <!-- Barra de contexto -->
         <div class="periodo-context-bar">
           <div class="pcb-info">
             <lucide-icon name="Calendar" size="15"></lucide-icon>
             <strong>{{ periodoNuevoNombre }}</strong>
             <span class="pcb-sep">|</span>
             <span>{{ periodoRangoInicio | date:'dd/MM/yyyy' }}</span>
-            <span style="color:#86efac;">→</span>
+            <span style="color:#86efac; margin:0 2px;">→</span>
             <span>{{ periodoRangoFin | date:'dd/MM/yyyy' }}</span>
           </div>
           <div [class]="tieneErroresCronograma ? 'pcb-warn' : 'pcb-ok'">
@@ -208,7 +212,6 @@
           </div>
         </div>
 
-        <!-- Loading -->
         @if (cargandoFases) {
           <div class="loading-fases">
             <lucide-icon name="Loader" size="22" class="spin"></lucide-icon>
@@ -216,187 +219,129 @@
           </div>
         }
 
-        <!-- ── Contenido principal del Paso 2 ────────────────
-             .paso2-scroll contiene TODO: gantt + tabla.
-             max-height: 70vh + overflow-y: auto → scroll interno
-             cuando el contenido es muy largo.
-             ───────────────────────────────────────────────── -->
         @if (!cargandoFases && fasesEditables.length > 0) {
-          <div class="paso2-scroll">
-
-            <!-- ── GANTT ───────────────────────────────────────
-                 .gantt-wrap:  padding lateral 1.25rem para separar
-                               el gantt de los bordes del dialog.
-                 .gantt-table: border redondeado contenedor.
-                 Cada fila tiene:
-                   - .gantt-label-col (180px fija): punto + nombre
-                   - .gantt-timeline-col (flex:1): barra posicionada
-                     con getFaseStyle() dentro de position:relative.
-                 ─────────────────────────────────────────────── -->
-            <div class="gantt-wrap">
-              <div class="gantt-table">
-
-                <!-- Cabecera de meses -->
-                <div class="gantt-row gantt-header-row">
-                  <div class="gantt-label-col">FASE</div>
-                  <div class="gantt-timeline-col">
-                    <!-- líneas de cuadrícula verticales -->
-                    @for (mes of mesesGantt; track mes.label) {
-                      <div class="gantt-grid-line" [style.left.%]="mes.leftPct"></div>
-                    }
-                    <!-- etiquetas de mes -->
-                    @for (mes of mesesGantt; track mes.label) {
-                      <div class="gantt-month-label"
-                           [style.left.%]="mes.leftPct"
-                           [style.width.%]="mes.widthPct">
-                        {{ mes.label }}
+          <div class="gantt-scroll-container">
+            <table class="unified-table">
+              <colgroup>
+                <col class="col-num">
+                <col class="col-fase">
+                <col class="col-fi">
+                <col class="col-ff">
+                <col class="col-dias">
+                <col class="col-est">
+                <col class="col-gantt">
+              </colgroup>
+              <thead>
+              <tr>
+                <th class="u-th sticky-num">#</th>
+                <th class="u-th sticky-fase">FASE</th>
+                <th class="u-th sticky-fi">FECHA INICIO</th>
+                <th class="u-th sticky-ff">FECHA FIN</th>
+                <th class="u-th sticky-dias" style="text-align:center;">DÍAS</th>
+                <th class="u-th sticky-est separator-right">ESTADO</th>
+                <th class="u-th gantt-th">
+                  <div class="gantt-header-inner">
+                    @for (col of ganttColumns; track col.label + col.leftPct) {
+                      <div class="gantt-col-header"
+                           [style.left.%]="col.leftPct"
+                           [style.width.%]="col.widthPct">
+                        <span class="gc-label">{{ col.label }}</span>
+                        <span class="gc-sub">{{ col.subLabel }}</span>
                       </div>
                     }
                   </div>
-                </div>
-
-                <!-- Una fila por fase -->
+                </th>
+              </tr>
+              </thead>
+              <tbody>
                 @for (fase of fasesEditables; track fase.idTipoFase; let i = $index) {
-                  <div class="gantt-row gantt-phase-row">
-
-                    <!-- Columna lateral: punto de color + nombre -->
-                    <div class="gantt-label-col">
-                      <span class="gantt-dot" [style.background]="getFaseColor(i)"></span>
-                      <span class="gantt-label-text" [title]="fase.nombreFase">{{ fase.nombreFase }}</span>
-                    </div>
-
-                    <!-- Columna de línea de tiempo -->
-                    <div class="gantt-timeline-col">
-                      <!-- cuadrícula -->
-                      @for (mes of mesesGantt; track mes.label) {
-                        <div class="gantt-grid-line" [style.left.%]="mes.leftPct"></div>
+                  <tr [class.row-error]="fase.tieneError">
+                    <td class="u-td sticky-num">
+                      <div class="orden-cell">
+                        <span class="orden-dot" [style.background]="getFaseColor(i)"></span>
+                        <span class="orden-num">{{ fase.orden }}</span>
+                      </div>
+                    </td>
+                    <td class="u-td sticky-fase">
+                      <span class="fase-nombre" [class.fase-nombre--error]="fase.tieneError"
+                            [title]="fase.nombreFase">{{ fase.nombreFase }}</span>
+                    </td>
+                    <td class="u-td sticky-fi">
+                      <input type="date" class="date-input"
+                             [class.date-input-error]="fase.tieneError"
+                             [(ngModel)]="fase.fechaInicio"
+                             [min]="periodoRangoInicio" [max]="periodoRangoFin"
+                             (change)="validarCronograma()">
+                    </td>
+                    <td class="u-td sticky-ff">
+                      <input type="date" class="date-input"
+                             [class.date-input-error]="fase.tieneError"
+                             [(ngModel)]="fase.fechaFin"
+                             [min]="fase.fechaInicio || periodoRangoInicio"
+                             [max]="periodoRangoFin"
+                             (change)="validarCronograma()">
+                    </td>
+                    <td class="u-td sticky-dias" style="text-align:center;">
+                      <span class="dias-badge"
+                            [class.dias-ok]="!fase.tieneError && !!fase.fechaInicio && !!fase.fechaFin">
+                        {{ getDuracionDias(fase) || '—' }}
+                      </span>
+                    </td>
+                    <td class="u-td sticky-est separator-right">
+                      @if (fase.tieneError) {
+                        <div class="estado-error">
+                          <lucide-icon name="AlertCircle" size="13"></lucide-icon>
+                          <span>{{ fase.mensajeError }}</span>
+                        </div>
+                      } @else if (fase.fechaInicio && fase.fechaFin) {
+                        <div class="estado-ok">
+                          <lucide-icon name="CheckCircle2" size="14"></lucide-icon>
+                          <span>OK</span>
+                        </div>
+                      } @else {
+                        <span class="estado-pending">Pendiente</span>
                       }
-
-                      <!-- barra de la fase -->
-                      @if (fase.fechaInicio && fase.fechaFin) {
-                        <div class="gantt-bar-outer"
-                             [style.left]="getFaseStyle(fase)['left']"
-                             [style.width]="getFaseStyle(fase)['width']">
-
+                    </td>
+                    <td class="u-td gantt-td">
+                      @for (col of ganttColumns; track col.label + col.leftPct) {
+                        <div class="gantt-vline" [style.left.%]="col.leftPct"></div>
+                      }
+                      @if (getFaseBarStyle(fase); as barStyle) {
+                        <div class="gantt-bar-wrap"
+                             [style.left]="barStyle.left"
+                             [style.width]="barStyle.width">
                           <div class="gantt-bar"
                                [class.gantt-bar--error]="fase.tieneError"
-                               [style.background-color]="getFaseColor(i)">
-                            <span class="gantt-bar-label">{{ fase.nombreFase }}</span>
+                               [style.background]="getFaseColor(i)"
+                               [title]="fase.nombreFase">
+                            <span class="gantt-bar-text">{{ fase.nombreFase }}</span>
                             @if (fase.tieneError) {
-                              <lucide-icon name="AlertTriangle" size="10"
-                                           class="gantt-bar-alert"></lucide-icon>
+                              <lucide-icon name="AlertTriangle" size="10" class="gantt-bar-warn"></lucide-icon>
                             }
                           </div>
-
-                          <!-- tooltip de error -->
                           @if (fase.tieneError) {
                             <div class="gantt-tooltip">
-                              <div class="gantt-tooltip-header">
-                                <lucide-icon name="AlertTriangle" size="12"></lucide-icon>
-                                Error de Traslape
+                              <div class="gantt-tooltip-title">
+                                <lucide-icon name="AlertTriangle" size="12"></lucide-icon> Error de Traslape
                               </div>
-                              {{ fase.mensajeError }}
+                              <div>{{ fase.mensajeError }}</div>
                             </div>
                           }
-
                         </div>
                       }
-                    </div>
-
-                  </div><!-- /gantt-phase-row -->
+                    </td>
+                  </tr>
                 }
-
-              </div><!-- /gantt-table -->
-            </div><!-- /gantt-wrap -->
-
-            <!-- ── TABLA DE CONFIGURACIÓN ──────────────────── -->
-            <div class="table-wrapper">
-              <table class="data-table cronograma-table">
-                <thead>
-                <tr>
-                  <th style="width: 46px;">#</th>
-                  <th>Fase</th>
-                  <th style="width: 162px;">Fecha Inicio</th>
-                  <th style="width: 162px;">Fecha Fin</th>
-                  <th style="width: 70px; text-align: center;">Días</th>
-                  <th>Estado</th>
-                </tr>
-                </thead>
-                <tbody>
-                  @for (fase of fasesEditables; track fase.idTipoFase; let i = $index) {
-                    <tr [class.fase-row-error]="fase.tieneError">
-
-                      <td style="text-align: center;">
-                        <span class="orden-badge"
-                              [style.background]="getFaseColor(i) + '20'"
-                              [style.color]="getFaseColor(i)"
-                              [style.border]="'1.5px solid ' + getFaseColor(i) + '55'">
-                          {{ fase.orden }}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span class="fase-nombre"
-                              [class.fase-nombre--error]="fase.tieneError">
-                          {{ fase.nombreFase }}
-                        </span>
-                      </td>
-
-                      <td>
-                        <input type="date" class="date-input"
-                               [class.date-input-error]="fase.tieneError"
-                               [(ngModel)]="fase.fechaInicio"
-                               [min]="periodoRangoInicio"
-                               [max]="periodoRangoFin"
-                               (change)="validarCronograma()">
-                      </td>
-
-                      <td>
-                        <input type="date" class="date-input"
-                               [class.date-input-error]="fase.tieneError"
-                               [(ngModel)]="fase.fechaFin"
-                               [min]="fase.fechaInicio || periodoRangoInicio"
-                               [max]="periodoRangoFin"
-                               (change)="validarCronograma()">
-                      </td>
-
-                      <td style="text-align: center;">
-                        <span class="dias-badge"
-                              [class.dias-badge--ok]="!fase.tieneError && !!fase.fechaInicio && !!fase.fechaFin">
-                          {{ getDuracionDias(fase) || '—' }}
-                        </span>
-                      </td>
-
-                      <td>
-                        @if (fase.tieneError) {
-                          <div class="row-error-msg">
-                            <lucide-icon name="AlertCircle" size="13"></lucide-icon>
-                            {{ fase.mensajeError }}
-                          </div>
-                        } @else if (fase.fechaInicio && fase.fechaFin) {
-                          <span class="row-ok-msg">
-                            <lucide-icon name="CheckCircle2" size="14"></lucide-icon> OK
-                          </span>
-                        } @else {
-                          <span class="row-pending-msg">Pendiente</span>
-                        }
-                      </td>
-
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div><!-- /table-wrapper -->
-
-          </div><!-- /paso2-scroll -->
+              </tbody>
+            </table>
+          </div>
         }
 
-        <!-- Footer Paso 2 -->
-        <div class="form-footer">
+        <div class="form-footer paso2-footer">
           <button class="btn-ghost" (click)="pasoActivo = 0" [disabled]="guardandoCronograma">
             <lucide-icon name="ArrowLeft" size="15"></lucide-icon> Volver
           </button>
-          <span style="flex: 1;"></span>
+          <span style="flex:1;"></span>
           <button class="btn-ghost" (click)="cerrarDialogCreacion()" [disabled]="guardandoCronograma">
             Cerrar
           </button>
@@ -410,11 +355,82 @@
             }
           </button>
         </div>
+      }
 
-      }<!-- /paso 1 -->
+    </div>
+  </div>
+}
 
-    </div><!-- /modal-box -->
-  </div><!-- /modal-backdrop -->
+
+<!-- ============================================================ -->
+<!-- MODAL: Confirmar Inicio de Periodo  ← NUEVO                 -->
+<!--                                                              -->
+<!-- Aparece solo cuando el admin pulsa el botón PlayCircle       -->
+<!-- en un periodo CONFIGURADO. Muestra nombre + fechas para      -->
+<!-- que la decisión sea consciente e irreversible.               -->
+<!-- ============================================================ -->
+@if (modalIniciarAbierto && periodoAIniciar) {
+  <div class="modal-backdrop">
+    <div class="modal-box modal-confirm">
+
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <lucide-icon name="PlayCircle" size="20" style="color:#15803d;"></lucide-icon>
+          Iniciar Periodo Académico
+        </h3>
+        <button type="button" class="btn-icon" [disabled]="iniciandoPeriodo"
+                (click)="cerrarModalIniciar()">
+          <lucide-icon name="X" size="18"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Cuerpo con resumen del periodo a iniciar -->
+      <div class="confirm-body">
+
+        <div class="confirm-periodo-card">
+          <lucide-icon name="Calendar" size="18" style="color:#15803d; flex-shrink:0;"></lucide-icon>
+          <div>
+            <div class="confirm-periodo-nombre">{{ periodoAIniciar.nombrePeriodo }}</div>
+            <div class="confirm-periodo-fechas">
+              {{ periodoAIniciar.fechaInicio | date:'dd/MM/yyyy' }}
+              <span style="margin:0 4px; color:#94a3b8;">→</span>
+              {{ periodoAIniciar.fechaFin | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
+          <span class="status-pill configurado" style="margin-left:auto;">CONFIGURADO</span>
+        </div>
+
+        <div class="confirm-warning">
+          <lucide-icon name="AlertTriangle" size="16" style="flex-shrink:0;"></lucide-icon>
+          <div>
+            <strong>Esta acción cambiará el estado a EN PROCESO.</strong>
+            <p>El periodo quedará activo en el sistema y las convocatorias de
+              ayudantías quedarán habilitadas. Esta transición no se puede revertir
+              manualmente; solo el vencimiento de la fecha de cierre desactiva el
+              periodo de forma automática.</p>
+          </div>
+        </div>
+
+        <p style="font-size:.85rem; color:#64748b; margin:0;">
+          ¿Confirmas que el cronograma está revisado y que deseas iniciar el periodo?
+        </p>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-ghost" (click)="cerrarModalIniciar()" [disabled]="iniciandoPeriodo">
+          Cancelar
+        </button>
+        <button class="btn-iniciar" (click)="confirmarInicio()" [disabled]="iniciandoPeriodo">
+          @if (iniciandoPeriodo) {
+            <lucide-icon name="Loader" size="16" class="spin"></lucide-icon> Iniciando…
+          } @else {
+            <lucide-icon name="PlayCircle" size="16"></lucide-icon> Sí, iniciar periodo
+          }
+        </button>
+      </div>
+
+    </div>
+  </div>
 }
 
 
@@ -425,26 +441,25 @@
   <div class="modal-backdrop">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 style="margin:0; font-size:1rem; font-weight:600; color:#1e293b;
-                   display:flex; align-items:center; gap:8px;">
+        <h3 class="modal-title">
           <lucide-icon name="Edit2" size="20"></lucide-icon> Editar Periodo
         </h3>
         <button type="button" class="btn-icon" (click)="cerrarModalEditar()">
           <lucide-icon name="X" size="18"></lucide-icon>
         </button>
       </div>
-      <div style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+      <div style="padding:1.5rem; display:flex; flex-direction:column; gap:1rem;">
         <div class="form-group">
           <label>Nombre del Periodo</label>
           <input type="text" [(ngModel)]="formularioEdicion.nombrePeriodo"
                  class="input-field" placeholder="Ej. 2026-2027 CI">
         </div>
-        <div style="display: flex; gap: 1rem;">
-          <div class="form-group" style="flex: 1;">
+        <div style="display:flex; gap:1rem;">
+          <div class="form-group" style="flex:1;">
             <label>Fecha de Inicio</label>
             <input type="date" [(ngModel)]="formularioEdicion.fechaInicio" class="input-field">
           </div>
-          <div class="form-group" style="flex: 1;">
+          <div class="form-group" style="flex:1;">
             <label>Fecha de Cierre</label>
             <input type="date" [(ngModel)]="formularioEdicion.fechaFin" class="input-field">
           </div>
@@ -477,18 +492,16 @@
   <div class="modal-backdrop">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 style="margin:0; font-size:1rem; font-weight:600; color:#1e293b;
-                   display:flex; align-items:center; gap:8px;">
+        <h3 class="modal-title">
           <lucide-icon name="Copy" size="20"></lucide-icon> Clonar Requisitos
         </h3>
         <button type="button" class="btn-icon" (click)="cerrarModalImportar()">
           <lucide-icon name="X" size="18"></lucide-icon>
         </button>
       </div>
-      <div style="padding: 1.5rem;">
-        <p style="font-size: 0.9rem; color: #64748b; margin: 0 0 1.25rem;">
-          Seleccione un período académico del historial para importar sus
-          parámetros y requisitos activos a este nuevo periodo.
+      <div style="padding:1.5rem;">
+        <p style="font-size:.9rem; color:#64748b; margin:0 0 1.25rem;">
+          Seleccione un período del historial para importar sus parámetros y requisitos activos.
         </p>
         <div class="form-group">
           <label>Periodo Fuente</label>
@@ -496,9 +509,7 @@
             <option [ngValue]="null">-- Elegir Origen --</option>
             @for (p of periodos; track p.idPeriodoAcademico) {
               @if (p.idPeriodoAcademico !== importarConfig.idDestino) {
-                <option [ngValue]="p.idPeriodoAcademico">
-                  {{ p.nombrePeriodo }} ({{ p.estado }})
-                </option>
+                <option [ngValue]="p.idPeriodoAcademico">{{ p.nombrePeriodo }} ({{ p.estado }})</option>
               }
             }
           </select>
@@ -506,8 +517,7 @@
       </div>
       <div class="form-footer">
         <button class="btn-ghost" (click)="cerrarModalImportar()">Cancelar</button>
-        <button class="btn-primary" [disabled]="!importarConfig.idFuente"
-                (click)="confirmarImportacion()">
+        <button class="btn-primary" [disabled]="!importarConfig.idFuente" (click)="confirmarImportacion()">
           <lucide-icon name="Download" size="16"></lucide-icon> Iniciar Importación
         </button>
       </div>

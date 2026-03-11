@@ -38,4 +38,10 @@ public class ConfiguracionPeriodoController {
             @Valid @RequestBody AjusteCronogramaRequestDTO request) {
         return ResponseEntity.ok(cronogramaService.guardarCronograma(request));
     }
+
+    @PostMapping("/periodos/{id}/iniciar")
+    public ResponseEntity<StandardResponseDTO<Integer>> iniciarPeriodo(
+            @PathVariable Integer id) {
+        return ResponseEntity.ok(periodoService.iniciarPeriodo(id));
+    }
 }

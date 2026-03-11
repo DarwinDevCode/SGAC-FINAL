@@ -8,7 +8,7 @@ import org.uteq.sgacfinal.entity.PeriodoFase;
 
 @Repository
 public interface ICronogramaRepository extends JpaRepository<PeriodoFase, Integer> {
-    @Query(value = "SELECT planificacion.fn_ajustar_cronograma_lote(:idPeriodo, :fasesJson::jsonb)", nativeQuery = true)
+    @Query(value = "SELECT planificacion.fn_ajustar_cronograma_lote(:idPeriodo, CAST(:fasesJson AS jsonb))", nativeQuery = true)
     String ajustarCronogramaLote(
             @Param("idPeriodo") Integer idPeriodo,
             @Param("fasesJson") String fasesJson

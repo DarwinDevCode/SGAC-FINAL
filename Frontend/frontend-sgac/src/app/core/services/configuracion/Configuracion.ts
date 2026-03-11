@@ -36,4 +36,10 @@ export class ConfiguracionService {
       data
     );
   }
+
+  iniciarPeriodo(idPeriodo: number): Observable<StandardResponse<number>> {
+    return this.http.post<StandardResponse<number>>(
+      `${this.baseUrl}/admin/configuracion/periodos/${idPeriodo}/iniciar`, {}
+    );
+  }
 }

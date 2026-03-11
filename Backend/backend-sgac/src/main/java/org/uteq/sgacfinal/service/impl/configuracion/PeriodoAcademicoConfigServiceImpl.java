@@ -37,4 +37,19 @@ public class PeriodoAcademicoConfigServiceImpl implements IPeriodoAcademicoServi
                     .build();
         }
     }
+
+    @Override
+    @Transactional
+    public StandardResponseDTO<Integer> iniciarPeriodo(Integer idPeriodo) {
+        try {
+            String json = repository.iniciarPeriodo(idPeriodo);
+            return objectMapper.readValue(json, new TypeReference<>() {});
+        } catch (Exception e) {
+            log.error("Error al iniciar periodo {}: {}", idPeriodo, e.getMessage());
+            return StandardResponseDTO.<Integer>builder()
+                    .exito(false)
+                    .mensaje("Error técnico al iniciar periodo: " + e.getMessage())
+                    .build();
+        }
+    }
 }
