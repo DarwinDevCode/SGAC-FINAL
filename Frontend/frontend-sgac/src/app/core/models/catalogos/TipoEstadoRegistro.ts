@@ -7,7 +7,7 @@ export interface TipoEstadoRegistroResponse {
 }
 
 export interface TipoEstadoRegistroRequest {
-  nombre_estado: string;
+  nombreEstado: string;
   descripcion: string;
   codigo: string;
 }

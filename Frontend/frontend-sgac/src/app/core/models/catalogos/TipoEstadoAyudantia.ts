@@ -7,7 +7,7 @@ export interface TipoEstadoAyudantiaResponse {
 }
 
 export interface TipoEstadoAyudantiaRequest {
-  nombre_estado: string;
+  nombreEstado: string;
   descripcion: string;
   codigo: string;
 }

@@ -6,6 +6,6 @@ export interface TipoSancionResponse {
 }
 
 export interface TipoSancionRequest {
-  nombre_tipo_sancion: string;
+  nombreTipoSancion: string;
   codigo: string;
 }

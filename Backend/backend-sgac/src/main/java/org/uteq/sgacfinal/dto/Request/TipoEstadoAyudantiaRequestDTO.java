@@ -2,13 +2,18 @@ package org.uteq.sgacfinal.dto.Request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import lombok.*;
+
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+
 public class TipoEstadoAyudantiaRequestDTO {
 
     @NotBlank(message = "El nombre del estado es requerido")

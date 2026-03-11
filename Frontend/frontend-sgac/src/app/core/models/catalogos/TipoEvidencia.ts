@@ -8,6 +8,6 @@ export interface TipoEvidenciaResponse {
 
 export interface TipoEvidenciaRequest {
   nombre: string;
-  extension_permitida: string;
+  extensionPermitida: string;
   codigo: string;
 }

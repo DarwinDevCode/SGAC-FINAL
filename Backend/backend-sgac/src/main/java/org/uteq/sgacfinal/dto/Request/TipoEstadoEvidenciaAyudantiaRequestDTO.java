@@ -1,5 +1,7 @@
 package org.uteq.sgacfinal.dto.Request;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -9,6 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TipoEstadoEvidenciaAyudantiaRequestDTO {
     @NotBlank(message = "El nombre del estado es requerido")
     @Size(max = 50, message = "El nombre no puede exceder 50 caracteres")

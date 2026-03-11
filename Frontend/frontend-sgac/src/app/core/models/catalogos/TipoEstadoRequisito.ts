@@ -7,7 +7,7 @@ export interface TipoEstadoRequisitoResponse {
 }
 
 export interface TipoEstadoRequisitoRequest {
-  nombre_estado: string;
+  nombreEstado: string;
   descripcion: string;
   codigo: string;
 }

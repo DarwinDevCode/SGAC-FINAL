@@ -15,14 +15,11 @@ import org.uteq.sgacfinal.dto.Response.TipoEstadoRequisitoResponseDTO;
 import org.uteq.sgacfinal.dto.Response.TipoEvidenciaResponseDTO;
 import org.uteq.sgacfinal.dto.Response.TipoFaseResponseDTO;
 import org.uteq.sgacfinal.dto.Response.TipoSancionAyudanteCatedraResponseDTO;
+import org.uteq.sgacfinal.dto.Request.TipoEstadoRegistroRequestDTO;
 import org.uteq.sgacfinal.service.catalogo.*;
 
 import java.util.List;
 
-/**
- * Controlador REST para los catálogos maestros del sistema.
- * Utiliza las funciones PostgreSQL con control transaccional.
- */
 @RestController
 @RequestMapping("/api/admin/catalogos-maestros")
 @RequiredArgsConstructor

@@ -7,8 +7,8 @@ export interface PrivilegioResponse {
 }
 
 export interface PrivilegioRequest {
-  nombre_privilegio: string;
-  codigo_interno: string;
+  nombrePrivilegio: string;
+  codigoInterno: string;
   descripcion: string;
 }
 

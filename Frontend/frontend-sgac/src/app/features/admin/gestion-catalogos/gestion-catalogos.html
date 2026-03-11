@@ -1,402 +1,722 @@
 <div class="gestion-container">
+  <div class="catalogo-header">
+    <div class="catalogo-header-left">
+      <h2 class="title">Configuración Global</h2>
+      <p class="subtitle">{{ labelActivo }}</p>
+    </div>
 
+    <div class="catalogo-selector-wrapper">
+      <label class="selector-label" for="selectCatalogo">Catálogo</label>
+      <div class="selector-control">
+        <select
+          id="selectCatalogo"
+          class="catalogo-select"
+          [value]="activeTab"
+          (change)="onCatalogoChange($any($event.target).value)">
+          @for (grupo of grupos; track grupo.label) {
+            <optgroup [label]="grupo.label">
+              @for (op of grupo.opciones; track op.value) {
+                <option [value]="op.value">{{ op.label }}</option>
+              }
+            </optgroup>
+          }
+        </select>
+        <lucide-icon name="ChevronDown" size="16" class="selector-chevron"></lucide-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       ENCABEZADO DE LA SECCIÓN ACTIVA + BOTÓN NUEVO
+       ══════════════════════════════════════════════════════════ -->
   <div class="section-header">
-    <h2 class="title">Configuración Global</h2>
+    <h3>{{ labelActivo }}</h3>
+
+    @if (activeTab === 'roles')                  { <button type="button" class="btn-primary" (click)="abrirModalNuevoRol()">                  <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'facultades')             { <button type="button" class="btn-primary" (click)="abrirModalNuevaFacultad()">             <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'carreras')               { <button type="button" class="btn-primary" (click)="abrirModalNuevaCarrera()">              <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'asignaturas')            { <button type="button" class="btn-primary" (click)="abrirModalNuevaAsignatura()">           <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'requisitosPostulacion')  { <button type="button" class="btn-primary" (click)="abrirModalNuevoRequisito()">            <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'tiposSancion')           { <button type="button" class="btn-primary" (click)="abrirModalNuevoSancion()">              <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'estadosAyudantia')       { <button type="button" class="btn-primary" (click)="abrirModalNuevoEstadoAyudantia()">      <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'estadosRegistro')        { <button type="button" class="btn-primary" (click)="abrirModalNuevoEstadoRegistro()">       <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'tiposEvidencia')         { <button type="button" class="btn-primary" (click)="abrirModalNuevoEvidencia()">            <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'estadosEvidenciaMaestro'){ <button type="button" class="btn-primary" (click)="abrirModalNuevoEstadoEvidencia()">      <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'estadosRequisito')       { <button type="button" class="btn-primary" (click)="abrirModalNuevoEstadoRequisito()">      <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'tiposFase')              { <button type="button" class="btn-primary" (click)="abrirModalNuevoFase()">                 <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'estadosPostulacion')     { <button type="button" class="btn-primary" (click)="abrirModalNuevoEstadoPostulacion()">    <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
+    @if (activeTab === 'privilegios')            { <button type="button" class="btn-primary" (click)="abrirModalNuevoPrivilegio()">           <lucide-icon name="Plus" size="16"></lucide-icon> Nuevo </button> }
   </div>
 
-  <div class="tabs-container" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-    <button class="btn-ghost" [class.highlight]="activeTab === 'roles'" (click)="setTab('roles')">Tipos de Rol</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'facultades'" (click)="setTab('facultades')">Facultades</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'carreras'" (click)="setTab('carreras')">Carreras</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'asignaturas'" (click)="setTab('asignaturas')">Asignaturas</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'requisitosPostulacion'" (click)="setTab('requisitosPostulacion')">Req. Postulación</button>
-    <button class="btn-ghost" [class.highlight]="activeTab === 'estadoEvidencias'" (click)="setTab('estadoEvidencias')">Est. Evidencias</button>
-  </div>
+  <!-- ══════════════════════════════════════════════════════════
+       TABLAS POR CATÁLOGO
+       ══════════════════════════════════════════════════════════ -->
 
+  <!-- ── ROLES ─────────────────────────────────────────────── -->
   @if (activeTab === 'roles') {
-  <div class="section-header">
-    <h3>Listado de Roles</h3>
-    <button type="button" class="btn-primary" (click)="abrirModalNuevoRol()">
-      <lucide-icon name="Plus" size="18"></lucide-icon> Nuevo Rol
-    </button>
-  </div>
-
-  <div class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre del Rol</th>
-          <th>Estado</th>
-          <th class="text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading) { <tr>
-          <td colspan="4">Cargando...</td>
-        </tr> }
-        @else {
-        @for (rol of rolesList; track rol.idTipoRol) {
-        <tr>
-          <td>{{ rol.idTipoRol }}</td>
-          <td>{{ rol.nombreTipoRol }}</td>
-          <td><span class="status-pill" [class.active]="rol.activo" [class.inactive]="!rol.activo">{{ rol.activo ?
-              'Activo' : 'Inactivo' }}</span></td>
-          <td class="text-left">
-            <button type="button" class="btn-icon" (click)="abrirModalEditarRol(rol)" title="Editar"><lucide-icon
-                name="Edit" size="18"></lucide-icon></button>
-            <button type="button" class="btn-icon" (click)="toggleEstadoRol(rol)" title="Cambiar estado"><lucide-icon
-                name="Power" size="18"></lucide-icon></button>
-          </td>
-        </tr>
-        } @empty { <tr>
-          <td colspan="4">No hay roles registrados</td>
-        </tr> }
-        }
-      </tbody>
-    </table>
-  </div>
-
-  @if (mostrarModal) {
-  <div class="modal-backdrop">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Editar Rol' : 'Registrar Nuevo Rol' }}</h3>
-        <button type="button" class="btn-icon" (click)="mostrarModal = false"><lucide-icon name="X"
-            size="18"></lucide-icon></button>
-      </div>
-      <form class="user-form" (submit)="guardarRol(); $event.preventDefault()">
-        <div class="form-group full-width">
-          <label>Nombre del Rol</label>
-          <input [(ngModel)]="formRol.nombreTipoRol" name="nombreTipoRol" required class="input-field"
-            placeholder="Ej. ADMIN_SISTEMA" />
-        </div>
-        <div class="form-footer full-width">
-          <button type="button" class="btn-ghost" (click)="mostrarModal = false">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar</button>
-        </div>
-      </form>
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre del Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="4" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (rol of rolesList; track rol.idTipoRol) {
+              <tr>
+                <td>{{ rol.idTipoRol }}</td>
+                <td>{{ rol.nombreTipoRol }}</td>
+                <td><span class="status-pill" [class.active]="rol.activo" [class.inactive]="!rol.activo">{{ rol.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarRol(rol)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="toggleEstadoRol(rol)" title="Cambiar estado"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="4" class="td-empty">No hay roles registrados</td></tr> }
+          }
+        </tbody>
+      </table>
     </div>
-  </div>
-  }
   }
 
+  <!-- ── FACULTADES ─────────────────────────────────────────── -->
   @if (activeTab === 'facultades') {
-  <div class="section-header">
-    <h3>Listado de Facultades</h3>
-    <button type="button" class="btn-primary" (click)="abrirModalNuevaFacultad()">
-      <lucide-icon name="Plus" size="18"></lucide-icon> Nueva Facultad
-    </button>
-  </div>
-
-  <div class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre de la Facultad</th>
-          <th>Estado</th>
-          <th class="text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading) { <tr>
-          <td colspan="4">Cargando...</td>
-        </tr> }
-        @else {
-        @for (f of facultadesList; track f.idFacultad) {
-        <tr>
-          <td>{{ f.idFacultad }}</td>
-          <td>{{ f.nombreFacultad }}</td>
-          <td><span class="status-pill" [class.active]="f.activo" [class.inactive]="!f.activo">{{ f.activo ? 'Activo' :
-              'Inactivo' }}</span></td>
-          <td class="text-left">
-            <button type="button" class="btn-icon" (click)="abrirModalEditarFacultad(f)" title="Editar"><lucide-icon
-                name="Edit" size="18"></lucide-icon></button>
-            <button type="button" class="btn-icon" (click)="toggleEstadoFacultad(f)" title="Cambiar estado"><lucide-icon
-                name="Power" size="18"></lucide-icon></button>
-          </td>
-        </tr>
-        } @empty { <tr>
-          <td colspan="4">No hay facultades registradas</td>
-        </tr> }
-        }
-      </tbody>
-    </table>
-  </div>
-
-  @if (mostrarModal) {
-  <div class="modal-backdrop">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Editar Facultad' : 'Registrar Nueva Facultad' }}</h3>
-        <button type="button" class="btn-icon" (click)="mostrarModal = false"><lucide-icon name="X"
-            size="18"></lucide-icon></button>
-      </div>
-      <form class="user-form" (submit)="guardarFacultad(); $event.preventDefault()">
-        <div class="form-group full-width">
-          <label>Nombre de la Facultad</label>
-          <input [(ngModel)]="formFacultad.nombreFacultad" name="nombreFacultad" required class="input-field"
-            placeholder="Ej. Facultad de Ciencias de la Ingeniería" />
-        </div>
-        <div class="form-footer full-width">
-          <button type="button" class="btn-ghost" (click)="mostrarModal = false">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-  }
-  }
-
-  @if (activeTab === 'carreras') {
-  <div class="section-header">
-    <h3>Listado de Carreras</h3>
-    <button type="button" class="btn-primary" (click)="abrirModalNuevaCarrera()">
-      <lucide-icon name="Plus" size="18"></lucide-icon> Nueva Carrera
-    </button>
-  </div>
-
-  <div class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre de la Carrera</th>
-          <th>Estado</th>
-          <th class="text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading) { <tr>
-          <td colspan="4">Cargando...</td>
-        </tr> }
-        @else {
-        @for (c of carrerasList; track c.idCarrera) {
-        <tr>
-          <td>{{ c.idCarrera }}</td>
-          <td>{{ c.nombreCarrera }}</td>
-          <td><span class="status-pill" [class.active]="c.activo" [class.inactive]="!c.activo">{{ c.activo ? 'Activo' :
-              'Inactivo' }}</span></td>
-          <td class="text-left">
-            <button type="button" class="btn-icon" (click)="abrirModalEditarCarrera(c)" title="Editar"><lucide-icon
-                name="Edit" size="18"></lucide-icon></button>
-            <button type="button" class="btn-icon" (click)="toggleEstadoCarrera(c)" title="Cambiar estado"><lucide-icon
-                name="Power" size="18"></lucide-icon></button>
-          </td>
-        </tr>
-        } @empty { <tr>
-          <td colspan="4">No hay carreras registradas</td>
-        </tr> }
-        }
-      </tbody>
-    </table>
-  </div>
-
-  @if (mostrarModal) {
-  <div class="modal-backdrop">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Editar Carrera' : 'Registrar Nueva Carrera' }}</h3>
-        <button type="button" class="btn-icon" (click)="mostrarModal = false"><lucide-icon name="X"
-            size="18"></lucide-icon></button>
-      </div>
-      <form class="user-form" (submit)="guardarCarrera(); $event.preventDefault()">
-        <div class="form-group full-width">
-          <label>Facultad a la que pertenece</label>
-          <select [(ngModel)]="formCarrera.idFacultad" name="idFacultad" required class="input-field">
-            <option [ngValue]="undefined">Seleccione una facultad</option>
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre de la Facultad</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="4" class="td-loading">Cargando...</td></tr> }
+          @else {
             @for (f of facultadesList; track f.idFacultad) {
-            <option [ngValue]="f.idFacultad">{{ f.nombreFacultad }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group full-width">
-          <label>Nombre de la Carrera</label>
-          <input [(ngModel)]="formCarrera.nombreCarrera" name="nombreCarrera" required class="input-field"
-            placeholder="Ej. Ingeniería en Software" />
-        </div>
-        <div class="form-footer full-width">
-          <button type="button" class="btn-ghost" (click)="mostrarModal = false">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar</button>
-        </div>
-      </form>
+              <tr>
+                <td>{{ f.idFacultad }}</td>
+                <td>{{ f.nombreFacultad }}</td>
+                <td><span class="status-pill" [class.active]="f.activo" [class.inactive]="!f.activo">{{ f.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarFacultad(f)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="toggleEstadoFacultad(f)" title="Cambiar estado"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="4" class="td-empty">No hay facultades registradas</td></tr> }
+          }
+        </tbody>
+      </table>
     </div>
-  </div>
-  }
   }
 
-  @if (activeTab === 'asignaturas') {
-  <div class="section-header">
-    <h3>Listado de Asignaturas</h3>
-    <button type="button" class="btn-primary" (click)="abrirModalNuevaAsignatura()">
-      <lucide-icon name="Plus" size="18"></lucide-icon> Nueva Asignatura
-    </button>
-  </div>
-
-  <div class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Carrera</th>
-          <th>Nombre Asignatura</th>
-          <th>Semestre</th>
-          <th>Estado</th>
-          <th class="text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading) { <tr>
-          <td colspan="6">Cargando...</td>
-        </tr> }
-        @else {
-        @for (a of asignaturasList; track a.idAsignatura) {
-        <tr>
-          <td>{{ a.idAsignatura }}</td>
-          <td>{{ a.nombreCarrera }}</td>
-          <td>{{ a.nombreAsignatura }}</td>
-          <td>{{ a.semestre }}</td>
-          <td><span class="status-pill" [class.active]="a.activo" [class.inactive]="!a.activo">{{ a.activo ? 'Activo' :
-              'Inactivo' }}</span></td>
-          <td class="text-left">
-            <button type="button" class="btn-icon" (click)="abrirModalEditarAsignatura(a)" title="Editar"><lucide-icon
-                name="Edit" size="18"></lucide-icon></button>
-            <button type="button" class="btn-icon" (click)="toggleEstadoAsignatura(a)"
-              title="Cambiar estado"><lucide-icon name="Power" size="18"></lucide-icon></button>
-          </td>
-        </tr>
-        } @empty { <tr>
-          <td colspan="6">No hay asignaturas registradas</td>
-        </tr> }
-        }
-      </tbody>
-    </table>
-  </div>
-
-  @if (mostrarModal) {
-  <div class="modal-backdrop">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Editar Asignatura' : 'Registrar Nueva Asignatura' }}</h3>
-        <button type="button" class="btn-icon" (click)="mostrarModal = false"><lucide-icon name="X"
-            size="18"></lucide-icon></button>
-      </div>
-      <form class="user-form" (submit)="guardarAsignatura(); $event.preventDefault()">
-        <div class="form-group full-width">
-          <label>Carrera a la que pertenece</label>
-          <select [(ngModel)]="formAsignatura.idCarrera" name="idCarrera" required class="input-field">
-            <option [ngValue]="undefined">Seleccione una carrera</option>
+  <!-- ── CARRERAS ───────────────────────────────────────────── -->
+  @if (activeTab === 'carreras') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre de la Carrera</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="4" class="td-loading">Cargando...</td></tr> }
+          @else {
             @for (c of carrerasList; track c.idCarrera) {
-            <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option>
-            }
-          </select>
-        </div>
-        <div class="form-group full-width">
-          <label>Nombre de la Asignatura</label>
-          <input [(ngModel)]="formAsignatura.nombreAsignatura" name="nombreAsignatura" required class="input-field"
-            placeholder="Ej. Programación Orientada a Objetos" />
-        </div>
-        <div class="form-group full-width">
-          <label>Semestre (Nivel)</label>
-          <input type="number" [(ngModel)]="formAsignatura.semestre" name="semestre" required class="input-field"
-            min="1" max="10" />
-        </div>
-        <div class="form-footer full-width">
-          <button type="button" class="btn-ghost" (click)="mostrarModal = false">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar</button>
-        </div>
-      </form>
+              <tr>
+                <td>{{ c.idCarrera }}</td>
+                <td>{{ c.nombreCarrera }}</td>
+                <td><span class="status-pill" [class.active]="c.activo" [class.inactive]="!c.activo">{{ c.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarCarrera(c)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="toggleEstadoCarrera(c)" title="Cambiar estado"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="4" class="td-empty">No hay carreras registradas</td></tr> }
+          }
+        </tbody>
+      </table>
     </div>
-  </div>
-  }
   }
 
+  <!-- ── ASIGNATURAS ────────────────────────────────────────── -->
+  @if (activeTab === 'asignaturas') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Carrera</th><th>Nombre</th><th>Semestre</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (a of asignaturasList; track a.idAsignatura) {
+              <tr>
+                <td>{{ a.idAsignatura }}</td>
+                <td>{{ a.nombreCarrera }}</td>
+                <td>{{ a.nombreAsignatura }}</td>
+                <td>{{ a.semestre }}</td>
+                <td><span class="status-pill" [class.active]="a.activo" [class.inactive]="!a.activo">{{ a.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarAsignatura(a)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="toggleEstadoAsignatura(a)" title="Cambiar estado"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay asignaturas registradas</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── REQUISITOS DE POSTULACIÓN ──────────────────────────── -->
   @if (activeTab === 'requisitosPostulacion') {
-  <div class="section-header">
-    <h3>Requisitos de Postulación</h3>
-    <button type="button" class="btn-primary" (click)="abrirModalNuevoRequisito()">
-      <lucide-icon name="Plus" size="18"></lucide-icon> Nuevo Requisito
-    </button>
-  </div>
-
-  <div class="table-card">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre del Requisito</th>
-          <th>Descripción</th>
-          <th>Tipo Documento</th>
-          <th>Estado</th>
-          <th class="text-right">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if (loading) { <tr>
-          <td colspan="5">Cargando...</td>
-        </tr> }
-        @else {
-        @for (r of requisitosPostulacionList; track r.idTipoRequisitoPostulacion) {
-        <tr>
-          <td>{{ r.idTipoRequisitoPostulacion }}</td>
-          <td>{{ r.nombreRequisito }}</td>
-          <td style="max-width: 350px; white-space: normal; line-height: 1.4;">{{ r.descripcion }}</td>
-          <td>{{ r.tipoDocumentoPermitido }}</td>
-          <td><span class="status-pill" [class.active]="r.activo" [class.inactive]="!r.activo">{{ r.activo ? 'Activo' :
-              'Inactivo' }}</span></td>
-          <td class="text-left">
-            <button type="button" class="btn-icon" (click)="abrirModalEditarRequisito(r)" title="Editar"><lucide-icon
-                name="Edit" size="18"></lucide-icon></button>
-            <button type="button" class="btn-icon" (click)="toggleEstadoRequisito(r)"
-              title="Cambiar estado"><lucide-icon name="Power" size="18"></lucide-icon></button>
-          </td>
-        </tr>
-        } @empty { <tr>
-          <td colspan="5">No hay requisitos registrados</td>
-        </tr> }
-        }
-      </tbody>
-    </table>
-  </div>
-
-  @if (mostrarModal) {
-  <div class="modal-backdrop">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Editar Requisito' : 'Registrar Nuevo Requisito' }}</h3>
-        <button type="button" class="btn-icon" (click)="mostrarModal = false"><lucide-icon name="X"
-            size="18"></lucide-icon></button>
-      </div>
-      <form class="user-form" (submit)="guardarRequisito(); $event.preventDefault()">
-        <div class="form-group full-width">
-          <label>Nombre del Requisito</label>
-          <input [(ngModel)]="formRequisito.nombreRequisito" name="nombreRequisito" required class="input-field"
-            placeholder="Ej. Copia de Cédula" />
-        </div>
-        <div class="form-group full-width">
-          <label>Descripción</label>
-          <textarea [(ngModel)]="formRequisito.descripcion" name="descripcion" required class="input-field"
-            placeholder="Describe el propósito o detalles de este requisito" rows="3"></textarea>
-        </div>
-        <div class="form-group full-width">
-          <label>Tipo de Documento Permitido</label>
-          <select [(ngModel)]="formRequisito.tipoDocumentoPermitido" name="tipoDocumentoPermitido" class="input-field">
-            <option value="">Cualquiera</option>
-            <option value=".pdf">Documento PDF (.pdf)</option>
-            <option value=".jpg,.jpeg,.png">Imágenes (.jpg, .png)</option>
-            <option value=".doc,.docx">Documento Word (.docx)</option>
-            <option value=".xlsx">Hoja de Cálculo Excel (.xlsx)</option>
-          </select>
-          <small>Extensiones permitidas para este requisito.</small>
-        </div>
-        <div class="form-footer full-width">
-          <button type="button" class="btn-ghost" (click)="mostrarModal = false">Cancelar</button>
-          <button type="submit" class="btn-primary">Guardar</button>
-        </div>
-      </form>
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Descripción</th><th>Tipo Doc.</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (r of requisitosPostulacionList; track r.idTipoRequisitoPostulacion) {
+              <tr>
+                <td>{{ r.idTipoRequisitoPostulacion }}</td>
+                <td>{{ r.nombreRequisito }}</td>
+                <td class="td-wrap">{{ r.descripcion }}</td>
+                <td>{{ r.tipoDocumentoPermitido }}</td>
+                <td><span class="status-pill" [class.active]="r.activo" [class.inactive]="!r.activo">{{ r.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarRequisito(r)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="toggleEstadoRequisito(r)" title="Cambiar estado"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay requisitos registrados</td></tr> }
+          }
+        </tbody>
+      </table>
     </div>
-  </div>
-  }
   }
 
+  <!-- ── TIPOS DE SANCIÓN ───────────────────────────────────── -->
+  @if (activeTab === 'tiposSancion') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="5" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of tiposSancionList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre_tipo_sancion }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarSancion(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarSancion(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="5" class="td-empty">No hay tipos de sanción registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── ESTADOS DE AYUDANTÍA ───────────────────────────────── -->
+  @if (activeTab === 'estadosAyudantia') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of estadosAyudantiaList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre_estado }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarEstadoAyudantia(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarEstadoAyudantia(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay estados de ayudantía registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── ESTADOS DE REGISTRO ────────────────────────────────── -->
+  @if (activeTab === 'estadosRegistro') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of estadosRegistroList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre_estado }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarEstadoRegistro(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarEstadoRegistro(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay estados de registro registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── TIPOS DE EVIDENCIA ─────────────────────────────────── -->
+  @if (activeTab === 'tiposEvidencia') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Extensión</th><th>Código</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of tiposEvidenciaList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre }}</td>
+                <td><code>{{ item.extension_permitida }}</code></td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarEvidencia(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarEvidencia(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay tipos de evidencia registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── ESTADOS DE EVIDENCIA (/estados-evidencia) ─────────── -->
+  @if (activeTab === 'estadosEvidenciaMaestro') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of estadosEvidenciaList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre_estado }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarEstadoEvidencia(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarEstadoEvidencia(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay estados de evidencia registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── ESTADOS DE REQUISITO ───────────────────────────────── -->
+  @if (activeTab === 'estadosRequisito') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of estadosRequisitoList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre_estado }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarEstadoRequisito(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarEstadoRequisito(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay estados de requisito registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── TIPOS DE FASE ──────────────────────────────────────── -->
+  @if (activeTab === 'tiposFase') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>Orden</th><th>Nombre</th><th>Código</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of tiposFaseList; track item.id) {
+              <tr>
+                <td>{{ item.orden }}</td>
+                <td>{{ item.nombre }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarFase(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarFase(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay tipos de fase registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── ESTADOS DE POSTULACIÓN ─────────────────────────────── -->
+  @if (activeTab === 'estadosPostulacion') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Código</th><th>Descripción</th><th>Creado</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="7" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of estadosPostulacionList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre }}</td>
+                <td><code>{{ item.codigo }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td>{{ item.fecha_creacion | date:'dd/MM/yyyy' }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarEstadoPostulacion(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarEstadoPostulacion(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="7" class="td-empty">No hay estados de postulación registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ── PRIVILEGIOS ────────────────────────────────────────── -->
+  @if (activeTab === 'privilegios') {
+    <div class="table-card">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>Nombre</th><th>Cód. Interno</th><th>Descripción</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody>
+          @if (loading) { <tr><td colspan="6" class="td-loading">Cargando...</td></tr> }
+          @else {
+            @for (item of privilegiosList; track item.id) {
+              <tr>
+                <td>{{ item.id }}</td>
+                <td>{{ item.nombre_privilegio }}</td>
+                <td><code>{{ item.codigo_interno }}</code></td>
+                <td class="td-wrap">{{ item.descripcion }}</td>
+                <td><span class="status-pill" [class.active]="item.activo" [class.inactive]="!item.activo">{{ item.activo ? 'Activo' : 'Inactivo' }}</span></td>
+                <td>
+                  <button type="button" class="btn-icon" (click)="abrirModalEditarPrivilegio(item)" title="Editar"><lucide-icon name="Edit" size="16"></lucide-icon></button>
+                  <button type="button" class="btn-icon" (click)="desactivarPrivilegio(item)" title="Desactivar"><lucide-icon name="Power" size="16"></lucide-icon></button>
+                </td>
+              </tr>
+            } @empty { <tr><td colspan="6" class="td-empty">No hay privilegios registrados</td></tr> }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODALES — uno por catálogo, sólo se renderiza el activo
+       ══════════════════════════════════════════════════════════ -->
+  @if (mostrarModal) {
+    <div class="modal-backdrop">
+      <div class="modal-box">
+
+        <!-- Modal: Rol -->
+        @if (activeTab === 'roles') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Rol' : 'Nuevo Rol' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarRol(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre del Rol</label>
+              <input [(ngModel)]="formRol.nombreTipoRol" name="nombreTipoRol" required class="input-field" placeholder="Ej. ADMIN_SISTEMA" />
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Facultad -->
+        @if (activeTab === 'facultades') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Facultad' : 'Nueva Facultad' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarFacultad(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre de la Facultad</label>
+              <input [(ngModel)]="formFacultad.nombreFacultad" name="nombreFacultad" required class="input-field" placeholder="Ej. Facultad de Ciencias de la Ingeniería" />
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Carrera -->
+        @if (activeTab === 'carreras') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Carrera' : 'Nueva Carrera' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarCarrera(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Facultad</label>
+              <select [(ngModel)]="formCarrera.idFacultad" name="idFacultad" required class="input-field">
+                <option [ngValue]="undefined">Seleccione una facultad</option>
+                @for (f of facultadesList; track f.idFacultad) { <option [ngValue]="f.idFacultad">{{ f.nombreFacultad }}</option> }
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label>Nombre de la Carrera</label>
+              <input [(ngModel)]="formCarrera.nombreCarrera" name="nombreCarrera" required class="input-field" placeholder="Ej. Ingeniería en Software" />
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Asignatura -->
+        @if (activeTab === 'asignaturas') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Asignatura' : 'Nueva Asignatura' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarAsignatura(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Carrera</label>
+              <select [(ngModel)]="formAsignatura.idCarrera" name="idCarrera" required class="input-field">
+                <option [ngValue]="undefined">Seleccione una carrera</option>
+                @for (c of carrerasList; track c.idCarrera) { <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option> }
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label>Nombre de la Asignatura</label>
+              <input [(ngModel)]="formAsignatura.nombreAsignatura" name="nombreAsignatura" required class="input-field" placeholder="Ej. Programación Orientada a Objetos" />
+            </div>
+            <div class="form-group full-width">
+              <label>Semestre</label>
+              <input type="number" [(ngModel)]="formAsignatura.semestre" name="semestre" required class="input-field" min="1" max="10" />
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Requisito de Postulación -->
+        @if (activeTab === 'requisitosPostulacion') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Requisito' : 'Nuevo Requisito' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarRequisito(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre del Requisito</label>
+              <input [(ngModel)]="formRequisito.nombreRequisito" name="nombreRequisito" required class="input-field" placeholder="Ej. Copia de Cédula" />
+            </div>
+            <div class="form-group full-width">
+              <label>Descripción</label>
+              <textarea [(ngModel)]="formRequisito.descripcion" name="descripcion" required class="input-field" rows="3" placeholder="Propósito o detalles del requisito"></textarea>
+            </div>
+            <div class="form-group full-width">
+              <label>Tipo de Documento</label>
+              <select [(ngModel)]="formRequisito.tipoDocumentoPermitido" name="tipoDocumentoPermitido" class="input-field">
+                <option value="">Cualquiera</option>
+                <option value=".pdf">PDF (.pdf)</option>
+                <option value=".jpg,.jpeg,.png">Imágenes (.jpg, .png)</option>
+                <option value=".doc,.docx">Word (.docx)</option>
+                <option value=".xlsx">Excel (.xlsx)</option>
+              </select>
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Tipo de Sanción -->
+        @if (activeTab === 'tiposSancion') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Tipo de Sanción' : 'Nuevo Tipo de Sanción' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarSancion(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre</label>
+              <input [(ngModel)]="formSancion.nombreTipoSancion" name="nombre_tipo_sancion" required class="input-field" placeholder="Ej. Suspensión Temporal" />
+            </div>
+            <div class="form-group full-width">
+              <label>Código</label>
+              <input [(ngModel)]="formSancion.codigo" name="codigo" required class="input-field" placeholder="Ej. SUSP_TEMP" maxlength="25" />
+              <small>Se guardará en mayúsculas automáticamente.</small>
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal genérico para: Estado Ayudantía / Estado Registro / Estado Evidencia / Estado Requisito -->
+        @if (activeTab === 'estadosAyudantia' || activeTab === 'estadosRegistro' || activeTab === 'estadosEvidenciaMaestro' || activeTab === 'estadosRequisito') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar ' + labelActivo : 'Nuevo — ' + labelActivo }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <!-- Dado que los cuatro catálogos tienen exactamente los mismos campos
+               (nombre_estado, codigo, descripcion), comparten un único formulario.
+               El método guardar* correcto se elige con la función helper abajo. -->
+          <form class="user-form" (submit)="guardarEstadoGenerico(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre del Estado</label>
+              <input [(ngModel)]="formEstadoActivo.nombreEstado" name="nombre_estado" required class="input-field" placeholder="Ej. En Proceso" />
+            </div>
+            <div class="form-group full-width">
+              <label>Código</label>
+              <input [(ngModel)]="formEstadoActivo.codigo" name="codigo" required class="input-field" placeholder="Ej. EN_PROCESO" maxlength="25" />
+            </div>
+            <div class="form-group full-width">
+              <label>Descripción</label>
+              <textarea [(ngModel)]="formEstadoActivo.descripcion" name="descripcion" required class="input-field" rows="3" placeholder="Descripción del estado"></textarea>
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Tipo de Evidencia -->
+        @if (activeTab === 'tiposEvidencia') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Tipo de Evidencia' : 'Nuevo Tipo de Evidencia' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarEvidencia(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre</label>
+              <input [(ngModel)]="formEvidencia.nombre" name="nombre" required class="input-field" placeholder="Ej. Documento PDF" />
+            </div>
+            <div class="form-group full-width">
+              <label>Extensión Permitida</label>
+              <input [(ngModel)]="formEvidencia.extensionPermitida" name="extension_permitida" required class="input-field" placeholder="Ej. .pdf" maxlength="10" />
+              <small>Se guardará en minúsculas automáticamente.</small>
+            </div>
+            <div class="form-group full-width">
+              <label>Código</label>
+              <input [(ngModel)]="formEvidencia.codigo" name="codigo" required class="input-field" placeholder="Ej. DOC_PDF" maxlength="25" />
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Tipo de Fase -->
+        @if (activeTab === 'tiposFase') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Tipo de Fase' : 'Nuevo Tipo de Fase' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarFase(); $event.preventDefault()">
+            <div class="form-group">
+              <label>Orden</label>
+              <input type="number" [(ngModel)]="formFase.orden" name="orden" required class="input-field" min="1" placeholder="1" />
+            </div>
+            <div class="form-group">
+              <label>Código</label>
+              <input [(ngModel)]="formFase.codigo" name="codigo" required class="input-field" placeholder="Ej. POSTULACION" maxlength="25" />
+            </div>
+            <div class="form-group full-width">
+              <label>Nombre</label>
+              <input [(ngModel)]="formFase.nombre" name="nombre" required class="input-field" placeholder="Ej. Fase de Postulación" maxlength="120" />
+            </div>
+            <div class="form-group full-width">
+              <label>Descripción</label>
+              <textarea [(ngModel)]="formFase.descripcion" name="descripcion" required class="input-field" rows="3" placeholder="Descripción de la fase"></textarea>
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Estado de Postulación -->
+        @if (activeTab === 'estadosPostulacion') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Estado de Postulación' : 'Nuevo Estado de Postulación' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarEstadoPostulacion(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre</label>
+              <input [(ngModel)]="formEstadoPostulacion.nombre" name="nombre" required class="input-field" placeholder="Ej. En Revisión" maxlength="100" />
+            </div>
+            <div class="form-group full-width">
+              <label>Código</label>
+              <input [(ngModel)]="formEstadoPostulacion.codigo" name="codigo" required class="input-field" placeholder="Ej. EN_REVISION" maxlength="25" />
+            </div>
+            <div class="form-group full-width">
+              <label>Descripción</label>
+              <textarea [(ngModel)]="formEstadoPostulacion.descripcion" name="descripcion" required class="input-field" rows="3" placeholder="Descripción del estado" maxlength="255"></textarea>
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+        <!-- Modal: Privilegio -->
+        @if (activeTab === 'privilegios') {
+          <div class="modal-header">
+            <h3>{{ isEditMode ? 'Editar Privilegio' : 'Nuevo Privilegio' }}</h3>
+            <button type="button" class="btn-icon" (click)="mostrarModal=false"><lucide-icon name="X" size="18"></lucide-icon></button>
+          </div>
+          <form class="user-form" (submit)="guardarPrivilegio(); $event.preventDefault()">
+            <div class="form-group full-width">
+              <label>Nombre del Privilegio</label>
+              <input [(ngModel)]="formPrivilegio.nombrePrivilegio" name="nombre_privilegio" required class="input-field" placeholder="Ej. LECTURA" maxlength="50" />
+            </div>
+            <div class="form-group full-width">
+              <label>Código Interno</label>
+              <input [(ngModel)]="formPrivilegio.codigoInterno" name="codigo_interno" required class="input-field" placeholder="Ej. R" maxlength="1" />
+              <small>Exactamente 1 carácter (VARCHAR(1) en la BD).</small>
+            </div>
+            <div class="form-group full-width">
+              <label>Descripción</label>
+              <textarea [(ngModel)]="formPrivilegio.descripcion" name="descripcion" required class="input-field" rows="3" placeholder="Descripción del privilegio"></textarea>
+            </div>
+            <div class="form-footer full-width">
+              <button type="button" class="btn-ghost" (click)="mostrarModal=false">Cancelar</button>
+              <button type="submit" class="btn-primary">Guardar</button>
+            </div>
+          </form>
+        }
+
+      </div><!-- /modal-box -->
+    </div><!-- /modal-backdrop -->
+  }
+
+</div>

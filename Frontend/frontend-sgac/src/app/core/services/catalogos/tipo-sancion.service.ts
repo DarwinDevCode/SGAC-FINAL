@@ -18,6 +18,7 @@ export class TipoSancionService {
   }
 
   crear(data: TipoSancionRequest): Observable<StandardModificacionResponse> {
+
     return this.http.post<StandardModificacionResponse>(this.baseUrl, data);
   }
 
