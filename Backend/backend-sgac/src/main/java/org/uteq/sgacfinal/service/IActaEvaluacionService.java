@@ -25,4 +25,10 @@ public interface IActaEvaluacionService {
     List<ActaEvaluacionResponseDTO> listarPorPostulacion(Integer idPostulacion);
 
     void eliminar(Integer idActa);
+
+    /**
+     * Coordina la firma electrónica de un acta enviando el PDF físico a FirmaEC.
+     * Retorna el nuevo DTO del acta con sus confirmaciones actualizadas.
+     */
+    ActaEvaluacionResponseDTO firmarActa(Integer idActa, org.springframework.web.multipart.MultipartFile archivoFirma, String password, String rolFirmante);
 }

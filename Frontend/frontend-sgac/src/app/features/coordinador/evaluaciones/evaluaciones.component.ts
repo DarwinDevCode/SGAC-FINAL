@@ -64,6 +64,13 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
     confirmandoActa = false;
     postulanteActas: any = null;
 
+    // ─── Modal Firma Electrónica ──────────────────────────────────────────────
+    mostrarModalFirma = false;
+    actaSeleccionadaParaFirma: any = null;
+    archivoFirma: File | null = null;
+    passwordFirma: string = '';
+    firmandoDocumento = false;
+
     // ─── Computed ────────────────────────────────────────────────────────────
     get totalMeritos(): number {
         if (!this.meritosForm) return 0;
@@ -436,10 +443,62 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
             this.http.post<any>(`${this.BASE}/evaluacion-seleccion/actas/confirmar`, body).subscribe({
                 next: () => {
                     this.confirmandoActa = false;
-                    this.showSuccess('Confirmación registrada correctamente.');
+                    this.showSuccess('Confirmación (sin firma electrónica) registrada correctamente.');
                     this.cargarActas(this.postulanteActas!.idPostulacion);
                 },
                 error: (err) => { this.confirmandoActa = false; this.showError('Error: ' + (err.error || err.message)); }
+            })
+        );
+    }
+
+    abrirModalFirma(acta: any): void {
+        this.actaSeleccionadaParaFirma = acta;
+        this.archivoFirma = null;
+        this.passwordFirma = '';
+        this.mostrarModalFirma = true;
+    }
+
+    cerrarModalFirma(): void {
+        this.mostrarModalFirma = false;
+        this.actaSeleccionadaParaFirma = null;
+        this.archivoFirma = null;
+        this.passwordFirma = '';
+    }
+
+    onFileSelected(event: any): void {
+        const file = event.target.files[0];
+        if (file) {
+            this.archivoFirma = file;
+        }
+    }
+
+    firmarElectronicamente(): void {
+        if (!this.actaSeleccionadaParaFirma || !this.archivoFirma || !this.passwordFirma) {
+            this.showError('Por favor, selecciona tu archivo de firma (.p12) y escribe la contraseña.');
+            return;
+        }
+
+        this.firmandoDocumento = true;
+        
+        const formData = new FormData();
+        formData.append('archivoFirma', this.archivoFirma);
+        formData.append('password', this.passwordFirma);
+        formData.append('rolFirmante', this.userRol); // DECANO, COORDINADOR, DOCENTE
+
+        const idActa = this.actaSeleccionadaParaFirma.idActa;
+
+        this.subs.add(
+            this.http.post<any>(`${this.BASE}/firmadigital/actas/${idActa}/firmar`, formData).subscribe({
+                next: () => {
+                    this.firmandoDocumento = false;
+                    this.cerrarModalFirma();
+                    this.showSuccess('Firma electrónica agregada exitosamente.');
+                    this.cargarActas(this.postulanteActas!.idPostulacion);
+                },
+                error: (err) => { 
+                    this.firmandoDocumento = false; 
+                    this.showError('Error de FirmaEC: ' + (err.error?.message || err.message || 'Contraseña o archivo inválido.')); 
+                }
             })
         );
     }

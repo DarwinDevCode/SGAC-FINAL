@@ -408,8 +408,8 @@
                             {{ actasMeritos ? 'Regenerar' : 'Generar' }} Acta
                         </button>
                         @if (actasMeritos && !yaConfirme(actasMeritos)) {
-                        <button class="btn-primary" (click)="confirmarActa(actasMeritos)" [disabled]="confirmandoActa">
-                            <lucide-icon name="check" size="14"></lucide-icon> Confirmar ({{ userRol }})
+                        <button class="btn-primary" (click)="abrirModalFirma(actasMeritos)" [disabled]="confirmandoActa">
+                            <lucide-icon name="pen-tool" size="14"></lucide-icon> Firmar ({{ userRol }})
                         </button>
                         }
                         @if (actasMeritos?.urlDocumento) {
@@ -451,9 +451,9 @@
                             {{ actasOposicion ? 'Regenerar' : 'Generar' }} Acta
                         </button>
                         @if (actasOposicion && !yaConfirme(actasOposicion)) {
-                        <button class="btn-primary" (click)="confirmarActa(actasOposicion)"
+                        <button class="btn-primary" (click)="abrirModalFirma(actasOposicion)"
                             [disabled]="confirmandoActa">
-                            <lucide-icon name="check" size="14"></lucide-icon> Confirmar ({{ userRol }})
+                            <lucide-icon name="pen-tool" size="14"></lucide-icon> Firmar ({{ userRol }})
                         </button>
                         }
                         @if (actasOposicion?.urlDocumento) {
@@ -504,3 +504,43 @@
     }
 
 </div>
+
+<!-- Modal Firma Electrónica -->
+@if (mostrarModalFirma) {
+<div class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h3>Firma Electrónica</h3>
+            <button class="icon-btn" (click)="cerrarModalFirma()">
+                <lucide-icon name="x" size="20"></lucide-icon>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="text-muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">
+                Sube tu certificado digital (.p12) y proporciona tu contraseña para firmar digitalmente el acta mediante FirmaEC.
+            </p>
+            
+            <div class="form-group">
+                <label>Archivo de Firma (.p12)</label>
+                <input type="file" accept=".p12" (change)="onFileSelected($event)">
+            </div>
+            
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" [(ngModel)]="passwordFirma" placeholder="Ingresa la contraseña de tu firma"
+                    (keyup.enter)="firmarElectronicamente()">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-outline" (click)="cerrarModalFirma()" [disabled]="firmandoDocumento">Cancelar</button>
+            <button class="btn-primary" (click)="firmarElectronicamente()" [disabled]="firmandoDocumento">
+                @if (firmandoDocumento) {
+                <lucide-icon name="loader-2" class="animate-spin" size="16"></lucide-icon> Firmando...
+                } @else {
+                <lucide-icon name="pen-tool" size="16"></lucide-icon> Firmar Acta
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}
