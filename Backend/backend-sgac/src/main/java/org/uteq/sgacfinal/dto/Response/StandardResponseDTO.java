@@ -4,10 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
-/**
- * DTO genérico para mapear las respuestas JSONB de las funciones de PostgreSQL.
- * Todas las funciones de catálogos maestros retornan este formato estándar.
- */
 @Getter
 @Setter
 @NoArgsConstructor
