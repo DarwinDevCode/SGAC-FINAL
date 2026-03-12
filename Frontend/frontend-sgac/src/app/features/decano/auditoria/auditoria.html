@@ -6,9 +6,125 @@
         </div>
     </div>
 
-    <div class="empty-state">
-        <lucide-angular name="bar-chart-3" class="empty-icon"></lucide-angular>
-        <h3>Módulo en construcción</h3>
-        <p>Pronto podrás visualizar los reportes y auditar eventos del sistema.</p>
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando datos de la facultad...</p>
     </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+
+    <!-- Pestañas -->
+    <div class="tabs-container">
+        <button class="tab-button" [class.active]="activeTab === 'reportes'" (click)="cambiarPestana('reportes')">
+            <lucide-icon name="file-text" size="18"></lucide-icon>
+            Reportes de Convocatorias
+        </button>
+        <button class="tab-button" [class.active]="activeTab === 'auditoria'" (click)="cambiarPestana('auditoria')">
+            <lucide-icon name="history" size="18"></lucide-icon>
+            Línea de Tiempo (Auditoría)
+        </button>
+    </div>
+
+    <!-- Contenido de Reportes -->
+    @if (activeTab === 'reportes') {
+    <div class="tab-content">
+        <div class="content-header">
+            <h3>Convocatorias Gestionadas</h3>
+            <div class="actions">
+                <button class="btn-export pdf" (click)="exportarReportesPDF()">
+                    <lucide-icon name="download" size="16"></lucide-icon> Descargar PDF
+                </button>
+                <button class="btn-export excel" (click)="exportarReportesExcel()">
+                    <lucide-icon name="download" size="16"></lucide-icon> Descargar Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Asignatura</th>
+                        <th>Carrera</th>
+                        <th>Coordinador a Cargo</th>
+                        <th>Estado</th>
+                        <th>Postulantes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (r of reportes; track r.idConvocatoria) {
+                    <tr>
+                        <td>#{{ r.idConvocatoria }}</td>
+                        <td class="semi-bold">{{ r.nombreAsignatura }}</td>
+                        <td>{{ r.nombreCarrera }}</td>
+                        <td>{{ r.nombreCoordinador }}</td>
+                        <td>
+                            <span class="badge" [class.success]="r.estado === 'ACTIVO'"
+                                [class.secondary]="r.estado !== 'ACTIVO'">
+                                {{ r.estado }}
+                            </span>
+                        </td>
+                        <td class="text-center">{{ r.numeroPostulantes }}</td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted" style="padding: 2rem;">
+                            No hay convocatorias registradas en esta facultad.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+    <!-- Contenido de Auditoría Timeline -->
+    @if (activeTab === 'auditoria') {
+    <div class="tab-content">
+        <div class="content-header">
+            <h3>Trazabilidad de Coordinadores</h3>
+            <div class="actions">
+                <button class="btn-export pdf" (click)="exportarAuditoriaPDF()">
+                    <lucide-icon name="download" size="16"></lucide-icon> Descargar PDF
+                </button>
+                <button class="btn-export excel" (click)="exportarAuditoriaExcel()">
+                    <lucide-icon name="download" size="16"></lucide-icon> Descargar Excel
+                </button>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            @for (log of auditoriaLogs; track log.idLog) {
+            <div class="timeline-item">
+                <div class="timeline-marker">
+                    <lucide-icon name="check-circle" size="16"></lucide-icon>
+                </div>
+                <div class="timeline-content">
+                    <div class="timeline-header">
+                        <span class="timeline-user">{{ log.nombreUsuario }}</span>
+                        <span class="timeline-date">{{ log.fechaHora | date:'medium' }}</span>
+                    </div>
+                    <div class="timeline-body">
+                        <p class="timeline-action">{{ log.accion }}</p>
+                        <span class="timeline-module">Módulo: {{ log.tablaAfectada }}</span>
+                    </div>
+                </div>
+            </div>
+            } @empty {
+            <div class="empty-state" style="margin-top:0; padding:3rem;">
+                <lucide-angular name="ghost" class="empty-icon"></lucide-angular>
+                <p>No hay registros de auditoría recientes.</p>
+            </div>
+            }
+        </div>
+    </div>
+    }
+    }
 </div>

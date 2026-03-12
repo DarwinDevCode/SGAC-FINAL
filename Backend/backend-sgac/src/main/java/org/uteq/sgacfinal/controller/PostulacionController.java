@@ -1,9 +1,12 @@
 package org.uteq.sgacfinal.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.TipoRequisitoPostulacionResponseDTO;
+import org.uteq.sgacfinal.service.ILogAuditoriaService;
 import org.uteq.sgacfinal.service.IPostulacionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import java.util.List;
 public class PostulacionController {
     private final IPostulacionService postulacionService;
     private final ITipoRequisitoPostulacionService requisitoService;
+    private final ILogAuditoriaService logAuditoriaService;
 
     @PostMapping(value = "/registrar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registrar(
@@ -50,9 +54,27 @@ public class PostulacionController {
     }
 
     @PutMapping("/cambiar-estado/{id}")
-    public ResponseEntity<?> cambiarEstado(@PathVariable Integer id, @RequestParam String estado, @RequestParam String observacion) {
+    public ResponseEntity<?> cambiarEstado(@PathVariable Integer id,
+                                           @RequestParam String estado,
+                                           @RequestParam String observacion,
+                                           @RequestParam(required = false) Integer idCoordinador,
+                                           HttpServletRequest request) {
         try {
             postulacionService.actualizarEstado(id, estado, observacion);
+            // Audit log
+            try {
+                if (idCoordinador != null) {
+                    logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
+                            .idUsuario(idCoordinador)
+                            .accion("VALIDAR_POSTULACION_" + estado.toUpperCase())
+                            .tablaAfectada("postulacion")
+                            .registroAfectado(id)
+                            .ipOrigen(request.getRemoteAddr())
+                            .valorAnterior("Postulación ID: " + id)
+                            .valorNuevo("Estado: " + estado + " | Obs: " + observacion)
+                            .build());
+                }
+            } catch (Exception ignored) {}
             return ResponseEntity.ok("Estado actualizado correctamente.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());

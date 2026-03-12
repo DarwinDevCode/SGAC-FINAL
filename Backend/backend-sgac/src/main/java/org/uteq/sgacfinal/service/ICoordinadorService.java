@@ -2,6 +2,9 @@ package org.uteq.sgacfinal.service;
 
 import org.uteq.sgacfinal.dto.Request.CoordinadorRequestDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorResponseDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
 import java.util.List;
 
 public interface ICoordinadorService {
@@ -18,5 +21,9 @@ public interface ICoordinadorService {
 
     List<CoordinadorResponseDTO> listarTodos();
 
-    //List<CoordinadorResponseDTO> listarActivosPorCarrera(Integer idCarrera);
+    CoordinadorEstadisticasDTO obtenerEstadisticasPropias(Integer idUsuario);
+
+    List<CoordinadorConvocatoriaReporteDTO> reporteConvocatoriasPropias(Integer idUsuario);
+
+    List<CoordinadorPostulanteReporteDTO> reportePostulantesPropios(Integer idUsuario);
 }

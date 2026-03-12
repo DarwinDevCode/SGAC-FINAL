@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,8 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.DictaminarPostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Request.EvaluarDocumentoRequestDTO;
+import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.service.IEvaluacionPostulacionService;
+import org.uteq.sgacfinal.service.ILogAuditoriaService;
 
 import java.util.List;
 
@@ -27,6 +30,7 @@ import java.util.List;
 public class EvaluacionPostulacionController {
 
     private final IEvaluacionPostulacionService evaluacionService;
+    private final ILogAuditoriaService logAuditoriaService;
 
     /**
      * Lista todas las postulaciones de la carrera del coordinador
@@ -96,7 +100,8 @@ public class EvaluacionPostulacionController {
     @PostMapping("/documentos/{idUsuario}/evaluar")
     public ResponseEntity<EvaluacionDocumentoResponseDTO> evaluarDocumento(
             @PathVariable Integer idUsuario,
-            @Valid @RequestBody EvaluarDocumentoRequestDTO request) {
+            @Valid @RequestBody EvaluarDocumentoRequestDTO request,
+            HttpServletRequest httpRequest) {
 
         log.info("POST /api/coordinador/evaluacion/documentos/{}/evaluar - Documento: {}, Acción: {}",
                 idUsuario, request.getIdRequisitoAdjunto(), request.getAccion());
@@ -104,6 +109,9 @@ public class EvaluacionPostulacionController {
         EvaluacionDocumentoResponseDTO resultado = evaluacionService.evaluarDocumento(idUsuario, request);
 
         if (resultado.getExito()) {
+            registrarLog(idUsuario, "EVALUAR_DOCUMENTO_" + request.getAccion().toUpperCase(),
+                    "requisito_adjunto", request.getIdRequisitoAdjunto(),
+                    null, "Acción: " + request.getAccion(), httpRequest);
             return ResponseEntity.ok(resultado);
         } else {
             return ResponseEntity.badRequest().body(resultado);
@@ -116,7 +124,8 @@ public class EvaluacionPostulacionController {
     @PostMapping("/postulaciones/{idUsuario}/dictaminar")
     public ResponseEntity<DictamenPostulacionResponseDTO> dictaminarPostulacion(
             @PathVariable Integer idUsuario,
-            @Valid @RequestBody DictaminarPostulacionRequestDTO request) {
+            @Valid @RequestBody DictaminarPostulacionRequestDTO request,
+            HttpServletRequest httpRequest) {
 
         log.info("POST /api/coordinador/evaluacion/postulaciones/{}/dictaminar - Postulación: {}, Acción: {}",
                 idUsuario, request.getIdPostulacion(), request.getAccion());
@@ -124,6 +133,11 @@ public class EvaluacionPostulacionController {
         DictamenPostulacionResponseDTO resultado = evaluacionService.dictaminarPostulacion(idUsuario, request);
 
         if (resultado.getExito()) {
+            registrarLog(idUsuario, "DICTAMINAR_POSTULACION_" + request.getAccion().toUpperCase(),
+                    "postulacion", request.getIdPostulacion(),
+                    "Postulación ID: " + request.getIdPostulacion(),
+                    "Dictamen: " + request.getAccion() + (request.getObservacion() != null ? " | " + request.getObservacion() : ""),
+                    httpRequest);
             return ResponseEntity.ok(resultado);
         } else {
             return ResponseEntity.badRequest().body(resultado);
@@ -175,6 +189,24 @@ public class EvaluacionPostulacionController {
         } catch (RuntimeException e) {
             log.error("Error al visualizar documento: {}", e.getMessage());
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    // ---- Audit log helper ----
+    private void registrarLog(Integer idUsuario, String accion, String tabla, Integer idRegistro,
+                               String valorAnterior, String valorNuevo, HttpServletRequest request) {
+        try {
+            logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
+                    .idUsuario(idUsuario)
+                    .accion(accion)
+                    .tablaAfectada(tabla)
+                    .registroAfectado(idRegistro)
+                    .ipOrigen(request.getRemoteAddr())
+                    .valorAnterior(valorAnterior)
+                    .valorNuevo(valorNuevo)
+                    .build());
+        } catch (Exception ignored) {
+            // El log no debe bloquear la operación principal
         }
     }
 }

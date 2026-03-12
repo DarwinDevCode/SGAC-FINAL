@@ -2,6 +2,9 @@ package org.uteq.sgacfinal.service;
 
 import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
 import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
+import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
+import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
 import java.util.List;
 
 public interface IDecanoService {
@@ -17,4 +20,10 @@ public interface IDecanoService {
     DecanoResponseDTO buscarPorUsuario(Integer idUsuario);
 
     List<DecanoResponseDTO> listarActivos();
+
+    DecanoEstadisticasDTO obtenerEstadisticasPorFacultad(Integer idFacultad);
+
+    List<ConvocatoriaReporteDTO> reporteConvocatoriasPorFacultad(Integer idFacultad);
+
+    List<LogAuditoriaDTO> reporteAuditoriaPorFacultad(Integer idFacultad);
 }

@@ -133,3 +133,14 @@ export interface CambioEstadoRevisionResponse {
   cambio_realizado?: boolean;
 }
 
+// Request para asignar comisión de evaluación de oposición
+export interface AsignarComisionRequest {
+  idPostulacion: number;
+  idComisionSeleccion: number;
+  temaExposicion: string;
+  fechaEvaluacion: string; // "YYYY-MM-DD"
+  horaInicio: string; // "HH:mm" o "HH:mm:ss"
+  horaFin: string; // "HH:mm" o "HH:mm:ss"
+  lugar: string;
+}
+

@@ -26,25 +26,52 @@
         <div class="stat-card">
             <div class="stat-icon amber"><lucide-icon name="file-text" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">{{ totalConvocatoriasActivas }}</div>
-                <div class="stat-label">Convocatorias Activas</div>
+                <div class="stat-value">{{ estadisticas?.totalConvocatorias || 0 }}</div>
+                <div class="stat-label">Convocatorias Totales</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">—</div>
-                <div class="stat-label">Postulantes Evaluados</div>
+                <div class="stat-value">{{ estadisticas?.totalPostulantes || 0 }}</div>
+                <div class="stat-label">Postulantes Totales</div>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon green"><lucide-icon name="file-signature" size="22"></lucide-icon></div>
             <div>
-                <div class="stat-value">—</div>
-                <div class="stat-label">Resoluciones Pendientes</div>
+                <div class="stat-value">{{ estadisticas?.postulantesEnEvaluacion || 0 }}</div>
+                <div class="stat-label">En Evaluación / Comisiones</div>
             </div>
         </div>
     </div>
+
+    <!-- Charts -->
+    @if (estadisticas && estadisticas.actividadPorCoordinador.length > 0) {
+    <div class="charts-wrapper">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Actividad por Coordinador</h3>
+                <p>Volumen de convocatorias gestionadas</p>
+            </div>
+            <div class="chart-container">
+                <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
+                </canvas>
+            </div>
+        </div>
+        <div class="chart-card doughnut-card">
+            <div class="chart-header">
+                <h3>Resumen Convocatorias</h3>
+                <p>Activas vs Inactivas</p>
+            </div>
+            <div class="chart-container">
+                <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions"
+                    [type]="doughnutChartType">
+                </canvas>
+            </div>
+        </div>
+    </div>
+    }
 
     <!-- Quick Actions -->
     <p class="subtitle"
