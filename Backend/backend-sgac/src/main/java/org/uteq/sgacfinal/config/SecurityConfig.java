@@ -98,6 +98,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/login").permitAll()
                         .requestMatchers(
+                                "/api/log-auditoria/**").permitAll()
+                        .requestMatchers(
                                 "/api/docente/dashboard/**").hasAuthority("DOCENTE")
                         .requestMatchers(
                                 "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
@@ -111,7 +113,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/sesiones/**").hasAuthority("AYUDANTE_CATEDRA")
                         .requestMatchers(
-                                "/api/notificaciones/**").authenticated()
+                                "/api/notificaciones/**").permitAll()
                         .requestMatchers(
                                 "/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
                         .requestMatchers(

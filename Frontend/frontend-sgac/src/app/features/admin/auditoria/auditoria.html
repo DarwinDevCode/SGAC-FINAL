@@ -1,0 +1,160 @@
+<div class="gestion-container">
+  <div class="section-header">
+    <h2 class="title">Registro de Auditoría</h2>
+    <button type="button" class="btn-primary" style="background-color: #dc3545;" (click)="descargarReporte()">
+      <lucide-icon name="FileText" size="18"></lucide-icon>
+      Exportar PDF
+    </button>
+  </div>
+
+  <div class="search-card">
+    <div class="row g-3 align-items-end" style="display: flex; gap: 1rem; width: 100%;">
+      <div style="flex: 1;">
+        <label>Buscar Usuario</label>
+        <div class="search-wrapper" style="margin-top: 5px;">
+          <lucide-icon class="search-icon" name="Search" size="18"></lucide-icon>
+          <input type="text" [(ngModel)]="filtros.queryParams" placeholder="Nombres o apellidos..." class="input-field search-input" />
+        </div>
+      </div>
+      <div style="flex: 1;">
+        <label>Módulo</label>
+        <input type="text" [(ngModel)]="filtros.tablaAfectada" placeholder="Ej. usuario" class="input-field" style="margin-top: 5px;" />
+      </div>
+      <div style="flex: 1;">
+        <label>Acción</label>
+        <input type="text" [(ngModel)]="filtros.accion" placeholder="INSERT, UPDATE..." class="input-field" style="margin-top: 5px;" />
+      </div>
+      <div style="flex: 1;">
+        <label>Fecha Inicio</label>
+        <input type="date" [(ngModel)]="filtros.fechaInicio" class="input-field" style="margin-top: 5px;" />
+      </div>
+      <div style="flex: 1;">
+        <label>Fecha Fin</label>
+        <input type="date" [(ngModel)]="filtros.fechaFin" class="input-field" style="margin-top: 5px;" />
+      </div>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; flex: 0.5;">
+        <button type="button" class="btn-primary" (click)="aplicarFiltros()" title="Buscar">
+          <lucide-icon name="Search" size="18"></lucide-icon>
+        </button>
+        <button type="button" class="btn-ghost" (click)="limpiarFiltros()" title="Limpiar">
+          <lucide-icon name="RotateCcw" size="18"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table" role="table">
+      <thead>
+        <tr>
+          <th>Fecha Hora</th>
+          <th>Usuario</th>
+          <th>Acción</th>
+          <th>Módulo</th>
+          <th>Reg. ID</th>
+          <th>IP Origen</th>
+          <th class="text-right">Detalle</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading) {
+          <tr><td colspan="7" style="text-align: center; padding: 2rem;">Cargando registros...</td></tr>
+        } @else {
+          @for (log of logs; track log.idLogAuditoria) {
+            <tr>
+              <td>{{ log.fechaHora | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+              <td>{{ log.nombreUsuario }}</td>
+              <td>
+                <span class="status-pill" 
+                      [class.active]="log.accion === 'INSERT'" 
+                      [class.inactive]="log.accion === 'DELETE'"
+                      [style.background-color]="log.accion === 'UPDATE' ? '#fff3cd' : null"
+                      [style.color]="log.accion === 'UPDATE' ? '#856404' : null">
+                  {{ log.accion }}
+                </span>
+              </td>
+              <td>{{ log.tablaAfectada }}</td>
+              <td>{{ log.registroAfectado }}</td>
+              <td>{{ log.ipOrigen || '-' }}</td>
+              <td class="text-right">
+                <button type="button" class="btn-icon" (click)="verDetalle(log)" title="Ver Modificaciones">
+                  <lucide-icon name="Eye" size="18"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" style="text-align: center; padding: 2rem;">No se encontraron registros de auditoría.</td></tr>
+          }
+        }
+      </tbody>
+    </table>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-top: 1px solid #eee;">
+      <div>
+        <select class="input-field" style="width: auto; display: inline-block;" #sizeSelect (change)="cambiarDataSize(sizeSelect.value)">
+          <option value="10" [selected]="pageSize === 10">10 registros</option>
+          <option value="25" [selected]="pageSize === 25">25 registros</option>
+          <option value="50" [selected]="pageSize === 50">50 registros</option>
+        </select>
+        <span style="margin-left: 1rem; color: #666;">Total: {{ totalRecords }}</span>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <button type="button" class="btn-ghost" [disabled]="currentPage === 0" (click)="cambiarPagina(currentPage - 1)">Anterior</button>
+        <span style="color: #666;">Página {{ currentPage + 1 }} de {{ totalPages === 0 ? 1 : totalPages }}</span>
+        <button type="button" class="btn-ghost" [disabled]="currentPage >= totalPages - 1" (click)="cambiarPagina(currentPage + 1)">Siguiente</button>
+      </div>
+    </div>
+  </div>
+
+  @if (verDetalleDialog) {
+    <div class="modal-backdrop">
+      <div class="modal-box" style="max-width: 800px;">
+        <div class="modal-header">
+          <h3>Detalle de Modificación</h3>
+          <button type="button" class="btn-icon" (click)="cerrarDetalle()">
+            <lucide-icon name="X" size="18"></lucide-icon>
+          </button>
+        </div>
+
+        <div style="padding: 1.5rem;">
+          <div style="margin-bottom: 1.5rem; background: #f8f9fa; padding: 1rem; border-radius: 8px;">
+            <strong>Módulo (Tabla):</strong> {{ logSeleccionado?.tablaAfectada }} <br/>
+            <strong>Registro Afectado:</strong> {{ logSeleccionado?.registroAfectado }} <br/>
+            <strong>Acción:</strong> <span class="status-pill active" style="background: #e2e8f0; color: #333;">{{ logSeleccionado?.accion }}</span>
+          </div>
+
+          @if (logSeleccionado) {
+            <table class="data-table" style="font-family: monospace; font-size: 0.9rem;">
+              <thead>
+                <tr>
+                  <th style="width: 30%">Campo</th>
+                  <th style="width: 35%; color: #dc3545;">Valor Anterior</th>
+                  <th style="width: 35%; color: #198754;">Valor Nuevo</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (m of camposModificados; track m.campo) {
+                  <tr>
+                    <td style="background: #f8f9fa; font-weight: bold;">{{ m.campo }}</td>
+                    <td style="background: #fff5f5; color: #dc3545; word-break: break-all;">
+                      <del *ngIf="m.anterior !== 'N/D'">{{ m.anterior }}</del>
+                      <span style="color: #6c757d; font-style: italic;" *ngIf="m.anterior === 'N/D'">N/A</span>
+                    </td>
+                    <td style="background: #f0fdf4; color: #198754; word-break: break-all;">
+                      <span *ngIf="m.nuevo !== 'N/D'">{{ m.nuevo }}</span>
+                      <span style="color: #6c757d; font-style: italic;" *ngIf="m.nuevo === 'N/D'">N/A</span>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" style="text-align: center; color: #6c757d; padding: 1rem;">No hay diferencias registradas o es un formato irreconocible.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -10,6 +10,12 @@ import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
 import org.uteq.sgacfinal.repository.LogAuditoriaRepository;
 import org.uteq.sgacfinal.service.ILogAuditoriaService;
+import org.uteq.sgacfinal.config.UserContext;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.uteq.sgacfinal.specification.LogAuditoriaSpecification;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,8 +31,7 @@ public class LogAuditoriaServiceImpl implements ILogAuditoriaService {
     @Override
     @Transactional
     public LogAuditoriaResponseDTO registrar(LogAuditoriaRequestDTO request) {
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + request.getIdUsuario()));
+        Usuario usuario = resolveUsuario(request.getIdUsuario());
 
         LogAuditoria log = LogAuditoria.builder()
                 .usuario(usuario)
@@ -67,11 +72,21 @@ public class LogAuditoriaServiceImpl implements ILogAuditoriaService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<LogAuditoriaResponseDTO> obtenerLogsPaginados(String queryParams, String tablaAfectada, String accion, LocalDateTime fechaInicio, LocalDateTime fechaFin, Pageable pageable) {
+        Specification<LogAuditoria> spec = LogAuditoriaSpecification.conFiltros(queryParams, tablaAfectada, accion, fechaInicio, fechaFin);
+        return logRepository.findAll(spec, pageable).map(this::mapearADTO);
+    }
+
     private LogAuditoriaResponseDTO mapearADTO(LogAuditoria entidad) {
+        Integer idUsuario = (entidad.getUsuario() != null) ? entidad.getUsuario().getIdUsuario() : null;
+        String nombreUsuario = (entidad.getUsuario() != null) ? (entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos()) : "Sistema / Trigger";
+
         return LogAuditoriaResponseDTO.builder()
                 .idLogAuditoria(entidad.getIdLogAuditoria())
-                .idUsuario(entidad.getUsuario().getIdUsuario())
-                .nombreUsuario(entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos())
+                .idUsuario(idUsuario)
+                .nombreUsuario(nombreUsuario)
                 .accion(entidad.getAccion())
                 .tablaAfectada(entidad.getTablaAfectada())
                 .registroAfectado(entidad.getRegistroAfectado())
@@ -80,5 +95,24 @@ public class LogAuditoriaServiceImpl implements ILogAuditoriaService {
                 .valorAnterior(entidad.getValorAnterior())
                 .valorNuevo(entidad.getValorNuevo())
                 .build();
+    }
+
+    /**
+     * Resolve the actor performing the action. If the request didn't include an explicit id,
+     * fall back to the authenticated user stored in the JwtAuthenticationFilter via UserContext.
+     */
+    private Usuario resolveUsuario(Integer idUsuario) {
+        if (idUsuario != null) {
+            return usuarioRepository.findById(idUsuario)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + idUsuario));
+        }
+
+        String username = UserContext.getUsername();
+        if (username != null) {
+            return usuarioRepository.findByNombreUsuario(username)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado para token: " + username));
+        }
+
+        throw new RuntimeException("No se pudo identificar al usuario para auditoría");
     }
 }

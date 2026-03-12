@@ -2,6 +2,8 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +22,8 @@ public class LogAuditoria {
     private Integer idLogAuditoria;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", nullable = false)
+    @JoinColumn(name = "id_usuario")
+    @NotFound(action = NotFoundAction.IGNORE)
     private Usuario usuario;
 
     @Column(name = "accion", length = 100)

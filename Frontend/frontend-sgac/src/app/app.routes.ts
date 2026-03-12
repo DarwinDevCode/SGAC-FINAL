@@ -67,6 +67,7 @@ export const routes: Routes = [
       { path: 'admin/rol-permiso', component: GestionPermisosComponent },
       { path: 'admin/periodos', component: GestionPeriodosComponent },
       { path: 'admin/notifications', component: PostulanteNotificaciones },
+      { path: 'admin/auditoria', loadComponent: () => import('./features/admin/auditoria/auditoria').then(m => m.Auditoria) },
 
       // Postulante / Estudiante (routes for ESTUDIANTE role sidebar)
       { path: 'postulante/dashboard', component: PostulanteDashboard },

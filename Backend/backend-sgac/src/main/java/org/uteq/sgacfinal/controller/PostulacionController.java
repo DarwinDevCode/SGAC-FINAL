@@ -1,19 +1,22 @@
 package org.uteq.sgacfinal.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Response.TipoRequisitoPostulacionResponseDTO;
+import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.ILogAuditoriaService;
 import org.uteq.sgacfinal.service.IPostulacionService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.service.ITipoRequisitoPostulacionService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -60,9 +63,10 @@ public class PostulacionController {
             postulacionService.actualizarEstado(id, estado, observacion);
             // Audit log
             try {
-                if (idCoordinador != null) {
+                Integer actorId = (idCoordinador != null) ? idCoordinador : getAuthenticatedUserId();
+                if (actorId != null) {
                     logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
-                            .idUsuario(idCoordinador)
+                            .idUsuario(actorId)
                             .accion("VALIDAR_POSTULACION_" + estado.toUpperCase())
                             .tablaAfectada("postulacion")
                             .registroAfectado(id)
@@ -154,5 +158,13 @@ public class PostulacionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al obtener postulación: " + e.getMessage());
         }
+    }
+
+    private Integer getAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UsuarioPrincipal up) {
+            return up.getIdUsuario();
+        }
+        return null;
     }
 }

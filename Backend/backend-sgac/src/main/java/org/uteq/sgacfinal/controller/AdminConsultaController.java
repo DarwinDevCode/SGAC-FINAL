@@ -20,6 +20,7 @@ public class AdminConsultaController {
         try {
             return ResponseEntity.ok(adminConsultaService.obtenerResumenSistema());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "Error al obtener estadísticas: " + e.getMessage()));
         }

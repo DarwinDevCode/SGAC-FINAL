@@ -4,10 +4,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.uteq.sgacfinal.dto.Request.ConvocatoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Response.ConvocatoriaResponseDTO;
+import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.IConvocatoriaService;
 import org.uteq.sgacfinal.service.ILogAuditoriaService;
 
@@ -81,9 +93,12 @@ public class ConvocatoriaController {
     }
 
     private void registrarLog(Integer idUsuario, String accion, String tabla,
-                               Integer idRegistro, String valorAnterior, String valorNuevo,
-                               HttpServletRequest request) {
+                              Integer idRegistro, String valorAnterior, String valorNuevo,
+                              HttpServletRequest request) {
         try {
+            if (idUsuario == null) {
+                idUsuario = getAuthenticatedUserId();
+            }
             if (idUsuario == null) return;
             logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
                     .idUsuario(idUsuario)
@@ -97,5 +112,13 @@ public class ConvocatoriaController {
         } catch (Exception ignored) {
             // El log no debe bloquear la operación principal
         }
+    }
+
+    private Integer getAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UsuarioPrincipal up) {
+            return up.getIdUsuario();
+        }
+        return null;
     }
 }

@@ -8,12 +8,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.DictaminarPostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.Request.EvaluarDocumentoRequestDTO;
 import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.IEvaluacionPostulacionService;
 import org.uteq.sgacfinal.service.ILogAuditoriaService;
 
@@ -196,6 +198,10 @@ public class EvaluacionPostulacionController {
     private void registrarLog(Integer idUsuario, String accion, String tabla, Integer idRegistro,
                                String valorAnterior, String valorNuevo, HttpServletRequest request) {
         try {
+            if (idUsuario == null) {
+                idUsuario = getAuthenticatedUserId();
+            }
+            if (idUsuario == null) return;
             logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
                     .idUsuario(idUsuario)
                     .accion(accion)
@@ -208,5 +214,13 @@ public class EvaluacionPostulacionController {
         } catch (Exception ignored) {
             // El log no debe bloquear la operación principal
         }
+    }
+
+    private Integer getAuthenticatedUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UsuarioPrincipal up) {
+            return up.getIdUsuario();
+        }
+        return null;
     }
 }

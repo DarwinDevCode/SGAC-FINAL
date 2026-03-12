@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.uteq.sgacfinal.entity.LogAuditoria;
@@ -9,7 +10,7 @@ import org.uteq.sgacfinal.entity.LogAuditoria;
 import java.util.List;
 
 @Repository
-public interface LogAuditoriaRepository extends JpaRepository<LogAuditoria, Integer> {
+public interface LogAuditoriaRepository extends JpaRepository<LogAuditoria, Integer>, JpaSpecificationExecutor<LogAuditoria> {
 
     @Query(value = "SELECT public.sp_crear_log_auditoria(:idUsuario, :accion, :tabla, :registro, :ip, :anterior, :nuevo)", nativeQuery = true)
     Integer registrarLog(@Param("idUsuario") Integer idUsuario,

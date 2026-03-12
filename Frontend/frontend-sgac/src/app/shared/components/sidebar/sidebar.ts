@@ -84,6 +84,7 @@ export class SidebarComponent {
       { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
       { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },
       { label: 'Roles y Permisos', icon: 'Settings', route: '/admin/rol-permiso' },
+      { label: 'Registro Auditoría', icon: 'Shield', route: '/admin/auditoria' },
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
   };
