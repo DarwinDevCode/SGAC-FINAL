@@ -60,6 +60,8 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
   checkPostulacionesGranulares() {
     if (!this.idEstudianteBase || this.convocatoriasFiltradas.length === 0) return;
     this.postulacionPorConvocatoria = {};
+
+
     this.convocatoriasFiltradas.forEach(conv => {
       if (!conv.idConvocatoria) return;
       this.subs.add(

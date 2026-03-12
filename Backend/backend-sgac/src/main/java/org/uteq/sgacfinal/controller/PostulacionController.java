@@ -41,6 +41,9 @@ public class PostulacionController {
         }
     }
 
+
+
+
     @GetMapping("/listar-activos")
     public ResponseEntity<List<TipoRequisitoPostulacionResponseDTO>> listar() {
         return ResponseEntity.ok(requisitoService.listarRequisitosActivos());

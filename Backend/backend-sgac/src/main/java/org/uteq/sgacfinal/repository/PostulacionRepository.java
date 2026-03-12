@@ -23,6 +23,10 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     @Query(value = "SELECT * FROM public.sp_listar_postulaciones_por_estudiante(:idEstudiante)", nativeQuery = true)
     List<Object[]> listarPostulacionesPorEstudianteSP(@Param("idEstudiante") Integer idEstudiante);
 
+
+
+
+
     @Query("SELECT p FROM Postulacion p WHERE p.estudiante.idEstudiante = :idEstudiante")
     List<Postulacion> findByEstudiante_IdEstudiante(@Param("idEstudiante") Integer idEstudiante);
 
@@ -61,6 +65,10 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
             @Param("estado") String estado,
             @Param("obs") String obs
     );
+
+
+
+
 
     @Query(value = "SELECT public.sp_crear_requisito_adjunto(:idPost, :idTipoReq, :idTipoEst, :archivo, :nombre, :fecha)", nativeQuery = true)
     Integer crearRequisitoAdjunto(

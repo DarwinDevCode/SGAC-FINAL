@@ -1,289 +1,350 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { Subscription, forkJoin, catchError, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+// src/app/features/coordinador/convocatorias/convocatorias.component.ts
+import {
+  Component, inject, OnInit, OnDestroy
+} from '@angular/core';
+import {
+  CommonModule
+} from '@angular/common';
+import {
+  FormsModule, ReactiveFormsModule,
+  FormBuilder, FormGroup, Validators
+} from '@angular/forms';
+import { RouterModule }         from '@angular/router';
+import { LucideAngularModule }  from 'lucide-angular';
+import {
+  Subscription, forkJoin, of, catchError
+} from 'rxjs';
+import { switchMap }            from 'rxjs/operators';
 
+import { ConvocatoriaService }    from '../../../core/services/convocatoria-service';
+import { CoordinadorService }     from '../../../core/services/coordinador-service';
+import { PeriodoAcademicoService} from '../../../core/services/periodo-academico-service';
+import { AuthService }            from '../../../core/services/auth-service';
 
-import { CoordinadorService } from '../../../core/services/coordinador-service';
-import { PeriodoAcademicoService } from '../../../core/services/periodo-academico-service';
-import { AuthService } from '../../../core/services/auth-service';
-import { ConvocatoriaService } from '../../../core/services/convocatoria-service';
-import { ConvocatoriaDTO } from '../../../core/dto/convocatoria';
-import { PeriodoAcademicoDTO } from '../../../core/dto/periodo-academico';
-import { AsignaturaComboDTO, DocenteComboDTO } from '../../../core/models/convocatoria.model';
-
-const API_CONV = 'http://localhost:8080/api/convocatorias';
+import {
+  ConvocatoriaDTO,
+  ConvocatoriaCrearRequest,
+  ConvocatoriaActualizarRequest,
+  VerificarFaseResponse,
+  VerificarPostulantesResponse,
+} from '../../../core/models/convocatoria/convocatoria';
+import { PeriodoAcademicoDTO }    from '../../../core/dto/periodo-academico';
+import { DocenteComboDTO, AsignaturaComboDTO } from '../../../core/models/convocatoria.model';
 
 @Component({
-  selector: 'app-coordinador-convocatorias-crud',
-  standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
+  selector:    'app-coordinador-convocatorias-crud',
+  standalone:  true,
+  imports:     [CommonModule, FormsModule, ReactiveFormsModule,
+    RouterModule, LucideAngularModule],
   templateUrl: './convocatorias.html',
-  styleUrl: './convocatorias.css',
+  styleUrl:    './convocatorias.css',
 })
 export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
-  private http = inject(HttpClient);
-  private coordinadorService = inject(CoordinadorService);
-  private periodoService = inject(PeriodoAcademicoService);
-  private authService = inject(AuthService);
-  private fb = inject(FormBuilder);
-  private subs = new Subscription();
-  private convocatoriaService = inject(ConvocatoriaService);
 
-  convocatorias: ConvocatoriaDTO[] = [];
-  periodoActivo: PeriodoAcademicoDTO | null = null;
+  // ── Servicios ────────────────────────────────────────────────────────────
+  private readonly convSrv   = inject(ConvocatoriaService);
+  private readonly coordSrv  = inject(CoordinadorService);
+  private readonly periodoSrv= inject(PeriodoAcademicoService);
+  private readonly authSrv   = inject(AuthService);
+  private readonly fb        = inject(FormBuilder);
+  private readonly subs      = new Subscription();
 
-  docentes: DocenteComboDTO[] = [];
-  asignaturas: AsignaturaComboDTO[] = [];
+  // ── Datos ────────────────────────────────────────────────────────────────
+  convocatorias:   ConvocatoriaDTO[]    = [];
+  periodoActivo:   PeriodoAcademicoDTO | null = null;
+  docentes:        DocenteComboDTO[]    = [];
+  asignaturas:     AsignaturaComboDTO[] = [];
+  periodosMap      = new Map<number, string>();
 
-  periodosMap: Map<number, string> = new Map();
+  // ── UI General ───────────────────────────────────────────────────────────
+  loading        = true;
+  textoBusqueda  = '';
+  toastMensaje   = '';
+  toastTipo: 'success' | 'error' = 'success';
+  private toastTimer: any;
 
-  loading = true;
-  errorMensaje = '';
-  successMensaje = '';
-  textoBusqueda = '';
-  idCarreraActual: number | null = null;
+  // ── Fase / contexto ──────────────────────────────────────────────────────
+  /** Resultado de verificar-fase; se consulta al abrir el formulario */
+  faseInfo:        VerificarFaseResponse | null = null;
+  verificandoFase  = false;
 
+  // ── Modal Crear / Editar ─────────────────────────────────────────────────
   mostrarModal = false;
-  modoEdicion = false;
-  loadingForm = false;
-  convocatoriaEditId: number | null = null;
+  modoEdicion  = false;
+  loadingForm  = false;
+  editId:      number | null = null;
+
+  /** PARCIAL: solo cupos/estado. COMPLETA: cambia docente/asignatura */
+  tipoEdicion: 'PARCIAL' | 'COMPLETA' = 'PARCIAL';
+  checkPostResult: VerificarPostulantesResponse | null = null;
 
   form: FormGroup = this.fb.group({
-    idAsignatura: [{ value: null, disabled: true }, Validators.required],
-    idDocente: [null, Validators.required],
-    idPeriodoAcademico: [{ value: null, disabled: true }],
-    cuposDisponibles: [1, [Validators.required, Validators.min(1)]],
-    fechaPublicacion: ['', Validators.required],
-    fechaCierre: ['', Validators.required],
-    estado: ['ABIERTA', Validators.required],
-    activo: [true],
+    idDocente:        [null, Validators.required],
+    idAsignatura:     [{ value: null, disabled: true }, Validators.required],
+    cuposDisponibles: [1,   [Validators.required, Validators.min(1)]],
+    estado:           ['ABIERTA', Validators.required],
   });
 
-  readonly estadoOpcion = ['ABIERTA', 'CERRADA', 'EN_EVALUACION', 'RESUELTA'];
+  readonly estadoOpciones = ['ABIERTA', 'CERRADA', 'EN_EVALUACION', 'RESUELTA'];
 
+  // ── Modal Desactivar ─────────────────────────────────────────────────────
+  mostrarModalDesactivar = false;
+  convDesactivar: ConvocatoriaDTO | null = null;
+  desactivando   = false;
+
+  // ── Computed ─────────────────────────────────────────────────────────────
   get convocatoriasFiltradas(): ConvocatoriaDTO[] {
     const t = this.textoBusqueda.toLowerCase().trim();
     if (!t) return this.convocatorias;
     return this.convocatorias.filter(c =>
       (c.nombreAsignatura || '').toLowerCase().includes(t) ||
-      this.getPeriodoNombre(c.idPeriodoAcademico).toLowerCase().includes(t)
+      (c.nombreDocente    || '').toLowerCase().includes(t)
     );
   }
 
   getPeriodoNombre(id?: number): string {
-
     if (!id) return '—';
     return this.periodosMap.get(id) || String(id);
   }
 
+  // ── Ciclo de vida ────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.cargarDatos();
-    this.loadDocentes();
+    this.cargarDocentes();
   }
+
   ngOnDestroy(): void { this.subs.unsubscribe(); }
 
-  cargarDatos() {
+  // ── Carga inicial ────────────────────────────────────────────────────────
+  cargarDatos(): void {
     this.loading = true;
-    const user = this.authService.getUser();
+    const user = this.authSrv.getUser();
     if (!user) { this.loading = false; return; }
 
     this.subs.add(
       forkJoin({
-        coordinador: this.coordinadorService.obtenerCoordinadorPorUsuario(user.idUsuario),
-        periodoActivo: this.periodoService.obtenerActivo().pipe(catchError((e) => { console.error('Error fetching active period:', e); return of(null); })),
+        coordinador:  this.coordSrv.obtenerCoordinadorPorUsuario(user.idUsuario),
+        periodoActivo: this.periodoSrv.obtenerActivo()
+          .pipe(catchError(() => of(null))),
       }).pipe(
         switchMap(({ coordinador, periodoActivo }) => {
-          this.periodoActivo = periodoActivo;
-          this.idCarreraActual = (coordinador as any).idCarrera ?? null;
-
+          this.periodoActivo = periodoActivo as PeriodoAcademicoDTO | null;
           if (periodoActivo?.idPeriodoAcademico) {
-            this.periodosMap.set(periodoActivo.idPeriodoAcademico, periodoActivo.nombrePeriodo);
-            this.form.patchValue({ idPeriodoAcademico: periodoActivo.idPeriodoAcademico });
+            this.periodosMap.set(
+              periodoActivo.idPeriodoAcademico,
+              periodoActivo.nombrePeriodo
+            );
           }
-
-          return forkJoin({
-            convocatorias: this.coordinadorService.listarConvocatoriasPorCarrera(this.idCarreraActual ?? 0).pipe(catchError(() => of([]))),
-          });
+          return this.convSrv.getAll().pipe(catchError(() => of([])));
         })
       ).subscribe({
-        next: ({ convocatorias }) => {
-          this.convocatorias = convocatorias as ConvocatoriaDTO[];
+        next: (convs) => {
+          this.convocatorias = convs as ConvocatoriaDTO[];
           this.loading = false;
         },
-        error: () => { this.errorMensaje = 'Error al cargar datos.'; this.loading = false; }
-      })
-    );
-
-  }
-
-  loadDocentes() {
-    this.subs.add(
-      this.convocatoriaService.getDocentesCarrera().pipe(catchError(() => of([]))).subscribe({
-        next: (data) => {
-          this.docentes = (data || []) as DocenteComboDTO[];
-        },
         error: () => {
-          this.docentes = [];
-        }
+          this.showToast('Error al cargar los datos.', 'error');
+          this.loading = false;
+        },
       })
     );
   }
 
-  onDocenteChange(event: any) {
-    const rawValue = event?.target?.value;
-    const idDocente = rawValue != null && rawValue !== '' ? Number(rawValue) : null;
+  cargarDocentes(): void {
+    this.subs.add(
+      this.convSrv.getDocentesCarrera()
+        .pipe(catchError(() => of([])))
+        .subscribe(d => this.docentes = d as DocenteComboDTO[])
+    );
+  }
 
-    // limpiar asignaturas y seleccionar docente
-    this.form.patchValue({ idDocente, idAsignatura: null });
+  // ── Cambio de docente ────────────────────────────────────────────────────
+  onDocenteChange(event: Event): void {
+    const id = +(event.target as HTMLSelectElement).value || null;
+    this.form.patchValue({ idDocente: id, idAsignatura: null });
     this.asignaturas = [];
 
-    if (!idDocente) {
-      this.form.get('idAsignatura')?.disable();
-      return;
-    }
-
+    if (!id) { this.form.get('idAsignatura')?.disable(); return; }
     this.form.get('idAsignatura')?.enable();
 
     this.subs.add(
-      this.convocatoriaService.getAsignaturasPorDocente(idDocente).pipe(catchError(() => of([]))).subscribe({
-        next: (data) => {
-          this.asignaturas = (data || []) as AsignaturaComboDTO[];
-        },
-        error: () => {
-          this.asignaturas = [];
-        }
-      })
+      this.convSrv.getAsignaturasPorDocente(id)
+        .pipe(catchError(() => of([])))
+        .subscribe(a => this.asignaturas = a as AsignaturaComboDTO[])
     );
   }
 
-  abrirModalCrear() {
-    this.modoEdicion = false;
-    this.convocatoriaEditId = null;
-    this.form.reset({
-      idAsignatura: null,
-      idDocente: null,
-      idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? null,
-      cuposDisponibles: 1,
-      estado: 'ABIERTA',
-      activo: true,
-    });
-    this.asignaturas = [];
+  // ── Modal Crear ──────────────────────────────────────────────────────────
+  abrirModalCrear(): void {
+    this.modoEdicion  = false;
+    this.editId       = null;
+    this.tipoEdicion  = 'COMPLETA';   // crear siempre requiere todos los campos
+    this.checkPostResult = null;
+    this.asignaturas  = [];
+    this.form.reset({ cuposDisponibles: 1, estado: 'ABIERTA',
+      idDocente: null, idAsignatura: null });
     this.form.get('idAsignatura')?.disable();
     this.mostrarModal = true;
+    this.consultarFase();
   }
 
-  abrirModalEditar(conv: ConvocatoriaDTO) {
-    this.modoEdicion = true;
-    this.convocatoriaEditId = conv.idConvocatoria ?? null;
-
-    if (conv.idPeriodoAcademico && conv.nombrePeriodo && !this.periodosMap.has(conv.idPeriodoAcademico)) {
-      this.periodosMap.set(conv.idPeriodoAcademico, conv.nombrePeriodo);
-    }
+  // ── Modal Editar ─────────────────────────────────────────────────────────
+  abrirModalEditar(conv: ConvocatoriaDTO): void {
+    this.modoEdicion  = true;
+    this.editId       = conv.idConvocatoria ?? null;
+    this.checkPostResult = null;
+    this.mostrarModal = true;
 
     this.form.patchValue({
-      idAsignatura: conv.idAsignatura ?? null,
-      idDocente: conv.idDocente ?? null,
-      idPeriodoAcademico: conv.idPeriodoAcademico ?? this.periodoActivo?.idPeriodoAcademico ?? null,
+      idDocente:        conv.idDocente        ?? null,
+      idAsignatura:     conv.idAsignatura     ?? null,
       cuposDisponibles: conv.cuposDisponibles ?? 1,
-      fechaPublicacion: this.formatFechaInput(conv.fechaPublicacion),
-      fechaCierre: this.formatFechaInput(conv.fechaCierre),
-      estado: conv.estado ?? 'ABIERTA',
-      activo: conv.activo ?? true,
+      estado:           conv.estado           ?? 'ABIERTA',
     });
 
-    const idDocente = conv.idDocente ?? null;
-    if (idDocente) {
+    if (conv.idDocente) {
       this.form.get('idAsignatura')?.enable();
       this.subs.add(
-        this.convocatoriaService.getAsignaturasPorDocente(idDocente).pipe(catchError(() => of([]))).subscribe({
-          next: (data) => {
-            this.asignaturas = (data || []) as AsignaturaComboDTO[];
-          },
+        this.convSrv.getAsignaturasPorDocente(conv.idDocente)
+          .pipe(catchError(() => of([])))
+          .subscribe(a => this.asignaturas = a as AsignaturaComboDTO[])
+      );
+    } else {
+      this.form.get('idAsignatura')?.disable();
+      this.asignaturas = [];
+    }
+
+    // 1. Verificar postulantes para definir tipoEdicion
+    if (this.editId) {
+      this.subs.add(
+        this.convSrv.checkPostulantes(this.editId)
+          .pipe(catchError(() => of(null)))
+          .subscribe(res => {
+            this.checkPostResult = res as VerificarPostulantesResponse | null;
+            this.tipoEdicion     = res?.tienePostulantes ? 'PARCIAL' : 'COMPLETA';
+            if (this.tipoEdicion === 'PARCIAL') {
+              // Bloquear campos que no se pueden cambiar con postulantes
+              this.form.get('idDocente')?.disable();
+              this.form.get('idAsignatura')?.disable();
+            } else {
+              this.form.get('idDocente')?.enable();
+            }
+          })
+      );
+    }
+
+    // 2. Consultar fase igualmente (para mostrar el banner informativo)
+    this.consultarFase();
+  }
+
+  cerrarModal(): void {
+    this.mostrarModal = false;
+    this.faseInfo     = null;
+    this.form.get('idDocente')?.enable();
+  }
+
+  // ── Verificar fase del cronograma ────────────────────────────────────────
+  private consultarFase(): void {
+    this.verificandoFase = true;
+    this.subs.add(
+      this.convSrv.verificarFase()
+        .pipe(catchError(() => of(null)))
+        .subscribe(res => {
+          this.faseInfo        = res as VerificarFaseResponse | null;
+          this.verificandoFase = false;
+        })
+    );
+  }
+
+  // ── Guardar (crear o actualizar) ─────────────────────────────────────────
+  guardar(): void {
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    this.loadingForm = true;
+    const raw = this.form.getRawValue();
+
+    if (!this.modoEdicion) {
+      // ── CREAR ────────────────────────────────────────────────────────────
+      const payload: ConvocatoriaCrearRequest = {
+        idAsignatura:     raw.idAsignatura,
+        idDocente:        raw.idDocente,
+        cuposDisponibles: raw.cuposDisponibles,
+        estado:           raw.estado,
+      };
+      this.subs.add(
+        this.convSrv.guardar(payload).subscribe({
+          next:  (res) => { this.onGuardadoExitoso(res.mensaje); },
+          error: (err) => { this.onGuardadoError(err); },
         })
       );
     } else {
-      this.asignaturas = [];
-      this.form.get('idAsignatura')?.disable();
+      // ── ACTUALIZAR ───────────────────────────────────────────────────────
+      const payload: ConvocatoriaActualizarRequest = {
+        idConvocatoria:   this.editId!,
+        tipoEdicion:      this.tipoEdicion,
+        cuposDisponibles: raw.cuposDisponibles,
+        estado:           raw.estado,
+        ...(this.tipoEdicion === 'COMPLETA' && {
+          idDocente:    raw.idDocente,
+          idAsignatura: raw.idAsignatura,
+        }),
+      };
+      this.subs.add(
+        this.convSrv.actualizar(payload).subscribe({
+          next:  (res) => { this.onGuardadoExitoso(res.mensaje); },
+          error: (err) => { this.onGuardadoError(err); },
+        })
+      );
     }
-
-    this.mostrarModal = true;
   }
 
-  cerrarModal() { this.mostrarModal = false; }
-
-  guardar() {
-    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.loadingForm = true;
-    const payload = {
-      ...this.form.getRawValue(),
-      idConvocatoria: this.modoEdicion ? this.convocatoriaEditId : undefined,
-      idPeriodoAcademico: this.periodoActivo?.idPeriodoAcademico ?? this.form.getRawValue().idPeriodoAcademico,
-    };
-
-    const req = (this.modoEdicion && this.convocatoriaEditId)
-      ? this.http.put<ConvocatoriaDTO>(`${API_CONV}/actualizar`, payload)
-      : this.http.post<ConvocatoriaDTO>(`${API_CONV}/crear`, payload);
-
-    this.subs.add(req.subscribe({
-      next: (resp) => {
-        if (this.modoEdicion) {
-          const idx = this.convocatorias.findIndex(c => c.idConvocatoria === this.convocatoriaEditId);
-          if (idx > -1) this.convocatorias[idx] = resp;
-        } else {
-          this.convocatorias = [resp, ...this.convocatorias];
-        }
-        this.showSuccess(this.modoEdicion ? 'Convocatoria actualizada.' : 'Convocatoria creada.');
-        this.cerrarModal();
-        this.loadingForm = false;
-      },
-      error: (err) => {
-        this.errorMensaje = err?.error?.message || 'Error al guardar.';
-        this.loadingForm = false;
-        setTimeout(() => this.errorMensaje = '', 4000);
-      }
-    }));
+  private onGuardadoExitoso(msg: string): void {
+    this.showToast(msg, 'success');
+    this.cerrarModal();
+    this.loadingForm = false;
+    this.cargarDatos();
   }
 
-  eliminar(conv: ConvocatoriaDTO) {
-    if (!confirm(`¿Eliminar "${conv.nombreAsignatura}"?`)) return;
+  private onGuardadoError(err: Error): void {
+    this.showToast(err.message, 'error');
+    this.loadingForm = false;
+  }
+
+  // ── Desactivar ───────────────────────────────────────────────────────────
+  abrirModalDesactivar(conv: ConvocatoriaDTO): void {
+    this.convDesactivar = conv;
+    this.mostrarModalDesactivar = true;
+  }
+
+  cerrarModalDesactivar(): void {
+    this.mostrarModalDesactivar = false;
+    this.convDesactivar = null;
+  }
+
+  confirmarDesactivar(): void {
+    if (!this.convDesactivar?.idConvocatoria) return;
+    this.desactivando = true;
     this.subs.add(
-      this.http.delete(`${API_CONV}/${conv.idConvocatoria}`).subscribe({
-        next: () => {
-          this.convocatorias = this.convocatorias.filter(c => c.idConvocatoria !== conv.idConvocatoria);
-          this.showSuccess('Convocatoria eliminada.');
+      this.convSrv.desactivar(this.convDesactivar.idConvocatoria).subscribe({
+        next:  (res) => {
+          this.showToast(res.mensaje, 'success');
+          this.cerrarModalDesactivar();
+          this.desactivando = false;
+          this.cargarDatos();
         },
-        error: () => { this.errorMensaje = 'No se pudo eliminar.'; setTimeout(() => this.errorMensaje = '', 3000); }
+        error: (err) => {
+          this.showToast(err.message, 'error');
+          this.desactivando = false;
+          this.cerrarModalDesactivar();
+        },
       })
     );
   }
 
-  formatFecha(fecha: any): any {
-    if (!fecha) return null;
-    if (Array.isArray(fecha)) {
-      return new Date(fecha[0], (fecha[1] ?? 1) - 1, fecha[2] ?? 1);
-    }
-    return fecha;
-  }
-
-  formatFechaInput(fecha: any): string {
-    if (!fecha) return '';
-    if (Array.isArray(fecha)) {
-      const y = fecha[0];
-      const m = String(fecha[1]).padStart(2, '0');
-      const d = String(fecha[2]).padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    }
-    if (typeof fecha === 'string') return fecha.split('T')[0];
-    return '';
-  }
-
-  private showSuccess(msg: string) {
-    this.successMensaje = msg;
-    setTimeout(() => this.successMensaje = '', 3500);
+  // ── Toast interno ────────────────────────────────────────────────────────
+  showToast(msg: string, tipo: 'success' | 'error'): void {
+    clearTimeout(this.toastTimer);
+    this.toastMensaje = msg;
+    this.toastTipo    = tipo;
+    this.toastTimer   = setTimeout(() => this.toastMensaje = '', tipo === 'error' ? 9000 : 4000);
   }
 }

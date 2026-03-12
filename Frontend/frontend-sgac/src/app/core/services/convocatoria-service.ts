@@ -1,139 +1,183 @@
+// src/app/core/services/convocatoria-service.ts
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { ConvocatoriaDTO } from '../dto/convocatoria';
-import { PeriodoAcademicoDTO } from '../dto/periodo-academico';
-import { AsignaturaDTO } from '../dto/asignatura';
-import { DocenteDTO } from '../dto/docente';
+
+import {
+  ConvocatoriaDTO,
+  ConvocatoriaCrearRequest,
+  ConvocatoriaActualizarRequest,
+  ConvocatoriaNativaResponse,
+  VerificarFaseResponse,
+  VerificarPostulantesResponse,
+} from '../models/convocatoria/convocatoria';
+import { PeriodoAcademicoDTO }  from '../dto/periodo-academico';
+import { AsignaturaDTO }        from '../dto/asignatura';
+import { DocenteDTO }           from '../dto/docente';
 import { DocenteComboDTO, AsignaturaComboDTO } from '../models/convocatoria.model';
 import {
   ConvocatoriaEstudianteDTO,
   ConvocatoriasEstudianteWrapperDTO,
   ValidacionContextoEstudianteDTO,
-  ValidacionElegibilidadAcademicaDTO
+  ValidacionElegibilidadAcademicaDTO,
 } from '../dto/convocatoria-estudiante';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ConvocatoriaService {
-  private http = inject(HttpClient);
 
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private readonly apiUrl = `${this.baseUrl}/convocatorias`;
+  private readonly http    = inject(HttpClient);
+  private readonly base    = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly apiUrl  = `${this.base}/convocatorias`;
+
+  // ══════════════════════════════════════════════════════════════════
+  // LECTURA (endpoints heredados)
+  // ══════════════════════════════════════════════════════════════════
 
   getAll(): Observable<ConvocatoriaDTO[]> {
-    return this.http.get<ConvocatoriaDTO[]>(this.apiUrl);
+    return this.http.get<ConvocatoriaDTO[]>(`${this.apiUrl}/listar-vista`)
+      .pipe(catchError(this.handleError));
   }
 
   getById(id: number): Observable<ConvocatoriaDTO> {
-    return this.http.get<ConvocatoriaDTO>(`${this.apiUrl}/${id}`);
+    return this.http.get<ConvocatoriaDTO>(`${this.apiUrl}/${id}`)
+      .pipe(catchError(this.handleError));
   }
 
-  create(convocatoria: ConvocatoriaDTO): Observable<ConvocatoriaDTO> {
-    return this.http.post<ConvocatoriaDTO>(`${this.apiUrl}/crear`, convocatoria);
+  // ══════════════════════════════════════════════════════════════════
+  // VERIFICACIONES (PL/pgSQL)
+  // ══════════════════════════════════════════════════════════════════
+
+  /**
+   * GET /convocatorias/verificar-fase
+   * Llamar al abrir el formulario para saber si la fecha actual
+   * permite crear/editar convocatorias.
+   */
+  verificarFase(): Observable<VerificarFaseResponse> {
+    return this.http.get<VerificarFaseResponse>(`${this.apiUrl}/verificar-fase`)
+      .pipe(catchError(this.handleError));
   }
 
-  update(convocatoria: ConvocatoriaDTO): Observable<ConvocatoriaDTO> {
-    return this.http.put<ConvocatoriaDTO>(`${this.apiUrl}/actualizar`, convocatoria);
+  /**
+   * GET /convocatorias/check-postulantes/{id}
+   * Llamar antes de abrir edición para decidir PARCIAL vs COMPLETA.
+   */
+  checkPostulantes(id: number): Observable<VerificarPostulantesResponse> {
+    return this.http.get<VerificarPostulantesResponse>(
+      `${this.apiUrl}/check-postulantes/${id}`
+    ).pipe(catchError(this.handleError));
   }
 
-  delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  // ══════════════════════════════════════════════════════════════════
+  // ESCRITURA (PL/pgSQL)
+  // ══════════════════════════════════════════════════════════════════
+
+  /**
+   * POST /convocatorias/guardar
+   * Crea una convocatoria. Las fechas las dicta el cronograma.
+   */
+  guardar(payload: ConvocatoriaCrearRequest): Observable<ConvocatoriaNativaResponse> {
+    return this.http.post<ConvocatoriaNativaResponse>(
+      `${this.apiUrl}/guardar`, payload
+    ).pipe(catchError(this.handleError));
   }
 
-
-  getPeriodoActivo(): Observable<PeriodoAcademicoDTO[]> {
-    return this.http.get<PeriodoAcademicoDTO[]>(`${this.baseUrl}/recursos/periodos`)
+  /**
+   * PUT /convocatorias/actualizar
+   * tipoEdicion = 'PARCIAL'  → solo cupos/estado (siempre permitido)
+   * tipoEdicion = 'COMPLETA' → valida postulantes + fase del cronograma
+   */
+  actualizar(payload: ConvocatoriaActualizarRequest): Observable<ConvocatoriaNativaResponse> {
+    return this.http.put<ConvocatoriaNativaResponse>(
+      `${this.apiUrl}/actualizar`, payload
+    ).pipe(catchError(this.handleError));
   }
 
-  getPeriodoActivo2(): Observable<PeriodoAcademicoDTO> {
-    return this.http.get<PeriodoAcademicoDTO>(`${this.baseUrl}/periodos-academicos/activo`);
+  /**
+   * PATCH /convocatorias/desactivar/{id}
+   * Solo desactiva si no hay postulaciones activas.
+   */
+  desactivar(id: number): Observable<ConvocatoriaNativaResponse> {
+    return this.http.patch<ConvocatoriaNativaResponse>(
+      `${this.apiUrl}/desactivar/${id}`, {}
+    ).pipe(catchError(this.handleError));
   }
 
+  // ══════════════════════════════════════════════════════════════════
+  // CATÁLOGOS
+  // ══════════════════════════════════════════════════════════════════
+
+  getPeriodoActivo(): Observable<PeriodoAcademicoDTO> {
+    return this.http.get<PeriodoAcademicoDTO>(`${this.base}/periodos-academicos/activo`)
+      .pipe(catchError(this.handleError));
+  }
 
   getAsignaturas(): Observable<AsignaturaDTO[]> {
-    return this.http.get<AsignaturaDTO[]>(`${this.baseUrl}/admin/catalogos/asignaturas`);
+    return this.http.get<AsignaturaDTO[]>(`${this.base}/admin/catalogos/asignaturas`)
+      .pipe(catchError(this.handleError));
   }
 
   getDocentes(): Observable<DocenteDTO[]> {
-    return this.http.get<DocenteDTO[]>(`${this.baseUrl}/recursos/docentes`);
+    return this.http.get<DocenteDTO[]>(`${this.base}/recursos/docentes`)
+      .pipe(catchError(this.handleError));
   }
 
-  /** Coordinador: docentes filtrados por carrera (backend resuelve el contexto por JWT). */
-  getDocentesCarrera() {
-    return this.http.get<DocenteComboDTO[]>(`${this.baseUrl}/coordinador/docentes-seleccionables`);
+  getDocentesCarrera(): Observable<DocenteComboDTO[]> {
+    return this.http.get<DocenteComboDTO[]>(`${this.base}/coordinador/docentes-seleccionables`)
+      .pipe(catchError(this.handleError));
   }
 
-  /** Coordinador: asignaturas activas filtradas por docente (solo relaciones activas). */
-  getAsignaturasPorDocente(idDocente: number) {
-    return this.http.get<AsignaturaComboDTO[]>(`${this.baseUrl}/coordinador/docentes/${idDocente}/asignaturas`);
+  getAsignaturasPorDocente(idDocente: number): Observable<AsignaturaComboDTO[]> {
+    return this.http.get<AsignaturaComboDTO[]>(
+      `${this.base}/coordinador/docentes/${idDocente}/asignaturas`
+    ).pipe(catchError(this.handleError));
   }
 
-  // ==================================================================================
-  // Métodos para Estudiante - Convocatorias Elegibles
-  // ==================================================================================
+  // ══════════════════════════════════════════════════════════════════
+  // ESTUDIANTE
+  // ══════════════════════════════════════════════════════════════════
 
-  /**
-   * Lista las convocatorias elegibles para un estudiante específico.
-   * Endpoint: GET /api/convocatorias/listar-por-estudiante/{idUsuario}
-   *
-   * La función de PostgreSQL aplica los siguientes filtros:
-   * - Valida que el usuario sea un estudiante activo
-   * - Valida que esté en 6to semestre o superior
-   * - Filtra convocatorias de su carrera
-   * - Filtra asignaturas de semestres inferiores al del estudiante
-   * - Calcula el estado y si puede postular según las fechas de la fase POSTULACION
-   *
-   * @param idUsuario ID del usuario logueado
-   * @returns Lista de convocatorias elegibles con información de estado y habilitación
-   */
   listarConvocatoriasElegibles(idUsuario: number): Observable<ConvocatoriaEstudianteDTO[]> {
     return this.http.get<ConvocatoriaEstudianteDTO[]>(
       `${this.apiUrl}/listar-por-estudiante/${idUsuario}`
-    );
+    ).pipe(catchError(this.handleError));
   }
 
-  /**
-   * @deprecated Usar listarConvocatoriasElegibles en su lugar
-   */
   getMisConvocatoriasElegibles(): Observable<ConvocatoriasEstudianteWrapperDTO> {
     return this.http.get<ConvocatoriasEstudianteWrapperDTO>(
-      `${this.baseUrl}/estudiante/convocatorias`
-    );
+      `${this.base}/estudiante/convocatorias`
+    ).pipe(catchError(this.handleError));
   }
 
-  /**
-   * Lista las convocatorias elegibles para un usuario específico.
-   * @param idUsuario ID del usuario a consultar
-   * @returns Lista de convocatorias elegibles
-   */
   getConvocatoriasElegiblesPorUsuario(idUsuario: number): Observable<ConvocatoriaEstudianteDTO[]> {
     return this.http.get<ConvocatoriaEstudianteDTO[]>(
-      `${this.baseUrl}/estudiante/convocatorias/listar/${idUsuario}`
-    );
+      `${this.base}/estudiante/convocatorias/listar/${idUsuario}`
+    ).pipe(catchError(this.handleError));
   }
 
-  /**
-   * Valida el contexto del estudiante (transforma id_usuario en id_estudiante).
-   * @param idUsuario ID del usuario a validar
-   * @returns DTO con resultado de validación
-   */
   validarContextoEstudiante(idUsuario: number): Observable<ValidacionContextoEstudianteDTO> {
     return this.http.get<ValidacionContextoEstudianteDTO>(
-      `${this.baseUrl}/estudiante/convocatorias/validar-contexto/${idUsuario}`
-    );
+      `${this.base}/estudiante/convocatorias/validar-contexto/${idUsuario}`
+    ).pipe(catchError(this.handleError));
   }
 
-  /**
-   * Valida la elegibilidad académica del estudiante (semestre >= 6).
-   * @param idEstudiante ID del estudiante a validar
-   * @returns DTO con resultado de validación
-   */
   validarElegibilidadAcademica(idEstudiante: number): Observable<ValidacionElegibilidadAcademicaDTO> {
     return this.http.get<ValidacionElegibilidadAcademicaDTO>(
-      `${this.baseUrl}/estudiante/convocatorias/validar-elegibilidad/${idEstudiante}`
-    );
+      `${this.base}/estudiante/convocatorias/validar-elegibilidad/${idEstudiante}`
+    ).pipe(catchError(this.handleError));
+  }
+
+  // ══════════════════════════════════════════════════════════════════
+  // MANEJO DE ERRORES
+  // ══════════════════════════════════════════════════════════════════
+
+  private handleError(err: HttpErrorResponse): Observable<never> {
+    // GlobalExceptionHandler retorna { message: "..." } en 422/409/400
+    const msg = err.error?.message
+      ?? err.error?.mensaje
+      ?? (typeof err.error === 'string' ? err.error : null)
+      ?? `Error ${err.status}: ${err.statusText}`;
+    return throwError(() => new Error(msg));
   }
 }

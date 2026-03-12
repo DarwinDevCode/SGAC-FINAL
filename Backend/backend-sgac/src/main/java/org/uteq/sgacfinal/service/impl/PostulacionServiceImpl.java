@@ -194,6 +194,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                     "PENDIENTE",
                     request.getObservaciones()
             );
+
             if (idPostulacion == null || idPostulacion == -1)
                 throw new RuntimeException("Error al crear la postulación — el SP devolvió -1");
 
@@ -207,7 +208,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
                         Integer idRequisito = postulacionRepository.crearRequisitoAdjunto(
                                 idPostulacion,
                                 idTipoReq,
-                                1, // idTipoEstadoRequisito = 1 (PENDIENTE/ENTREGADO)
+                                1,
                                 archivo.getBytes(),
                                 archivo.getOriginalFilename(),
                                 new java.sql.Date(System.currentTimeMillis()));

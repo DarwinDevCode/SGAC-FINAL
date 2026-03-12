@@ -10,9 +10,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -27,24 +29,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<Map<String, Object>> handleBadRequestException(BadRequestException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Bad Request", ex.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> response = new HashMap<>();
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Validation Failed");
-        response.put("errors", errors);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -101,4 +85,41 @@ public class GlobalExceptionHandler {
         response.put("message", message);
         return new ResponseEntity<>(response, status);
     }
+
+    /** Errores de negocio devueltos por PL/pgSQL → 422 */
+    @ExceptionHandler(ConvocatoriaBusinessException.class)
+    public ResponseEntity<Map<String, Object>> handleBusiness(ConvocatoriaBusinessException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status",    422,
+                "error",     "Validación de negocio",
+                "message",   ex.getMessage(),
+                "codigo",    ex.getCodigo()
+        ));
+    }
+
+    /** Restricción de fase del cronograma → 409 */
+    @ExceptionHandler(FaseRestriccionException.class)
+    public ResponseEntity<Map<String, Object>> handleFase(FaseRestriccionException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status",    409,
+                "error",     "Restricción de fase",
+                "message",   ex.getMessage()
+        ));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+        String errores = ex.getBindingResult().getFieldErrors().stream()
+                .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status",    400,
+                "error",     "Datos inválidos",
+                "message",   errores
+        ));
+    }
 }
+

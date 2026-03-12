@@ -31,8 +31,8 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
             @Param("estado") String estado
     );
 
-    @Query(value = "SELECT public.sp_desactivar_convocatoria(:id)", nativeQuery = true)
-    Integer desactivarConvocatoria(@Param("id") Integer idConvocatoria);
+    //@Query(value = "SELECT public.sp_desactivar_convocatoria(:id)", nativeQuery = true)
+    //Integer desactivarConvocatoria(@Param("id") Integer idConvocatoria);
 
     @Query(value = "SELECT * FROM public.sp_listar_convocatorias_activas()", nativeQuery = true)
     List<Object[]> listarConvocatoriasActivasSP();
@@ -40,4 +40,26 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
     List<Convocatoria> findByPeriodoAcademico_IdPeriodoAcademico(Integer idPeriodo);
     List<Convocatoria> findByActivoTrue();
     List<Convocatoria> findByActivoFalse();
+
+
+    @Query(value = "SELECT convocatoria.fn_verificar_restricciones_fase()",
+            nativeQuery = true)
+    String verificarRestriccionesFase();
+
+    @Query(value = "SELECT convocatoria.fn_crear_convocatoria(CAST(:pDatos AS jsonb))",
+            nativeQuery = true)
+    String crearConvocatoria(@Param("pDatos") String pDatos);
+
+    @Query(value = "SELECT convocatoria.fn_actualizar_convocatoria(CAST(:pDatos AS jsonb), :pTipoEdicion)",
+            nativeQuery = true)
+    String actualizarConvocatoria(@Param("pDatos")       String pDatos,
+                                  @Param("pTipoEdicion") String pTipoEdicion);
+
+    @Query(value = "SELECT convocatoria.fn_verificar_postulantes(:pId)",
+            nativeQuery = true)
+    String verificarPostulantes(@Param("pId") Integer pId);
+
+    @Query(value = "SELECT convocatoria.fn_desactivar_convocatoria(:pId)",
+            nativeQuery = true)
+    String desactivarConvocatoria(@Param("pId") Integer pId);
 }

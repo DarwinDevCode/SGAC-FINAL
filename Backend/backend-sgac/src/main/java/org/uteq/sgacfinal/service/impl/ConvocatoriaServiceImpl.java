@@ -2,35 +2,46 @@ package org.uteq.sgacfinal.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.ConvocatoriaRequestDTO;
+import org.uteq.sgacfinal.dto.Request.configuracion.ConvocatoriaActualizarRequestDTO;
+import org.uteq.sgacfinal.dto.Request.configuracion.ConvocatoriaCrearRequestDTO;
 import org.uteq.sgacfinal.dto.Response.ConvocatoriaResponseDTO;
+import org.uteq.sgacfinal.dto.Response.configuracion.ConvocatoriaNativaResponseDTO;
+import org.uteq.sgacfinal.dto.Response.configuracion.VerificarFaseResponseDTO;
+import org.uteq.sgacfinal.dto.Response.configuracion.VerificarPostulantesResponseDTO;
 import org.uteq.sgacfinal.entity.Asignatura;
 import org.uteq.sgacfinal.entity.Convocatoria;
 import org.uteq.sgacfinal.entity.Docente;
 import org.uteq.sgacfinal.entity.PeriodoAcademico;
 import org.uteq.sgacfinal.event.ConvocatoriaCreadaEvent;
+import org.uteq.sgacfinal.exception.ConvocatoriaBusinessException;
+import org.uteq.sgacfinal.exception.FaseRestriccionException;
 import org.uteq.sgacfinal.mapper.ConvocatoriaMapper;
 import org.uteq.sgacfinal.repository.DocenteRepository;
 import org.uteq.sgacfinal.repository.IAsignaturaRepository;
 import org.uteq.sgacfinal.repository.IConvocatoriaRepository;
 import org.uteq.sgacfinal.repository.IPeriodoAcademicoRepository;
 import org.uteq.sgacfinal.service.IConvocatoriaService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     private final IConvocatoriaRepository convocatoriaRepo;
     private final IPeriodoAcademicoRepository periodoRepo;
     private final IAsignaturaRepository asignaturaRepo;
     private final DocenteRepository docenteRepo;
-
+    private final ObjectMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -45,8 +56,6 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
         return ConvocatoriaMapper.toDTO(saved);
     }
 
-    // El envío de notificaciones se movió a ConvocatoriaNotificacionListener (AFTER_COMMIT)
-
     @Override
     @Transactional
     public ConvocatoriaResponseDTO update(ConvocatoriaRequestDTO dto) {
@@ -59,7 +68,6 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     @Override
     @Transactional(readOnly = true)
     public List<ConvocatoriaResponseDTO> findAll() {
-        // Encontrar el periodo académico activo actual
         PeriodoAcademico periodoActivo = periodoRepo.findFirstByEstadoAndActivoTrueOrderByFechaInicioDesc("EN PROCESO")
                 .orElse(null);
 
@@ -115,6 +123,76 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
         }
     }
 
+    private <T> T parse(String json, Class<T> clazz) {
+        try {
+            return mapper.readValue(json, clazz);
+        } catch (Exception e) {
+            log.error("Error al deserializar respuesta PL/pgSQL: {}", e.getMessage());
+            throw new ConvocatoriaBusinessException("Error técnico al procesar la respuesta del servidor.");
+        }
+    }
+
+    /** Serializa el DTO para enviarlo como JSON string a PL/pgSQL */
+    private String toJson(Object obj) {
+        try {
+            return mapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new ConvocatoriaBusinessException("Error técnico al preparar la solicitud.");
+        }
+    }
+
+    private ConvocatoriaNativaResponseDTO evaluar(String json) {
+        ConvocatoriaNativaResponseDTO res = parse(json, ConvocatoriaNativaResponseDTO.class);
+        if (!res.isExito()) {
+            String msg = res.getMensaje() != null ? res.getMensaje() : "Error desconocido.";
+            if (msg.startsWith("[FASE]") || msg.contains("fase") || msg.contains("cronograma")) {
+                throw new FaseRestriccionException(msg);
+            }
+            if (msg.startsWith("[BLOQUEO]")) {
+                throw new ConvocatoriaBusinessException(msg, "BLOQUEO_POSTULANTES");
+            }
+            throw new ConvocatoriaBusinessException(msg);
+        }
+        return res;
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public VerificarFaseResponseDTO verificarFase() {
+        return parse(convocatoriaRepo.verificarRestriccionesFase(), VerificarFaseResponseDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public ConvocatoriaNativaResponseDTO crear(ConvocatoriaCrearRequestDTO request) {
+        return evaluar(convocatoriaRepo.crearConvocatoria(toJson(request)));
+    }
+
+    @Override
+    @Transactional
+    public ConvocatoriaNativaResponseDTO actualizar(ConvocatoriaActualizarRequestDTO request) {
+        return evaluar(
+                convocatoriaRepo.actualizarConvocatoria(toJson(request), request.getTipoEdicion())
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public VerificarPostulantesResponseDTO checkPostulantes(Integer idConvocatoria) {
+        VerificarPostulantesResponseDTO res =
+                parse(convocatoriaRepo.verificarPostulantes(idConvocatoria), VerificarPostulantesResponseDTO.class);
+        if (!res.isExito()) {
+            throw new ConvocatoriaBusinessException(res.getMensaje());
+        }
+        return res;
+    }
+
+    @Override
+    @Transactional
+    public ConvocatoriaNativaResponseDTO desactivar(Integer idConvocatoria) {
+        return evaluar(convocatoriaRepo.desactivarConvocatoria(idConvocatoria));
+    }
 
 
 
