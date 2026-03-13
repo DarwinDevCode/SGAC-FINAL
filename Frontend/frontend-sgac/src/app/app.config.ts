@@ -61,10 +61,42 @@ import {
   Trash2,
   TrendingUp,
   Users,
-  X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
-  MousePointerClick, RefreshCw, FileX, Upload, Info, Megaphone,
-  CheckCheck, Copy, CalendarPlus, CalendarDays, ChevronLeft, XCircle, Loader, PlayCircle, CalendarOff, BarChart2, List, PowerOff, User,
-  CircleCheck, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet, UserCheck
+  X,
+  ChevronRight,
+  Folder,
+  ChevronDown,
+  ExternalLink,
+  CheckCircle2,
+  ClipboardList,
+  RefreshCcw,
+  Paperclip,
+  MousePointerClick,
+  RefreshCw,
+  FileX,
+  Upload,
+  Info,
+  Megaphone,
+  CheckCheck,
+  Copy,
+  CalendarPlus,
+  CalendarDays,
+  ChevronLeft,
+  XCircle,
+  Loader,
+  PlayCircle,
+  CalendarOff,
+  BarChart2,
+  List,
+  PowerOff,
+  User,
+  CircleCheck,
+  ThumbsDown,
+  ThumbsUp,
+  Edit3,
+  MessageSquare,
+  Sheet,
+  UserCheck,
+  Gavel, TriangleAlert, UsersRound, CircleX, CircleCheckBig, CalendarX, ClipboardPen
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -136,7 +168,14 @@ export const appConfig: ApplicationConfig = {
         X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
         MousePointerClick, RefreshCw, FileX, Upload, Info, Megaphone,
         CheckCheck, Copy, CalendarPlus, CalendarDays, ChevronLeft, XCircle, Loader, PlayCircle, CalendarOff, BarChart2, List, PowerOff, User,
-        CircleCheck, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet, UserCheck
+        CircleCheck, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet, UserCheck,
+        Gavel,
+        TriangleAlert,
+        UsersRound,
+        CircleX,
+        CircleCheckBig,
+        CalendarX,
+        ClipboardPen
 
       })
     )

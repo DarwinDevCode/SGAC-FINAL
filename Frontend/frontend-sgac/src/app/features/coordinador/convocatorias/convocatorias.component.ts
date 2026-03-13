@@ -29,7 +29,7 @@ import {
   VerificarPostulantesResponse,
 } from '../../../core/models/convocatoria/convocatoria';
 import { PeriodoAcademicoDTO }    from '../../../core/dto/periodo-academico';
-import { DocenteComboDTO, AsignaturaComboDTO } from '../../../core/models/convocatoria.model';
+import { DocenteComboDTO, AsignaturaComboDTO } from '../../../core/models/convocatoria/convocatoria.model';
 
 @Component({
   selector:    'app-coordinador-convocatorias-crud',

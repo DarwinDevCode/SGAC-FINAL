@@ -50,6 +50,15 @@ import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayud
 // Docente
 import { ActividadesAyudanteComponent } from './features/docente/actividades-ayudante/actividades-ayudante';
 import { CronogramaActivoComponent} from './features/General/cronograma-activo/cronograma-activo.component';
+import {ComisionSeleccion} from './features/postulante/comision-seleccion/comision-seleccion';
+import {GestionEvaluacionesComponent} from './features/General/gestion-evaluaciones/gestion-evaluaciones';
+import {MiOposicionEstudianteComponent} from './features/postulante/mi-oposicion-estudiante/mi-oposicion-estudiante';
+import {
+  SalaEvaluacionComponent
+} from './features/evaluacionOposicion/sala-evaluacion-component/sala-evaluacion-component';
+import {
+  GestionOposicionComponent
+} from './features/coordinador/gestion-oposicion-component/gestion-oposicion-component';
 
 
 export const routes: Routes = [
@@ -62,6 +71,11 @@ export const routes: Routes = [
       // Global
       { path: 'notificaciones', component: NotificacionesPageComponent },
       { path: 'cronograma', component: CronogramaActivoComponent },
+      { path: 'comision', component: GestionEvaluacionesComponent},
+      { path: 'comision/sala',                    component: SalaEvaluacionComponent },
+      { path: 'comision/sala/:idConvocatoria',    component: SalaEvaluacionComponent },
+
+
 
       // Admin
       { path: 'admin/consulta', component: AdminDashboard },
@@ -76,7 +90,9 @@ export const routes: Routes = [
       { path: 'postulante/mis-postulaciones', component: EstadoPostulacionComponent },
       { path: 'postulante/resultados', component: ResultadosComponent },
       { path: 'postulante/meritos/:id', component: MeritosComponent },
-      { path: 'postulante/oposicion/:id', component: OposicionComponent },
+      //{ path: 'postulante/oposicion/:id', component: OposicionComponent },
+      { path: 'postulante/oposicion/:id', component: MiOposicionEstudianteComponent },
+      { path: 'postulante/comision', component: ComisionSeleccion },
 
       // Decano
       { path: 'decano/dashboard', component: DecanoDashboard },
@@ -90,6 +106,8 @@ export const routes: Routes = [
       { path: 'coordinador/convocatorias', component: CoordinadorConvocatoriasComponent },
       { path: 'coordinador/postulantes/:idConvocatoria', component: CoordinadorPostulantes },
       { path: 'coordinador/validaciones', component: ValidacionesComponent },
+      { path: 'coordinador/oposicion', component: GestionOposicionComponent },
+      { path: 'coordinador/oposicion/:idConvocatoria', component: GestionOposicionComponent },
       { path: 'coordinador/seguimiento', component: SeguimientoComponent },
       { path: 'coordinador/resoluciones', component: ResolucionesComponent },
       { path: 'coordinador/evaluaciones', component: EvaluacionesComponent },

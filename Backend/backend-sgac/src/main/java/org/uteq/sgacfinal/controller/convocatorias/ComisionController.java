@@ -12,7 +12,7 @@ import org.uteq.sgacfinal.service.convocatorias.IComisionService;
 public class ComisionController {
     private final IComisionService comisionService;
 
-    @PostMapping("/api/admin/comisiones/generar")
+    @PostMapping("/api/comisiones/generar")
     public ResponseEntity<GenerarComisionesResponseDTO> generarComisiones() {
         return ResponseEntity.ok(comisionService.generarComisionesAutomaticas());
     }

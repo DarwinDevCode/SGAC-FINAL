@@ -1,0 +1,207 @@
+<!-- src/app/features/estudiante/mi-oposicion/mi-oposicion-estudiante.html -->
+<div class="moe-wrapper">
+
+  <!-- ── LOADER ─────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="moe-center">
+    <lucide-icon name="loader" size="28" class="moe-spin moe-icon-muted"></lucide-icon>
+    <p class="moe-muted">Cargando tu información de oposición...</p>
+  </div>
+
+  <!-- ── ERROR ──────────────────────────────────────────────── -->
+  <div *ngIf="!loading && errorMsg" class="moe-error-card">
+    <lucide-icon name="circle-x" size="24"></lucide-icon>
+    <p>{{ errorMsg }}</p>
+  </div>
+
+  <!-- ── SIN TURNO ASIGNADO ──────────────────────────────────── -->
+  <div *ngIf="!loading && !errorMsg && !miTurno" class="moe-empty">
+    <div class="moe-empty-icon">
+      <lucide-icon name="calendar-search" size="32"></lucide-icon>
+    </div>
+    <h2 class="moe-empty-title">Sin sorteo realizado</h2>
+    <p class="moe-empty-sub">
+      El sorteo de oposición aún no ha sido ejecutado para tu convocatoria.
+      Vuelve a consultar una vez que el Coordinador realice el sorteo.
+    </p>
+  </div>
+
+  <!-- ── TARJETA DE TURNO ────────────────────────────────────── -->
+  <div *ngIf="!loading && !errorMsg && miTurno" class="moe-content">
+
+    <!-- Encabezado con estado -->
+    <div class="moe-header">
+      <div class="moe-header-left">
+        <div class="moe-header-icon">
+          <lucide-icon name="mic-vocal" size="22"></lucide-icon>
+        </div>
+        <div>
+          <h1 class="moe-title">Mi Evaluación de Oposición</h1>
+          <p class="moe-subtitle">Tu turno asignado mediante sorteo aleatorio</p>
+        </div>
+      </div>
+      <span class="moe-badge moe-badge-lg" [ngClass]="badgeColor">
+        {{ miTurno.nombreEstado }}
+      </span>
+    </div>
+
+    <!-- Cuerpo principal: dos columnas en desktop -->
+    <div class="moe-grid">
+
+      <!-- Columna izquierda: info del turno -->
+      <div class="moe-card moe-card-main">
+
+        <!-- Número de turno destacado -->
+        <div class="moe-turno-numero">
+          <span class="moe-num-label">Turno asignado</span>
+          <span class="moe-num-valor">#{{ miTurno.orden }}</span>
+        </div>
+
+        <div class="moe-divider"></div>
+
+        <!-- Datos logísticos -->
+        <div class="moe-info-grid">
+          <div class="moe-info-item">
+            <lucide-icon name="calendar" size="16" class="moe-info-icon"></lucide-icon>
+            <div>
+              <p class="moe-info-label">Fecha</p>
+              <p class="moe-info-val">{{ formatFecha(miTurno.fecha) }}</p>
+            </div>
+          </div>
+
+          <div class="moe-info-item">
+            <lucide-icon name="clock" size="16" class="moe-info-icon"></lucide-icon>
+            <div>
+              <p class="moe-info-label">Horario de exposición</p>
+              <p class="moe-info-val">
+                {{ formatHora(miTurno.horaInicio) }}
+                <span class="moe-hora-sep">→</span>
+                {{ formatHora(miTurno.horaFin) }}
+              </p>
+              <p class="moe-info-hint">Bloque de 35 min: 20' expo · 10' preguntas · 5' transición</p>
+            </div>
+          </div>
+
+          <div class="moe-info-item">
+            <lucide-icon name="map-pin" size="16" class="moe-info-icon"></lucide-icon>
+            <div>
+              <p class="moe-info-label">Lugar</p>
+              <p class="moe-info-val">{{ miTurno.lugar }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tema asignado — el elemento más importante visualmente -->
+        <div class="moe-tema-card">
+          <div class="moe-tema-header">
+            <lucide-icon name="book-open-text" size="16"></lucide-icon>
+            <span>Tema asignado por sorteo</span>
+          </div>
+          <p class="moe-tema-texto">{{ miTurno.tema }}</p>
+        </div>
+
+        <!-- Aviso de sorteo imparcial -->
+        <div class="moe-aviso">
+          <lucide-icon name="shield-check" size="14"></lucide-icon>
+          <p>
+            Tu tema fue asignado mediante un proceso de sorteo aleatorio doble,
+            garantizando igualdad de condiciones para todos los postulantes.
+          </p>
+        </div>
+      </div>
+
+      <!-- Columna derecha: resultado (si ya fue evaluado) o preparación -->
+      <div class="moe-right-col">
+
+        <!-- RESULTADO FINAL — solo si está FINALIZADA -->
+        <div *ngIf="miTurno.estado === 'FINALIZADA' && miTurno.puntajeFinal != null"
+             class="moe-card moe-card-resultado">
+          <div class="moe-resultado-icon">
+            <lucide-icon name="award" size="28"></lucide-icon>
+          </div>
+          <p class="moe-resultado-label">Tu puntaje final de oposición</p>
+          <p class="moe-resultado-valor">
+            {{ miTurno.puntajeFinal | number:'1.2-2' }}
+          </p>
+          <p class="moe-resultado-max">sobre 20 puntos</p>
+          <p class="moe-resultado-nota">
+            Promedio calculado automáticamente a partir de las calificaciones
+            independientes de los tres miembros del tribunal.
+          </p>
+
+          <!-- Detalle por jurado -->
+          <div *ngIf="miTurno.jurados.length > 0" class="moe-jurados-detalle">
+            <p class="moe-jurados-label">Desglose por jurado</p>
+            <div *ngFor="let j of miTurno.jurados" class="moe-jurado-row">
+              <span class="moe-jurado-rol">{{ j.rol }}</span>
+              <div class="moe-jurado-scores">
+                <span title="Material">M: {{ j.puntajeMaterial ?? '—' }}</span>
+                <span title="Exposición">E: {{ j.puntajeExposicion ?? '—' }}</span>
+                <span title="Respuestas">R: {{ j.puntajeRespuestas ?? '—' }}</span>
+              </div>
+              <span class="moe-jurado-subtotal">{{ j.subtotal }}/20</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESTADO PROGRAMADA — tips de preparación -->
+        <div *ngIf="miTurno.estado === 'PROGRAMADA'" class="moe-card moe-card-tips">
+          <div class="moe-tips-header">
+            <lucide-icon name="lightbulb" size="18" class="moe-icon-amber"></lucide-icon>
+            <h3 class="moe-tips-title">Recomendaciones para tu exposición</h3>
+          </div>
+          <ul class="moe-tips-list">
+            <li>Prepara tu material de apoyo (impreso y digital) con anticipación.</li>
+            <li>Tienes <strong>20 minutos</strong> para exponer el tema asignado con claridad.</li>
+            <li>Los siguientes <strong>10 minutos</strong> son para responder preguntas del tribunal.</li>
+            <li>Llega al menos 15 minutos antes al lugar indicado.</li>
+          </ul>
+        </div>
+
+        <!-- ESTADO EN_CURSO — en vivo -->
+        <div *ngIf="miTurno.estado === 'EN_CURSO'" class="moe-card moe-card-en-curso">
+          <div class="moe-en-curso-dot"></div>
+          <p class="moe-en-curso-text">Tu evaluación está en curso ahora mismo</p>
+          <p class="moe-en-curso-sub">El tribunal está registrando sus calificaciones.</p>
+        </div>
+
+        <!-- ESTADO NO_PRESENTO -->
+        <div *ngIf="miTurno.estado === 'NO_PRESENTO'" class="moe-card moe-card-ausente">
+          <lucide-icon name="user-x" size="28" class="moe-icon-red"></lucide-icon>
+          <p class="moe-ausente-text">Marcado como No Presentó</p>
+          <p class="moe-ausente-sub">
+            El sistema registró tu ausencia durante el turno asignado.
+            Consulta con el Coordinador para más información.
+          </p>
+        </div>
+
+        <!-- Criterios de evaluación (siempre visible) -->
+        <div class="moe-card moe-card-criterios">
+          <p class="moe-criterios-title">
+            <lucide-icon name="clipboard-list" size="15"></lucide-icon>
+            Criterios del tribunal (20 pts por jurado)
+          </p>
+          <div class="moe-criterio-item">
+            <div class="moe-criterio-dot" style="background:#15803d"></div>
+            <span class="moe-criterio-nombre">Material de apoyo</span>
+            <span class="moe-criterio-pts">10 pts</span>
+          </div>
+          <div class="moe-criterio-item">
+            <div class="moe-criterio-dot" style="background:#1d4ed8"></div>
+            <span class="moe-criterio-nombre">Dominio y fluidez</span>
+            <span class="moe-criterio-pts">4 pts</span>
+          </div>
+          <div class="moe-criterio-item">
+            <div class="moe-criterio-dot" style="background:#7c3aed"></div>
+            <span class="moe-criterio-nombre">Pertinencia de respuestas</span>
+            <span class="moe-criterio-pts">6 pts</span>
+          </div>
+          <div class="moe-criterio-total">
+            <span>Promedio final (3 jurados)</span>
+            <span>/ 20 pts</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

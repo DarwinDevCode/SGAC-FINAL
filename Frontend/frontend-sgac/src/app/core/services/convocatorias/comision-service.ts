@@ -16,7 +16,7 @@ export class ComisionService {
 
   generarAutomatico(): Observable<GenerarComisionesResponse> {
     return this.http.post<GenerarComisionesResponse>(
-      `${this.API}/generar-automatico`, {}
+      `${this.API}/generar`, {}
     ).pipe(catchError(this.handleError));
   }
 

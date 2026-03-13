@@ -16,7 +16,7 @@ import {
 import { PeriodoAcademicoDTO }  from '../dto/periodo-academico';
 import { AsignaturaDTO }        from '../dto/asignatura';
 import { DocenteDTO }           from '../dto/docente';
-import { DocenteComboDTO, AsignaturaComboDTO } from '../models/convocatoria.model';
+import { DocenteComboDTO, AsignaturaComboDTO } from '../models/convocatoria/convocatoria.model';
 import {
   ConvocatoriaEstudianteDTO,
   ConvocatoriasEstudianteWrapperDTO,

@@ -2,7 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { DocenteDashboardDTO } from '../../../core/models/docente-dashboard.model';
+import { DocenteDashboardDTO } from '../../../core/models/dashboard/docente-dashboard.model';
 import { DocenteDashboardService } from '../../../core/services/docente-dashboard.service';
 
 @Component({

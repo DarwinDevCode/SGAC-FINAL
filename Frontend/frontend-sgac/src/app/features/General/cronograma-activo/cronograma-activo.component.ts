@@ -2,7 +2,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule }       from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfiguracionService } from '../../../core/services/configuracion/Configuracion';
-import { CronogramaActivoResponse, PeriodoInfo, FaseInfo } from '../../../core/models/Cronograma';
+import { CronogramaActivoResponse, PeriodoInfo, FaseInfo } from '../../../core/models/configuracion/Cronograma';
 
 export interface GanttCol {
   label:    string;

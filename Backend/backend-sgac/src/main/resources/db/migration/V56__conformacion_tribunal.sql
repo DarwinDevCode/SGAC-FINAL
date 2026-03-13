@@ -37,6 +37,15 @@ BEGIN
             WHERE  cs.id_convocatoria = c.id_convocatoria
               AND  cs.activo = TRUE
         )
+          AND EXISTS (
+            SELECT 1
+            FROM  postulacion.postulacion          p
+                      JOIN  postulacion.tipo_estado_postulacion tep
+                            ON tep.id_tipo_estado_postulacion = p.id_tipo_estado_postulacion
+            WHERE p.id_convocatoria = c.id_convocatoria
+              AND p.activo          = TRUE
+              AND tep.codigo        = 'APROBADA'
+        )
         ORDER BY c.id_convocatoria
         LOOP
 
@@ -112,6 +121,11 @@ EXCEPTION WHEN OTHERS THEN
            );
 END;
 $$;
+
+
+
+
+
 
 
 -- ────────────────────────────────────────────────────────────────────

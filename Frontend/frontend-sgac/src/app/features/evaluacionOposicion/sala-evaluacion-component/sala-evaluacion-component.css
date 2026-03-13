@@ -1,0 +1,246 @@
+/* src/app/features/comite/sala-evaluacion/sala-evaluacion.css */
+
+.se-wrapper {
+  max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem;
+  display: flex; flex-direction: column; gap: 1.25rem; position: relative;
+}
+
+/* Toast */
+.se-toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.75rem 1.1rem; border-radius: 10px;
+  font-size: 0.85rem; font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0,0,0,.15); z-index: 9999;
+  animation: slide-up .2s ease-out; max-width: 380px;
+}
+@keyframes slide-up { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.se-toast-ok   { background:#f0fdf4; border:1px solid #86efac; color:#15803d; }
+.se-toast-err  { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+.se-toast-warn { background:#fffbeb; border:1px solid #fcd34d; color:#92400e; }
+
+/* Header */
+.se-header { display:flex; align-items:center; gap:.875rem; }
+.se-header-icon {
+  width:44px; height:44px; border-radius:10px;
+  background:#dcfce7; color:#15803d;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.se-title { font-size:1.35rem; font-weight:700; color:#0f172a; margin:0; letter-spacing:-.02em; }
+.se-subtitle { font-size:.82rem; color:#64748b; margin:.2rem 0 0; }
+
+/* State */
+.se-state-box { display:flex; flex-direction:column; align-items:center; gap:.75rem; padding:3rem 1rem; border:1px dashed #e2e8f0; border-radius:12px; background:#f8fafc; }
+.se-state-text { font-size:.9rem; color:#475569; margin:0; font-weight:500; text-align:center; }
+.se-icon-muted { color:#94a3b8; }
+.se-icon-green { color:#15803d; }
+.se-icon-warn  { color:#d97706; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.se-spin { animation:spin 1s linear infinite; }
+
+/* Layout */
+.se-layout {
+  display: grid; grid-template-columns: 260px 1fr;
+  gap: 1.25rem; align-items: start;
+}
+
+/* Sidebar */
+.se-sidebar {
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:.75rem; display:flex; flex-direction:column; gap:.375rem;
+  position:sticky; top:1.5rem;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+.se-sidebar-label {
+  font-size:.7rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.07em; color:#94a3b8; padding:.25rem .5rem .5rem; margin:0;
+}
+.se-sidebar-empty { display:flex; align-items:center; gap:.5rem; padding:.75rem; color:#94a3b8; font-size:.82rem; }
+.se-turno-item {
+  padding:.65rem .875rem; border-radius:8px;
+  cursor:pointer; border:1px solid transparent; transition:background .12s;
+}
+.se-turno-item:hover { background:#f1f5f9; }
+.se-turno-item--active { background:#f0fdf4; border-color:#bbf7d0; }
+.se-turno-item--en-curso { border-left:3px solid #f59e0b; }
+.se-turno-top { display:flex; align-items:center; justify-content:space-between; gap:.4rem; margin-bottom:.25rem; }
+.se-turno-num { font-size:.72rem; font-weight:700; color:#94a3b8; }
+.se-turno-nombre { font-size:.84rem; font-weight:600; color:#1e293b; margin:0; }
+.se-turno-hora { font-size:.74rem; color:#94a3b8; margin:0; }
+
+/* Badges */
+.se-badge {
+  display:inline-flex; align-items:center;
+  font-size:.68rem; font-weight:600; letter-spacing:.03em;
+  padding:.15rem .55rem; border-radius:20px; white-space:nowrap;
+}
+.se-badge-lg { font-size:.78rem; padding:.25rem .75rem; }
+.badge-blue    { background:#dbeafe; color:#1d4ed8; }
+.badge-amber   { background:#fef3c7; color:#92400e; }
+.badge-green   { background:#dcfce7; color:#15803d; }
+.badge-red     { background:#fee2e2; color:#dc2626; }
+.badge-gray    { background:#f1f5f9; color:#475569; }
+
+/* Main panel */
+.se-main {
+  background:#fff; border:1px solid #e2e8f0; border-radius:14px;
+  padding:1.5rem; display:flex; flex-direction:column; gap:1.25rem;
+  box-shadow:0 1px 3px rgba(0,0,0,.04); min-height:480px;
+}
+.se-main-empty { align-items:center; justify-content:center; color:#94a3b8; font-size:.88rem; }
+
+/* Turno header */
+.se-turno-header {
+  display:flex; align-items:flex-start; gap:1rem;
+  padding-bottom:1.1rem; border-bottom:1px solid #f1f5f9;
+}
+.se-turno-avatar-lg {
+  width:52px; height:52px; border-radius:50%;
+  background:#dcfce7; color:#15803d; font-size:1.1rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; text-transform:uppercase;
+}
+.se-turno-info { flex:1; }
+.se-turno-nombre-lg { font-size:1.1rem; font-weight:700; color:#0f172a; margin:0 0 .3rem; letter-spacing:-.01em; }
+.se-turno-meta {
+  display:flex; align-items:center; gap:.5rem; flex-wrap:wrap;
+  font-size:.78rem; color:#64748b; margin:0 0 .4rem;
+}
+.se-turno-tema {
+  display:flex; align-items:flex-start; gap:.4rem;
+  font-size:.82rem; color:#374151; margin:0; line-height:1.4;
+}
+
+/* Timer */
+.se-timer-section {
+  display:flex; flex-direction:column; align-items:center; gap:.875rem;
+  padding:1rem; background:#f8fafc; border-radius:12px; border:1px solid #f1f5f9;
+}
+.se-timer-wrap { display:flex; align-items:center; gap:2rem; flex-wrap:wrap; justify-content:center; }
+.se-timer-svg { width:120px; height:120px; }
+.se-timer-leyenda { display:flex; flex-direction:column; gap:.5rem; }
+.se-leyenda-item {
+  display:flex; align-items:center; gap:.5rem;
+  font-size:.78rem; color:#64748b; opacity:.6; transition:opacity .2s;
+}
+.se-leyenda-active { opacity:1; font-weight:600; color:#1e293b; }
+.se-leyenda-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.se-segmento-badge {
+  display:inline-flex; align-items:center; gap:.4rem;
+  font-size:.78rem; font-weight:600; padding:.3rem .9rem; border-radius:20px;
+}
+.se-seg-expo       { background:#dcfce7; color:#15803d; }
+.se-seg-preg       { background:#dbeafe; color:#1d4ed8; }
+.se-seg-trans      { background:#fef3c7; color:#92400e; }
+.se-seg-fin        { background:#fee2e2; color:#dc2626; }
+
+/* Coordinador controls */
+.se-coord-controls {
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:1rem 1.1rem;
+}
+.se-section-label {
+  font-size:.7rem; font-weight:700; text-transform:uppercase;
+  letter-spacing:.07em; color:#94a3b8; margin:0 0 .75rem;
+}
+.se-coord-btns { display:flex; gap:.75rem; flex-wrap:wrap; align-items:center; }
+.se-finalizada-msg {
+  display:flex; align-items:center; gap:.4rem;
+  font-size:.82rem; color:#15803d; font-weight:600;
+}
+
+/* Botones */
+.se-btn {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.55rem 1.1rem; border:none; border-radius:8px;
+  font-size:.82rem; font-weight:700; cursor:pointer; transition:background .15s; white-space:nowrap;
+}
+.se-btn-iniciar    { background:#15803d; color:#fff; }
+.se-btn-iniciar:hover { background:#166534; }
+.se-btn-finalizar  { background:#1d4ed8; color:#fff; }
+.se-btn-finalizar:hover { background:#1e40af; }
+.se-btn-guardar    { background:#f1f5f9; color:#1e293b; }
+.se-btn-guardar:hover { background:#e2e8f0; }
+.se-btn-finalizar-jurado { background:#15803d; color:#fff; }
+.se-btn-finalizar-jurado:hover { background:#166534; }
+.se-btn:disabled   { opacity:.5; cursor:not-allowed; }
+
+/* Formulario de notas */
+.se-form-section { display:flex; flex-direction:column; gap:.875rem; }
+.se-form-header { display:flex; align-items:center; justify-content:space-between; }
+.se-ya-finalizo {
+  display:flex; align-items:center; gap:.35rem;
+  font-size:.75rem; color:#dc2626; font-weight:600;
+  background:#fef2f2; border:1px solid #fecaca; padding:.2rem .65rem; border-radius:20px;
+}
+.se-form-blocked {
+  display:flex; align-items:center; gap:.75rem;
+  padding:1.25rem; background:#f8fafc; border:1px dashed #e2e8f0; border-radius:10px;
+  font-size:.85rem; color:#64748b;
+}
+.se-block-warn { background:#fffbeb; border-color:#fcd34d; }
+.se-form { display:flex; flex-direction:column; gap:1rem; }
+.se-field { display:flex; flex-direction:column; gap:.375rem; }
+.se-field-label-row { display:flex; align-items:center; justify-content:space-between; }
+.se-label { font-size:.82rem; font-weight:600; color:#374151; }
+.se-max-badge {
+  font-size:.7rem; font-weight:600; color:#64748b;
+  background:#f1f5f9; border:1px solid #e2e8f0; padding:.15rem .5rem; border-radius:20px;
+}
+.se-input-row { display:flex; align-items:center; gap:.75rem; }
+.se-input {
+  width:80px; height:2.4rem; border:1px solid #e2e8f0; border-radius:8px;
+  padding:0 .75rem; font-size:.9rem; font-weight:600; color:#1e293b;
+  background:#f8fafc; text-align:center; transition:border-color .15s; flex-shrink:0;
+}
+.se-input:focus { outline:none; border-color:#15803d; background:#fff; }
+.se-input-readonly { background:#f1f5f9; color:#94a3b8; cursor:not-allowed; }
+.se-bar-wrap {
+  flex:1; height:8px; background:#f1f5f9; border-radius:4px; overflow:hidden;
+}
+.se-bar-fill { height:100%; border-radius:4px; transition:width .3s ease; }
+.se-bar-green  { background:#15803d; }
+.se-bar-blue   { background:#1d4ed8; }
+.se-bar-purple { background:#7c3aed; }
+.se-subtotal {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.75rem 1rem; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0;
+  font-size:.85rem; color:#64748b;
+}
+.se-subtotal-val { font-size:1rem; font-weight:700; color:#1e293b; }
+.se-subtotal-max { color:#15803d; }
+.se-form-btns { display:flex; gap:.75rem; flex-wrap:wrap; margin-top:.25rem; }
+
+/* Jurados grid */
+.se-jurados-section { display:flex; flex-direction:column; gap:.75rem; }
+.se-jurados-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:.875rem; }
+.se-jurado-card {
+  background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;
+  padding:.875rem; display:flex; flex-direction:column; gap:.625rem;
+}
+.se-jurado-finalizo { border-color:#86efac; background:#f0fdf4; }
+.se-jurado-top { display:flex; align-items:center; gap:.6rem; }
+.se-jurado-avatar {
+  width:30px; height:30px; border-radius:50%;
+  background:#e2e8f0; color:#475569; font-size:.75rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; text-transform:uppercase;
+}
+.se-jurado-nombre { font-weight:600; color:#1e293b; font-size:.83rem; margin:0; }
+.se-jurado-rol { font-size:.72rem; color:#64748b; margin:0; text-transform:uppercase; letter-spacing:.04em; }
+.se-jurado-lock { margin-left:auto; }
+.se-jurado-scores { display:flex; flex-direction:column; gap:.3rem; }
+.se-score-row { display:flex; justify-content:space-between; font-size:.78rem; color:#64748b; }
+.se-score-total { display:flex; justify-content:space-between; font-size:.82rem; color:#1e293b; border-top:1px solid #e2e8f0; padding-top:.3rem; margin-top:.1rem; }
+.se-jurado-pending { font-size:.75rem; color:#94a3b8; font-style:italic; margin:0; }
+
+/* Nota final */
+.se-nota-final {
+  display:flex; align-items:center; gap:.875rem;
+  padding:1rem 1.25rem; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; color:#15803d;
+}
+.se-nota-label { font-size:.8rem; font-weight:600; margin:0; }
+.se-nota-valor { font-size:1.4rem; font-weight:800; margin:0; letter-spacing:-.02em; }
+
+/* Responsive */
+@media (max-width:768px) {
+  .se-layout { grid-template-columns:1fr; }
+  .se-sidebar { position:static; }
+}

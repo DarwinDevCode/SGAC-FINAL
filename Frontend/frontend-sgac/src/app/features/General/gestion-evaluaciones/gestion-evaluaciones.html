@@ -1,0 +1,269 @@
+<!-- src/app/features/comite/gestion-evaluaciones/gestion-evaluaciones.html -->
+<div class="ge-wrapper">
+
+  <!-- ══════════════════════════════════════════════════════════
+       HEADER
+  ══════════════════════════════════════════════════════════ -->
+  <div class="ge-header">
+    <div class="ge-header-icon">
+      <lucide-icon name="gavel" size="22"></lucide-icon>
+    </div>
+    <div>
+      <h1 class="ge-title">Tribunal de Selección</h1>
+      <p class="ge-subtitle">
+        {{ esCoordinador
+        ? 'Gestión de comisiones y evaluación de postulantes'
+        : 'Convocatorias asignadas para evaluación — ' + rolUsuario }}
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       PANEL COORDINADOR — GENERAR COMISIONES
+       Solo visible para rol COORDINADOR
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="esCoordinador" class="ge-panel-gen">
+
+    <!-- Cabecera del panel -->
+    <div class="ge-panel-gen-header">
+      <div class="ge-panel-gen-info">
+        <lucide-icon name="users-round" size="18" class="ge-panel-gen-icon"></lucide-icon>
+        <div>
+          <p class="ge-panel-gen-title">Conformación de Comisiones del Periodo</p>
+          <p class="ge-panel-gen-desc">
+            Genera automáticamente los tribunales para todas las convocatorias
+            con postulantes aptos. El proceso es seguro y repetible.
+          </p>
+        </div>
+      </div>
+
+      <!-- Indicador de fase -->
+      <div class="ge-fase-req-badge" *ngIf="faseRequisitos"
+           [class.ge-fase-req--cerrada]="puedeGenerarComisiones"
+           [class.ge-fase-req--activa]="!puedeGenerarComisiones">
+        <lucide-icon
+          [name]="puedeGenerarComisiones ? 'check-circle-2' : 'clock'"
+          size="14">
+        </lucide-icon>
+        <span *ngIf="!puedeGenerarComisiones">
+          Fase activa hasta el {{ formatFecha(faseRequisitos!.fechaFin) }}
+        </span>
+        <span *ngIf="puedeGenerarComisiones">
+          Fase cerrada · disponible desde {{ formatFecha(faseRequisitos!.fechaFin) }}
+        </span>
+      </div>
+
+      <div class="ge-fase-req-badge ge-fase-req--warn" *ngIf="!faseRequisitos && !loading">
+        <lucide-icon name="triangle-alert" size="14"></lucide-icon>
+        Sin cronograma activo
+      </div>
+    </div>
+
+    <!-- Botón principal -->
+    <div class="ge-panel-gen-footer">
+      <button
+        class="ge-btn-generar"
+        [class.ge-btn-generar--disabled]="!puedeGenerarComisiones || generando"
+        [disabled]="!puedeGenerarComisiones || generando"
+        (click)="generarComisiones()"
+        [title]="tooltipBoton()"
+      >
+        <lucide-icon
+          [name]="generando ? 'loader' : 'users-round'"
+          size="16"
+          [class.ge-spin]="generando">
+        </lucide-icon>
+        {{ generando ? 'Generando comisiones...' : 'Generar Comisiones del Periodo' }}
+      </button>
+
+      <p class="ge-btn-hint" *ngIf="!puedeGenerarComisiones && faseRequisitos">
+        <lucide-icon name="info" size="13"></lucide-icon>
+        Disponible una vez que cierre la fase de Evaluación de Requisitos
+        ({{ formatFecha(faseRequisitos!.fechaFin) }}).
+      </p>
+    </div>
+
+    <!-- Resultado de la generación -->
+    <div *ngIf="resultadoGeneracion" class="ge-resultado"
+         [class.ge-resultado--ok]="resultadoGeneracion.exito"
+         [class.ge-resultado--err]="!resultadoGeneracion.exito">
+      <div class="ge-resultado-left">
+        <lucide-icon
+          [name]="resultadoGeneracion.exito ? 'circle-check-big' : 'circle-x'"
+          size="20">
+        </lucide-icon>
+        <div>
+          <p class="ge-resultado-msg">{{ resultadoGeneracion.mensaje }}</p>
+          <p class="ge-resultado-meta" *ngIf="resultadoGeneracion.exito">
+            <strong>{{ resultadoGeneracion.creadas }}</strong> comisiones creadas
+            <span *ngIf="resultadoGeneracion.omitidas > 0">
+              · <strong>{{ resultadoGeneracion.omitidas }}</strong> convocatorias sin miembro (revisar)
+            </span>
+          </p>
+        </div>
+      </div>
+      <button class="ge-resultado-close" (click)="cerrarResultado()">
+        <lucide-icon name="x" size="16"></lucide-icon>
+      </button>
+    </div>
+
+  </div>
+  <!-- /panel coordinador -->
+
+  <!-- ══════════════════════════════════════════════════════════
+       LOADER
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="ge-state-box">
+    <lucide-icon name="loader" size="28" class="ge-spin ge-icon-muted"></lucide-icon>
+    <p class="ge-state-text">Cargando comisiones y cronograma...</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       SIN CONVOCATORIAS ASIGNADAS
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && convocatorias.length === 0" class="ge-state-box">
+    <lucide-icon name="inbox" size="36" class="ge-icon-muted"></lucide-icon>
+    <p class="ge-state-text">No tienes convocatorias asignadas como evaluador aún.</p>
+    <p class="ge-state-hint" *ngIf="esCoordinador">
+      Una vez generadas las comisiones, aparecerán aquí tus asignaciones.
+    </p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       DASHBOARD — CONVOCATORIAS + DETALLE
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && convocatorias.length > 0" class="ge-dashboard">
+
+    <!-- ── Sidebar lista de convocatorias ─────────────────── -->
+    <aside class="ge-sidebar">
+      <p class="ge-sidebar-label">
+        Mis convocatorias ({{ convocatorias.length }})
+      </p>
+
+      <div
+        *ngFor="let conv of convocatorias"
+        class="ge-conv-item"
+        [class.ge-conv-item--active]="conv.idConvocatoria === convSeleccionada?.idConvocatoria"
+        (click)="seleccionar(conv)"
+      >
+        <div class="ge-conv-item-top">
+          <span class="ge-conv-asignatura">{{ conv.nombreAsignatura }}</span>
+          <span class="ge-badge"
+                [class.ge-badge-green]="faseActiva(conv.faseEvaluacion)"
+                [class.ge-badge-gray]="!faseActiva(conv.faseEvaluacion)">
+            {{ faseActiva(conv.faseEvaluacion) ? 'Vigente' : 'Fuera de plazo' }}
+          </span>
+        </div>
+        <div class="ge-conv-meta">
+          <lucide-icon name="users" size="12"></lucide-icon>
+          {{ conv.postulantes.length }} postulante(s)
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Detalle convocatoria seleccionada ──────────────── -->
+    <section class="ge-detail" *ngIf="convSeleccionada">
+
+      <div class="ge-detail-header">
+        <div>
+          <h2 class="ge-detail-title">{{ convSeleccionada.nombreAsignatura }}</h2>
+          <p class="ge-detail-subtitle">{{ convSeleccionada.nombreComision }}</p>
+        </div>
+      </div>
+
+      <!-- Banner fase evaluación -->
+      <div *ngIf="convSeleccionada.faseEvaluacion" class="ge-fase-banner"
+           [class.ge-fase-banner--activa]="faseActiva(convSeleccionada.faseEvaluacion)"
+           [class.ge-fase-banner--inactiva]="!faseActiva(convSeleccionada.faseEvaluacion)">
+        <div class="ge-fase-banner-left">
+          <lucide-icon
+            [name]="faseActiva(convSeleccionada.faseEvaluacion) ? 'clock' : 'calendar-x'"
+            size="18">
+          </lucide-icon>
+          <div>
+            <p class="ge-fase-label">{{ convSeleccionada.faseEvaluacion!.nombreFase }}</p>
+            <p class="ge-fase-fechas">
+              {{ formatFecha(convSeleccionada.faseEvaluacion!.fechaInicio) }}
+              &nbsp;—&nbsp;
+              {{ formatFecha(convSeleccionada.faseEvaluacion!.fechaFin) }}
+            </p>
+          </div>
+        </div>
+        <div class="ge-fase-banner-right">
+          <span *ngIf="faseActiva(convSeleccionada.faseEvaluacion)">
+            <strong>{{ diasRestantes(convSeleccionada.faseEvaluacion) }}</strong> días restantes
+          </span>
+          <span *ngIf="!faseActiva(convSeleccionada.faseEvaluacion)">Plazo finalizado</span>
+        </div>
+      </div>
+
+      <div *ngIf="!convSeleccionada.faseEvaluacion" class="ge-fase-banner ge-fase-banner--inactiva">
+        <lucide-icon name="info" size="16"></lucide-icon>
+        <p style="margin:0;font-size:.82rem;">
+          La fase de Evaluación de Méritos y Oposición aún no está configurada.
+        </p>
+      </div>
+
+      <!-- Tabla de postulantes -->
+      <div class="ge-postulantes-section">
+        <p class="ge-section-label">Postulantes ({{ convSeleccionada.postulantes.length }})</p>
+
+        <div *ngIf="convSeleccionada.postulantes.length === 0" class="ge-empty-post">
+          <lucide-icon name="user-x" size="24" class="ge-icon-muted"></lucide-icon>
+          <p>No hay postulantes registrados para esta convocatoria.</p>
+        </div>
+
+        <div class="ge-table-wrap" *ngIf="convSeleccionada.postulantes.length > 0">
+          <table class="ge-table">
+            <thead>
+            <tr>
+              <th>#</th>
+              <th>Postulante</th>
+              <th>Correo</th>
+              <th>Postulado</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let p of convSeleccionada.postulantes; let i = index">
+              <td class="ge-td-num">{{ i + 1 }}</td>
+              <td>
+                <div class="ge-td-name">
+                  <div class="ge-avatar">
+                    {{ p.nombres.charAt(0) }}{{ p.apellidos.charAt(0) }}
+                  </div>
+                  <p class="ge-name-full">{{ p.nombres }} {{ p.apellidos }}</p>
+                </div>
+              </td>
+              <td class="ge-td-mail">{{ p.correo }}</td>
+              <td class="ge-td-date">{{ formatFecha(p.fechaPostulacion) }}</td>
+              <td>
+                  <span class="ge-badge" [ngClass]="badgeEstado(p.codigoEstado)">
+                    {{ labelEstado(p.estadoPostulacion) }}
+                  </span>
+              </td>
+              <td>
+                <button
+                  class="ge-btn-eval"
+                  [disabled]="!faseActiva(convSeleccionada!.faseEvaluacion)"
+                  (click)="iniciarEvaluacion(p)"
+                  [title]="faseActiva(convSeleccionada!.faseEvaluacion)
+                      ? 'Iniciar evaluación'
+                      : 'La fase de evaluación no está activa'"
+                >
+                  <lucide-icon name="clipboard-pen" size="14"></lucide-icon>
+                  Evaluar
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+  <!-- /dashboard -->
+
+</div>

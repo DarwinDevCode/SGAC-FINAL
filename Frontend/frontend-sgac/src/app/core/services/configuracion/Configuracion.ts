@@ -8,7 +8,7 @@ import {
   PeriodoFaseResponse,
   AjusteCronogramaRequest
 } from '../../models/configuracion/Configuracion';
-import {CronogramaActivoResponse, PeriodoInfo, FaseInfo} from '../../models/Cronograma';
+import {CronogramaActivoResponse, PeriodoInfo, FaseInfo} from '../../models/configuracion/Cronograma';
 
 @Injectable({
   providedIn: 'root'

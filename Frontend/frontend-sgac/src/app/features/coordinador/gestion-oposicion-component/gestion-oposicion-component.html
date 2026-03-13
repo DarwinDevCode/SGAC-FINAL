@@ -1,0 +1,269 @@
+<!-- src/app/features/coordinador/gestion-oposicion/gestion-oposicion.html -->
+<div class="go-wrapper">
+
+  <!-- ══ TOAST ══════════════════════════════════════════════ -->
+  <div *ngIf="toastMsg" class="go-toast"
+       [class.go-toast-ok]="toastTipo==='ok'"
+       [class.go-toast-err]="toastTipo==='err'"
+       [class.go-toast-warn]="toastTipo==='warn'">
+    <lucide-icon [name]="toastTipo==='ok' ? 'circle-check-big' : toastTipo==='warn' ? 'triangle-alert' : 'circle-x'" size="16"></lucide-icon>
+    <span>{{ toastMsg }}</span>
+  </div>
+
+  <!-- ══ HEADER ═════════════════════════════════════════════ -->
+  <div class="go-header">
+    <div class="go-header-icon">
+      <lucide-icon name="scroll-text" size="22"></lucide-icon>
+    </div>
+    <div>
+      <h1 class="go-title">Evaluación de Oposición</h1>
+      <p class="go-subtitle">Gestión del banco de temas y cronograma de exposiciones</p>
+    </div>
+  </div>
+
+  <!-- ══ TABS ════════════════════════════════════════════════ -->
+  <div class="go-tabs">
+    <button class="go-tab" [class.go-tab--active]="tabActiva==='temas'" (click)="cambiarTab('temas')">
+      <lucide-icon name="book-open-text" size="15"></lucide-icon> Banco de Temas
+    </button>
+    <button class="go-tab" [class.go-tab--active]="tabActiva==='cronograma'" (click)="cambiarTab('cronograma')">
+      <lucide-icon name="calendar-clock" size="15"></lucide-icon> Cronograma
+    </button>
+  </div>
+
+  <!-- ══ LOADER ══════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="go-state-box">
+    <lucide-icon name="loader" size="26" class="go-spin go-icon-muted"></lucide-icon>
+    <p class="go-state-text">{{ loadingMsg }}</p>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB: BANCO DE TEMAS
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && tabActiva==='temas'" class="go-panel">
+
+    <!-- Indicador de progreso -->
+    <div class="go-indicator" [class.go-indicator--ok]="listoParaSorteo" [class.go-indicator--warn]="!listoParaSorteo">
+      <div class="go-indicator-left">
+        <lucide-icon [name]="listoParaSorteo ? 'check-circle-2' : 'info'" size="18"></lucide-icon>
+        <div>
+          <p class="go-indicator-title">
+            {{ listoParaSorteo ? '¡Listo para el sorteo!' : 'Aún faltan temas' }}
+          </p>
+          <p class="go-indicator-sub">
+            Postulantes aptos: <strong>{{ totalAptos }}</strong>
+            &nbsp;·&nbsp;
+            Temas registrados: <strong>{{ temas.length }}</strong>
+            <span *ngIf="!listoParaSorteo">
+              &nbsp;·&nbsp; Faltan: <strong>{{ temasRestantes }}</strong>
+            </span>
+          </p>
+        </div>
+      </div>
+      <button
+        class="go-btn-sorteo"
+        [class.go-btn--disabled]="!listoParaSorteo"
+        [disabled]="!listoParaSorteo"
+        (click)="abrirModalSorteo()"
+        title="{{ listoParaSorteo ? 'Realizar sorteo' : 'Registra más temas antes de sortear' }}">
+        <lucide-icon name="shuffle" size="15"></lucide-icon>
+        Realizar Sorteo
+      </button>
+    </div>
+
+    <!-- Formulario rápido de nuevo tema -->
+    <div class="go-add-tema">
+      <input
+        class="go-input"
+        type="text"
+        [(ngModel)]="nuevoTema"
+        placeholder="Ej: Derivadas e integrales — Cálculo diferencial"
+        (keydown.enter)="agregarTema()"
+        maxlength="255"
+      />
+      <button class="go-btn-add" (click)="agregarTema()" [disabled]="!nuevoTema.trim()">
+        <lucide-icon name="plus" size="16"></lucide-icon>
+        Agregar
+      </button>
+    </div>
+
+    <!-- Lista de temas -->
+    <div *ngIf="temas.length === 0" class="go-state-box go-state-sm">
+      <lucide-icon name="inbox" size="28" class="go-icon-muted"></lucide-icon>
+      <p class="go-state-text">No hay temas registrados aún.</p>
+    </div>
+
+    <div *ngIf="temas.length > 0" class="go-temas-list">
+      <div class="go-temas-header">
+        <span class="go-section-label">{{ temas.length }} tema(s) registrado(s)</span>
+        <button class="go-btn-limpiar" (click)="confirmarLimpiar()">
+          <lucide-icon name="trash-2" size="13"></lucide-icon> Limpiar banco
+        </button>
+      </div>
+
+      <div *ngFor="let t of temas; let i = index" class="go-tema-item">
+        <div class="go-tema-num">{{ i + 1 }}</div>
+        <p class="go-tema-desc">{{ t.descripcionTema }}</p>
+        <lucide-icon name="check" size="14" class="go-icon-green"></lucide-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB: CRONOGRAMA
+  ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && tabActiva==='cronograma'" class="go-panel">
+
+    <div *ngIf="cronograma.length === 0" class="go-state-box">
+      <lucide-icon name="calendar-x" size="36" class="go-icon-muted"></lucide-icon>
+      <p class="go-state-text">Aún no se ha realizado el sorteo para esta convocatoria.</p>
+      <button class="go-btn-sorteo go-btn-sorteo-center" (click)="cambiarTab('temas')">
+        <lucide-icon name="arrow-left" size="14"></lucide-icon> Ir a Banco de Temas
+      </button>
+    </div>
+
+    <div *ngIf="cronograma.length > 0" class="go-table-wrap">
+      <table class="go-table">
+        <thead>
+        <tr>
+          <th>Turno</th>
+          <th>Postulante</th>
+          <th>Tema</th>
+          <th>Horario</th>
+          <th>Lugar</th>
+          <th>Estado</th>
+          <th>Nota</th>
+          <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let t of cronograma" [class.go-tr-activo]="t.estado==='EN_CURSO'">
+          <td class="go-td-num">{{ t.orden }}</td>
+          <td>
+            <div class="go-td-name">
+              <div class="go-avatar">{{ t.nombres.charAt(0) }}{{ t.apellidos.charAt(0) }}</div>
+              <div>
+                <p class="go-name-full">{{ t.nombres }} {{ t.apellidos }}</p>
+                <p class="go-name-mail">{{ t.correo }}</p>
+              </div>
+            </div>
+          </td>
+          <td class="go-td-tema">{{ t.tema }}</td>
+          <td class="go-td-hora">
+            <span>{{ formatHora(t.horaInicio) }} — {{ formatHora(t.horaFin) }}</span>
+            <span *ngIf="t.horaInicioReal" class="go-hora-real">(Real: {{ formatHora(t.horaInicioReal) }})</span>
+          </td>
+          <td class="go-td-lugar">{{ t.lugar }}</td>
+          <td>
+            <span class="go-badge" [ngClass]="badgeEstado(t.estado)">{{ t.nombreEstado }}</span>
+          </td>
+          <td class="go-td-nota">
+            {{ t.puntajeFinal != null ? t.puntajeFinal : '—' }}
+          </td>
+          <td>
+            <div class="go-td-actions">
+              <button *ngIf="t.estado==='PROGRAMADA'" class="go-btn-action go-btn-iniciar" (click)="iniciarTurno(t)" title="Iniciar evaluación">
+                <lucide-icon name="play" size="13"></lucide-icon>
+              </button>
+              <button *ngIf="t.estado==='PROGRAMADA'" class="go-btn-action go-btn-ausente" (click)="marcarNoPresento(t)" title="No se presentó">
+                <lucide-icon name="user-x" size="13"></lucide-icon>
+              </button>
+              <button *ngIf="t.estado==='EN_CURSO'" class="go-btn-action go-btn-finalizar" (click)="finalizarTurno(t)" title="Cerrar acta">
+                <lucide-icon name="lock" size="13"></lucide-icon>
+              </button>
+              <span *ngIf="t.estado==='FINALIZADA'" class="go-icon-green">
+                  <lucide-icon name="shield-check" size="16"></lucide-icon>
+                </span>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ MODAL SORTEO ════════════════════════════════════════ -->
+  <div *ngIf="mostrarModalSorteo" class="go-modal-overlay" (click)="cerrarModalSorteo()">
+    <div class="go-modal" (click)="$event.stopPropagation()">
+
+      <!-- Animación de sorteando -->
+      <div *ngIf="sorteando" class="go-sorteo-anim">
+        <div class="go-sorteo-circles">
+          <div class="go-circle go-circle-1"></div>
+          <div class="go-circle go-circle-2"></div>
+          <div class="go-circle go-circle-3"></div>
+        </div>
+        <p class="go-sorteo-text">Ejecutando sorteo aleatorio...</p>
+        <p class="go-sorteo-sub">Emparejando postulantes con temas de forma aleatoria</p>
+      </div>
+
+      <!-- Resultado del sorteo -->
+      <div *ngIf="!sorteando && cronogramaGenerado.length > 0" class="go-sorteo-result">
+        <div class="go-modal-header">
+          <lucide-icon name="party-popper" size="20" class="go-icon-green"></lucide-icon>
+          <h3 class="go-modal-title">¡Sorteo Completado!</h3>
+          <button class="go-modal-close" (click)="cerrarModalSorteo()"><lucide-icon name="x" size="18"></lucide-icon></button>
+        </div>
+        <p class="go-modal-subtitle">{{ cronogramaGenerado.length }} turno(s) generado(s)</p>
+        <div class="go-result-table-wrap">
+          <table class="go-result-table">
+            <thead><tr><th>Turno</th><th>Postulante</th><th>Tema asignado</th><th>Horario</th></tr></thead>
+            <tbody>
+            <tr *ngFor="let t of cronogramaGenerado">
+              <td class="go-td-num">{{ t.orden }}</td>
+              <td><strong>{{ t.nombres }} {{ t.apellidos }}</strong></td>
+              <td class="go-td-tema">{{ t.tema }}</td>
+              <td class="go-td-hora">{{ t.horaInicio }} — {{ t.horaFin }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Formulario de sorteo -->
+      <div *ngIf="!sorteando && cronogramaGenerado.length === 0">
+        <div class="go-modal-header">
+          <lucide-icon name="shuffle" size="20" class="go-icon-green"></lucide-icon>
+          <h3 class="go-modal-title">Configurar Sorteo</h3>
+          <button class="go-modal-close" (click)="cerrarModalSorteo()"><lucide-icon name="x" size="18"></lucide-icon></button>
+        </div>
+        <p class="go-modal-subtitle">Define la logística antes de ejecutar el doble shuffle aleatorio</p>
+
+        <div class="go-form-group">
+          <label class="go-label">Fecha de evaluación</label>
+          <input class="go-input" type="date" [(ngModel)]="sorteoFecha" />
+        </div>
+        <div class="go-form-group">
+          <label class="go-label">Hora de inicio</label>
+          <input class="go-input" type="time" [(ngModel)]="sorteoHora" />
+          <p class="go-input-hint">Cada bloque dura 35 min (20' expo + 10' preguntas + 5' transición)</p>
+        </div>
+        <div class="go-form-group">
+          <label class="go-label">Lugar / Aula</label>
+          <input class="go-input" type="text" [(ngModel)]="sorteoLugar" placeholder="Ej: Aula 301 — Edificio C" />
+        </div>
+
+        <div class="go-modal-footer">
+          <button class="go-btn-cancel" (click)="cerrarModalSorteo()">Cancelar</button>
+          <button class="go-btn-exec" (click)="ejecutarSorteo()">
+            <lucide-icon name="shuffle" size="15"></lucide-icon> Ejecutar Sorteo
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ MODAL CONFIRMACIÓN ══════════════════════════════════ -->
+  <div *ngIf="mostrarModalConfirm" class="go-modal-overlay">
+    <div class="go-modal go-modal-sm">
+      <lucide-icon name="triangle-alert" size="28" class="go-icon-warn go-icon-center"></lucide-icon>
+      <p class="go-confirm-msg">{{ confirmMsg }}</p>
+      <div class="go-modal-footer">
+        <button class="go-btn-cancel" (click)="cancelarConfirm()">Cancelar</button>
+        <button class="go-btn-danger" (click)="aceptarConfirm()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+</div>

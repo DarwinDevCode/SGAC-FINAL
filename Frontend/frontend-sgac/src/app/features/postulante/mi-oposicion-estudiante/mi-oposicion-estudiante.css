@@ -1,0 +1,234 @@
+/* src/app/features/estudiante/mi-oposicion/mi-oposicion-estudiante.css */
+
+/* ── Wrapper ─────────────────────────────────────────────── */
+.moe-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Estados de carga y error ────────────────────────────── */
+.moe-center {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 0.875rem;
+  padding: 4rem 1rem;
+}
+.moe-muted { font-size: 0.88rem; color: #94a3b8; margin: 0; }
+.moe-icon-muted { color: #94a3b8; }
+.moe-icon-amber { color: #d97706; }
+.moe-icon-red   { color: #dc2626; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.moe-spin { animation: spin 1s linear infinite; }
+
+.moe-error-card {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1rem 1.25rem; border-radius: 10px;
+  background: #fef2f2; border: 1px solid #fecaca;
+  color: #dc2626; font-size: 0.88rem; font-weight: 500;
+}
+
+/* ── Estado vacío ────────────────────────────────────────── */
+.moe-empty {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.875rem; padding: 4rem 2rem; text-align: center;
+  background: #f8fafc; border: 1px dashed #e2e8f0; border-radius: 16px;
+}
+.moe-empty-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: #f1f5f9; color: #94a3b8;
+  display: flex; align-items: center; justify-content: center;
+}
+.moe-empty-title { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0; }
+.moe-empty-sub { font-size: 0.85rem; color: #64748b; margin: 0; max-width: 380px; line-height: 1.6; }
+
+/* ── Contenido principal ─────────────────────────────────── */
+.moe-content { display: flex; flex-direction: column; gap: 1.1rem; }
+
+/* ── Header ──────────────────────────────────────────────── */
+.moe-header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap; gap: 0.875rem;
+}
+.moe-header-left { display: flex; align-items: center; gap: 0.875rem; }
+.moe-header-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: #dcfce7; color: #15803d;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.moe-title { font-size: 1.3rem; font-weight: 700; color: #0f172a; margin: 0; letter-spacing: -0.02em; }
+.moe-subtitle { font-size: 0.82rem; color: #64748b; margin: 0.15rem 0 0; }
+
+/* ── Badges ──────────────────────────────────────────────── */
+.moe-badge {
+  display: inline-flex; align-items: center;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+  padding: 0.2rem 0.65rem; border-radius: 20px; white-space: nowrap;
+}
+.moe-badge-lg { font-size: 0.82rem; padding: 0.3rem 0.9rem; }
+.moe-badge-blue    { background: #dbeafe; color: #1d4ed8; }
+.moe-badge-amber   { background: #fef3c7; color: #92400e; }
+.moe-badge-green   { background: #dcfce7; color: #15803d; }
+.moe-badge-red     { background: #fee2e2; color: #dc2626; }
+.moe-badge-gray    { background: #f1f5f9; color: #475569; }
+
+/* ── Grid principal ──────────────────────────────────────── */
+.moe-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.1rem;
+  align-items: start;
+}
+
+/* ── Tarjetas base ───────────────────────────────────────── */
+.moe-card {
+  background: #ffffff; border: 1px solid #e2e8f0;
+  border-radius: 14px; padding: 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+
+/* ── Número de turno ─────────────────────────────────────── */
+.moe-turno-numero {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.875rem 1.1rem;
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #86efac; border-radius: 10px;
+}
+.moe-num-label { font-size: 0.78rem; font-weight: 600; color: #15803d; letter-spacing: 0.04em; text-transform: uppercase; }
+.moe-num-valor { font-size: 2rem; font-weight: 800; color: #15803d; line-height: 1; letter-spacing: -0.04em; }
+
+/* ── Divider ─────────────────────────────────────────────── */
+.moe-divider { height: 1px; background: #f1f5f9; margin: 0 -0.25rem; }
+
+/* ── Grid de info logística ──────────────────────────────── */
+.moe-info-grid { display: flex; flex-direction: column; gap: 0.875rem; }
+.moe-info-item { display: flex; align-items: flex-start; gap: 0.75rem; }
+.moe-info-icon { color: #15803d; margin-top: 0.1rem; flex-shrink: 0; }
+.moe-info-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 0.15rem; }
+.moe-info-val { font-size: 0.92rem; font-weight: 600; color: #1e293b; margin: 0; }
+.moe-hora-sep { color: #94a3b8; margin: 0 0.35rem; font-weight: 400; }
+.moe-info-hint { font-size: 0.72rem; color: #94a3b8; margin: 0.2rem 0 0; line-height: 1.4; }
+
+/* ── Tema asignado ───────────────────────────────────────── */
+.moe-tema-card {
+  background: #f8fafc; border: 1px solid #e2e8f0;
+  border-left: 3px solid #15803d;
+  border-radius: 0 10px 10px 0;
+  padding: 1rem 1.1rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.moe-tema-header {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: #15803d;
+}
+.moe-tema-texto {
+  font-size: 0.95rem; font-weight: 600; color: #1e293b;
+  line-height: 1.5; margin: 0;
+}
+
+/* ── Aviso de transparencia ──────────────────────────────── */
+.moe-aviso {
+  display: flex; align-items: flex-start; gap: 0.6rem;
+  font-size: 0.75rem; color: #64748b; line-height: 1.5;
+  padding: 0.75rem; background: #f8fafc; border-radius: 8px;
+}
+.moe-aviso lucide-icon { flex-shrink: 0; color: #15803d; margin-top: 0.1rem; }
+.moe-aviso p { margin: 0; }
+
+/* ── Columna derecha ─────────────────────────────────────── */
+.moe-right-col { display: flex; flex-direction: column; gap: 0.875rem; }
+
+/* ── Tarjeta resultado ───────────────────────────────────── */
+.moe-card-resultado {
+  text-align: center;
+  background: linear-gradient(135deg, #f0fdf4, #f8fafc);
+  border-color: #86efac;
+}
+.moe-resultado-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #dcfce7; color: #15803d;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto;
+}
+.moe-resultado-label { font-size: 0.8rem; font-weight: 600; color: #15803d; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; }
+.moe-resultado-valor { font-size: 3.5rem; font-weight: 800; color: #15803d; margin: 0; line-height: 1; letter-spacing: -0.04em; }
+.moe-resultado-max { font-size: 0.82rem; color: #64748b; margin: 0; }
+.moe-resultado-nota { font-size: 0.75rem; color: #94a3b8; line-height: 1.5; margin: 0; }
+
+/* ── Desglose por jurado ─────────────────────────────────── */
+.moe-jurados-detalle {
+  border-top: 1px solid #dcfce7; padding-top: 0.875rem;
+  display: flex; flex-direction: column; gap: 0.5rem;
+  text-align: left;
+}
+.moe-jurados-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin: 0 0 0.25rem; }
+.moe-jurado-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; }
+.moe-jurado-rol { font-weight: 600; color: #475569; flex: 1; }
+.moe-jurado-scores { display: flex; gap: 0.5rem; color: #64748b; }
+.moe-jurado-subtotal { font-weight: 700; color: #15803d; min-width: 36px; text-align: right; }
+
+/* ── Tarjeta tips ────────────────────────────────────────── */
+.moe-card-tips { background: #fffbeb; border-color: #fde68a; }
+.moe-tips-header { display: flex; align-items: center; gap: 0.6rem; }
+.moe-tips-title { font-size: 0.88rem; font-weight: 700; color: #92400e; margin: 0; }
+.moe-tips-list { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.45rem; }
+.moe-tips-list li { font-size: 0.82rem; color: #78350f; line-height: 1.5; }
+
+/* ── Tarjeta en curso ────────────────────────────────────── */
+.moe-card-en-curso {
+  align-items: center; text-align: center;
+  background: linear-gradient(135deg, #fffbeb, #fef9c3);
+  border-color: #fbbf24;
+}
+.moe-en-curso-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 0 0 rgba(245,158,11,.4);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(245,158,11,.4); }
+  70%  { box-shadow: 0 0 0 10px rgba(245,158,11,0); }
+  100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+}
+.moe-en-curso-text { font-size: 0.92rem; font-weight: 700; color: #92400e; margin: 0; }
+.moe-en-curso-sub  { font-size: 0.78rem; color: #b45309; margin: 0; }
+
+/* ── Tarjeta ausente ─────────────────────────────────────── */
+.moe-card-ausente {
+  align-items: center; text-align: center;
+  background: #fef2f2; border-color: #fecaca;
+}
+.moe-ausente-text { font-size: 0.95rem; font-weight: 700; color: #dc2626; margin: 0; }
+.moe-ausente-sub  { font-size: 0.78rem; color: #b91c1c; line-height: 1.5; margin: 0; }
+
+/* ── Criterios de evaluación ─────────────────────────────── */
+.moe-card-criterios { gap: 0.625rem; }
+.moe-criterios-title {
+  display: flex; align-items: center; gap: 0.45rem;
+  font-size: 0.78rem; font-weight: 700; color: #374151;
+  text-transform: uppercase; letter-spacing: 0.04em; margin: 0;
+}
+.moe-criterio-item {
+  display: flex; align-items: center; gap: 0.625rem;
+  padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9;
+}
+.moe-criterio-item:last-of-type { border-bottom: none; }
+.moe-criterio-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.moe-criterio-nombre { font-size: 0.82rem; color: #374151; flex: 1; }
+.moe-criterio-pts { font-size: 0.82rem; font-weight: 700; color: #1e293b; }
+.moe-criterio-total {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.5rem 0.75rem; background: #f1f5f9; border-radius: 8px;
+  font-size: 0.8rem; font-weight: 600; color: #1e293b;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .moe-grid { grid-template-columns: 1fr; }
+}

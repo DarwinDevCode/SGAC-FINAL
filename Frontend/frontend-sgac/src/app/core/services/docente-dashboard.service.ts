@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DocenteDashboardDTO } from '../models/docente-dashboard.model';
+import { DocenteDashboardDTO } from '../models/dashboard/docente-dashboard.model';
 
 @Injectable({ providedIn: 'root' })
 export class DocenteDashboardService {
