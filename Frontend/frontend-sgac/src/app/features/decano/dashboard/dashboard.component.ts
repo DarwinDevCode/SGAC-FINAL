@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { DecanoService } from '../../../core/services/decano-service';
 import { AuthService } from '../../../core/services/auth-service';
+import { InformeMensualService } from '../../../core/services/informe-mensual.service';
 import { DecanoResponseDTO } from '../../../core/dto/decano';
 
 @Component({
@@ -17,10 +18,12 @@ import { DecanoResponseDTO } from '../../../core/dto/decano';
 export class DashboardComponent implements OnInit, OnDestroy {
   decanoService = inject(DecanoService);
   authService = inject(AuthService);
+  informeService = inject(InformeMensualService);
   private subs = new Subscription();
 
   decanoData: DecanoResponseDTO | null = null;
   totalConvocatoriasActivas = 0;
+  totalInformesPendientes = 0;
 
   loading = true;
   errorMensaje = '';
@@ -54,6 +57,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.decanoService.listarConvocatoriasActivas().subscribe({
               next: (convocatorias) => {
                 this.totalConvocatoriasActivas = convocatorias.length;
+              },
+              error: () => { }
+            })
+          );
+
+          this.subs.add(
+            this.informeService.listarPendientesDecano().subscribe({
+              next: (informes) => {
+                this.totalInformesPendientes = informes.length;
                 this.loading = false;
               },
               error: () => this.loading = false

@@ -393,8 +393,12 @@ export class SesionesComponent implements OnInit {
           this.cerrarModalRegistro();
           this.cargarSesiones();
         },
-        error: () => {
-          this.formError = 'No se pudo registrar la sesión. Intenta nuevamente.';
+        error: (err) => {
+          this.formError = err?.error?.message || err?.message || 'No se pudo registrar la sesión. Intenta nuevamente.';
+          // Emitimos alerta en pantalla (AlertService fallback básico)
+          if (this.formError.includes('20 horas') || this.formError.toLowerCase().includes('evidencia')) {
+            alert(this.formError);
+          }
         },
       });
   }

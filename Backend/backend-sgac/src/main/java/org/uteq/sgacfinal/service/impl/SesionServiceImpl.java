@@ -11,13 +11,16 @@ import org.uteq.sgacfinal.dto.EvidenciaRequest;
 import org.uteq.sgacfinal.dto.Request.RegistrarSesionRequest;
 import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.exception.AccesoDenegadoException;
+import org.uteq.sgacfinal.exception.BadRequestException;
 import org.uteq.sgacfinal.exception.RecursoNoEncontradoException;
 import org.uteq.sgacfinal.repository.AyudantiaRepository;
 import org.uteq.sgacfinal.repository.EvidenciaRegistroActividadRepository;
 import org.uteq.sgacfinal.repository.ProgresoRepository;
 import org.uteq.sgacfinal.repository.RegistroActividadRepository;
 import org.uteq.sgacfinal.service.IUploadService;
+import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.SesionService;
+import org.uteq.sgacfinal.entity.Ayudantia;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,6 +38,7 @@ public class SesionServiceImpl implements SesionService {
     private final ProgresoRepository progresoRepository;
     private final ObjectMapper objectMapper;
     private final IUploadService uploadService;
+    private final INotificacionService notificacionService;
 
     @Override
     @Transactional
@@ -121,22 +125,36 @@ public class SesionServiceImpl implements SesionService {
     public RegistrarSesionResponse registrarSesion(
             Integer idUsuario, RegistrarSesionRequest request, List<MultipartFile> archivos) {
 
-        // 1) Obtención automática del ID de la ayudantía activa para el usuario
-        Integer idAyudantia = ayudantiaRepository
-                .findIdAyudantiaActivaByUsuario(idUsuario)
+        // 1) Obtención automática de la Ayudantía activa (para poder obtener el docente después)
+        Ayudantia ayudantia = ayudantiaRepository.findById(
+                ayudantiaRepository.findIdAyudantiaActivaByUsuario(idUsuario)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "No se encontró una ayudantía activa (EN_PROGRESO) para el usuario con ID: " + idUsuario
-                ));
+                ))
+        ).get();
+        Integer idAyudantia = ayudantia.getIdAyudantia();
 
-        // Validaciones de archivos y coherencia (se mantienen tus reglas)
-        if (archivos == null || archivos.isEmpty()) {
-            throw new IllegalArgumentException("Debe adjuntar al menos un archivo de evidencia.");
-        }
-        if (request.getEvidencias() == null || request.getEvidencias().isEmpty()) {
-            throw new IllegalArgumentException("Debe incluir la información de las evidencias en el request.");
+        // Validaciones de archivos y coherencia
+        if (archivos == null || archivos.isEmpty() || request.getEvidencias() == null || request.getEvidencias().isEmpty()) {
+            // Notificar al docente responsable
+            Integer idDocente = ayudantia.getPostulacion().getConvocatoria().getDocente().getUsuario().getIdUsuario();
+            notificacionService.enviarNotificacion(idDocente, org.uteq.sgacfinal.dto.Request.NotificationRequest.builder()
+                .titulo("Intento de Registro sin Evidencia")
+                .mensaje("El ayudante " + ayudantia.getPostulacion().getEstudiante().getUsuario().getNombres() + " " + ayudantia.getPostulacion().getEstudiante().getUsuario().getApellidos() + 
+                " intentó registrar una sesión sin evidencias adjuntas.")
+                .tipo("WARNING")
+                .build());
+            throw new BadRequestException("Debe adjuntar al menos un archivo de evidencia.");
         }
         if (request.getEvidencias().size() != archivos.size()) {
-            throw new IllegalArgumentException("La cantidad de metadatos de evidencias y archivos físicos no coincide.");
+            throw new BadRequestException("La cantidad de metadatos de evidencias y archivos físicos no coincide.");
+        }
+
+        // Validación de horas de control semanal (20h max)
+        ControlSemanalResponse control = controlSemanal(idUsuario);
+        BigDecimal nuevasHoras = request.getHorasDedicadas() != null ? request.getHorasDedicadas() : BigDecimal.ZERO;
+        if (control.getHorasRegistradas().add(nuevasHoras).compareTo(control.getLimiteSemanal()) > 0) {
+            throw new BadRequestException("El registro de esta sesión superará el límite de 20 horas semanales permitidas.");
         }
 
         // 2) Subida a Cloudinary

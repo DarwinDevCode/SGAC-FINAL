@@ -17,6 +17,7 @@ import org.uteq.sgacfinal.entity.UsuarioTipoRolId;
 import org.uteq.sgacfinal.repository.IUsuarioTipoRolRepository;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;
 import org.uteq.sgacfinal.security.UsuarioPrincipal;
+import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.IUsuariosService;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.entity.TipoRol;

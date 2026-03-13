@@ -10,11 +10,25 @@
     @if (loading) {
     <div class="loading-state">
         <div class="spinner"></div>
-        <p>Cargando actividades...</p>
+        <p>Cargando información...</p>
     </div>
     }
 
-    @if (!loading && actividades.length === 0) {
+    <div class="tabs-container" style="display:flex; gap:1rem; border-bottom:1px solid #ddd; margin-bottom: 1.5rem;"
+        *ngIf="!loading">
+        <button [class.active-tab]="activeTab === 'actividades'" (click)="activeTab = 'actividades'"
+            style="background:none; border:none; padding:10px 15px; cursor:pointer; font-weight:bold; border-bottom: 2px solid transparent;"
+            [ngStyle]="{'border-bottom-color': activeTab === 'actividades' ? '#2563eb' : 'transparent', 'color': activeTab === 'actividades' ? '#2563eb' : '#666'}">
+            Sesiones Individuales
+        </button>
+        <button [class.active-tab]="activeTab === 'informes'" (click)="activeTab = 'informes'"
+            style="background:none; border:none; padding:10px 15px; cursor:pointer; font-weight:bold; border-bottom: 2px solid transparent;"
+            [ngStyle]="{'border-bottom-color': activeTab === 'informes' ? '#2563eb' : 'transparent', 'color': activeTab === 'informes' ? '#2563eb' : '#666'}">
+            Informes Mensuales
+        </button>
+    </div>
+
+    @if (!loading && activeTab === 'actividades' && actividades.length === 0) {
     <div class="empty-state">
         <lucide-icon name="file-text" [size]="48"></lucide-icon>
         <p>Este ayudante no tiene actividades registradas aún.</p>
@@ -99,13 +113,66 @@
         }
     </div>
     }
+
+    @if (!loading && activeTab === 'informes') {
+    <div class="informes-list">
+        @if (informes.length === 0) {
+        <div class="empty-state">
+            <lucide-icon name="file-text" [size]="48"></lucide-icon>
+            <p>No se han generado informes mensuales aún.</p>
+        </div>
+        }
+        @for (inf of informes; track inf.idInformeMensual) {
+        <div class="act-card" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid #ddd; border-radius: 8px;">
+            <div class="act-card-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="act-card-left" style="display:flex; gap: 1rem; align-items:center;">
+                    <lucide-icon name="file-text" [size]="20" class="status-default"></lucide-icon>
+                    <div class="act-card-info">
+                        <span class="act-desc">Informe Mes: {{ inf.mes }} / Año: {{ inf.anio }}</span>
+                        <span class="act-meta">Enviado: {{ inf.fechaEnvio | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                </div>
+                <div class="act-card-right">
+                    <span class="estado-badge"
+                        style="padding: 4px 8px; border-radius: 12px; background: #eef2ff; color: #4f46e5; font-size: 0.8rem; font-weight: bold;">
+                        {{ inf.estado }}
+                    </span>
+                    @if (inf.estado === 'EN_REVISION_DOCENTE') {
+                    <button class="btn-estado" (click)="iniciarRevisarInforme(inf.idInformeMensual, inf.estado)"
+                        style="background: #2563eb; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">
+                        Revisar
+                    </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Contenido del Informe -->
+            <div
+                style="margin-top: 1rem; background: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #eee;">
+                <h4 style="margin-top:0;">Contenido Detallado:</h4>
+                <div [innerHTML]="inf.contenidoBorrador" style="font-size: 0.9rem; line-height: 1.5; color: #444;">
+                </div>
+            </div>
+
+            @if (inf.observaciones) {
+            <div class="obs-banner"
+                style="margin-top: 1rem; padding: 0.5rem; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px;">
+                <lucide-icon name="eye" [size]="14"></lucide-icon>
+                <span><strong>Observación / Motivo:</strong> {{ inf.observaciones }}</span>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
 </div>
 
 <!-- Modal cambio de estado -->
 @if (modalVisible) {
 <div class="modal-backdrop" (click)="cerrarModal()">
     <div class="modal-box" (click)="$event.stopPropagation()">
-        <h3 class="modal-title">{{ modalTipo === 'actividad' ? 'Estado de Actividad' : 'Estado de Evidencia' }}</h3>
+        <h3 class="modal-title">{{ modalTipo === 'actividad' ? 'Estado de Actividad' : (modalTipo === 'informe' ?
+            'Estado de Informe' : 'Estado de Evidencia') }}</h3>
 
         <label class="modal-label">Nuevo Estado</label>
         <div class="estado-options">

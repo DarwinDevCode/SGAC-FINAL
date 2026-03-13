@@ -44,6 +44,14 @@
                 <div class="stat-label">Resoluciones Pendientes</div>
             </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-icon red" style="background: #fee2e2; color: #ef4444;"><lucide-icon name="file-text"
+                    size="22"></lucide-icon></div>
+            <div>
+                <div class="stat-value">{{ totalInformesPendientes }}</div>
+                <div class="stat-label">Informes por Revisar</div>
+            </div>
+        </div>
     </div>
 
     <!-- Quick Actions -->
@@ -70,6 +78,16 @@
             <div>
                 <div class="action-title">Auditoría y Reportes</div>
                 <div class="action-desc">Reportes del periodo académico</div>
+            </div>
+        </a>
+        <a routerLink="/decano/aprobaciones" class="action-card"
+            style="background: white; border: 1px solid #ddd; padding: 1rem; border-radius: 8px; display: flex; gap: 1rem; text-decoration: none; color: inherit; align-items: center; transition: all 0.2s;">
+            <div class="action-icon"
+                style="background: #fee2e2; color: #ef4444; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                <lucide-icon name="file-text" size="20"></lucide-icon></div>
+            <div>
+                <div class="action-title" style="font-weight: 600;">Revisar Informes</div>
+                <div class="action-desc" style="font-size: 0.8rem; color: #666;">Aprobación final de mensuales</div>
             </div>
         </a>
     </div>
