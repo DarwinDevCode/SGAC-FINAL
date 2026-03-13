@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Download, Plus, Eye, PlusCircle, ShieldCheck, Database, Folder, ChevronDown, ChevronRight, X, EyeOff, AlertCircle, CheckCircle, Trash2, FileSpreadsheet } from 'lucide-angular';
 import {forkJoin, of, Subscription} from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { TipoRolService } from '../../../core/services/tipo-rol-service';
@@ -19,6 +19,11 @@ import {CatalogosService} from '../../../core/services/catalogos-service';
   selector: 'app-gestion-permisos',
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
+  providers: [{
+    provide: LUCIDE_ICONS,
+    multi: true,
+    useValue: new LucideIconProvider({ Download, Plus, Eye, PlusCircle, ShieldCheck, Database, Folder, ChevronDown, ChevronRight, X, EyeOff, AlertCircle, CheckCircle, Trash2, FileSpreadsheet })
+  }],
   templateUrl: './gestion-permisos.html',
   styleUrls: ['./gestion-permisos.css']
 })
@@ -56,6 +61,48 @@ export class GestionPermisosComponent implements OnInit {
   categoriaSeleccionada: TipoObjetoSeguridadDTO | null = null;
   loadingElementos = false;
   seleccionPendiente: GestionPermisosRequestDTO[] = [];
+
+  descargarReporte() {
+    this.subs.add(
+      this.permisoService.descargarMatrizPermisos().subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'matriz_permisos.pdf';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: (err) => {
+          console.error('Error al descargar reporte', err);
+          alert('Hubo un error al generar el reporte.');
+        }
+      })
+    );
+  }
+
+  descargarReporteExcel() {
+    this.subs.add(
+      this.permisoService.descargarMatrizPermisosExcel().subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'matriz_permisos.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: (err) => {
+          console.error('Error al descargar reporte', err);
+          alert('Hubo un error al generar el reporte Excel.');
+        }
+      })
+    );
+  }
 
   ngOnInit(): void {
     this.cargarRoles();

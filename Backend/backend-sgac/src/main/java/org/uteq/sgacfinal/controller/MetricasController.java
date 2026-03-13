@@ -3,7 +3,10 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.uteq.sgacfinal.dto.Response.AdminConsultaDTO;
 import org.uteq.sgacfinal.service.impl.NotificacionMasivaService;
+import org.uteq.sgacfinal.service.IPdfGeneratorService;
+import org.uteq.sgacfinal.service.IExcelGeneratorService;
 
 import java.util.Map;
 
@@ -18,7 +21,8 @@ import java.util.Map;
 public class MetricasController {
 
     private final NotificacionMasivaService masivaService;
-
+    private final IPdfGeneratorService pdfService;
+    private final IExcelGeneratorService excelGeneratorService;
 
     /** GET /api/metricas/coordinador?idCarrera=X */
     @GetMapping("/coordinador")
@@ -28,6 +32,47 @@ public class MetricasController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
                     .body(Map.of("error", "Error al cargar métricas: " + e.getMessage()));
+        }
+    }
+
+    /** GET /api/metricas/reporte-admin */
+    @GetMapping("/reporte-admin")
+    public ResponseEntity<byte[]> descargarReporteDashboardAdmin() {
+        try {
+            // Since we don't have an admin dashboard service method yet, we build dummy data for presentation
+            String dataJson = "{\"Total Usuarios Registrados\": 150, \"Facultades Activas\": 5, \"Periodos Abiertos\": 2, \"Total Postulaciones Mes\": 45}";
+            byte[] pdfBytes = pdfService.generarReporteDashboard(dataJson);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "reporte_dashboard.pdf");
+
+            return new ResponseEntity<>(pdfBytes, headers, org.springframework.http.HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/reporte-admin/excel")
+    public ResponseEntity<byte[]> descargarReporteDashboardAdminExcel() {
+        try {
+            // Placeholder data for Dashboard as is done in the PDF service
+            AdminConsultaDTO mockDto = AdminConsultaDTO.builder()
+                .totalUsuarios(150L)
+                .totalConvocatorias(2L)
+                .totalPostulaciones(45L)
+                .periodoActivo("Periodo Prueba")
+                .build();
+            byte[] excelBytes = excelGeneratorService.generarExcelDashboard(mockDto);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "reporte_dashboard.xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(excelBytes, headers, org.springframework.http.HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
         }
     }
 

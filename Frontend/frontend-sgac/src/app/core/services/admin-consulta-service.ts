@@ -46,4 +46,12 @@ export class AdminConsultaService {
     obtenerEstadisticas(): Observable<AdminConsultaDTO> {
         return this.http.get<AdminConsultaDTO>(`${this.baseUrl}/admin/consulta/estadisticas`);
     }
+
+    descargarReporteDashboard(): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}/metricas/reporte-admin`, { responseType: 'blob' });
+    }
+
+    descargarReporteExcel(): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}/metricas/reporte-admin/excel`, { responseType: 'blob' as 'json' }) as unknown as Observable<Blob>;
+    }
 }

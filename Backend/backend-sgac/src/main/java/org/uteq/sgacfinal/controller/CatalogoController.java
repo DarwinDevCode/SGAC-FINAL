@@ -34,12 +34,49 @@ public class CatalogoController {
     private final ITipoRolService tipoRolService;
     private final ITipoSancionAyudanteCatedraService tipoSancionService;
     private final ICatalogoService catalogoService;
+    private final IPdfGeneratorService pdfService;
+    private final IExcelGeneratorService excelGeneratorService;
 
 
     // Facultad
     @GetMapping("/facultades")
     public ResponseEntity<List<FacultadResponseDTO>> listarFacultades() {
         return ResponseEntity.ok(facultadService.listarTodas());
+    }
+
+    @GetMapping("/reporte")
+    public ResponseEntity<byte[]> descargarReporteCatalogos() {
+        try {
+            List<FacultadResponseDTO> facultades = facultadService.listarTodas();
+            List<CarreraResponseDTO> carreras = carreraService.listarTodas();
+            byte[] pdfBytes = pdfService.generarReporteCatalogos(facultades, carreras);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_PDF);
+            headers.setContentDispositionFormData("attachment", "reporte_catalogos.pdf");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/reporte/excel")
+    public ResponseEntity<byte[]> descargarReporteCatalogosExcel() {
+        try {
+            List<FacultadResponseDTO> facultades = facultadService.listarTodas();
+            List<CarreraResponseDTO> carreras = carreraService.listarTodas();
+            byte[] excelBytes = excelGeneratorService.generarExcelCatalogos(facultades, carreras);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.setContentDispositionFormData("attachment", "reporte_catalogos.xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @PostMapping("/facultades")

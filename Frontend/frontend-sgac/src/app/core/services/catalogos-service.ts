@@ -35,6 +35,14 @@ export class CatalogosService {
     return this.http.get<FacultadDTO[]>(`${this.API}/facultades`);
   }
 
+  descargarReporteCatalogos(): Observable<Blob> {
+    return this.http.get(`${this.API}/reporte`, { responseType: 'blob' });
+  }
+
+  descargarReporteCatalogosExcel(): Observable<Blob> {
+    return this.http.get(`${this.API}/reporte/excel`, { responseType: 'blob' });
+  }
+
   postFacultad(facultad: FacultadDTO): Observable<FacultadDTO> {
     const { idFacultad, activo, ...requestBody } = facultad;
     return this.http.post<FacultadDTO>(`${this.API}/facultades`, requestBody);

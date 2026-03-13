@@ -30,6 +30,14 @@ export class PermisoService {
     return this.http.get<PermisoRolDTO[]>(`${this.apiUrl}/consultar`, { params });
   }
 
+  descargarMatrizPermisos(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reporte`, { responseType: 'blob' });
+  }
+
+  descargarMatrizPermisosExcel(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/reporte/excel`, { responseType: 'blob' });
+  }
+
   gestionarPermiso(request: GestionPermisosRequestDTO): Observable<MensajeResponseDTO> {
     return this.http.post<MensajeResponseDTO>(`${this.apiUrl}/gestionar`, request);
   }

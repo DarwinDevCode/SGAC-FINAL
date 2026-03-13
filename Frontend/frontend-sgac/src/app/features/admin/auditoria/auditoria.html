@@ -1,10 +1,16 @@
 <div class="gestion-container">
   <div class="section-header">
     <h2 class="title">Registro de Auditoría</h2>
-    <button type="button" class="btn-primary" style="background-color: #dc3545;" (click)="descargarReporte()">
-      <lucide-icon name="FileText" size="18"></lucide-icon>
-      Exportar PDF
-    </button>
+    <div class="header-actions" style="display: flex; gap: 0.5rem;">
+      <button type="button" class="btn-primary" style="background-color: #dc3545;" (click)="descargarReporte()">
+        <lucide-icon name="FileText" size="18"></lucide-icon>
+        Exportar PDF
+      </button>
+      <button type="button" class="btn-primary" style="background-color: #198754;" (click)="descargarReporteExcel()">
+        <lucide-icon name="FileSpreadsheet" size="18"></lucide-icon>
+        Exportar Excel
+      </button>
+    </div>
   </div>
 
   <div class="search-card">

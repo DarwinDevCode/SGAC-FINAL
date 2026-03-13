@@ -64,7 +64,7 @@ import {
   X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
   MousePointerClick, RefreshCw, FileX, Upload, Info, Megaphone,
   CheckCheck, Copy, CalendarPlus, ChevronLeft, UserCheck, CalendarCheck, XCircle, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet,
-  RotateCcw
+  RotateCcw, FileSpreadsheet
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -136,7 +136,7 @@ export const appConfig: ApplicationConfig = {
         X, ChevronRight, Folder, ChevronDown, ExternalLink, CheckCircle2, ClipboardList, RefreshCcw, Paperclip,
         MousePointerClick, RefreshCw, FileX, Upload, Info, Megaphone,
         CheckCheck, Copy, CalendarPlus, ChevronLeft, UserCheck, CalendarCheck, XCircle, ThumbsDown, ThumbsUp, Edit3, MessageSquare, Sheet,
-        RotateCcw
+        RotateCcw, FileSpreadsheet
       })
     )
   ]

@@ -49,13 +49,29 @@ export class AuditoriaService {
 
   descargarReportePdf(filtros: any): Observable<Blob> {
     let params = new HttpParams();
-    
     if (filtros.queryParams) params = params.set('queryParams', filtros.queryParams);
     if (filtros.tablaAfectada) params = params.set('tablaAfectada', filtros.tablaAfectada);
     if (filtros.accion) params = params.set('accion', filtros.accion);
     if (filtros.fechaInicio) params = params.set('fechaInicio', filtros.fechaInicio);
     if (filtros.fechaFin) params = params.set('fechaFin', filtros.fechaFin);
 
-    return this.http.get(`${this.apiUrl}/reporte-pdf`, { params, responseType: 'blob' });
+    return this.http.get(`${this.apiUrl}/reporte-pdf`, {
+      params: params,
+      responseType: 'blob'
+    });
+  }
+
+  descargarReporteExcel(filtros: any): Observable<Blob> {
+    let params = new HttpParams();
+    if (filtros.queryParams) params = params.set('queryParams', filtros.queryParams);
+    if (filtros.tablaAfectada) params = params.set('tablaAfectada', filtros.tablaAfectada);
+    if (filtros.accion) params = params.set('accion', filtros.accion);
+    if (filtros.fechaInicio) params = params.set('fechaInicio', filtros.fechaInicio);
+    if (filtros.fechaFin) params = params.set('fechaFin', filtros.fechaFin);
+
+    return this.http.get(`${this.apiUrl}/reporte-excel`, {
+      params: params,
+      responseType: 'blob'
+    });
   }
 }

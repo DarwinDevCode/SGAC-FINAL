@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/log-auditoria")
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class LogAuditoriaController {
 
     private final ILogAuditoriaService logAuditoriaService;
     private final IPdfGeneratorService pdfGeneratorService;
+    private final org.uteq.sgacfinal.service.IExcelGeneratorService excelGeneratorService;
 
     @GetMapping("/paginado")
     public ResponseEntity<?> obtenerLogsPaginados(
@@ -86,48 +89,44 @@ public class LogAuditoriaController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", "reporte_auditoria.pdf");
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_auditoria.pdf");
 
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(pdfBytes);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error al generar PDF de auditoría: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().body(Map.of("error", "Error al generar el PDF: " + e.getMessage()));
         }
     }
 
-    /**
-     * Endpoint de prueba para generar rápidamente un registro de auditoría con el usuario autenticado.
-     * Útil para verificar que el dashboard y el listado muestren datos.
-     */
-    @PostMapping("/registrar-demo")
-    public ResponseEntity<?> registrarDemo(@RequestBody(required = false) Map<String, String> body,
-                                           HttpServletRequest request) {
+    @GetMapping("/reporte-excel")
+    public ResponseEntity<?> descargarReporteExcel(
+            @RequestParam(required = false) String queryParams,
+            @RequestParam(required = false) String tablaAfectada,
+            @RequestParam(required = false) String accion,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin
+    ) {
         try {
-            Integer idUsuario = getAuthenticatedUserId();
-            if (idUsuario == null) {
-                return ResponseEntity.status(401).body(Map.of("error", "No hay usuario autenticado"));
-            }
+            Pageable pageable = PageRequest.of(0, 10000, Sort.by(Sort.Direction.DESC, "fechaHora"));
+            Page<LogAuditoriaResponseDTO> paginaLogs = logAuditoriaService.obtenerLogsPaginados(
+                    queryParams, tablaAfectada, accion, fechaInicio, fechaFin, pageable
+            );
+            List<LogAuditoriaResponseDTO> logs = paginaLogs.getContent();
 
-            String accion = body != null && body.containsKey("accion") ? body.get("accion") : "PRUEBA_DEMO";
-            String tabla = body != null && body.containsKey("tabla") ? body.get("tabla") : "demo";
-            String detalle = body != null && body.containsKey("detalle") ? body.get("detalle") : "Registro generado para prueba.";
+            byte[] excelBytes = excelGeneratorService.generarExcelAuditoria(logs);
 
-            logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
-                    .idUsuario(idUsuario)
-                    .accion(accion)
-                    .tablaAfectada(tabla)
-                    .registroAfectado(null)
-                    .ipOrigen(request.getRemoteAddr())
-                    .valorAnterior(null)
-                    .valorNuevo(detalle)
-                    .build());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte_auditoria.xlsx");
 
-            return ResponseEntity.ok(Map.of("mensaje", "Log demo registrado", "accion", accion, "tabla", tabla));
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelBytes);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(Map.of("error", "No se pudo registrar log demo: " + e.getMessage()));
+            log.error("Error al generar Excel de auditoría: {}", e.getMessage(), e);
+            return ResponseEntity.internalServerError().body(Map.of("error", "Error al generar el Excel: " + e.getMessage()));
         }
     }
 

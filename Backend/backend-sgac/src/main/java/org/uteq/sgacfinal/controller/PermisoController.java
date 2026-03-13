@@ -10,21 +10,59 @@ import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Request.GestionPermisosMasivoRequestDTO;
 import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
 import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.service.IExcelGeneratorService;
 import org.uteq.sgacfinal.service.IPermisoService;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/permisos")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class PermisoController {
 
     private final IPermisoService permisoService;
+    private final org.uteq.sgacfinal.service.IPdfGeneratorService pdfService;
+    private final IExcelGeneratorService excelGeneratorService;
 
 
     @GetMapping
     public ResponseEntity<List<PermisoDTO>> permisosActuales() {
         return ResponseEntity.ok(permisoService.obtenerPermisos());
+    }
+
+    @GetMapping("/reporte")
+    public ResponseEntity<byte[]> descargarReportePermisos() {
+        try {
+            // We pass a general string for now as representation
+            byte[] pdfBytes = pdfService.generarMatrizPermisos("Listado General de Permisos en el Sistema Roles Activos");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=matriz_permisos.pdf");
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/reporte/excel")
+    public ResponseEntity<byte[]> descargarReportePermisosExcel() {
+        try {
+            byte[] excelBytes = excelGeneratorService.generarMatrizPermisos();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=matriz_permisos.xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return new ResponseEntity<>(excelBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/consultar")

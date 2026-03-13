@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Plus, Edit, Power, X } from 'lucide-angular';
+import { LucideAngularModule, LucideIconProvider, LUCIDE_ICONS, Building2, BookOpen, Plus, Search, Edit, Trash2, Eye, Download, FileSpreadsheet } from 'lucide-angular';
 import { CatalogosService } from '../../../core/services/catalogos-service';
 import { TipoRolDTO } from '../../../core/dto/tipo-rol';
 import { FacultadDTO } from '../../../core/dto/facultad';
@@ -20,7 +20,9 @@ import { TipoEstadoEvidenciaAyudantiaDTO } from '../../../core/dto/tipo-estado-e
     {
       provide: LUCIDE_ICONS,
       multi: true,
-      useValue: new LucideIconProvider({ Plus, Edit, Power, X })
+      useValue: new LucideIconProvider({
+        Building2, BookOpen, Plus, Search, Edit, Trash2, Eye, Download, FileSpreadsheet
+      })
     }
   ],
   templateUrl: './gestion-catalogos.html',
@@ -100,6 +102,47 @@ export class GestionCatalogosComponent implements OnInit, OnDestroy {
     }
   }
 
+  descargarReporte() {
+    this.subs.add(
+      this.catalogosService.descargarReporteCatalogos().subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'reporte_catalogos.pdf';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: (err) => {
+          console.error('Error al descargar reporte', err);
+          alert('Hubo un error al generar el reporte.');
+        }
+      })
+    );
+  }
+
+  descargarReporteExcel() {
+    this.subs.add(
+      this.catalogosService.descargarReporteCatalogosExcel().subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'reporte_catalogos.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        },
+        error: (err) => {
+          console.error('Error al descargar reporte', err);
+          alert('Hubo un error al generar el reporte.');
+        }
+      })
+    );
+  }
 
   abrirModalNuevoRol() {
     this.isEditMode = false;

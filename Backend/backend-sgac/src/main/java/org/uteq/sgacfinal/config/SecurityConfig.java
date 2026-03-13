@@ -107,6 +107,7 @@ public class SecurityConfig {
                                 "/api/convocatorias/crear",
                                 "/api/convocatorias/editar/**").hasAnyAuthority("DECANO", "COORDINADOR")
                         .requestMatchers(
+                                "/api/admin/**",
                                 "/api/auth/**",
                                 "/api/tipos-rol/**",
                                 "/api/permisos/**").hasAnyAuthority("ADMINISTRADOR")

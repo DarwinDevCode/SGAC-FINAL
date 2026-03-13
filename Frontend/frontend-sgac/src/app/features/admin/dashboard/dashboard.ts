@@ -18,7 +18,8 @@ import {
     CheckCircle,
     AlertCircle,
     FileText,
-    Clock
+    Clock,
+    Download
 } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
@@ -40,7 +41,7 @@ Chart.register(...registerables);
             useValue: new LucideIconProvider({
                 Users, UserCheck, Shield, CalendarClock, Activity,
                 HardDrive, ChevronRight, Inbox, TrendingUp, BarChart3,
-                Loader2, CheckCircle, AlertCircle, FileText, Clock
+                Loader2, CheckCircle, AlertCircle, FileText, Clock, Download
             })
         }
     ]

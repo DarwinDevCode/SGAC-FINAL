@@ -18,6 +18,16 @@ export class UsuarioService {
     return this.http.get<UsuarioDTO[]>(this.API_AUTH);
   }
 
+  descargarReporteUsuarios(): Observable<Blob> {
+    const url = `${this.baseUrl}/admin/usuarios/reporte`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
+  descargarReporteUsuariosExcel(): Observable<Blob> {
+    const url = `${this.baseUrl}/admin/usuarios/reporte/excel`;
+    return this.http.get(url, { responseType: 'blob' });
+  }
+
   crear(usuario: UsuarioDTO): Observable<UsuarioDTO> {
     const rol = usuario.rolRegistro;
     let endpoint = '';

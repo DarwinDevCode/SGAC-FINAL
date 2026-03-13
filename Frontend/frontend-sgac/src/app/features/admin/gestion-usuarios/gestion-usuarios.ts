@@ -1,15 +1,15 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, LucideIconProvider, LUCIDE_ICONS, Users, UserPlus, Search, Edit2, Power, Eye, Download, FileSpreadsheet, Plus } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { UsuarioService } from '../../../core/services/usuario-service';
 import { UsuarioDTO } from '../../../core/dto/usuario';
 import {CarreraDTO} from '../../../core/dto/carrera';
 import {FacultadDTO} from '../../../core/dto/facultad';
 import { TipoRolDTO } from '../../../core/dto/tipo-rol';
-import { CatalogosService} from '../../../core/services/catalogos-service';
-import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {CatalogosService} from '../../../core/services/catalogos-service';
+import {HttpErrorResponse} from '@angular/common/http';
 
 
 @Component({
@@ -18,6 +18,12 @@ import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './gestion-usuarios.html',
   styleUrl: './gestion-usuarios.css',
+  providers: [
+    {
+      provide: LUCIDE_ICONS,
+      useValue: new LucideIconProvider({ Users, UserPlus, Search, Edit2, Power, Eye, Download, FileSpreadsheet, Plus })
+    }
+  ]
 })
 export class GestionUsuarios implements OnInit, OnDestroy {
   catalogoService = inject(CatalogosService);
@@ -161,6 +167,49 @@ export class GestionUsuarios implements OnInit, OnDestroy {
     );
   }
 
+  descargarReporte() {
+    this.subs.add(
+      this.usuarioService.descargarReporteUsuarios().subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'usuarios.pdf';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          alert('Reporte PDF generado exitosamente [V2].');
+        },
+        error: (err) => {
+          console.error('Error al descargar reporte', err);
+          alert('Hubo un error al generar el reporte.');
+        }
+      })
+    );
+  }
+
+  descargarReporteExcel() {
+    this.subs.add(
+      this.usuarioService.descargarReporteUsuariosExcel().subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'usuarios.xlsx';
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          alert('Reporte Excel generado exitosamente [V2].');
+        },
+        error: (err) => {
+          console.error('Error al descargar reporte Excel', err);
+          alert('Hubo un error al generar el reporte Excel.');
+        }
+      })
+    );
+  }
 
   toggleEstado(u: UsuarioDTO) {
     if (!u.idUsuario) return;

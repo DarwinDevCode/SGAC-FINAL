@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideAngularModule, LucideIconProvider, LUCIDE_ICONS, FileText, Search, RotateCcw, Eye, X, FileSpreadsheet } from 'lucide-angular';
 import { AuditoriaService, LogAuditoria } from './services/auditoria.service';
 
 @Component({
@@ -10,6 +10,15 @@ import { AuditoriaService, LogAuditoria } from './services/auditoria.service';
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './auditoria.html',
   styleUrl: './auditoria.css',
+  providers: [
+    {
+      provide: LUCIDE_ICONS,
+      multi: true,
+      useValue: new LucideIconProvider({
+        FileText, Search, RotateCcw, Eye, X, FileSpreadsheet
+      })
+    }
+  ]
 })
 export class Auditoria implements OnInit {
   logs: LogAuditoria[] = [];
@@ -48,10 +57,10 @@ export class Auditoria implements OnInit {
     const filtrosLimpios = this.prepararFiltros(this.filtros);
 
     this.auditoriaService.obtenerLogsPaginados(
-      filtrosLimpios, 
-      this.currentPage, 
-      this.pageSize, 
-      this.currentSort, 
+      filtrosLimpios,
+      this.currentPage,
+      this.pageSize,
+      this.currentSort,
       this.currentDirection
     ).subscribe({
       next: (res) => {
@@ -98,15 +107,46 @@ export class Auditoria implements OnInit {
   }
 
   descargarReporte() {
-    const filtrosLimpios = this.prepararFiltros(this.filtros);
-    this.auditoriaService.descargarReportePdf(filtrosLimpios).subscribe(blob => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'reporte_auditoria.pdf';
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
+    const f = this.prepararFiltros(this.filtros);
+    this.auditoriaService.descargarReportePdf(f).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().getTime();
+        a.download = `reporte_auditoria_${timestamp}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        alert('Reporte PDF generado exitosamente [V2].');
+      },
+      error: (err) => {
+        console.error('Error al descargar el reporte PDF', err);
+        alert('Hubo un error al generar el reporte PDF [V2].');
+      }
+    });
+  }
+
+  descargarReporteExcel() {
+    const f = this.prepararFiltros(this.filtros);
+    this.auditoriaService.descargarReporteExcel(f).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const timestamp = new Date().getTime();
+        a.download = `reporte_auditoria_${timestamp}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        alert('Reporte Excel generado exitosamente [V2].');
+      },
+      error: (err) => {
+        console.error('Error al descargar el reporte Excel', err);
+        alert('Hubo un error al generar el reporte Excel [V2].');
+      }
     });
   }
 
@@ -157,8 +197,8 @@ export class Auditoria implements OnInit {
 
   private prepararFiltros(f: any): any {
     const result: any = { ...f };
-    if (result.fechaInicio) result.fechaInicio = new Date(result.fechaInicio).toISOString();
-    if (result.fechaFin) result.fechaFin = new Date(result.fechaFin).toISOString();
+    if (result.fechaInicio) result.fechaInicio = new Date(result.fechaInicio).toISOString().split('.')[0];
+    if (result.fechaFin) result.fechaFin = new Date(result.fechaFin).toISOString().split('.')[0];
     return result;
   }
 }

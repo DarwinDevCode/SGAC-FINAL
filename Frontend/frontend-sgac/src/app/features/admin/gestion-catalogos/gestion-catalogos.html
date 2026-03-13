@@ -2,6 +2,16 @@
 
   <div class="section-header">
     <h2 class="title">Configuración Global</h2>
+    <div class="header-actions" style="display: flex; gap: 0.5rem">
+      <button type="button" class="btn-ghost" (click)="descargarReporteExcel()" title="Descargar Reporte de Oferta Académica Excel">
+        <lucide-icon name="FileSpreadsheet" size="18"></lucide-icon>
+        Exportar Excel
+      </button>
+      <button type="button" class="btn-ghost" (click)="descargarReporte()" title="Descargar Reporte de Oferta Académica PDF">
+        <lucide-icon name="Download" size="18"></lucide-icon>
+        Exportar PDF
+      </button>
+    </div>
   </div>
 
   <div class="tabs-container" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">

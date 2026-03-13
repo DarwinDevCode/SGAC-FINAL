@@ -1,10 +1,20 @@
 <div class="gestion-container">
   <div class="section-header">
     <h2 class="title">Gestión de Usuarios</h2>
-    <button type="button" class="btn-primary" (click)="abrirModalCrear()">
-      <lucide-icon name="Plus" size="18"></lucide-icon>
-      Nuevo Usuario
-    </button>
+    <div class="header-actions" style="display: flex; gap: 0.5rem">
+      <button type="button" class="btn-ghost" (click)="descargarReporteExcel()" title="Descargar Reporte Excel">
+        <lucide-icon name="FileSpreadsheet" size="18"></lucide-icon>
+        Exportar Excel
+      </button>
+      <button type="button" class="btn-ghost" (click)="descargarReporte()" title="Descargar Reporte PDF">
+        <lucide-icon name="Download" size="18"></lucide-icon>
+        Exportar PDF
+      </button>
+      <button type="button" class="btn-primary" (click)="abrirModalCrear()">
+          <lucide-icon name="Plus" class="w-4 h-4 mr-2"></lucide-icon>
+        Nuevo Usuario
+      </button>
+    </div>
   </div>
 
   <div class="search-card">

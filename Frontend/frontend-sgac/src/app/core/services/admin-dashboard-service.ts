@@ -46,4 +46,8 @@ export class AdminDashboardService {
     obtenerEstadisticas(): Observable<AdminDashboardDTO> {
         return this.http.get<AdminDashboardDTO>(`${this.baseUrl}/admin/dashboard/estadisticas`);
     }
+
+    descargarReporteExcel(): Observable<Blob> {
+        return this.http.get(`${this.baseUrl}/metricas/reporte-admin/excel`, { responseType: 'blob' as 'json' }) as unknown as Observable<Blob>;
+    }
 }
