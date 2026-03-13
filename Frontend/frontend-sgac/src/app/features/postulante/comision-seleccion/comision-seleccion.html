@@ -1,0 +1,81 @@
+<!-- src/app/features/estudiante/mi-comision/mi-comision-estudiante.html -->
+<div class="mce-wrapper">
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <div class="mce-header">
+    <div class="mce-header-icon">
+      <lucide-icon name="users" size="22"></lucide-icon>
+    </div>
+    <div>
+      <h1 class="mce-title">Mi Comisión de Selección</h1>
+      <p class="mce-subtitle">Miembros asignados para evaluar tu postulación</p>
+    </div>
+  </div>
+
+  <!-- ── Loader ────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="mce-state-box">
+    <lucide-icon name="loader" size="28" class="mce-spin mce-icon-muted"></lucide-icon>
+    <p class="mce-state-text">Cargando tu comisión...</p>
+  </div>
+
+  <!-- ── Error ─────────────────────────────────────────────── -->
+  <div *ngIf="!loading && errorMsg" class="mce-state-box mce-error-box">
+    <lucide-icon name="triangle-alert" size="28" class="mce-icon-warn"></lucide-icon>
+    <p class="mce-state-text">{{ errorMsg }}</p>
+  </div>
+
+  <!-- ── Sin comisiones ────────────────────────────────────── -->
+  <div *ngIf="!loading && !errorMsg && comisiones.length === 0" class="mce-state-box">
+    <lucide-icon name="inbox" size="36" class="mce-icon-muted"></lucide-icon>
+    <p class="mce-state-text">Aún no tienes una comisión asignada.</p>
+    <p class="mce-state-hint">La comisión se conformará una vez que inicie el proceso de evaluación.</p>
+  </div>
+
+  <!-- ── Lista de comisiones ────────────────────────────────── -->
+  <div *ngIf="!loading && !errorMsg && comisiones.length > 0" class="mce-list">
+
+    <div *ngFor="let com of comisiones" class="mce-card">
+
+      <!-- Cabecera tarjeta -->
+      <div class="mce-card-header">
+        <div class="mce-card-header-left">
+          <lucide-icon name="book-marked" size="18"></lucide-icon>
+          <span class="mce-asignatura">{{ com.nombreAsignatura }}</span>
+        </div>
+        <span class="mce-badge-fecha">
+          <lucide-icon name="calendar-days" size="13"></lucide-icon>
+          Conformada el {{ formatFecha(com.fechaConformacion) }}
+        </span>
+      </div>
+
+      <p class="mce-comision-nombre">{{ com.nombreComision }}</p>
+
+      <!-- Grid de miembros -->
+      <div class="mce-members-grid">
+        <div
+          *ngFor="let m of ordenadosMiembros(com.miembros)"
+          class="mce-member-card"
+          [class.mce-member-decano]="m.cargo === 'DECANO'"
+          [class.mce-member-coord]="m.cargo === 'COORDINADOR'"
+          [class.mce-member-docente]="m.cargo === 'DOCENTE'"
+        >
+          <div class="mce-member-top">
+            <div class="mce-member-avatar">
+              <lucide-icon [name]="iconForCargo(m.cargo)" size="20"></lucide-icon>
+            </div>
+            <span class="mce-member-role-badge">{{ labelForCargo(m.cargo) }}</span>
+          </div>
+
+          <p class="mce-member-name">{{ m.nombres }} {{ m.apellidos }}</p>
+
+          <a [href]="'mailto:' + m.correo" class="mce-member-mail">
+            <lucide-icon name="mail" size="13"></lucide-icon>
+            {{ m.correo }}
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -16,6 +16,7 @@ import org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -72,25 +73,36 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
     @Override
     @Transactional(readOnly = true)
     public CoordinadorResponseDTO buscarPorId(Integer id) {
+        /*
         Coordinador coordinador = coordinadorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Coordinador no encontrado con ID: " + id));
         return mapearADTO(coordinador);
+
+         */
+        return new CoordinadorResponseDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public CoordinadorResponseDTO buscarPorUsuario(Integer idUsuario) {
+        /*
         Coordinador coordinador = coordinadorRepository.findByUsuario_IdUsuarioAndActivoTrue(idUsuario)
                 .orElseThrow(() -> new RuntimeException("No existe coordinador activo para el usuario ID: " + idUsuario));
         return mapearADTO(coordinador);
+        */
+        return new CoordinadorResponseDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorResponseDTO> listarTodos() {
+        /*
         return coordinadorRepository.findAll().stream()
                 .map(this::mapearADTO)
                 .collect(Collectors.toList());
+
+         */
+        return new ArrayList<>();
     }
 
 //    @Override
@@ -104,6 +116,7 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
     @Override
     @Transactional(readOnly = true)
     public CoordinadorEstadisticasDTO obtenerEstadisticasPropias(Integer idUsuario) {
+        /*
         List<Convocatoria> convocatorias = convocatoriaRepository.findByCoordinadorPropio(idUsuario);
 
         long totalConvocatorias = convocatorias.size();
@@ -139,11 +152,16 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
                 .postulantesEnEvaluacion(enEvaluacion)
                 .postulantesPorConvocatoria(topConvocatorias)
                 .build();
+
+        */
+        return new CoordinadorEstadisticasDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorConvocatoriaReporteDTO> reporteConvocatoriasPropias(Integer idUsuario) {
+
+        /*
         List<Convocatoria> convocatorias = convocatoriaRepository.findByCoordinadorPropio(idUsuario);
 
         return convocatorias.stream().map(c -> CoordinadorConvocatoriaReporteDTO.builder()
@@ -158,11 +176,14 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
                 .numeroPostulantes((long) (c.getPostulaciones() != null ? c.getPostulaciones().size() : 0))
                 .build()
         ).collect(Collectors.toList());
+         */
+        return new ArrayList<>();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorPostulanteReporteDTO> reportePostulantesPropios(Integer idUsuario) {
+        /*
         List<Postulacion> postulaciones = postulacionRepository.findByCoordinadorPropioActivo(idUsuario);
 
         return postulaciones.stream().map(p -> CoordinadorPostulanteReporteDTO.builder()
@@ -190,5 +211,8 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
                 .fechaFin(entidad.getFechaFin())
                 .activo(entidad.getActivo())
                 .build();
+    }
+    */
+        return new ArrayList<>();
     }
 }

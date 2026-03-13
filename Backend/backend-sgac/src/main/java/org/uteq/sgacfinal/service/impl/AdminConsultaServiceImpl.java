@@ -88,6 +88,7 @@ public class AdminConsultaServiceImpl implements IAdminConsultaService {
     private List<AdminConsultaDTO.EstadisticaMensualDTO> calcularEstadisticasMensuales(
             List<Convocatoria> convocatorias, List<Postulacion> postulaciones) {
 
+        /*
         List<AdminConsultaDTO.EstadisticaMensualDTO> resultado = new ArrayList<>();
         LocalDate hoy = LocalDate.now();
 
@@ -113,6 +114,14 @@ public class AdminConsultaServiceImpl implements IAdminConsultaService {
         }
 
         return resultado;
+
+         */
+
+        List<AdminConsultaDTO.EstadisticaMensualDTO> result = new ArrayList<>();
+
+
+
+        return new ArrayList<>();
     }
 
     private List<AdminConsultaDTO.RolEstadisticaDTO> calcularDistribucionRoles(List<Usuario> usuarios) {

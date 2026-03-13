@@ -2,17 +2,21 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-@Getter
-@Setter
 @Entity
 @Table(name = "periodo_fase", schema = "planificacion")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PeriodoFase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,5 +42,4 @@ public class PeriodoFase {
     @NotNull
     @Column(name = "fecha_fin", nullable = false)
     private LocalDate fechaFin;
-
 }

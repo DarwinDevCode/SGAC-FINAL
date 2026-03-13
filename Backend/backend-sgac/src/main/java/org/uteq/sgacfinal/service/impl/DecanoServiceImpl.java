@@ -19,6 +19,7 @@ import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
 import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -100,6 +101,7 @@ public class DecanoServiceImpl implements IDecanoService {
     @Override
     @Transactional(readOnly = true)
     public DecanoEstadisticasDTO obtenerEstadisticasPorFacultad(Integer idFacultad) {
+        /*
         List<Convocatoria> convocatorias = convocatoriaRepository.findByFacultadPropia(idFacultad);
         List<Postulacion> postulaciones = postulacionRepository.findByFacultadPropia(idFacultad);
 
@@ -137,11 +139,16 @@ public class DecanoServiceImpl implements IDecanoService {
                 .postulantesEnEvaluacion(enEvaluacion)
                 .actividadPorCoordinador(actividadList)
                 .build();
+
+         */
+        return new DecanoEstadisticasDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ConvocatoriaReporteDTO> reporteConvocatoriasPorFacultad(Integer idFacultad) {
+
+        /*
         List<Convocatoria> convocatorias = convocatoriaRepository.findByFacultadPropia(idFacultad);
         // Podríamos optimizar esto, pero como es un reporte con volumen moderado, está bien.
         return convocatorias.stream().map(c -> {
@@ -164,6 +171,9 @@ public class DecanoServiceImpl implements IDecanoService {
                     .numeroPostulantes(postulantes)
                     .build();
         }).collect(Collectors.toList());
+
+         */
+        return new ArrayList<>();
     }
 
     @Override

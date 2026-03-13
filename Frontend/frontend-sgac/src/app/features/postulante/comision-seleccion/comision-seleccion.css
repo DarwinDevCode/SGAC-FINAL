@@ -1,0 +1,221 @@
+/* src/app/features/estudiante/mi-comision/mi-comision-estudiante.css */
+
+/* ── Wrapper ──────────────────────────────────────────────── */
+.mce-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Header ───────────────────────────────────────────────── */
+.mce-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.mce-header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #dcfce7;
+  color: #15803d;
+  flex-shrink: 0;
+}
+
+.mce-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.mce-subtitle {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0.2rem 0 0;
+}
+
+/* ── Estado (loader / error / vacío) ─────────────────────── */
+.mce-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 3.5rem 1rem;
+  border: 1px dashed #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.mce-error-box {
+  border-color: #fca5a5;
+  background: #fff7f7;
+}
+
+.mce-state-text {
+  font-size: 0.9rem;
+  color: #475569;
+  margin: 0;
+  font-weight: 500;
+  text-align: center;
+}
+
+.mce-state-hint {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+  text-align: center;
+}
+
+.mce-icon-muted { color: #94a3b8; }
+.mce-icon-warn  { color: #ef4444; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.mce-spin { animation: spin 1s linear infinite; }
+
+/* ── Lista ────────────────────────────────────────────────── */
+.mce-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Tarjeta principal ────────────────────────────────────── */
+.mce-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+
+.mce-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mce-card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.mce-asignatura { font-size: 1rem; color: #0f172a; }
+
+.mce-badge-fecha {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 0.2rem 0.75rem;
+}
+
+.mce-comision-nombre {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Grid de miembros ─────────────────────────────────────── */
+.mce-members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.mce-member-card {
+  border-radius: 10px;
+  padding: 1rem 1rem 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border: 1px solid #e2e8f0;
+  transition: box-shadow .15s;
+}
+
+.mce-member-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+
+/* Variantes por cargo */
+.mce-member-decano  { border-top: 3px solid #15803d; background: #f0fdf4; }
+.mce-member-coord   { border-top: 3px solid #2563eb; background: #eff6ff; }
+.mce-member-docente { border-top: 3px solid #7c3aed; background: #faf5ff; }
+
+.mce-member-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.mce-member-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.7);
+  border: 1px solid rgba(0,0,0,.08);
+}
+
+.mce-member-decano  .mce-member-avatar { color: #15803d; }
+.mce-member-coord   .mce-member-avatar { color: #2563eb; }
+.mce-member-docente .mce-member-avatar { color: #7c3aed; }
+
+.mce-member-role-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(0,0,0,.1);
+}
+
+.mce-member-decano  .mce-member-role-badge { color: #15803d; }
+.mce-member-coord   .mce-member-role-badge { color: #2563eb; }
+.mce-member-docente .mce-member-role-badge { color: #7c3aed; }
+
+.mce-member-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.mce-member-mail {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.mce-member-mail:hover { color: #15803d; text-decoration: underline; }
