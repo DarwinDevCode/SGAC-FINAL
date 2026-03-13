@@ -1,72 +1,74 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
-import { Subscription } from 'rxjs';
-import { PostulanteService } from '../../../core/services/postulante-service';
-import { AuthService } from '../../../core/services/auth-service';
+import { PostulanteDashboardService } from '../../../core/services/postulante/postulante-dashboard.service';
+import { PostulanteDashboard } from '../../../core/models/postulante/postulante-dashboard.model';
 
 @Component({
-    selector: 'app-postulante-dashboard',
-    standalone: true,
-    imports: [CommonModule, RouterModule, LucideAngularModule],
-    templateUrl: './dashboard.html',
-    styleUrl: './dashboard.css',
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
+  templateUrl: './dashboard.html',
+  styleUrl: './dashboard.css'
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-    postulanteService = inject(PostulanteService);
-    authService = inject(AuthService);
-    private subs = new Subscription();
+export class DashboardComponent implements OnInit {
+  private dashboardService = inject(PostulanteDashboardService);
 
-    totalConvocatorias = 0;
-    totalPostulaciones = 0;
-    loading = true;
-    idEstudianteBase = 0;
+  dashboard: PostulanteDashboard | null = null;
+  loading = true;
+  error = false;
 
-    ngOnInit(): void {
-        const user = this.authService.getUser();
-        if (user) {
-            this.idEstudianteBase = user.idUsuario;
-        }
-        this.cargarDatosDashboard();
+  ngOnInit(): void {
+    this.cargarDashboard();
+  }
+
+  cargarDashboard(): void {
+    this.loading = true;
+    this.error = false;
+
+    this.dashboardService.getResumenDashboard().subscribe({
+      next: (data) => {
+        this.dashboard = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar dashboard', err);
+        this.error = true;
+        this.loading = false;
+      }
+    });
+  }
+
+  getEstadoClass(estado: string | undefined): string {
+    if (!estado) return 'badge badge-secondary';
+
+    const valor = estado.toUpperCase();
+
+    if (valor.includes('APROB')) return 'badge badge-success';
+    if (valor.includes('RECHAZ')) return 'badge badge-danger';
+    if (valor.includes('REVISION') || valor.includes('PENDIENTE')) return 'badge badge-warning';
+    if (valor.includes('OBSERV')) return 'badge badge-warning';
+
+    return 'badge badge-secondary';
+  }
+
+  /*
+   * IMPORTANTE:
+   * Esta función ahora usa el MISMO formato que la pantalla
+   * "Mi Postulación", para que ambas muestren la misma fecha.
+   */
+  formatearFecha(fecha: string | null | undefined): string {
+    if (!fecha) return '--';
+
+    try {
+      const date = new Date(fecha);
+      return date.toLocaleDateString('es-EC', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
+    } catch {
+      return fecha;
     }
-
-    ngOnDestroy(): void {
-        this.subs.unsubscribe();
-    }
-
-    cargarDatosDashboard() {
-        this.loading = true;
-
-        // Cargar número de convocatorias activas
-        this.subs.add(
-            this.postulanteService.listarConvocatoriasActivas().subscribe({
-                next: (convocatorias) => {
-                    this.totalConvocatorias = convocatorias?.length || 0;
-                    this.checkLoading();
-                },
-                error: () => this.checkLoading()
-            })
-        );
-
-        // Cargar número de postulaciones activas del estudiante
-        this.subs.add(
-            this.postulanteService.misPostulaciones(this.idEstudianteBase).subscribe({
-                next: (postulaciones) => {
-                    this.totalPostulaciones = postulaciones?.length || 0;
-                    this.checkLoading();
-                },
-                error: () => this.checkLoading()
-            })
-        );
-    }
-
-    // Pequeño hack para quitar el loading solo cuando ambas peticiones terminen (podría usarse forkJoin)
-    private requestsCompleted = 0;
-    private checkLoading() {
-        this.requestsCompleted++;
-        if (this.requestsCompleted >= 2) {
-            this.loading = false;
-        }
-    }
+  }
 }

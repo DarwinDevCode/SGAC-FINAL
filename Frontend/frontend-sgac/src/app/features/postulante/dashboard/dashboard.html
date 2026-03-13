@@ -1,42 +1,223 @@
-<div class="gestion-container">
-    <div class="section-header">
-        <div class="title-container">
-            <h2 class="title">Dashboard Postulante</h2>
-            <p class="subtitle">Bienvenido a tu panel de control de selección de ayudantías.</p>
-        </div>
+<div class="dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <h1>Dashboard del Estudiante</h1>
+      <p>Resumen general de tus postulaciones y del proceso de ayudantías.</p>
     </div>
+  </div>
 
-    @if (loading) {
-    <div class="loading-state">Cargando información del panel...</div>
-    } @else {
-    <div class="dashboard-grid">
-        <!-- Tarjeta Convocatorias -->
-        <div class="stat-card">
-            <div class="stat-icon calls-icon">
-                <lucide-icon name="briefcase" size="24"></lucide-icon>
-            </div>
-            <div class="stat-info">
-                <h3 class="stat-title">Convocatorias Abiertas</h3>
-                <p class="stat-value">{{ totalConvocatorias }}</p>
-            </div>
-            <a routerLink="/postulante/convocatorias" class="stat-link">
-                Ver Plazas <lucide-icon name="arrow-right" size="16"></lucide-icon>
-            </a>
-        </div>
-
-        <!-- Tarjeta Mis Postulaciones -->
-        <div class="stat-card">
-            <div class="stat-icon apps-icon">
-                <lucide-icon name="file-text" size="24"></lucide-icon>
-            </div>
-            <div class="stat-info">
-                <h3 class="stat-title">Mis Postulaciones Activas</h3>
-                <p class="stat-value">{{ totalPostulaciones }}</p>
-            </div>
-            <a routerLink="/postulante/mis-postulaciones" class="stat-link">
-                Revisar Estado <lucide-icon name="arrow-right" size="16"></lucide-icon>
-            </a>
-        </div>
+  @if (loading) {
+    <div class="state-box">
+      <div class="state-icon">⌛</div>
+      <p>Cargando información del dashboard...</p>
     </div>
-    }
+  }
+
+  @if (error) {
+    <div class="state-box state-box-error">
+      <div class="state-icon">⚠</div>
+      <p>Ocurrió un error al cargar el dashboard.</p>
+    </div>
+  }
+
+  @if (!loading && dashboard) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <div class="summary-icon icon-green">📢</div>
+        <div class="summary-info">
+          <h2 class="summary-number">{{ dashboard.convocatoriasAbiertas }}</h2>
+          <p class="summary-label">Convocatorias abiertas</p>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon icon-blue">📝</div>
+        <div class="summary-info">
+          <h2 class="summary-number">{{ dashboard.misPostulaciones }}</h2>
+          <p class="summary-label">Mis postulaciones</p>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon icon-yellow">📌</div>
+        <div class="summary-info">
+          <h2 class="summary-text">{{ dashboard.faseActual }}</h2>
+          <p class="summary-label">Fase actual</p>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <div class="summary-icon icon-purple">📅</div>
+        <div class="summary-info">
+          <h2 class="summary-text">{{ dashboard.periodoAcademico }}</h2>
+          <p class="summary-label">Periodo académico</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid dashboard-grid-top">
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h3>Accesos rápidos</h3>
+            <p class="card-subtitle">Ingresa rápidamente a las opciones principales.</p>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <a routerLink="/postulante/convocatorias" class="quick-btn">
+            <span class="quick-icon">📢</span>
+            <span>Ver convocatorias</span>
+          </a>
+
+          <a routerLink="/postulante/mis-postulaciones" class="quick-btn">
+            <span class="quick-icon">📝</span>
+            <span>Mis postulaciones</span>
+          </a>
+
+          <a routerLink="/postulante/resultados" class="quick-btn">
+            <span class="quick-icon">🏆</span>
+            <span>Resultados</span>
+          </a>
+
+          <a routerLink="/cronograma" class="quick-btn">
+            <span class="quick-icon">🗓</span>
+            <span>Cronograma</span>
+          </a>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <div>
+            <h3>Mi última postulación</h3>
+            <p class="card-subtitle">Estado más reciente de tu proceso.</p>
+          </div>
+          <a routerLink="/postulante/mis-postulaciones" class="header-link">Ver detalles</a>
+        </div>
+
+        @if (dashboard.ultimaPostulacion) {
+          <div class="detail-list">
+            <div class="detail-row">
+              <div class="detail-icon">📚</div>
+              <div class="detail-content">
+                <span class="detail-label">Asignatura</span>
+                <span class="detail-value">{{ dashboard.ultimaPostulacion.asignatura }}</span>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-icon">👨‍🏫</div>
+              <div class="detail-content">
+                <span class="detail-label">Docente</span>
+                <span class="detail-value">{{ dashboard.ultimaPostulacion.docente }}</span>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-icon">📆</div>
+              <div class="detail-content">
+                <span class="detail-label">Fecha</span>
+                <span class="detail-value">
+                  {{ formatearFecha(dashboard.ultimaPostulacion.fechaPostulacion) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-icon">📍</div>
+              <div class="detail-content status-content">
+                <span class="detail-label">Estado</span>
+                <span [class]="getEstadoClass(dashboard.ultimaPostulacion.estado)">
+                  {{ dashboard.ultimaPostulacion.estado }}
+                </span>
+              </div>
+            </div>
+
+            <div class="observation-box">
+              <div class="observation-top">
+                <span class="observation-icon">💬</span>
+                <span class="detail-label">Observación</span>
+              </div>
+              <p>{{ dashboard.ultimaPostulacion.observacion || 'Sin observaciones registradas.' }}</p>
+            </div>
+          </div>
+        } @else {
+          <p class="empty-text">Aún no has realizado postulaciones.</p>
+        }
+      </article>
+    </section>
+
+    <section class="dashboard-grid dashboard-grid-bottom">
+      <article class="card card-full">
+        <div class="card-header">
+          <div>
+            <h3>Resumen del proceso</h3>
+            <p class="card-subtitle">Información general del periodo académico actual.</p>
+          </div>
+          <a routerLink="/cronograma" class="header-link">Ver cronograma</a>
+        </div>
+
+        @if (dashboard.resumenProceso) {
+          <div class="process-grid">
+            <div class="process-item">
+              <div class="process-item-top">
+                <span class="process-mini-icon">🚩</span>
+                <span class="process-label">Inicio del período</span>
+              </div>
+              <span class="process-value">
+                {{ formatearFecha(dashboard.resumenProceso.fechaInicioPeriodo) }}
+              </span>
+            </div>
+
+            <div class="process-item">
+              <div class="process-item-top">
+                <span class="process-mini-icon">🏁</span>
+                <span class="process-label">Fin del período</span>
+              </div>
+              <span class="process-value">
+                {{ formatearFecha(dashboard.resumenProceso.fechaFinPeriodo) }}
+              </span>
+            </div>
+
+            <div class="process-item">
+              <div class="process-item-top">
+                <span class="process-mini-icon">▶</span>
+                <span class="process-label">Inicio de fase actual</span>
+              </div>
+              <span class="process-value">
+                {{ formatearFecha(dashboard.resumenProceso.fechaInicioFaseActual) }}
+              </span>
+            </div>
+
+            <div class="process-item">
+              <div class="process-item-top">
+                <span class="process-mini-icon">■</span>
+                <span class="process-label">Fin de fase actual</span>
+              </div>
+              <span class="process-value">
+                {{ formatearFecha(dashboard.resumenProceso.fechaFinFaseActual) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>Progreso del proceso</span>
+              <span class="progress-percent">{{ dashboard.resumenProceso.porcentajeAvance }}%</span>
+            </div>
+
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                [style.width.%]="dashboard.resumenProceso.porcentajeAvance">
+              </div>
+            </div>
+          </div>
+        } @else {
+          <p class="empty-text">No existe información del proceso actual.</p>
+        }
+      </article>
+    </section>
+  }
 </div>
