@@ -9,7 +9,7 @@ import { InformeMensualResponse } from '../dto/informe-mensual-response';
 })
 export class InformeMensualService {
     private http = inject(HttpClient);
-    private apiUrl = `${environment.apiUrl}/api/informes`;
+    private apiUrl = `${environment.apiUrl}/informes`;
 
     listarPorAyudantia(idAyudantia: number): Observable<InformeMensualResponse[]> {
         return this.http.get<InformeMensualResponse[]>(`${this.apiUrl}/ayudantia/${idAyudantia}`);
@@ -23,8 +23,8 @@ export class InformeMensualService {
         return this.http.get<InformeMensualResponse>(`${this.apiUrl}/${id}`);
     }
 
-    generarBorradorIA(idAyudantia: number, mes: number, anio: number): Observable<InformeMensualResponse> {
-        return this.http.post<InformeMensualResponse>(`${this.apiUrl}/ayudantia/${idAyudantia}/generar?mes=${mes}&anio=${anio}`, {});
+    generarBorradorIA(idUsuario: number, mes: number, anio: number): Observable<InformeMensualResponse> {
+        return this.http.post<InformeMensualResponse>(`${this.apiUrl}/generar?idUsuario=${idUsuario}&mes=${mes}&anio=${anio}`, {});
     }
 
     enviarARevision(id: number, borradorEditado: string): Observable<InformeMensualResponse> {
