@@ -24,4 +24,7 @@ public interface ICargaAcademicaRepository extends JpaRepository<Docente, Intege
             @Param("idDocente") Integer idDocente,
             @Param("asignaturasIds") String asignaturasIds
     );
+
+    @Query(value = "SELECT academico.fn_listar_asignaturas_docente(:idDocente)", nativeQuery = true)
+    String listarAsignaturasDocente(@Param("idDocente") Integer idDocente);
 }

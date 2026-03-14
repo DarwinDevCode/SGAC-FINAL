@@ -1,13 +1,11 @@
-import {
-  Component, OnInit, OnDestroy, inject, computed, signal,
-} from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 
-import { CargaAcademicaService } from '../../../core/services/configuracion/carga-academica-service'
+import { CargaAcademicaService } from '../../../core/services/configuracion/carga-academica-service';
 import {
   AsignaturaJerarquiaDTO,
   DocenteActivoDTO,
@@ -28,35 +26,25 @@ export class CargaAcademicaComponent implements OnInit, OnDestroy {
   private svc  = inject(CargaAcademicaService);
   private subs = new Subscription();
 
-  // ── Vista activa ─────────────────────────────────────────────
   vista: Vista = 'seleccion';
 
-  // ── Datos maestros ───────────────────────────────────────────
   docentes:    DocenteActivoDTO[]       = [];
   asignaturas: AsignaturaJerarquiaDTO[] = [];
 
-  // ── Selección ────────────────────────────────────────────────
   docenteSeleccionado: DocenteActivoDTO | null = null;
-
-  /** Carga en edición (lado izquierdo del panel) */
   cargaActual: AsignaturaJerarquiaDTO[] = [];
 
-  // ── Feedback ─────────────────────────────────────────────────
   cargandoDocentes    = true;
+  cargandoPanel       = false;
   cargandoAsignaturas = true;
   guardando           = false;
   resultado: SincronizarCargaResponse | null = null;
 
-  // ── Buscadores ───────────────────────────────────────────────
-  /** Búsqueda en la tabla de docentes */
-  busquedaDocente = '';
-
-  /** Filtros del catálogo de asignaturas (lado derecho) */
+  busquedaDocente  = '';
   filtroFacultad   = 0;
   filtroCarrera    = 0;
   filtroAsignatura = '';
 
-  // ── Catálogos derivados ──────────────────────────────────────
   get facultades(): { id: number; nombre: string }[] {
     const mapa = new Map<number, string>();
     this.asignaturas.forEach(a => mapa.set(a.idFacultad, a.nombreFacultad));
@@ -88,59 +76,51 @@ export class CargaAcademicaComponent implements OnInit, OnDestroy {
 
   get asignaturasFiltradas(): AsignaturaJerarquiaDTO[] {
     return this.asignaturas.filter(a => {
-      const porFacultad  = !this.filtroFacultad   || a.idFacultad === this.filtroFacultad;
-      const porCarrera   = !this.filtroCarrera    || a.idCarrera  === this.filtroCarrera;
-      const porNombre    = !this.filtroAsignatura ||
+      const porFacultad = !this.filtroFacultad  || a.idFacultad === this.filtroFacultad;
+      const porCarrera  = !this.filtroCarrera   || a.idCarrera  === this.filtroCarrera;
+      const porNombre   = !this.filtroAsignatura ||
         a.nombreAsignatura.toLowerCase().includes(this.filtroAsignatura.toLowerCase().trim());
-      const noEnCarga    = !this.cargaActual.some(c => c.idAsignatura === a.idAsignatura);
+      const noEnCarga   = !this.cargaActual.some(c => c.idAsignatura === a.idAsignatura);
       return porFacultad && porCarrera && porNombre && noEnCarga;
     });
   }
 
-  get hayPendientes(): boolean {
-    // Compara IDs de la carga actual con los que vienen del servidor
-    return true; // siempre habilitar guardar si hay docente seleccionado
-  }
-
-  // ── Ciclo de vida ────────────────────────────────────────────
   ngOnInit() {
-    this.cargarDocentes();
-    this.cargarAsignaturas();
+    this.subs.add(
+      forkJoin({
+        docentes:    this.svc.getDocentes(),
+        asignaturas: this.svc.getAsignaturas(),
+      }).subscribe({
+        next: ({ docentes, asignaturas }) => {
+          this.docentes            = docentes    ?? [];
+          this.asignaturas         = asignaturas ?? [];
+          this.cargandoDocentes    = false;
+          this.cargandoAsignaturas = false;
+        },
+        error: () => {
+          this.cargandoDocentes    = false;
+          this.cargandoAsignaturas = false;
+        },
+      })
+    );
   }
 
   ngOnDestroy() { this.subs.unsubscribe(); }
 
-  // ── Carga de datos ───────────────────────────────────────────
-  private cargarDocentes() {
-    this.cargandoDocentes = true;
-    this.subs.add(
-      this.svc.getDocentes().subscribe({
-        next: (data) => { this.docentes = data; this.cargandoDocentes = false; },
-        error: () => { this.cargandoDocentes = false; alert('Error al cargar docentes.'); },
-      })
-    );
-  }
-
-  private cargarAsignaturas() {
-    this.cargandoAsignaturas = true;
-    this.subs.add(
-      this.svc.getAsignaturas().subscribe({
-        next: (data) => { this.asignaturas = data; this.cargandoAsignaturas = false; },
-        error: () => { this.cargandoAsignaturas = false; alert('Error al cargar asignaturas.'); },
-      })
-    );
-  }
-
-  // ── Selección de docente ─────────────────────────────────────
   seleccionarDocente(docente: DocenteActivoDTO) {
     this.docenteSeleccionado = docente;
+    this.cargaActual         = [];
     this.resultado           = null;
-    // Inicialmente la carga actual vacía; el usuario la construye
-    // desde el catálogo. En una mejora futura se puede precargar
-    // desde un endpoint GET /carga-academica/docentes/:id/asignaturas
-    this.cargaActual = [];
     this.resetFiltros();
-    this.vista = 'gestion';
+    this.vista               = 'gestion';
+    this.cargandoPanel       = true;
+
+    this.subs.add(
+      this.svc.getAsignaturasDocente(docente.idDocente).subscribe({
+        next:  (data) => { this.cargaActual = data ?? []; this.cargandoPanel = false; },
+        error: ()     => { this.cargandoPanel = false; },
+      })
+    );
   }
 
   volverASeleccion() {
@@ -148,9 +128,8 @@ export class CargaAcademicaComponent implements OnInit, OnDestroy {
     this.vista = 'seleccion';
   }
 
-  // ── Gestión de carga ─────────────────────────────────────────
   agregarAsignatura(a: AsignaturaJerarquiaDTO) {
-    if (this.cargaActual.some(c => c.idAsignatura === a.idAsignatura)) return; // guard
+    if (this.cargaActual.some(c => c.idAsignatura === a.idAsignatura)) return;
     this.cargaActual = [...this.cargaActual, a];
   }
 
@@ -164,33 +143,28 @@ export class CargaAcademicaComponent implements OnInit, OnDestroy {
     this.filtroAsignatura = '';
   }
 
-  onFacultadChange() {
-    this.filtroCarrera = 0; // Resetear carrera al cambiar facultad
-  }
+  onFacultadChange() { this.filtroCarrera = 0; }
 
-  // ── Guardar cambios ──────────────────────────────────────────
   guardarCambios() {
     if (!this.docenteSeleccionado) return;
-    if (!confirm(`¿Confirmar los cambios en la carga de ${this.docenteSeleccionado.nombres} ${this.docenteSeleccionado.apellidos}?`)) return;
+    const nombre = `${this.docenteSeleccionado.nombres} ${this.docenteSeleccionado.apellidos}`;
+    if (!confirm(`¿Confirmar cambios en la carga de ${nombre}?`)) return;
 
     this.guardando = true;
     this.resultado = null;
 
-    const payload = {
-      idDocente:      this.docenteSeleccionado.idDocente,
-      asignaturasIds: this.cargaActual.map(a => a.idAsignatura),
-    };
-
     this.subs.add(
-      this.svc.sincronizar(payload).subscribe({
+      this.svc.sincronizar({
+        idDocente:      this.docenteSeleccionado.idDocente,
+        asignaturasIds: this.cargaActual.map(a => a.idAsignatura),
+      }).subscribe({
         next: (res) => {
           this.guardando = false;
           this.resultado = res;
-          // Actualizar conteo en la tabla de docentes
-          if (this.docenteSeleccionado) {
-            this.docenteSeleccionado.totalAsignaturas = this.cargaActual.length;
-            const idx = this.docentes.findIndex(d => d.idDocente === this.docenteSeleccionado!.idDocente);
-            if (idx !== -1) this.docentes[idx] = { ...this.docentes[idx], totalAsignaturas: this.cargaActual.length };
+          const idx = this.docentes.findIndex(d => d.idDocente === this.docenteSeleccionado!.idDocente);
+          if (idx !== -1) {
+            this.docentes[idx] = { ...this.docentes[idx], totalAsignaturas: this.cargaActual.length };
+            this.docenteSeleccionado = { ...this.docenteSeleccionado!, totalAsignaturas: this.cargaActual.length };
           }
         },
         error: (err: HttpErrorResponse) => {

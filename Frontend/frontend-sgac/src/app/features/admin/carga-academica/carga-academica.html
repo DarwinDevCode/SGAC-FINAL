@@ -1,29 +1,29 @@
-<div class="ca-container">
+<div class="gestion-container">
 
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!--  VISTA 1: SELECCIÓN DE DOCENTE                           -->
-  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════
+       VISTA 1 — TABLA DE SELECCIÓN DE DOCENTE
+       ═══════════════════════════════════════════════════════════ -->
   @if (vista === 'seleccion') {
 
-    <div class="page-header">
+    <div class="section-header">
       <div>
-        <h2 class="page-title">Gestión de Carga Académica</h2>
-        <p class="page-subtitle">Seleccione un docente para gestionar su asignación de materias.</p>
+        <h2 class="title">Gestión de Carga Académica</h2>
+        <p class="subtitle">Seleccione un docente para gestionar su asignación de materias.</p>
       </div>
     </div>
 
-    <!-- Buscador de docentes -->
-    <div class="search-bar-card">
-      <lucide-icon name="Search" size="18" class="search-icon"></lucide-icon>
-      <input
-        type="text"
-        [(ngModel)]="busquedaDocente"
-        placeholder="Buscar docente por nombre o cédula…"
-        class="search-input"
-      />
+    <div class="search-card">
+      <div class="search-wrapper">
+        <lucide-icon name="Search" size="18" class="search-icon"></lucide-icon>
+        <input
+          type="text"
+          [(ngModel)]="busquedaDocente"
+          placeholder="Buscar docente por nombre o cédula…"
+          class="input-field search-input"
+        />
+      </div>
     </div>
 
-    <!-- Tabla de docentes -->
     <div class="table-card">
       <table class="data-table">
         <thead>
@@ -36,21 +36,18 @@
         </thead>
         <tbody>
           @if (cargandoDocentes) {
-            <tr><td colspan="4" class="state-cell">
-              <span class="spinner"></span> Cargando docentes…
+            <tr><td colspan="4" class="td-center">
+              <lucide-icon name="Loader2" size="18" class="spin"></lucide-icon>
+              Cargando docentes…
             </td></tr>
           } @else if (docentesFiltrados.length === 0) {
-            <tr><td colspan="4" class="state-cell muted">
-              No se encontraron docentes.
-            </td></tr>
+            <tr><td colspan="4" class="td-center td-muted">Sin resultados.</td></tr>
           } @else {
             @for (d of docentesFiltrados; track d.idDocente) {
-              <tr class="table-row" (click)="seleccionarDocente(d)">
+              <tr>
                 <td>
                   <div class="docente-cell">
-                    <div class="docente-avatar">
-                      {{ d.nombres[0] }}{{ d.apellidos[0] }}
-                    </div>
+                    <div class="docente-avatar">{{ d.nombres[0] }}{{ d.apellidos[0] }}</div>
                     <div>
                       <div class="docente-nombre">{{ d.nombres }} {{ d.apellidos }}</div>
                       <div class="docente-correo">{{ d.correo }}</div>
@@ -64,7 +61,7 @@
                   </span>
                 </td>
                 <td class="text-right">
-                  <button type="button" class="btn-select">
+                  <button type="button" class="btn-primary" (click)="seleccionarDocente(d)">
                     Gestionar <lucide-icon name="ChevronRight" size="14"></lucide-icon>
                   </button>
                 </td>
@@ -76,38 +73,38 @@
     </div>
   }
 
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!--  VISTA 2: PANEL DE GESTIÓN DE CARGA                      -->
-  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ═══════════════════════════════════════════════════════════
+       VISTA 2 — PANEL DE GESTIÓN DE CARGA
+       ═══════════════════════════════════════════════════════════ -->
   @if (vista === 'gestion' && docenteSeleccionado) {
 
-    <!-- Breadcrumb / Header -->
+    <!-- Encabezado con datos del docente -->
     <div class="panel-header">
       <button type="button" class="btn-back" (click)="volverASeleccion()">
         <lucide-icon name="ArrowLeft" size="16"></lucide-icon>
         Volver
       </button>
+
       <div class="docente-info-header">
         <div class="docente-avatar large">
           {{ docenteSeleccionado.nombres[0] }}{{ docenteSeleccionado.apellidos[0] }}
         </div>
         <div>
-          <h2 class="panel-title">
+          <h2 class="panel-docente-nombre">
             {{ docenteSeleccionado.nombres }} {{ docenteSeleccionado.apellidos }}
           </h2>
-          <p class="panel-subtitle">{{ docenteSeleccionado.correo }}</p>
+          <p class="panel-docente-correo">{{ docenteSeleccionado.correo }}</p>
         </div>
       </div>
 
-      <!-- Botón Guardar -->
       <button
         type="button"
         class="btn-guardar"
-        [disabled]="guardando"
+        [disabled]="guardando || cargandoPanel"
         (click)="guardarCambios()"
       >
         @if (guardando) {
-          <span class="spinner sm"></span>
+          <lucide-icon name="Loader2" size="16" class="spin"></lucide-icon>
           Sincronizando…
         } @else {
           <lucide-icon name="Save" size="16"></lucide-icon>
@@ -116,22 +113,12 @@
       </button>
     </div>
 
-    <!-- ── Resultado de sincronización ──────────────────────── -->
+    <!-- Banner de resultado -->
     @if (resultado) {
-      <div class="result-banner" [class.success]="resultado.exito">
-        <lucide-icon [name]="resultado.exito ? 'CheckCircle2' : 'XCircle'" size="18"></lucide-icon>
-        <div>
+      <div class="result-banner">
+        <lucide-icon name="CheckCircle2" size="18"></lucide-icon>
+        <div class="result-body">
           <strong>{{ resultado.mensaje }}</strong>
-          @if (resultado.revocadas > 0) {
-            <span class="result-detail">
-              · {{ resultado.revocadas }} revocada(s)
-            </span>
-          }
-          @if (resultado.asignadas > 0) {
-            <span class="result-detail">
-              · {{ resultado.asignadas }} añadida(s)
-            </span>
-          }
           <span class="result-mail">
             📧 Notificación enviada a {{ resultado.correoDocente }}
           </span>
@@ -142,39 +129,44 @@
       </div>
     }
 
-    <!-- ── Panel de dos columnas ────────────────────────────── -->
+    <!-- Panel de dos columnas -->
     <div class="dual-panel">
 
-      <!-- ── COLUMNA IZQUIERDA: Carga actual ─────────────────── -->
+      <!-- ── Columna izquierda: Carga actual ────────────────── -->
       <div class="panel-col">
         <div class="col-header">
           <lucide-icon name="BookOpen" size="16"></lucide-icon>
           <h3>Carga actual</h3>
-          <span class="count-chip">{{ cargaActual.length }}</span>
+          <span class="count-chip" [class.empty]="cargaActual.length === 0">
+            {{ cargaActual.length }}
+          </span>
         </div>
 
         <div class="col-body">
-          @if (cargaActual.length === 0) {
-            <div class="empty-col">
+          @if (cargandoPanel) {
+            <div class="col-empty">
+              <lucide-icon name="Loader2" size="28" class="spin empty-icon"></lucide-icon>
+              <p>Cargando asignaturas…</p>
+            </div>
+          } @else if (cargaActual.length === 0) {
+            <div class="col-empty">
               <lucide-icon name="BookX" size="32" class="empty-icon"></lucide-icon>
               <p>Sin asignaturas asignadas.</p>
-              <p class="muted">Añada materias desde el catálogo →</p>
+              <p class="td-muted">Añada materias desde el catálogo →</p>
             </div>
           } @else {
             <ul class="asig-list">
               @for (a of cargaActual; track a.idAsignatura) {
-                <li class="asig-item current">
+                <li class="asig-item">
                   <div class="asig-info">
                     <span class="asig-nombre">{{ a.nombreAsignatura }}</span>
-                    <span class="asig-meta">
-                      {{ a.nombreCarrera }} · Sem. {{ a.semestre }}
-                    </span>
+                    <span class="asig-meta">{{ a.nombreCarrera }} · Sem. {{ a.semestre }}</span>
                     <span class="asig-facultad">{{ a.nombreFacultad }}</span>
                   </div>
                   <button
                     type="button"
                     class="btn-revocar"
-                    title="Revocar asignatura"
+                    title="Quitar asignatura"
                     (click)="revocarAsignatura(a)"
                   >
                     <lucide-icon name="X" size="14"></lucide-icon>
@@ -186,7 +178,7 @@
         </div>
       </div>
 
-      <!-- ── COLUMNA DERECHA: Buscador global ───────────────── -->
+      <!-- ── Columna derecha: Catálogo global ───────────────── -->
       <div class="panel-col">
         <div class="col-header">
           <lucide-icon name="Library" size="16"></lucide-icon>
@@ -201,7 +193,7 @@
           <select
             [(ngModel)]="filtroFacultad"
             (ngModelChange)="onFacultadChange()"
-            class="filter-select"
+            class="input-field filter-select"
           >
             <option [ngValue]="0">Todas las facultades</option>
             @for (f of facultades; track f.id) {
@@ -209,38 +201,38 @@
             }
           </select>
 
-          <select [(ngModel)]="filtroCarrera" class="filter-select">
+          <select [(ngModel)]="filtroCarrera" class="input-field filter-select">
             <option [ngValue]="0">Todas las carreras</option>
             @for (c of carreras; track c.id) {
               <option [ngValue]="c.id">{{ c.nombre }}</option>
             }
           </select>
 
-          <div class="filter-search">
+          <div class="filter-search-wrap">
             <lucide-icon name="Search" size="14" class="filter-icon"></lucide-icon>
             <input
               type="text"
               [(ngModel)]="filtroAsignatura"
               placeholder="Buscar asignatura…"
-              class="filter-input"
+              class="input-field filter-input"
             />
           </div>
 
-          <button type="button" class="btn-ghost-sm" (click)="resetFiltros()" title="Limpiar filtros">
-            <lucide-icon name="FilterX" size="14"></lucide-icon>
+          <button type="button" class="btn-icon" (click)="resetFiltros()" title="Limpiar filtros">
+            <lucide-icon name="FilterX" size="15"></lucide-icon>
           </button>
         </div>
 
-        <!-- Lista del catálogo -->
         <div class="col-body">
           @if (cargandoAsignaturas) {
-            <div class="state-cell">
-              <span class="spinner"></span> Cargando catálogo…
+            <div class="col-empty">
+              <lucide-icon name="Loader2" size="28" class="spin empty-icon"></lucide-icon>
+              <p>Cargando catálogo…</p>
             </div>
           } @else if (asignaturasFiltradas.length === 0) {
-            <div class="empty-col">
+            <div class="col-empty">
               <lucide-icon name="SearchX" size="28" class="empty-icon"></lucide-icon>
-              <p class="muted">Sin resultados para los filtros aplicados.</p>
+              <p class="td-muted">Sin resultados para los filtros aplicados.</p>
             </div>
           } @else {
             <ul class="asig-list">
@@ -248,15 +240,13 @@
                 <li class="asig-item catalog">
                   <div class="asig-info">
                     <span class="asig-nombre">{{ a.nombreAsignatura }}</span>
-                    <span class="asig-meta">
-                      {{ a.nombreCarrera }} · Sem. {{ a.semestre }}
-                    </span>
+                    <span class="asig-meta">{{ a.nombreCarrera }} · Sem. {{ a.semestre }}</span>
                     <span class="asig-facultad">{{ a.nombreFacultad }}</span>
                   </div>
                   <button
                     type="button"
                     class="btn-agregar"
-                    title="Agregar a carga actual"
+                    title="Añadir a carga actual"
                     (click)="agregarAsignatura(a)"
                   >
                     <lucide-icon name="Plus" size="14"></lucide-icon>
@@ -268,7 +258,7 @@
         </div>
       </div>
 
-    </div><!-- /dual-panel -->
+    </div>
   }
 
 </div>

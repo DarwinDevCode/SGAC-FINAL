@@ -7,7 +7,7 @@ import {
   DocenteActivoDTO,
   SincronizarCargaRequest,
   SincronizarCargaResponse,
-} from '../../models/configuracion/CargaAcademica'
+} from '../../models/configuracion/CargaAcademica';
 
 @Injectable({ providedIn: 'root' })
 export class CargaAcademicaService {
@@ -16,6 +16,10 @@ export class CargaAcademicaService {
 
   getDocentes(): Observable<DocenteActivoDTO[]> {
     return this.http.get<DocenteActivoDTO[]>(`${this.base}/docentes`);
+  }
+
+  getAsignaturasDocente(idDocente: number): Observable<AsignaturaJerarquiaDTO[]> {
+    return this.http.get<AsignaturaJerarquiaDTO[]>(`${this.base}/docentes/${idDocente}/asignaturas`);
   }
 
   getAsignaturas(): Observable<AsignaturaJerarquiaDTO[]> {

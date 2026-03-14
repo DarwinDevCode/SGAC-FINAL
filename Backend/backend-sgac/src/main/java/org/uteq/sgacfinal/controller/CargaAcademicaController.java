@@ -18,12 +18,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class CargaAcademicaController {
-
     private final CargaAcademicaService service;
 
     @GetMapping("/docentes")
     public ResponseEntity<List<DocenteActivoDTO>> listarDocentes() {
         return ResponseEntity.ok(service.listarDocentes());
+    }
+
+    @GetMapping("/docentes/{idDocente}/asignaturas")
+    public ResponseEntity<List<AsignaturaJerarquiaDTO>> listarAsignaturasDocente(
+            @PathVariable Integer idDocente) {
+        return ResponseEntity.ok(service.listarAsignaturasDocente(idDocente));
     }
 
     @GetMapping("/asignaturas")

@@ -47,6 +47,27 @@ public class CargaAcademicaService {
     }
 
     @Transactional(readOnly = true)
+    public List<AsignaturaJerarquiaDTO> listarAsignaturasDocente(Integer idDocente) {
+        try {
+            String json = repo.listarAsignaturasDocente(idDocente);
+            List<Map<String, Object>> raw = objectMapper.readValue(json, new TypeReference<>() {});
+            return raw.stream().map(m -> AsignaturaJerarquiaDTO.builder()
+                            .idAsignatura    (num(m, "idAsignatura"))
+                            .nombreAsignatura((String) m.get("nombreAsignatura"))
+                            .semestre        (num(m, "semestre"))
+                            .idCarrera       (num(m, "idCarrera"))
+                            .nombreCarrera   ((String) m.get("nombreCarrera"))
+                            .idFacultad      (num(m, "idFacultad"))
+                            .nombreFacultad  ((String) m.get("nombreFacultad"))
+                            .etiqueta        ((String) m.get("etiqueta"))
+                            .build())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Error al listar asignaturas del docente: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional(readOnly = true)
     public List<AsignaturaJerarquiaDTO> listarAsignaturas() {
         try {
             String json = repo.listarJerarquiaAsignaturas();
@@ -67,9 +88,11 @@ public class CargaAcademicaService {
         }
     }
 
+    // ── Sincronización atómica ──────────────────────────────────────
     @Transactional
     public SincronizarCargaResponseDTO sincronizar(SincronizarCargaRequest req) {
         try {
+            // Convertir List<Integer> → formato PostgreSQL array: {1,2,3}
             String pgArray = req.getAsignaturasIds() == null || req.getAsignaturasIds().isEmpty()
                     ? "{}"
                     : "{" + req.getAsignaturasIds().stream()
@@ -92,6 +115,7 @@ public class CargaAcademicaService {
                     .mensaje(buildMensaje(result))
                     .build();
 
+            // Notificar al docente por correo (asíncrono)
             emailService.enviarActualizacionCarga(
                     dto.getCorreoDocente(),
                     dto.getNombreDocente(),

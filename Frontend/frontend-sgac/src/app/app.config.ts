@@ -106,7 +106,8 @@ import {
   ScrollText,
   MicVocal,
   BookOpenText,
-  Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX
+  Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX, SearchX,
+  Mic
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -198,9 +199,9 @@ export const appConfig: ApplicationConfig = {
         KeyRound,
         Library,
         FilterX,
-        BookX
-
-
+        BookX,
+        SearchX,
+        Mic
       })
     )
   ]

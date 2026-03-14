@@ -5,9 +5,8 @@ import { LucideAngularModule } from 'lucide-angular';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType, ChartOptions } from 'chart.js';
+import { ChartData, ChartOptions } from 'chart.js';
 import { CoordinadorService } from '../../../core/services/coordinador-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { CoordinadorResponseDTO, CoordinadorEstadisticasDTO } from '../../../core/dto/coordinador';
@@ -31,14 +30,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   loading = true;
   errorMensaje = '';
 
-  // P10 — Panel de notificaciones masivas
   msgMasivo = '';
   tipoMasivo = 'CONVOCATORIA';
   enviadoMasivo = false;
   enviandoMasivo = false;
   respuestaMasiva = '';
 
-  // Configuración Chart.js - Estado de Convocatorias (Doughnut)
   public doughnutChartOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -47,7 +44,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public doughnutChartType = 'doughnut' as const;
   public doughnutChartData: ChartData<'doughnut'> = { labels: [], datasets: [] };
 
-  // Configuración Chart.js - Postulantes por Convocatoria (Bar)
   public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -83,21 +79,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.subs.add(
             this.coordinadorService.obtenerEstadisticasPropias(user.idUsuario).subscribe({
               next: (stats: CoordinadorEstadisticasDTO) => {
-                this.estadisticas = stats;
-                this.configurarGraficos(stats);
+                // --- NORMALIZACIÓN DE DATOS (Blinda el HTML contra nulos) ---
+                this.estadisticas = {
+                  ...stats,
+                  totalConvocatoriasPropias: stats.totalConvocatoriasPropias ?? 0,
+                  convocatoriasActivas: stats.convocatoriasActivas ?? 0,
+                  convocatoriasInactivas: stats.convocatoriasInactivas ?? 0,
+                  totalPostulantesRecibidos: stats.totalPostulantesRecibidos ?? 0,
+                  postulantesAprobados: stats.postulantesAprobados ?? 0,
+                  postulantesRechazados: stats.postulantesRechazados ?? 0,
+                  postulantesEnEvaluacion: stats.postulantesEnEvaluacion ?? 0,
+                  postulantesPorConvocatoria: stats.postulantesPorConvocatoria ?? []
+                };
+
+                this.configurarGraficos(this.estadisticas);
                 this.loading = false;
               },
               error: (err) => {
-                console.error('Error al cargar estadísticas del Coordinador:', err);
-                this.errorMensaje = 'No se pudieron cargar las métricas de tu dashboard.';
+                console.error('Error al cargar estadísticas:', err);
+                this.errorMensaje = 'No se pudieron cargar las métricas.';
                 this.loading = false;
               }
             })
           );
         },
         error: (err) => {
-          console.error('Error al cargar datos del Coordinador:', err);
-          this.errorMensaje = 'Tu usuario no está registrado como un Coordinador activo.';
+          console.error('Error al cargar Coordinador:', err);
+          this.errorMensaje = 'Usuario no registrado como Coordinador activo.';
           this.loading = false;
         }
       })
@@ -105,33 +113,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private configurarGraficos(stats: CoordinadorEstadisticasDTO) {
-    // 1. Gráfico de Barras: Top Convocatorias por número de postulantes
-    const labelsBarras = stats.postulantesPorConvocatoria.map(p => p.tituloConvocatoria);
-    const dataBarras = stats.postulantesPorConvocatoria.map(p => p.cantidadPostulantes);
+    // Al estar normalizado arriba, ya no hay riesgo de null aquí
+    const listaPostulantes = stats.postulantesPorConvocatoria;
+
+    const labelsBarras = listaPostulantes.map(p => p.tituloConvocatoria || 'Sin Título');
+    const dataBarras = listaPostulantes.map(p => p.cantidadPostulantes || 0);
 
     this.barChartData = {
       labels: labelsBarras,
-      datasets: [
-        {
-          data: dataBarras,
-          label: 'Postulantes',
-          backgroundColor: '#3b82f6', // blue-500
-          borderRadius: 4,
-          hoverBackgroundColor: '#2563eb' // blue-600
-        }
-      ]
+      datasets: [{
+        data: dataBarras,
+        label: 'Postulantes',
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+        hoverBackgroundColor: '#2563eb'
+      }]
     };
 
-    // 2. Gráfico Doughnut: Estado de Convocatorias Propias
     this.doughnutChartData = {
       labels: ['Activas', 'Inactivas'],
-      datasets: [
-        {
-          data: [stats.convocatoriasActivas, stats.convocatoriasInactivas],
-          backgroundColor: ['#10b981', '#ef4444'], // green-500, red-500
-          hoverBackgroundColor: ['#059669', '#dc2626'] // green-600, red-600
-        }
-      ]
+      datasets: [{
+        data: [stats.convocatoriasActivas, stats.convocatoriasInactivas],
+        backgroundColor: ['#10b981', '#ef4444'],
+        hoverBackgroundColor: ['#059669', '#dc2626']
+      }]
     };
   }
 
