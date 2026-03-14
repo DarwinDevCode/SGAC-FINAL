@@ -1,0 +1,274 @@
+<div class="ca-container">
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!--  VISTA 1: SELECCIÓN DE DOCENTE                           -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  @if (vista === 'seleccion') {
+
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Gestión de Carga Académica</h2>
+        <p class="page-subtitle">Seleccione un docente para gestionar su asignación de materias.</p>
+      </div>
+    </div>
+
+    <!-- Buscador de docentes -->
+    <div class="search-bar-card">
+      <lucide-icon name="Search" size="18" class="search-icon"></lucide-icon>
+      <input
+        type="text"
+        [(ngModel)]="busquedaDocente"
+        placeholder="Buscar docente por nombre o cédula…"
+        class="search-input"
+      />
+    </div>
+
+    <!-- Tabla de docentes -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>Docente</th>
+          <th>Cédula</th>
+          <th class="text-center">Asignaturas</th>
+          <th class="text-right">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+          @if (cargandoDocentes) {
+            <tr><td colspan="4" class="state-cell">
+              <span class="spinner"></span> Cargando docentes…
+            </td></tr>
+          } @else if (docentesFiltrados.length === 0) {
+            <tr><td colspan="4" class="state-cell muted">
+              No se encontraron docentes.
+            </td></tr>
+          } @else {
+            @for (d of docentesFiltrados; track d.idDocente) {
+              <tr class="table-row" (click)="seleccionarDocente(d)">
+                <td>
+                  <div class="docente-cell">
+                    <div class="docente-avatar">
+                      {{ d.nombres[0] }}{{ d.apellidos[0] }}
+                    </div>
+                    <div>
+                      <div class="docente-nombre">{{ d.nombres }} {{ d.apellidos }}</div>
+                      <div class="docente-correo">{{ d.correo }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-mono">{{ d.cedula }}</td>
+                <td class="text-center">
+                  <span class="badge-count" [class.empty]="d.totalAsignaturas === 0">
+                    {{ d.totalAsignaturas }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  <button type="button" class="btn-select">
+                    Gestionar <lucide-icon name="ChevronRight" size="14"></lucide-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!--  VISTA 2: PANEL DE GESTIÓN DE CARGA                      -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  @if (vista === 'gestion' && docenteSeleccionado) {
+
+    <!-- Breadcrumb / Header -->
+    <div class="panel-header">
+      <button type="button" class="btn-back" (click)="volverASeleccion()">
+        <lucide-icon name="ArrowLeft" size="16"></lucide-icon>
+        Volver
+      </button>
+      <div class="docente-info-header">
+        <div class="docente-avatar large">
+          {{ docenteSeleccionado.nombres[0] }}{{ docenteSeleccionado.apellidos[0] }}
+        </div>
+        <div>
+          <h2 class="panel-title">
+            {{ docenteSeleccionado.nombres }} {{ docenteSeleccionado.apellidos }}
+          </h2>
+          <p class="panel-subtitle">{{ docenteSeleccionado.correo }}</p>
+        </div>
+      </div>
+
+      <!-- Botón Guardar -->
+      <button
+        type="button"
+        class="btn-guardar"
+        [disabled]="guardando"
+        (click)="guardarCambios()"
+      >
+        @if (guardando) {
+          <span class="spinner sm"></span>
+          Sincronizando…
+        } @else {
+          <lucide-icon name="Save" size="16"></lucide-icon>
+          Guardar cambios
+        }
+      </button>
+    </div>
+
+    <!-- ── Resultado de sincronización ──────────────────────── -->
+    @if (resultado) {
+      <div class="result-banner" [class.success]="resultado.exito">
+        <lucide-icon [name]="resultado.exito ? 'CheckCircle2' : 'XCircle'" size="18"></lucide-icon>
+        <div>
+          <strong>{{ resultado.mensaje }}</strong>
+          @if (resultado.revocadas > 0) {
+            <span class="result-detail">
+              · {{ resultado.revocadas }} revocada(s)
+            </span>
+          }
+          @if (resultado.asignadas > 0) {
+            <span class="result-detail">
+              · {{ resultado.asignadas }} añadida(s)
+            </span>
+          }
+          <span class="result-mail">
+            📧 Notificación enviada a {{ resultado.correoDocente }}
+          </span>
+        </div>
+        <button type="button" class="btn-icon" (click)="resultado = null">
+          <lucide-icon name="X" size="14"></lucide-icon>
+        </button>
+      </div>
+    }
+
+    <!-- ── Panel de dos columnas ────────────────────────────── -->
+    <div class="dual-panel">
+
+      <!-- ── COLUMNA IZQUIERDA: Carga actual ─────────────────── -->
+      <div class="panel-col">
+        <div class="col-header">
+          <lucide-icon name="BookOpen" size="16"></lucide-icon>
+          <h3>Carga actual</h3>
+          <span class="count-chip">{{ cargaActual.length }}</span>
+        </div>
+
+        <div class="col-body">
+          @if (cargaActual.length === 0) {
+            <div class="empty-col">
+              <lucide-icon name="BookX" size="32" class="empty-icon"></lucide-icon>
+              <p>Sin asignaturas asignadas.</p>
+              <p class="muted">Añada materias desde el catálogo →</p>
+            </div>
+          } @else {
+            <ul class="asig-list">
+              @for (a of cargaActual; track a.idAsignatura) {
+                <li class="asig-item current">
+                  <div class="asig-info">
+                    <span class="asig-nombre">{{ a.nombreAsignatura }}</span>
+                    <span class="asig-meta">
+                      {{ a.nombreCarrera }} · Sem. {{ a.semestre }}
+                    </span>
+                    <span class="asig-facultad">{{ a.nombreFacultad }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-revocar"
+                    title="Revocar asignatura"
+                    (click)="revocarAsignatura(a)"
+                  >
+                    <lucide-icon name="X" size="14"></lucide-icon>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+
+      <!-- ── COLUMNA DERECHA: Buscador global ───────────────── -->
+      <div class="panel-col">
+        <div class="col-header">
+          <lucide-icon name="Library" size="16"></lucide-icon>
+          <h3>Catálogo de asignaturas</h3>
+          @if (!cargandoAsignaturas) {
+            <span class="count-chip muted">{{ asignaturasFiltradas.length }}</span>
+          }
+        </div>
+
+        <!-- Filtros -->
+        <div class="filters-row">
+          <select
+            [(ngModel)]="filtroFacultad"
+            (ngModelChange)="onFacultadChange()"
+            class="filter-select"
+          >
+            <option [ngValue]="0">Todas las facultades</option>
+            @for (f of facultades; track f.id) {
+              <option [ngValue]="f.id">{{ f.nombre }}</option>
+            }
+          </select>
+
+          <select [(ngModel)]="filtroCarrera" class="filter-select">
+            <option [ngValue]="0">Todas las carreras</option>
+            @for (c of carreras; track c.id) {
+              <option [ngValue]="c.id">{{ c.nombre }}</option>
+            }
+          </select>
+
+          <div class="filter-search">
+            <lucide-icon name="Search" size="14" class="filter-icon"></lucide-icon>
+            <input
+              type="text"
+              [(ngModel)]="filtroAsignatura"
+              placeholder="Buscar asignatura…"
+              class="filter-input"
+            />
+          </div>
+
+          <button type="button" class="btn-ghost-sm" (click)="resetFiltros()" title="Limpiar filtros">
+            <lucide-icon name="FilterX" size="14"></lucide-icon>
+          </button>
+        </div>
+
+        <!-- Lista del catálogo -->
+        <div class="col-body">
+          @if (cargandoAsignaturas) {
+            <div class="state-cell">
+              <span class="spinner"></span> Cargando catálogo…
+            </div>
+          } @else if (asignaturasFiltradas.length === 0) {
+            <div class="empty-col">
+              <lucide-icon name="SearchX" size="28" class="empty-icon"></lucide-icon>
+              <p class="muted">Sin resultados para los filtros aplicados.</p>
+            </div>
+          } @else {
+            <ul class="asig-list">
+              @for (a of asignaturasFiltradas; track a.idAsignatura) {
+                <li class="asig-item catalog">
+                  <div class="asig-info">
+                    <span class="asig-nombre">{{ a.nombreAsignatura }}</span>
+                    <span class="asig-meta">
+                      {{ a.nombreCarrera }} · Sem. {{ a.semestre }}
+                    </span>
+                    <span class="asig-facultad">{{ a.nombreFacultad }}</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-agregar"
+                    title="Agregar a carga actual"
+                    (click)="agregarAsignatura(a)"
+                  >
+                    <lucide-icon name="Plus" size="14"></lucide-icon>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </div>
+
+    </div><!-- /dual-panel -->
+  }
+
+</div>

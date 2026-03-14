@@ -69,3 +69,23 @@ export interface SorteoPayload {
   horaInicio:     string;
   lugar:          string;
 }
+
+export interface ConvocatoriaOposicionDTO {
+  idConvocatoria:        number;
+  nombreAsignatura:      string;
+  semestreAsignatura:    number;
+  nombreCarrera:         string;
+  nombreFacultad:        string;
+  nombreDocente:         string;
+  cuposDisponibles:      number;
+  estadoConvocatoria:    string;
+  totalPostulantesAptos: number;
+  tieneComision:         boolean;
+  tieneSorteo:           boolean;
+}
+
+export interface ConvocatoriasAptasResponse {
+  exito:    boolean;
+  mensaje?: string;
+  datos?:   ConvocatoriaOposicionDTO[];
+}

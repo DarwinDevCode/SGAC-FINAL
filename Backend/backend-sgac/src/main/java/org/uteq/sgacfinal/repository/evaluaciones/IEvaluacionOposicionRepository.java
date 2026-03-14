@@ -125,4 +125,11 @@ public interface IEvaluacionOposicionRepository
             @Param("pIdUsuario")      Integer pIdUsuario
     );
 
+    @Query(value = """
+        SELECT CAST(
+            postulacion.fn_listar_convocatorias_para_oposicion()
+        AS text)
+        """, nativeQuery = true)
+    String listarConvocatoriasParaOposicion();
+
 }

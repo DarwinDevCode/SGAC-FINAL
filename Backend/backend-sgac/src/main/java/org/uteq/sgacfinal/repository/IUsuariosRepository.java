@@ -13,6 +13,11 @@ import java.util.Optional;
 
 @Repository
 public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
+    @Query(value = "SELECT seguridad.fn_registrar_usuario_global(CAST(:payload AS jsonb))", nativeQuery = true)
+    String registrarUsuarioGlobal(@Param("payload") String payload);
+
+    @Query(value = "SELECT seguridad.fn_listar_roles_activos()", nativeQuery = true)
+    String listarRolesActivosJson();
 
     @Modifying
     @Query(value = "CALL public.sp_registrar_estudiante(:nombres, :apellidos, :cedula, :correo, :username, :password, :idCarrera, :matricula, :semestre)", nativeQuery = true)
@@ -31,12 +36,12 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
     @Modifying
     @Query(value = "CALL public.sp_registrar_docente(:nombres, :apellidos, :cedula, :correo, :username, :password)", nativeQuery = true)
     void registrarDocente(
-           @Param("nombres") String nombres,
-           @Param("apellidos") String apellidos,
-           @Param("cedula") String cedula,
-           @Param("correo") String correo,
-           @Param("username") String username,
-           @Param("password") String password
+            @Param("nombres") String nombres,
+            @Param("apellidos") String apellidos,
+            @Param("cedula") String cedula,
+            @Param("correo") String correo,
+            @Param("username") String username,
+            @Param("password") String password
     );
 
     @Modifying
@@ -93,7 +98,6 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
             @Param("horasAsignadas") BigDecimal horasAsignadas
     );
 
-
     Optional<Usuario> findByNombreUsuario(String nombreUsuario);
 
     @Query("""
@@ -112,5 +116,4 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
             LEFT JOIN FETCH r.tipoRol
             """)
     List<Usuario> findAllWithRolesAndTipoRol();
-
 }

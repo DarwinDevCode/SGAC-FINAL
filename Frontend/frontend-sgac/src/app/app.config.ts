@@ -106,7 +106,7 @@ import {
   ScrollText,
   MicVocal,
   BookOpenText,
-  Shuffle, PartyPopper, Play, UserX
+  Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -117,7 +117,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
-    //provideCharts(withDefaultRegisterables()),
     importProvidersFrom(
       LucideAngularModule.pick({
         AlertCircle,
@@ -192,7 +191,15 @@ export const appConfig: ApplicationConfig = {
         Shuffle,
         PartyPopper,
         Play,
-        UserX
+        UserX,
+        ListFilter,
+        CalendarCheck2,
+        UserPlus,
+        KeyRound,
+        Library,
+        FilterX,
+        BookX
+
 
       })
     )

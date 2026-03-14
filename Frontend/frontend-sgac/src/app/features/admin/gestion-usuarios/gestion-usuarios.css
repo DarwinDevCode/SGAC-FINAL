@@ -1,6 +1,5 @@
-.gestion-container {
-  padding: 1rem;
-}
+/* ── Layout general ────────────────────────────────────────── */
+.gestion-container { padding: 1rem; }
 
 .section-header {
   display: flex;
@@ -15,6 +14,7 @@
   color: hsl(var(--foreground));
 }
 
+/* ── Buscador ───────────────────────────────────────────────── */
 .search-card {
   background: white;
   padding: 1rem;
@@ -23,9 +23,7 @@
   margin-bottom: 1.5rem;
 }
 
-.search-wrapper {
-  position: relative;
-}
+.search-wrapper { position: relative; }
 
 .search-icon {
   position: absolute;
@@ -35,11 +33,9 @@
   color: hsl(var(--muted-foreground));
 }
 
-.search-input {
-  padding-left: 2.5rem !important;
-}
+.search-input { padding-left: 2.5rem !important; }
 
-/* Tabla */
+/* ── Tabla ──────────────────────────────────────────────────── */
 .table-card {
   background: white;
   border-radius: var(--radius);
@@ -47,10 +43,7 @@
   overflow: hidden;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.data-table { width: 100%; border-collapse: collapse; }
 
 .data-table th {
   background: hsl(var(--muted) / 0.3);
@@ -68,64 +61,95 @@
   vertical-align: middle;
 }
 
-.user-info-cell {
+.loading-cell, .empty-cell {
+  text-align: center;
+  color: hsl(var(--muted-foreground));
+  padding: 2rem !important;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
 }
 
-.full-name { font-weight: 600; font-size: 0.9rem; }
-.user-email { font-size: 0.8rem; color: hsl(var(--muted-foreground)); }
+.user-info-cell { display: flex; flex-direction: column; gap: 2px; }
+.full-name   { font-weight: 600; font-size: 0.9rem; }
+.user-email  { font-size: 0.8rem; color: hsl(var(--muted-foreground)); }
 .user-username { font-size: 0.7rem; color: #94a3b8; }
 
-.roles-wrapper {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
+.roles-wrapper { display: flex; gap: .5rem; flex-wrap: wrap; }
 
 .badge-rol {
-  padding: 0.2rem 0.6rem;
+  padding: .2rem .6rem;
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 500;
   border: 1px solid;
   cursor: pointer;
+  transition: opacity .15s;
 }
-
-.badge-rol.active { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.badge-rol.active   { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
 .badge-rol.inactive { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
-.badge-rol.disabled { opacity: 0.5; cursor: not-allowed; }
+.badge-rol.disabled { opacity: .45; cursor: not-allowed; }
 
 .status-pill {
-  padding: 0.25rem 0.75rem;
+  padding: .25rem .75rem;
   border-radius: 999px;
-  font-size: 0.75rem;
+  font-size: .75rem;
   font-weight: 600;
 }
-
-.status-pill.active { background: #dcfce7; color: #15803d; }
+.status-pill.active   { background: #dcfce7; color: #15803d; }
 .status-pill.inactive { background: #fee2e2; color: #b91c1c; }
 
-/* Modal */
+/* ── Botones ────────────────────────────────────────────────── */
+.btn-primary {
+  background: hsl(var(--primary));
+  color: white;
+  padding: .6rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  transition: opacity .15s;
+}
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-ghost {
+  padding: .6rem 1.25rem;
+  color: #64748b;
+  border-radius: var(--radius);
+}
+.btn-ghost:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-icon {
+  padding: .5rem;
+  border-radius: .5rem;
+  color: #64748b;
+  transition: all .2s;
+}
+.btn-icon:hover { background: #f1f5f9; color: hsl(var(--primary)); }
+
+/* ── Modal ──────────────────────────────────────────────────── */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, .5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  backdrop-filter: blur(2px);
 }
 
 .modal-box {
   background: white;
   width: 100%;
-  max-width: 650px;
-  max-height: 90vh;
+  max-width: 680px;
+  max-height: 92vh;
   border-radius: 1rem;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0,0,0,.15);
 }
 
 .modal-header {
@@ -133,58 +157,204 @@
   border-bottom: 1px solid hsl(var(--border));
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   background: #f8fafc;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
+.modal-title  { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; margin: 0; }
+.modal-subtitle {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 4px 0 0;
+}
+
+/* ── Formulario ─────────────────────────────────────────────── */
 .user-form {
   padding: 1.5rem;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 1.25rem;
+  align-items: start;
 }
 
 .full-width { grid-column: span 2; }
+
+.form-section-label {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: #64748b;
+  padding-top: .75rem;
+  border-top: 1px solid hsl(var(--border));
+  margin-top: .25rem;
+}
+
+/* Primera sección no necesita borde superior */
+.form-section-label:first-of-type { border-top: none; padding-top: 0; }
 
 .form-group label {
   display: block;
   font-size: 0.8rem;
   font-weight: 600;
-  margin-bottom: 0.4rem;
+  margin-bottom: .4rem;
   color: #475569;
 }
 
 .input-field {
   width: 100%;
-  padding: 0.6rem 0.8rem;
+  padding: .6rem .8rem;
   border-radius: var(--radius);
   border: 1px solid hsl(var(--border));
   font-size: 0.9rem;
   outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  box-sizing: border-box;
 }
 
-.input-field.highlight {
-  background-color: #eff6ff;
-  border-color: #bfdbfe;
+.input-field:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / .12);
+}
+
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+/* ── Password notice (reemplaza al campo de contraseña) ─────── */
+.password-notice {
+  grid-column: span 1;
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  padding: .75rem 1rem;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+}
+
+.password-notice lucide-icon { flex-shrink: 0; margin-top: 2px; }
+
+.password-notice strong {
+  display: block;
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.password-notice p { margin: 0; color: #2563eb; line-height: 1.4; }
+
+/* ── Roles checkboxes ───────────────────────────────────────── */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: .6rem;
+}
+
+.roles-loading {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.rol-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .6rem .9rem;
+  border: 1.5px solid hsl(var(--border));
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #475569;
+  background: white;
+  transition: all .15s;
+  user-select: none;
+}
+
+.rol-checkbox-label:hover {
+  border-color: hsl(var(--primary) / .5);
+  background: hsl(var(--primary) / .04);
+}
+
+.rol-checkbox-label.selected {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / .08);
+  color: hsl(var(--primary));
   font-weight: 600;
 }
 
-.form-divider {
-  padding-top: 1rem;
-  font-size: 0.8rem;
-  color: #94a3b8;
-  border-top: 1px solid hsl(var(--border));
-  margin-top: 0.5rem;
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: transparent;
+  transition: background .15s;
 }
 
+.rol-checkbox-label.selected .checkbox-custom {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: white;
+}
+
+/* ── Footer del formulario ──────────────────────────────────── */
 .form-footer {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: .5rem;
+  padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border));
 }
 
-.btn-primary { background: hsl(var(--primary)); color: white; padding: 0.6rem 1.25rem; border-radius: var(--radius); font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
-.btn-ghost { padding: 0.6rem 1.25rem; color: #64748b; }
-.btn-icon { padding: 0.5rem; border-radius: 0.5rem; color: #64748b; transition: all 0.2s; }
-.btn-icon:hover { background: #f1f5f9; color: hsl(var(--primary)); }
+.roles-badge-preview {
+  margin-right: auto;
+  font-size: 0.78rem;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: .25rem .65rem;
+  border-radius: 999px;
+}
+
+/* ── Spinner ────────────────────────────────────────────────── */
+.spin {
+  animation: spin .8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .user-form { grid-template-columns: 1fr; }
+  .full-width { grid-column: span 1; }
+  .roles-grid { grid-template-columns: 1fr 1fr; }
+  .password-notice { grid-column: span 1; }
+}

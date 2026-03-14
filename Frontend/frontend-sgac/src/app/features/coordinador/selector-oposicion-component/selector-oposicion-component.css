@@ -1,0 +1,173 @@
+/* =========================================================
+   SELECTOR DE OPOSICIÓN — Estilos
+   ========================================================= */
+
+/* ── Wrapper ─────────────────────────────────────────────── */
+.so-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.so-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.so-icon-box {
+  width: 46px; height: 46px; border-radius: 12px;
+  background: #dcfce7; color: #15803d;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.so-title {
+  font-size: 1.4rem; font-weight: 700; color: #0f172a;
+  margin: 0; letter-spacing: -0.02em;
+}
+.so-subtitle {
+  font-size: 0.82rem; color: #64748b; margin: 0.2rem 0 0;
+}
+
+/* ── Feedback (loading / error) ──────────────────────────── */
+.so-feedback {
+  display: flex; flex-direction: column; align-items: center; gap: 0.875rem;
+  padding: 4rem 1rem;
+  border: 1px dashed #e2e8f0; border-radius: 16px; background: #f8fafc;
+}
+.so-feedback-text { font-size: 0.9rem; color: #475569; margin: 0; font-weight: 500; text-align: center; }
+.so-muted-icon    { color: #94a3b8; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.so-spin { animation: spin 1s linear infinite; }
+
+.so-btn-reload {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 1rem; background: white; color: #475569;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+.so-btn-reload:hover { background: #f1f5f9; }
+
+/* ── Contador ────────────────────────────────────────────── */
+.so-count {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-size: 0.78rem; color: #64748b; font-weight: 500; margin: 0;
+}
+
+/* ── Grid de tarjetas ────────────────────────────────────── */
+.so-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.1rem;
+}
+
+/* ── Tarjeta ─────────────────────────────────────────────── */
+.so-card {
+  /* Resetear estilos de button */
+  appearance: none;
+  text-align: left;
+  font-family: inherit;
+
+  /* Card */
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.05);
+  /* Accesibilidad: foco visible */
+  outline: none;
+}
+.so-card:hover {
+  box-shadow: 0 6px 24px rgba(0,0,0,.10);
+  border-color: #15803d;
+  transform: translateY(-2px);
+}
+.so-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(21,128,61,.25);
+  border-color: #15803d;
+}
+.so-card:active { transform: translateY(0); }
+
+/* ── Cabecera de la tarjeta ──────────────────────────────── */
+.so-card-top {
+  display: flex; align-items: center; gap: 0.875rem;
+}
+.so-avatar {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: linear-gradient(135deg, #15803d 0%, #16a34a 100%);
+  color: white; font-size: 0.85rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+.so-card-titles { flex: 1; min-width: 0; }
+.so-asignatura {
+  font-size: 0.95rem; font-weight: 700; color: #1e293b;
+  margin: 0 0 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.so-carrera {
+  font-size: 0.74rem; color: #94a3b8; margin: 0;
+}
+.so-chevron {
+  color: #cbd5e1; flex-shrink: 0; transition: color 0.15s, transform 0.15s;
+}
+.so-card:hover .so-chevron { color: #15803d; transform: translateX(3px); }
+
+/* ── Badge de postulantes aptos (elemento central) ───────── */
+.so-aptos-row {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+}
+.so-aptos-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.55rem 1rem;
+  background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 10px;
+  color: #15803d;
+}
+.so-aptos-num  { font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.so-aptos-lbl  { font-size: 0.75rem; font-weight: 600; }
+
+/* Badges de proceso de oposición */
+.so-proceso-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em;
+  padding: 0.25rem 0.65rem; border-radius: 20px; white-space: nowrap;
+  margin-left: auto;
+}
+.badge-teal  { background: #ccfbf1; color: #0f766e; }
+.badge-blue  { background: #dbeafe; color: #1d4ed8; }
+.badge-amber { background: #fef3c7; color: #92400e; }
+
+/* ── Pie de la tarjeta ────────────────────────────────────── */
+.so-card-footer {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+  padding-top: 0.875rem;
+  border-top: 1px solid #f1f5f9;
+}
+.so-footer-item {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.75rem; color: #64748b;
+}
+.so-footer-sep { color: #e2e8f0; font-size: 0.75rem; }
+
+/* Pills de estado de convocatoria */
+.so-estado-pill {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em;
+  padding: 0.18rem 0.55rem; border-radius: 20px; text-transform: uppercase;
+  margin-left: auto;
+}
+.so-estado-pill--abierta       { background: #d1fae5; color: #065f46; }
+.so-estado-pill--en_evaluacion { background: #dbeafe; color: #1e40af; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 580px) {
+  .so-grid    { grid-template-columns: 1fr; }
+  .so-aptos-badge { flex: 1; }
+  .so-proceso-badge { margin-left: 0; }
+}

@@ -1,5 +1,6 @@
 package org.uteq.sgacfinal.service.impl.evaluaciones;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.uteq.sgacfinal.dto.Request.evaluaciones.BancoTemasRequest;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.CambiarEstadoEvaluacionRequest;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.PuntajeJuradoRequest;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.SorteoOposicionRequest;
+import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.Response.evaluaciones.ConvocatoriaOposicionDTO;
 import org.uteq.sgacfinal.exception.ComisionException;
 import org.uteq.sgacfinal.repository.evaluaciones.IEvaluacionOposicionRepository;
 import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionOposicionService;
@@ -151,6 +154,26 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
         } catch (Exception e) {
             log.error("[EvaluacionOposicion] Error parseando respuesta de {}: {}", contexto, raw);
             throw new ComisionException("Respuesta inesperada del servidor.");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StandardResponseDTO<List<ConvocatoriaOposicionDTO>> listarConvocatoriasParaOposicion() {
+        try {
+            String json = repo.listarConvocatoriasParaOposicion();
+
+            return objectMapper.readValue(
+                    json,
+                    new TypeReference<StandardResponseDTO<List<ConvocatoriaOposicionDTO>>>() {}
+            );
+
+        } catch (Exception e) {
+            log.error("[ConvocatoriaOposicion] Error al listar convocatorias aptas: {}", e.getMessage());
+            return StandardResponseDTO.<List<ConvocatoriaOposicionDTO>>builder()
+                    .exito(false)
+                    .mensaje("Error al obtener las convocatorias para oposición: " + e.getMessage())
+                    .build();
         }
     }
 }

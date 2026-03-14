@@ -7,13 +7,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.BancoTemasRequest;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.CambiarEstadoEvaluacionRequest;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.PuntajeJuradoRequest;
 import org.uteq.sgacfinal.dto.Request.evaluaciones.SorteoOposicionRequest;
+import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.Response.evaluaciones.ConvocatoriaOposicionDTO;
 import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionOposicionService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/oposicion")
@@ -85,5 +91,15 @@ public class EvaluacionMeritoOposicionController {
             return ResponseEntity.status(401).build();
 
         return ResponseEntity.ok(service.obtenerMiTurno(idConvocatoria, idUsuario));
+    }
+
+    @GetMapping("/convocatorias-aptas")
+    public ResponseEntity<StandardResponseDTO<List<ConvocatoriaOposicionDTO>>> listarConvocatoriasAptas(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        StandardResponseDTO<List<ConvocatoriaOposicionDTO>> response =
+                service.listarConvocatoriasParaOposicion();
+
+        return ResponseEntity.ok(response);
     }
 }

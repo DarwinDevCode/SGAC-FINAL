@@ -1,0 +1,442 @@
+/* ── Variables locales ──────────────────────────────────────── */
+:host {
+  --ca-radius: 10px;
+  --ca-blue:   #1e3a5f;
+  --ca-accent: #2563eb;
+  --ca-green:  #16a34a;
+  --ca-red:    #dc2626;
+  --ca-border: #e2e8f0;
+  --ca-muted:  #64748b;
+  --ca-bg:     #f8fafc;
+}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+.ca-container { padding: 1.5rem; max-width: 1280px; margin: 0 auto; }
+
+/* ── Encabezado ─────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ca-blue);
+  margin: 0;
+}
+
+.page-subtitle { font-size: .875rem; color: var(--ca-muted); margin: 4px 0 0; }
+
+/* ── Buscador de docentes ───────────────────────────────────── */
+.search-bar-card {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ca-muted);
+}
+
+.search-input {
+  width: 100%;
+  padding: .7rem .9rem .7rem 2.75rem;
+  border: 1.5px solid var(--ca-border);
+  border-radius: var(--ca-radius);
+  font-size: .9rem;
+  outline: none;
+  background: white;
+  box-sizing: border-box;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.search-input:focus {
+  border-color: var(--ca-accent);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* ── Tabla de docentes ──────────────────────────────────────── */
+.table-card {
+  background: white;
+  border-radius: var(--ca-radius);
+  border: 1px solid var(--ca-border);
+  overflow: hidden;
+}
+
+.data-table { width: 100%; border-collapse: collapse; }
+
+.data-table th {
+  background: #f1f5f9;
+  padding: .875rem 1rem;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--ca-muted);
+  border-bottom: 1px solid var(--ca-border);
+  font-weight: 600;
+}
+
+.data-table td { padding: .875rem 1rem; border-bottom: 1px solid var(--ca-border); }
+
+.table-row {
+  cursor: pointer;
+  transition: background .12s;
+}
+.table-row:hover { background: #f0f9ff; }
+.table-row:last-child td { border-bottom: none; }
+
+.state-cell {
+  text-align: center;
+  padding: 2.5rem !important;
+  color: var(--ca-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+
+/* ── Docente cell ───────────────────────────────────────────── */
+.docente-cell { display: flex; align-items: center; gap: .875rem; }
+
+.docente-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ca-blue), var(--ca-accent));
+  color: white;
+  font-weight: 700;
+  font-size: .85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.docente-avatar.large { width: 52px; height: 52px; font-size: 1.1rem; }
+
+.docente-nombre { font-weight: 600; font-size: .9rem; color: #1e293b; }
+.docente-correo { font-size: .78rem; color: var(--ca-muted); margin-top: 2px; }
+.text-mono      { font-family: monospace; font-size: .85rem; }
+
+.badge-count {
+  display: inline-block;
+  padding: .2rem .65rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 700;
+  background: #dbeafe;
+  color: var(--ca-accent);
+}
+.badge-count.empty { background: #f1f5f9; color: var(--ca-muted); }
+
+.btn-select {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .4rem .9rem;
+  background: var(--ca-accent);
+  color: white;
+  border-radius: 6px;
+  font-size: .8rem;
+  font-weight: 600;
+  transition: background .15s;
+}
+.btn-select:hover { background: #1d4ed8; }
+
+/* ── Panel de gestión ───────────────────────────────────────── */
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-back {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem .9rem;
+  border-radius: 8px;
+  font-size: .85rem;
+  color: var(--ca-muted);
+  border: 1px solid var(--ca-border);
+  background: white;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.btn-back:hover { border-color: var(--ca-accent); color: var(--ca-accent); }
+
+.docente-info-header { display: flex; align-items: center; gap: 1rem; flex: 1; }
+
+.panel-title { font-size: 1.2rem; font-weight: 700; color: var(--ca-blue); margin: 0; }
+.panel-subtitle { font-size: .8rem; color: var(--ca-muted); margin: 3px 0 0; }
+
+.btn-guardar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem 1.4rem;
+  background: var(--ca-green);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: .9rem;
+  transition: background .15s, opacity .15s;
+  white-space: nowrap;
+}
+.btn-guardar:hover:not(:disabled)  { background: #15803d; }
+.btn-guardar:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ── Banner de resultado ────────────────────────────────────── */
+.result-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: .875rem;
+  padding: .875rem 1.125rem;
+  border-radius: var(--ca-radius);
+  margin-bottom: 1.25rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.result-detail { font-size: .85rem; margin-left: .5rem; opacity: .8; }
+.result-mail { display: block; font-size: .8rem; margin-top: 4px; opacity: .75; }
+
+/* ── Panel dual ─────────────────────────────────────────────── */
+.dual-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.panel-col {
+  background: white;
+  border: 1px solid var(--ca-border);
+  border-radius: var(--ca-radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+  max-height: 68vh;
+}
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  padding: .875rem 1rem;
+  background: var(--ca-bg);
+  border-bottom: 1px solid var(--ca-border);
+  position: sticky;
+  top: 0;
+}
+
+.col-header h3 {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--ca-blue);
+  margin: 0;
+  flex: 1;
+}
+
+.count-chip {
+  background: #dbeafe;
+  color: var(--ca-accent);
+  font-size: .72rem;
+  font-weight: 700;
+  padding: .15rem .55rem;
+  border-radius: 999px;
+}
+.count-chip.muted { background: #f1f5f9; color: var(--ca-muted); }
+
+/* ── Filtros ────────────────────────────────────────────────── */
+.filters-row {
+  display: flex;
+  gap: .5rem;
+  padding: .75rem;
+  background: var(--ca-bg);
+  border-bottom: 1px solid var(--ca-border);
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 120px;
+  padding: .45rem .65rem;
+  border: 1px solid var(--ca-border);
+  border-radius: 6px;
+  font-size: .8rem;
+  outline: none;
+  background: white;
+}
+
+.filter-search {
+  position: relative;
+  flex: 1;
+  min-width: 140px;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ca-muted);
+}
+
+.filter-input {
+  width: 100%;
+  padding: .45rem .65rem .45rem 1.9rem;
+  border: 1px solid var(--ca-border);
+  border-radius: 6px;
+  font-size: .8rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.btn-ghost-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: var(--ca-muted);
+  border: 1px solid var(--ca-border);
+  background: white;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.btn-ghost-sm:hover { color: var(--ca-red); border-color: var(--ca-red); }
+
+/* ── Listas de asignaturas ──────────────────────────────────── */
+.col-body { overflow-y: auto; flex: 1; }
+
+.asig-list { list-style: none; margin: 0; padding: 0; }
+
+.asig-item {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background .1s;
+}
+.asig-item:last-child { border-bottom: none; }
+.asig-item.current:hover  { background: #fff1f2; }
+.asig-item.catalog:hover  { background: #f0f9ff; }
+
+.asig-info { flex: 1; min-width: 0; }
+
+.asig-nombre {
+  display: block;
+  font-weight: 600;
+  font-size: .875rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.asig-meta {
+  display: block;
+  font-size: .75rem;
+  color: var(--ca-muted);
+  margin-top: 2px;
+}
+
+.asig-facultad {
+  display: block;
+  font-size: .7rem;
+  color: #94a3b8;
+  margin-top: 1px;
+}
+
+/* ── Botones de acción por ítem ─────────────────────────────── */
+.btn-revocar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--ca-red);
+  background: #fff1f2;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.btn-revocar:hover { background: var(--ca-red); color: white; }
+
+.btn-agregar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--ca-green);
+  background: #f0fdf4;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.btn-agregar:hover { background: var(--ca-green); color: white; }
+
+/* ── Empty state ────────────────────────────────────────────── */
+.empty-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--ca-muted);
+  gap: .5rem;
+  font-size: .875rem;
+}
+.empty-icon { opacity: .3; }
+.muted { color: var(--ca-muted); }
+
+/* ── Spinner ────────────────────────────────────────────────── */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  opacity: .7;
+}
+.spinner.sm { width: 14px; height: 14px; border-width: 2px; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.text-center { text-align: center; }
+.text-right  { text-align: right; }
+.btn-icon {
+  display: flex; align-items: center; padding: .25rem; border-radius: 4px;
+  color: currentColor; opacity: .6; transition: opacity .15s;
+}
+.btn-icon:hover { opacity: 1; }
+
+@media (max-width: 900px) {
+  .dual-panel { grid-template-columns: 1fr; }
+  .panel-col  { max-height: 50vh; }
+}
+
+@media (max-width: 600px) {
+  .panel-header { flex-direction: column; align-items: flex-start; }
+  .filters-row  { flex-direction: column; }
+  .filter-select, .filter-search { width: 100%; }
+}

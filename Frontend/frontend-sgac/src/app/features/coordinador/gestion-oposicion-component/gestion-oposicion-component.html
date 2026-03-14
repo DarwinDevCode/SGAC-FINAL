@@ -10,6 +10,14 @@
     <span>{{ toastMsg }}</span>
   </div>
 
+  <!-- ══ BOTÓN VOLVER ════════════════════════════════════════ -->
+  <div>
+    <button class="go-back-btn" (click)="volver()">
+      <lucide-icon name="arrow-left" size="15"></lucide-icon>
+      Volver a convocatorias
+    </button>
+  </div>
+
   <!-- ══ HEADER ═════════════════════════════════════════════ -->
   <div class="go-header">
     <div class="go-header-icon">
@@ -172,8 +180,8 @@
                 <lucide-icon name="lock" size="13"></lucide-icon>
               </button>
               <span *ngIf="t.estado==='FINALIZADA'" class="go-icon-green">
-                  <lucide-icon name="shield-check" size="16"></lucide-icon>
-                </span>
+                <lucide-icon name="shield-check" size="16"></lucide-icon>
+              </span>
             </div>
           </td>
         </tr>

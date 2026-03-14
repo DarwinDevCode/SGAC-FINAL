@@ -1,0 +1,101 @@
+<!-- ============================================================ -->
+<!-- SELECTOR DE CONVOCATORIA PARA OPOSICIÓN                    -->
+<!-- Punto de entrada del flujo: Gestionar Oposición → sidebar  -->
+<!-- ============================================================ -->
+<div class="so-wrapper">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
+  <div class="so-header">
+    <div class="so-icon-box">
+      <lucide-icon name="ScrollText" size="22"></lucide-icon>
+    </div>
+    <div>
+      <h1 class="so-title">Evaluación de Oposición</h1>
+      <p class="so-subtitle">
+        Selecciona una convocatoria para gestionar el banco de temas y el cronograma de exposiciones
+      </p>
+    </div>
+  </div>
+
+  <!-- ══ ESTADO: CARGANDO ════════════════════════════════════ -->
+  @if (loading) {
+    <div class="so-feedback">
+      <lucide-icon name="Loader" size="28" class="so-spin so-muted-icon"></lucide-icon>
+      <p class="so-feedback-text">Cargando convocatorias disponibles…</p>
+    </div>
+  }
+
+  <!-- ══ ESTADO: ERROR / VACÍO ═══════════════════════════════ -->
+  @else if (error) {
+    <div class="so-feedback">
+      <lucide-icon name="Inbox" size="42" class="so-muted-icon"></lucide-icon>
+      <p class="so-feedback-text">{{ error }}</p>
+      <button class="so-btn-reload" (click)="cargar()">
+        <lucide-icon name="RefreshCw" size="14"></lucide-icon>
+        Reintentar
+      </button>
+    </div>
+  }
+
+  <!-- ══ LISTADO DE TARJETAS ══════════════════════════════════ -->
+  @else {
+    <!-- Contador -->
+    <p class="so-count">
+      <lucide-icon name="ListFilter" size="14"></lucide-icon>
+      {{ convocatorias.length }} convocatoria{{ convocatorias.length !== 1 ? 's' : '' }} aptas para oposición
+    </p>
+
+    <div class="so-grid">
+      @for (conv of convocatorias; track conv.idConvocatoria) {
+        <button class="so-card" (click)="seleccionar(conv)" type="button">
+
+          <!-- Cabecera: avatar + nombre asignatura -->
+          <div class="so-card-top">
+            <div class="so-avatar">{{ iniciales(conv.nombreDocente) }}</div>
+            <div class="so-card-titles">
+              <h2 class="so-asignatura">{{ conv.nombreAsignatura }}</h2>
+              <p class="so-carrera">{{ conv.nombreCarrera }} · {{ conv.semestreAsignatura }}° semestre</p>
+            </div>
+
+            <!-- Flecha de acción -->
+            <lucide-icon name="ChevronRight" size="18" class="so-chevron"></lucide-icon>
+          </div>
+
+          <!-- ── Sección central: Badge de postulantes aptos ── -->
+          <div class="so-aptos-row">
+            <div class="so-aptos-badge">
+              <lucide-icon name="UserCheck" size="16"></lucide-icon>
+              <span class="so-aptos-num">{{ conv.totalPostulantesAptos }}</span>
+              <span class="so-aptos-lbl">postulante{{ conv.totalPostulantesAptos !== 1 ? 's' : '' }} apto{{ conv.totalPostulantesAptos !== 1 ? 's' : '' }}</span>
+            </div>
+
+            <!-- Estado del proceso -->
+            <span class="so-proceso-badge {{ estadoProceso(conv).cls }}">
+              <lucide-icon [name]="estadoProceso(conv).icon" size="12"></lucide-icon>
+              {{ estadoProceso(conv).label }}
+            </span>
+          </div>
+
+          <!-- ── Pie: docente, cupos, estado convocatoria ────── -->
+          <div class="so-card-footer">
+            <span class="so-footer-item">
+              <lucide-icon name="User" size="12"></lucide-icon>
+              {{ conv.nombreDocente }}
+            </span>
+            <span class="so-footer-sep">·</span>
+            <span class="so-footer-item">
+              <lucide-icon name="Users" size="12"></lucide-icon>
+              {{ conv.cuposDisponibles }} cupo{{ conv.cuposDisponibles !== 1 ? 's' : '' }}
+            </span>
+            <span class="so-footer-sep">·</span>
+            <span class="so-estado-pill so-estado-pill--{{ conv.estadoConvocatoria | lowercase }}">
+              {{ conv.estadoConvocatoria }}
+            </span>
+          </div>
+
+        </button>
+      }
+    </div>
+  }
+
+</div>

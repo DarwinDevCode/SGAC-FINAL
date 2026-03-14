@@ -13,7 +13,6 @@ import { ConvocatoriasComponent } from './features/postulante/convocatorias/conv
 import { EstadoPostulacionComponent } from './features/postulante/estado-postulacion/estado-postulacion.component';
 import { ResultadosComponent } from './features/postulante/resultados/resultados.component';
 import { MeritosComponent } from './features/postulante/meritos/meritos.component';
-import { OposicionComponent } from './features/postulante/oposicion/oposicion.component';
 import { NotificacionesComponent as PostulanteNotificaciones } from './features/postulante/notificaciones/notificaciones.component';
 
 // Decano
@@ -22,7 +21,6 @@ import { ConvocatoriasVistaComponent as DecanoConvocatorias } from './features/d
 import { PostulantesVistaComponent as DecanoPostulantes } from './features/decano/postulantes-vista/postulantes-vista.component';
 import { ComisionesDecanoComponent } from './features/decano/comisiones/comisiones.component';
 import { AuditoriaComponent as DecanoAuditoria } from './features/decano/auditoria/auditoria';
-// DecanoNotificaciones stub removido porque usaremos el global
 
 // Coordinador
 import { DashboardComponent as CoordinadorDashboard } from './features/coordinador/dashboard/dashboard.component';
@@ -33,32 +31,26 @@ import { SeguimientoComponent } from './features/coordinador/seguimiento/seguimi
 import { ResolucionesComponent } from './features/coordinador/resoluciones/resoluciones.component';
 import { EvaluacionesComponent } from './features/coordinador/evaluaciones/evaluaciones.component';
 import { ReportesComponent as CoordinadorReportes } from './features/coordinador/reportes/reportes';
+import { SelectorOposicionComponent } from './features/coordinador/selector-oposicion-component/selector-oposicion-component';
+import { GestionOposicionComponent }  from './features/coordinador/gestion-oposicion-component/gestion-oposicion-component';
 
 // Ayudante
 import { DashboardComponent as AyudanteDashboard } from './features/ayudante/dashboard/dashboard.component';
 import { ActividadesComponent as AyudanteActividades } from './features/ayudante/actividades/actividades.component';
 import { InformesComponent as AyudanteInformes } from './features/ayudante/informes/informes.component';
-import { AyudanteNotificacionesComponent } from './features/ayudante/notificaciones/notificaciones.component';
-
-
-
-
 import { SesionesComponent } from './features/ayudante/sesiones/sesiones';
+
+// General
 import { NotificacionesPageComponent } from './features/notificaciones/notificaciones-page.component';
 import { DocenteDashboardComponent } from './features/docente/dashboard/docente-dashboard.component';
 import { MisAyudantesComponent } from './features/docente/mis-ayudantes/mis-ayudantes.component';
-// Docente
 import { ActividadesAyudanteComponent } from './features/docente/actividades-ayudante/actividades-ayudante';
-import { CronogramaActivoComponent} from './features/General/cronograma-activo/cronograma-activo.component';
-import {ComisionSeleccion} from './features/postulante/comision-seleccion/comision-seleccion';
-import {GestionEvaluacionesComponent} from './features/General/gestion-evaluaciones/gestion-evaluaciones';
-import {MiOposicionEstudianteComponent} from './features/postulante/mi-oposicion-estudiante/mi-oposicion-estudiante';
-import {
-  SalaEvaluacionComponent
-} from './features/evaluacionOposicion/sala-evaluacion-component/sala-evaluacion-component';
-import {
-  GestionOposicionComponent
-} from './features/coordinador/gestion-oposicion-component/gestion-oposicion-component';
+import { CronogramaActivoComponent } from './features/General/cronograma-activo/cronograma-activo.component';
+import { ComisionSeleccion } from './features/postulante/comision-seleccion/comision-seleccion';
+import { GestionEvaluacionesComponent } from './features/General/gestion-evaluaciones/gestion-evaluaciones';
+import { MiOposicionEstudianteComponent } from './features/postulante/mi-oposicion-estudiante/mi-oposicion-estudiante';
+import { SalaEvaluacionComponent } from './features/evaluacionOposicion/sala-evaluacion-component/sala-evaluacion-component';
+import {CargaAcademicaComponent} from './features/admin/carga-academica/carga-academica';
 
 
 export const routes: Routes = [
@@ -68,66 +60,66 @@ export const routes: Routes = [
     path: '',
     component: MainLayoutComponent,
     children: [
-      // Global
-      { path: 'notificaciones', component: NotificacionesPageComponent },
-      { path: 'cronograma', component: CronogramaActivoComponent },
-      { path: 'comision', component: GestionEvaluacionesComponent},
-      { path: 'comision/sala',                    component: SalaEvaluacionComponent },
-      { path: 'comision/sala/:idConvocatoria',    component: SalaEvaluacionComponent },
 
+      // ── Global ─────────────────────────────────────────────
+      { path: 'notificaciones',                component: NotificacionesPageComponent },
+      { path: 'cronograma',                    component: CronogramaActivoComponent },
+      { path: 'comision',                      component: GestionEvaluacionesComponent },
+      { path: 'comision/sala',                 component: SalaEvaluacionComponent },
+      { path: 'comision/sala/:idConvocatoria', component: SalaEvaluacionComponent },
 
-
-      // Admin
-      { path: 'admin/consulta', component: AdminDashboard },
-      { path: 'admin/usuarios', component: GestionUsuarios },
+      // ── Admin ───────────────────────────────────────────────
+      { path: 'admin/consulta',      component: AdminDashboard },
+      { path: 'admin/usuarios',      component: GestionUsuarios },
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
-      { path: 'admin/rol-permiso', component: GestionPermisosComponent },
-      { path: 'admin/periodos', component: GestionPeriodosComponent },
+      { path: 'admin/carga-academica', component: CargaAcademicaComponent},
+      { path: 'admin/rol-permiso',   component: GestionPermisosComponent },
+      { path: 'admin/periodos',      component: GestionPeriodosComponent },
 
-      // Postulante / Estudiante (routes for ESTUDIANTE role sidebar)
-      { path: 'postulante/dashboard', component: PostulanteDashboard },
-      { path: 'postulante/convocatorias', component: ConvocatoriasComponent },
+      // ── Postulante / Estudiante ─────────────────────────────
+      { path: 'postulante/dashboard',         component: PostulanteDashboard },
+      { path: 'postulante/convocatorias',     component: ConvocatoriasComponent },
       { path: 'postulante/mis-postulaciones', component: EstadoPostulacionComponent },
-      { path: 'postulante/resultados', component: ResultadosComponent },
-      { path: 'postulante/meritos/:id', component: MeritosComponent },
-      //{ path: 'postulante/oposicion/:id', component: OposicionComponent },
-      { path: 'postulante/oposicion/:id', component: MiOposicionEstudianteComponent },
-      { path: 'postulante/comision', component: ComisionSeleccion },
+      { path: 'postulante/resultados',        component: ResultadosComponent },
+      { path: 'postulante/meritos/:id',       component: MeritosComponent },
+      { path: 'postulante/oposicion/:id',     component: MiOposicionEstudianteComponent },
+      { path: 'postulante/comision',          component: ComisionSeleccion },
 
-      // Decano
-      { path: 'decano/dashboard', component: DecanoDashboard },
-      { path: 'decano/convocatorias', component: DecanoConvocatorias },
+      // ── Decano ──────────────────────────────────────────────
+      { path: 'decano/dashboard',                   component: DecanoDashboard },
+      { path: 'decano/convocatorias',               component: DecanoConvocatorias },
       { path: 'decano/postulantes/:idConvocatoria', component: DecanoPostulantes },
-      { path: 'decano/comisiones', component: ComisionesDecanoComponent },
-      { path: 'decano/reportes', component: DecanoAuditoria },
+      { path: 'decano/comisiones',                  component: ComisionesDecanoComponent },
+      { path: 'decano/reportes',                    component: DecanoAuditoria },
 
-      // Coordinador
-      { path: 'coordinador/dashboard', component: CoordinadorDashboard },
-      { path: 'coordinador/convocatorias', component: CoordinadorConvocatoriasComponent },
+      // ── Coordinador ─────────────────────────────────────────
+      { path: 'coordinador/dashboard',                   component: CoordinadorDashboard },
+      { path: 'coordinador/convocatorias',               component: CoordinadorConvocatoriasComponent },
       { path: 'coordinador/postulantes/:idConvocatoria', component: CoordinadorPostulantes },
-      { path: 'coordinador/validaciones', component: ValidacionesComponent },
-      { path: 'coordinador/oposicion/:idConvocatoria', component: GestionOposicionComponent },
-      { path: 'coordinador/seguimiento', component: SeguimientoComponent },
-      { path: 'coordinador/resoluciones', component: ResolucionesComponent },
-      { path: 'coordinador/evaluaciones', component: EvaluacionesComponent },
-      { path: 'coordinador/reportes', component: CoordinadorReportes },
+      { path: 'coordinador/validaciones',                component: ValidacionesComponent },
+      { path: 'coordinador/oposicion',                   component: SelectorOposicionComponent },
+      { path: 'coordinador/oposicion/:idConvocatoria',   component: GestionOposicionComponent },
+      { path: 'coordinador/seguimiento',   component: SeguimientoComponent },
+      { path: 'coordinador/resoluciones',  component: ResolucionesComponent },
+      { path: 'coordinador/evaluaciones',  component: EvaluacionesComponent },
+      { path: 'coordinador/reportes',      component: CoordinadorReportes },
       { path: 'coordinador/notifications', component: PostulanteNotificaciones },
 
-      // Ayudante
-      { path: 'ayudante/dashboard', component: AyudanteDashboard },
+      // ── Ayudante ────────────────────────────────────────────
+      { path: 'ayudante/dashboard',   component: AyudanteDashboard },
       { path: 'ayudante/actividades', component: AyudanteActividades },
-      { path: 'ayudante/informes', component: AyudanteInformes },
-      { path: 'ayudante/sesiones', component: SesionesComponent },
+      { path: 'ayudante/informes',    component: AyudanteInformes },
+      { path: 'ayudante/sesiones',    component: SesionesComponent },
 
-      // Docente
-      { path: 'docente/dashboard', component: DocenteDashboardComponent },
-      { path: 'docente/mis-ayudantes', component: MisAyudantesComponent },
-      { path: 'docente/aprobar-informes', component: MisAyudantesComponent },
+      // ── Docente ─────────────────────────────────────────────
+      { path: 'docente/dashboard',                              component: DocenteDashboardComponent },
+      { path: 'docente/mis-ayudantes',                          component: MisAyudantesComponent },
+      { path: 'docente/aprobar-informes',                       component: MisAyudantesComponent },
       { path: 'docente/mis-ayudantes/:idAyudantia/actividades', component: ActividadesAyudanteComponent },
 
-      { path: '', redirectTo: 'login', pathMatch: 'full' }
-    ]
+      { path: '', redirectTo: 'login', pathMatch: 'full' },
+    ],
   },
 
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'login' },
 ];

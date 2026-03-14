@@ -3,6 +3,9 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V2__vistas.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V54__correcion_sp_registro_postulacion.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V59__filtrar_convocatorias.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V60__gestion_usuarios.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V61__gestion_academica.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V8__actualizacion_funcion_mostrar_permisos.sql" dialect="PostgreSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>

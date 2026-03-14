@@ -4,6 +4,7 @@ import { Observable, throwError }     from 'rxjs';
 import { catchError }                 from 'rxjs/operators';
 import { environment }                from '../../../../environments/environment';
 import {
+  ConvocatoriasAptasResponse,
   OposicionResponse,
   PuntajeJuradoPayload,
   SorteoPayload
@@ -76,5 +77,11 @@ export class EvaluacionOposicionService {
   private handleError(err: any): Observable<never> {
     const msg = err.error?.mensaje ?? err.error?.message ?? 'Error al comunicarse con el servidor.';
     return throwError(() => new Error(msg));
+  }
+
+  listarConvocatoriasAptas(): Observable<ConvocatoriasAptasResponse> {
+    return this.http
+      .get<ConvocatoriasAptasResponse>(`${this.API}/convocatorias-aptas`)
+      .pipe(catchError(this.handleError));
   }
 }

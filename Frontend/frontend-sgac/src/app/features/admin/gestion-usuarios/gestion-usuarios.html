@@ -1,12 +1,15 @@
 <div class="gestion-container">
+
+  <!-- ── Encabezado ──────────────────────────────────────────── -->
   <div class="section-header">
     <h2 class="title">Gestión de Usuarios</h2>
     <button type="button" class="btn-primary" (click)="abrirModalCrear()">
-      <lucide-icon name="Plus" size="18"></lucide-icon>
+      <lucide-icon name="UserPlus" size="18"></lucide-icon>
       Nuevo Usuario
     </button>
   </div>
 
+  <!-- ── Buscador ────────────────────────────────────────────── -->
   <div class="search-card">
     <div class="search-wrapper">
       <lucide-icon class="search-icon" name="Search" size="18"></lucide-icon>
@@ -14,25 +17,29 @@
         type="text"
         [(ngModel)]="busqueda"
         (ngModelChange)="filtrarUsuarios($event)"
-        placeholder="Buscar..."
+        placeholder="Buscar por nombre, cédula o usuario…"
         class="input-field search-input"
       />
     </div>
   </div>
 
+  <!-- ── Tabla ────────────────────────────────────────────────── -->
   <div class="table-card">
     <table class="data-table" role="table" aria-label="Lista de usuarios del sistema">
       <thead>
       <tr>
         <th>Usuario</th>
-        <th>Roles</th>
-        <th>Estado Global</th>
+        <th>Roles asignados</th>
+        <th>Estado</th>
         <th class="text-right">Acciones</th>
       </tr>
       </thead>
       <tbody>
         @if (loading) {
-          <tr><td colspan="4">Cargando datos...</td></tr>
+          <tr><td colspan="4" class="loading-cell">
+            <lucide-icon name="Loader2" size="20" class="spin"></lucide-icon>
+            Cargando datos…
+          </td></tr>
         } @else {
           @for (user of usuariosFiltrados; track user.idUsuario) {
             <tr>
@@ -40,7 +47,7 @@
                 <div class="user-info-cell">
                   <div class="full-name">{{ user.nombres }} {{ user.apellidos }}</div>
                   <div class="user-email">{{ user.correo }}</div>
-                  <div class="user-username">{{ '@' + user.nombreUsuario }}</div>
+                  <div class="user-username">&#64;{{ user.nombreUsuario }}</div>
                 </div>
               </td>
 
@@ -49,11 +56,12 @@
                   @for (rol of user.roles; track rol.idTipoRol) {
                     <button
                       type="button"
-                      (click)="toggleEstadoRol(user, rol)"
                       class="badge-rol"
                       [class.active]="rol.activo && user.activo"
                       [class.inactive]="!rol.activo && user.activo"
                       [class.disabled]="!user.activo"
+                      [title]="user.activo ? (rol.activo ? 'Clic para desactivar' : 'Clic para activar') : 'Usuario inactivo'"
+                      (click)="toggleEstadoRol(user, rol)"
                     >
                       {{ rol.nombreTipoRol }}
                     </button>
@@ -62,121 +70,183 @@
               </td>
 
               <td>
-                <span class="status-pill" [class.active]="user.activo" [class.inactive]="!user.activo">
+                <span class="status-pill"
+                      [class.active]="user.activo"
+                      [class.inactive]="!user.activo">
                   {{ user.activo ? 'Activo' : 'Inactivo' }}
                 </span>
               </td>
 
               <td class="text-right">
-                <button type="button" class="btn-icon" (click)="toggleEstado(user)" title="Cambiar estado global">
-                  <lucide-icon name="Power" size="18"></lucide-icon>
+                <button
+                  type="button"
+                  class="btn-icon"
+                  (click)="toggleEstado(user)"
+                  [title]="user.activo ? 'Desactivar usuario' : 'Activar usuario'"
+                >
+                  <lucide-icon [name]="user.activo ? 'Power' : 'PowerOff'" size="18"></lucide-icon>
                 </button>
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="4">No hay registros</td></tr>
+            <tr><td colspan="4" class="empty-cell">No hay usuarios que coincidan con la búsqueda.</td></tr>
           }
         }
       </tbody>
     </table>
   </div>
 
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!--  Modal de Registro                                        -->
+  <!-- ══════════════════════════════════════════════════════════ -->
   @if (mostrarModal) {
-    <div class="modal-backdrop">
-      <div class="modal-box">
+    <div class="modal-backdrop" (click)="cerrarModal()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+
+        <!-- Header del modal -->
         <div class="modal-header">
-          <h3>Registrar Nuevo Usuario</h3>
+          <div>
+            <h3 class="modal-title">Registrar Nuevo Usuario</h3>
+            <p class="modal-subtitle">
+              Las credenciales se generan automáticamente y se envían al correo.
+            </p>
+          </div>
           <button type="button" class="btn-icon" (click)="cerrarModal()">
-            <lucide-icon name="X" size="18"></lucide-icon>
+            <lucide-icon name="X" size="20"></lucide-icon>
           </button>
         </div>
 
+        <!-- ── Formulario ──────────────────────────────────── -->
         <form class="user-form" (submit)="guardarUsuario(); $event.preventDefault()">
-          <div class="form-group full-width">
-            <label>Tipo de Usuario</label>
-            <select [(ngModel)]="form.rolRegistro" name="rol" class="input-field highlight">
-              <option value="ESTUDIANTE">Estudiante</option>
-              <option value="DOCENTE">Docente</option>
-              <option value="COORDINADOR">Coordinador</option>
-              <option value="DECANO">Decano</option>
-              <option value="ADMINISTRADOR">Administrador</option>
-              <option value="AYUDANTE_CATEDRA">Ayudante Directo</option>
-            </select>
+
+          <!-- Sección: Datos personales -->
+          <div class="form-section-label full-width">
+            <lucide-icon name="User" size="14"></lucide-icon>
+            Datos personales
           </div>
 
           <div class="form-group">
-            <label>Cédula</label>
-            <input [(ngModel)]="form.cedula" name="cedula" required maxlength="10" class="input-field" />
+            <label for="f-cedula">Cédula *</label>
+            <input id="f-cedula" [(ngModel)]="form.cedula" name="cedula"
+                   required maxlength="10" pattern="\d{10}"
+                   placeholder="0000000000" class="input-field" />
           </div>
 
           <div class="form-group">
-            <label>Nombres</label>
-            <input [(ngModel)]="form.nombres" name="nombres" required class="input-field" />
+            <label for="f-nombres">Nombres *</label>
+            <input id="f-nombres" [(ngModel)]="form.nombres" name="nombres"
+                   required class="input-field" placeholder="Juan Carlos" />
           </div>
 
           <div class="form-group">
-            <label>Apellidos</label>
-            <input [(ngModel)]="form.apellidos" name="apellidos" required class="input-field" />
+            <label for="f-apellidos">Apellidos *</label>
+            <input id="f-apellidos" [(ngModel)]="form.apellidos" name="apellidos"
+                   required class="input-field" placeholder="Pérez López" />
           </div>
 
           <div class="form-group">
-            <label>Correo</label>
-            <input [(ngModel)]="form.correo" name="correo" type="email" required class="input-field" />
+            <label for="f-correo">Correo electrónico *</label>
+            <input id="f-correo" [(ngModel)]="form.correo" name="correo"
+                   type="email" required class="input-field"
+                   placeholder="usuario@uteq.edu.ec" />
           </div>
 
           <div class="form-group">
-            <label>Usuario</label>
-            <input [(ngModel)]="form.nombreUsuario" name="nombreUsuario" required class="input-field" />
+            <label for="f-username">Nombre de usuario *</label>
+            <input id="f-username" [(ngModel)]="form.username" name="username"
+                   required minlength="3" class="input-field"
+                   placeholder="jperez" />
+            <span class="field-hint">
+              <lucide-icon name="Info" size="12"></lucide-icon>
+              Se convertirá a minúsculas automáticamente.
+            </span>
           </div>
 
-          <div class="form-group">
-            <label>Contraseña</label>
-            <input [(ngModel)]="form.password" name="password" type="password" required class="input-field" />
+          <!-- Placeholder donde antes iba el campo contraseña -->
+          <div class="password-notice form-group">
+            <lucide-icon name="KeyRound" size="16"></lucide-icon>
+            <div>
+              <strong>Contraseña automática</strong>
+              <p>Se generará una clave de 12 caracteres y se enviará al correo ingresado.</p>
+            </div>
           </div>
 
-          @if (getEsEstudiante()) {
-            <div class="form-divider full-width">Datos Académicos</div>
+          <!-- Sección: Roles -->
+          <div class="form-section-label full-width">
+            <lucide-icon name="ShieldCheck" size="14"></lucide-icon>
+            Roles del sistema *
+          </div>
 
-            <div class="form-group">
-              <label>Carrera</label>
-              <select [(ngModel)]="form.idCarrera" name="idCarreraEstudiante" class="input-field">
-                <option [ngValue]="undefined">Seleccione carrera</option>
+          <div class="roles-grid full-width">
+            @if (rolesCheckbox.length === 0) {
+              <p class="roles-loading">
+                <lucide-icon name="Loader2" size="14" class="spin"></lucide-icon>
+                Cargando roles…
+              </p>
+            } @else {
+              @for (rol of rolesCheckbox; track rol.idTipoRol) {
+                <label class="rol-checkbox-label"
+                       [class.selected]="rol.seleccionado">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="rol.seleccionado"
+                    [name]="'rol_' + rol.idTipoRol"
+                    class="sr-only"
+                  />
+                  <span class="checkbox-custom">
+                    @if (rol.seleccionado) {
+                      <lucide-icon name="Check" size="12"></lucide-icon>
+                    }
+                  </span>
+                  {{ rol.nombreTipoRol | titlecase }}
+                </label>
+              }
+            }
+          </div>
+
+          <!-- ── Campos condicionales: ESTUDIANTE / COORDINADOR → Carrera ── -->
+          @if (necesitaCarrera) {
+            <div class="form-section-label full-width">
+              <lucide-icon name="BookOpen" size="14"></lucide-icon>
+              Datos académicos
+            </div>
+
+            <div class="form-group full-width">
+              <label for="f-carrera">Carrera *</label>
+              <select id="f-carrera" [(ngModel)]="form.idCarrera" name="idCarrera" class="input-field">
+                <option [ngValue]="undefined">— Seleccione una carrera —</option>
                 @for (c of listaCarreras; track c.idCarrera) {
                   <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option>
                 }
               </select>
             </div>
+          }
 
+          @if (necesitaEstudiante) {
             <div class="form-group">
-              <label>Matrícula</label>
-              <input [(ngModel)]="form.matricula" name="matricula" class="input-field" placeholder="Ej: 2024-A-001" />
+              <label for="f-matricula">Matrícula *</label>
+              <input id="f-matricula" [(ngModel)]="form.matricula" name="matricula"
+                     class="input-field" placeholder="2024-A-001" />
             </div>
 
             <div class="form-group">
-              <label>Semestre</label>
-              <input [(ngModel)]="form.semestre" name="semestre" type="number" min="1" max="10" class="input-field" />
+              <label for="f-semestre">Semestre *</label>
+              <input id="f-semestre" [(ngModel)]="form.semestre" name="semestre"
+                     type="number" min="1" max="10" class="input-field" />
             </div>
           }
 
-          @if (getEsCoordinador()) {
-            <div class="form-divider full-width">Asignación</div>
-            <div class="form-group full-width">
-              <label>Carrera a Coordinar</label>
-              <select [(ngModel)]="form.idCarrera" name="idCarreraCoordinador" class="input-field">
-                <option [ngValue]="undefined">Seleccione carrera</option>
-                @for (c of listaCarreras; track c.idCarrera) {
-                  <option [ngValue]="c.idCarrera">{{ c.nombreCarrera }}</option>
-                }
-              </select>
+          <!-- ── Campo condicional: DECANO → Facultad ─────────────── -->
+          @if (necesitaFacultad) {
+            <div class="form-section-label full-width">
+              <lucide-icon name="Building2" size="14"></lucide-icon>
+              Asignación institucional
             </div>
-          }
 
-          @if (getEsDecano()) {
-            <div class="form-divider full-width">Asignación</div>
             <div class="form-group full-width">
-              <label>Facultad</label>
-              <select [(ngModel)]="form.idFacultad" name="idFacultad" class="input-field">
-                <option [ngValue]="undefined">Seleccione facultad</option>
+              <label for="f-facultad">Facultad *</label>
+              <select id="f-facultad" [(ngModel)]="form.idFacultad" name="idFacultad" class="input-field">
+                <option [ngValue]="undefined">— Seleccione una facultad —</option>
                 @for (f of listaFacultades; track f.idFacultad) {
                   <option [ngValue]="f.idFacultad">{{ f.nombreFacultad }}</option>
                 }
@@ -184,20 +254,45 @@
             </div>
           }
 
-          @if (getEsAyudante()) {
-            <div class="form-divider full-width">Contrato</div>
+          <!-- ── Campo condicional: AYUDANTE_CATEDRA → Horas ──────── -->
+          @if (necesitaHoras) {
+            <div class="form-section-label full-width">
+              <lucide-icon name="Clock" size="14"></lucide-icon>
+              Contrato de ayudantía
+            </div>
+
             <div class="form-group">
-              <label>Horas Asignadas</label>
-              <input [(ngModel)]="form.horasAyudante" name="horasAyudante" type="number" min="0" class="input-field" />
+              <label for="f-horas">Horas asignadas *</label>
+              <input id="f-horas" [(ngModel)]="form.horasAyudante" name="horasAyudante"
+                     type="number" min="1" step="0.5" class="input-field"
+                     placeholder="20" />
             </div>
           }
 
+          <!-- ── Footer del formulario ──────────────────────────── -->
           <div class="form-footer full-width">
-            <button type="button" class="btn-ghost" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn-primary">Guardar Registro</button>
+            <span class="roles-badge-preview">
+              @if (rolesSeleccionados.length > 0) {
+                {{ rolesSeleccionados.length }} rol(es) seleccionado(s)
+              }
+            </span>
+            <button type="button" class="btn-ghost" (click)="cerrarModal()" [disabled]="guardando">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-primary" [disabled]="guardando">
+              @if (guardando) {
+                <lucide-icon name="Loader2" size="16" class="spin"></lucide-icon>
+                Registrando…
+              } @else {
+                <lucide-icon name="Send" size="16"></lucide-icon>
+                Registrar y enviar acceso
+              }
+            </button>
           </div>
+
         </form>
       </div>
     </div>
   }
+
 </div>

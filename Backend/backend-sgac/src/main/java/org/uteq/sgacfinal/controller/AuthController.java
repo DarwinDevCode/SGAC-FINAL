@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.LoginRequestDTO;
 import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.MensajeResponseDTO;
+import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
 import org.uteq.sgacfinal.security.JwtService;
 import org.uteq.sgacfinal.service.IAuthService;
@@ -23,56 +23,75 @@ public class AuthController {
     private final IUsuariosService usuarioService;
     private final JwtService jwtService;
 
-    private ResponseEntity<MensajeResponseDTO> exito(String mensaje) {
+    private ResponseEntity<MensajeResponseDTO> created(String mensaje) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new MensajeResponseDTO(mensaje, true));
     }
 
+    @PostMapping("/registro-global")
+    public ResponseEntity<MensajeResponseDTO> registroGlobal(
+            @Valid @RequestBody RegistroUsuarioGlobalRequest dto) {
+
+        usuarioService.registrarUsuarioGlobal(dto);
+        return created("Usuario registrado. Las credenciales han sido enviadas al correo: " + dto.getCorreo());
+    }
+
+    @GetMapping("/roles-activos")
+    public ResponseEntity<List<TipoRolResponseDTO>> getRolesActivos() {
+        return ResponseEntity.ok(usuarioService.listarRolesActivos());
+    }
+
     @PostMapping("/registro-estudiante")
-    public ResponseEntity<MensajeResponseDTO> regEstudiante(@Valid @RequestBody RegistroEstudianteRequestDTO dto) {
+    public ResponseEntity<MensajeResponseDTO> regEstudiante(
+            @Valid @RequestBody RegistroEstudianteRequestDTO dto) {
         usuarioService.registrarEstudiante(dto);
-        return exito("Estudiante registrado correctamente.");
+        return created("Estudiante registrado correctamente.");
     }
 
     @PostMapping("/registro-docente")
-    public ResponseEntity<MensajeResponseDTO> regDocente(@Valid @RequestBody RegistroDocenteRequestDTO dto) {
+    public ResponseEntity<MensajeResponseDTO> regDocente(
+            @Valid @RequestBody RegistroDocenteRequestDTO dto) {
         usuarioService.registrarDocente(dto);
-        return exito("Docente registrado correctamente.");
+        return created("Docente registrado correctamente.");
     }
 
     @PostMapping("/registro-decano")
-    public ResponseEntity<MensajeResponseDTO> regDecano(@Valid @RequestBody RegistroDecanoRequestDTO dto) {
+    public ResponseEntity<MensajeResponseDTO> regDecano(
+            @Valid @RequestBody RegistroDecanoRequestDTO dto) {
         usuarioService.registrarDecano(dto);
-        return exito("Decano registrado correctamente.");
+        return created("Decano registrado correctamente.");
     }
 
     @PostMapping("/registro-coordinador")
-    public ResponseEntity<MensajeResponseDTO> regCoordinador(@Valid @RequestBody RegistroCoordinadorRequestDTO dto) {
+    public ResponseEntity<MensajeResponseDTO> regCoordinador(
+            @Valid @RequestBody RegistroCoordinadorRequestDTO dto) {
         usuarioService.registrarCoordinador(dto);
-        return exito("Coordinador registrado correctamente.");
+        return created("Coordinador registrado correctamente.");
     }
 
     @PostMapping("/registro-admin")
-    public ResponseEntity<MensajeResponseDTO> regAdmin(@Valid @RequestBody RegistroAdministradorRequest dto) {
+    public ResponseEntity<MensajeResponseDTO> regAdmin(
+            @Valid @RequestBody RegistroAdministradorRequest dto) {
         usuarioService.registrarAdministrador(dto);
-        return exito("Administrador registrado correctamente.");
+        return created("Administrador registrado correctamente.");
     }
 
     @PostMapping("/registro-ayudante-directo")
-    public ResponseEntity<MensajeResponseDTO> regAyudante(@Valid @RequestBody RegistroAyudanteCatedraRequestDTO dto) {
+    public ResponseEntity<MensajeResponseDTO> regAyudante(
+            @Valid @RequestBody RegistroAyudanteCatedraRequestDTO dto) {
         usuarioService.registrarAyudanteDirecto(dto);
-        return exito("Ayudante directo creado correctamente.");
+        return created("Ayudante directo creado correctamente.");
     }
 
     @PostMapping("/promover-estudiante")
-    public ResponseEntity<MensajeResponseDTO> promover(@Valid @RequestBody PromoverEstudianteAyudanteRequest dto) {
+    public ResponseEntity<MensajeResponseDTO> promover(
+            @Valid @RequestBody PromoverEstudianteAyudanteRequest dto) {
         usuarioService.promoverEstudiante(dto);
-        return exito("Estudiante promovido a ayudante correctamente.");
+        return created("Estudiante promovido a ayudante correctamente.");
     }
 
     @PostMapping("/login")
     public ResponseEntity<UsuarioResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        // La función fn_login_sgac verifica las credenciales con pgcrypto crypt()
         UsuarioResponseDTO usuario = authService.loginUsuario(request);
         String token = jwtService.generateToken(usuario.getNombreUsuario(), usuario.getRolActual());
         usuario.setToken(token);
@@ -89,7 +108,6 @@ public class AuthController {
         usuarioService.cambiarEstadoGlobal(id);
         return ResponseEntity.noContent().build();
     }
-
 
     @PatchMapping("/{idUsuario}/roles/{idRol}/estado")
     public ResponseEntity<Void> cambiarEstadoRol(
