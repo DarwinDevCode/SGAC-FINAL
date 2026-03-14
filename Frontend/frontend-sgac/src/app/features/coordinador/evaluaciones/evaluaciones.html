@@ -407,13 +407,13 @@
                             <lucide-icon name="file-plus" size="14"></lucide-icon>
                             {{ actasMeritos ? 'Regenerar' : 'Generar' }} Acta
                         </button>
-                        @if (actasMeritos && !yaConfirme(actasMeritos)) {
+                        @if (actasMeritos && actasMeritos.estado !== 'CONFIRMADO') {
                         <button class="btn-primary" (click)="abrirModalFirma(actasMeritos)" [disabled]="confirmandoActa">
-                            <lucide-icon name="pen-tool" size="14"></lucide-icon> Firmar ({{ userRol }})
+                            <lucide-icon name="pen-tool" size="14"></lucide-icon> {{ yaConfirme(actasMeritos) ? 'Volver a Firmar' : 'Firmar' }} ({{ userRol }})
                         </button>
                         }
                         @if (actasMeritos?.urlDocumento) {
-                        <a class="btn-outline" [href]="actasMeritos.urlDocumento" target="_blank">
+                        <a class="btn-outline" [href]="actasMeritos.urlDocumento + '?t=' + pdfTimestamp" target="_blank">
                             <lucide-icon name="download" size="14"></lucide-icon> Ver PDF
                         </a>
                         }
@@ -450,14 +450,14 @@
                             <lucide-icon name="file-plus" size="14"></lucide-icon>
                             {{ actasOposicion ? 'Regenerar' : 'Generar' }} Acta
                         </button>
-                        @if (actasOposicion && !yaConfirme(actasOposicion)) {
+                        @if (actasOposicion && actasOposicion.estado !== 'CONFIRMADO') {
                         <button class="btn-primary" (click)="abrirModalFirma(actasOposicion)"
                             [disabled]="confirmandoActa">
-                            <lucide-icon name="pen-tool" size="14"></lucide-icon> Firmar ({{ userRol }})
+                            <lucide-icon name="pen-tool" size="14"></lucide-icon> {{ yaConfirme(actasOposicion) ? 'Volver a Firmar' : 'Firmar' }} ({{ userRol }})
                         </button>
                         }
                         @if (actasOposicion?.urlDocumento) {
-                        <a class="btn-outline" [href]="actasOposicion.urlDocumento" target="_blank">
+                        <a class="btn-outline" [href]="actasOposicion.urlDocumento + '?t=' + pdfTimestamp" target="_blank">
                             <lucide-icon name="download" size="14"></lucide-icon> Ver PDF
                         </a>
                         }

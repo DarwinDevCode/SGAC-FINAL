@@ -1,6 +1,7 @@
 package org.uteq.sgacfinal.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,7 +19,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CloudinaryUploadServiceImpl implements IUploadService {
 
-    private static final String UPLOAD_DIR = "uploads";
+    @Value("${app.file.upload-dir}")
+    private String baseUploadDir;
 
     @Override
     public Map<String, Object> upload(MultipartFile file) {
@@ -44,7 +46,7 @@ public class CloudinaryUploadServiceImpl implements IUploadService {
         String publicId = baseName + "-" + UUID.randomUUID() + ".pdf";
 
         try {
-            Path uploadPath = Paths.get(UPLOAD_DIR);
+            Path uploadPath = Paths.get(baseUploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }

@@ -15,12 +15,17 @@ import java.nio.file.Paths;
 @CrossOrigin(origins = {"http://localhost:5173", "http://localhost:4200"})
 public class FileController {
 
-    private final Path fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+    @org.springframework.beans.factory.annotation.Value("${app.file.upload-dir}")
+    private String baseUploadDir;
+
+    private Path getFileStorageLocation() {
+        return Paths.get(baseUploadDir).toAbsolutePath().normalize();
+    }
 
     @GetMapping("/{fileName:.+}")
     public ResponseEntity<Resource> downloadFile(@PathVariable String fileName) {
         try {
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            Path filePath = this.getFileStorageLocation().resolve(fileName).normalize();
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists()) {

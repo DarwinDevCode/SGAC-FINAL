@@ -23,6 +23,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
     private authService = inject(AuthService);
     private http = inject(HttpClient);
     private subs = new Subscription();
+    pdfTimestamp: number = Date.now();
 
     private readonly BASE = 'http://localhost:8080/api';
 
@@ -428,6 +429,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
                 next: () => {
                     this.generandoActa = false;
                     this.showSuccess(`Acta de ${tipo === 'MERITOS' ? 'Méritos' : 'Oposición'} generada.`);
+                    this.actualizarTimestampPdf();
                     this.cargarActas(this.postulanteActas!.idPostulacion);
                 },
                 error: (err) => { this.generandoActa = false; this.showError('Error: ' + (err.error || err.message)); }
@@ -493,6 +495,7 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
                     this.firmandoDocumento = false;
                     this.cerrarModalFirma();
                     this.showSuccess('Firma electrónica agregada exitosamente.');
+                    this.actualizarTimestampPdf();
                     this.cargarActas(this.postulanteActas!.idPostulacion);
                 },
                 error: (err) => { 
@@ -509,6 +512,16 @@ export class EvaluacionesComponent implements OnInit, OnDestroy {
         if (this.userRol === 'COORDINADOR') return acta.confirmadoCoordinador;
         if (this.userRol === 'DOCENTE') return acta.confirmadoDocente;
         return false;
+    }
+
+    actualizarTimestampPdf(): void {
+        setTimeout(() => {
+            this.pdfTimestamp = Date.now();
+        });
+    }
+
+    getTimestamp(): number {
+        return new Date().getTime();
     }
 
     // ─── Tabs ────────────────────────────────────────────────────────────────

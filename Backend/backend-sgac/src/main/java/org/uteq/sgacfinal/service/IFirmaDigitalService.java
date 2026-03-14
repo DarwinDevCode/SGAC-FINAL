@@ -10,5 +10,5 @@ public interface IFirmaDigitalService {
      * @param pdfBase64 El documento PDF a firmar, convertido a String en Base64.
      * @return Respuesta en JSON del servidor enviada por FirmaDigital.
      */
-    String firmarDocumentoApp(String pkcs12Base64, String password, String pdfBase64);
+    String firmarDocumentoApp(String pkcs12Base64, String password, String pdfBase64, String rolFirmante);
 }

@@ -39,6 +39,9 @@ public class ActaEvaluacionServiceImpl implements IActaEvaluacionService {
     @Value("${app.file.upload-dir}")
     private String baseUploadDir;
 
+    @Value("${firmadigital.mode:PROD}")
+    private String digitalMode;
+
     @Override
     public ActaEvaluacionResponseDTO generarActa(GenerarActaRequestDTO request) {
         Postulacion postulacion = postulacionRepo.findById(request.getIdPostulacion())
@@ -107,33 +110,59 @@ public class ActaEvaluacionServiceImpl implements IActaEvaluacionService {
                 .orElseThrow(() -> new RuntimeException("Acta no encontrada"));
 
         try {
-            // 2. Extraer el archivo PDF físico de nuestro disco (uploads directory)
+            // Obtener la ruta del archivo físico
             String fileUrl = acta.getUrlDocumento();
             String nombreArchivo = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
             Path filePath = Paths.get(baseUploadDir).resolve(nombreArchivo).normalize();
             
-            if (!Files.exists(filePath)) {
-                throw new RuntimeException("No se encontró el archivo físico original del acta para firmar");
+            // 2. Preparar el PDF base
+            byte[] pdfBytes;
+            if ("DEV".equalsIgnoreCase(digitalMode)) {
+                // En modo DEV, regeneramos un acta limpia para evitar "firmas encimadas"
+                if ("MERITOS".equalsIgnoreCase(acta.getTipoActa())) {
+                    pdfBytes = pdfService.generarActaMeritos(acta.getPostulacion());
+                } else {
+                    pdfBytes = pdfService.generarActaOposicion(acta.getPostulacion());
+                }
+                
+                // Convertir a Base64 para el flujo de firmas
+                String pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
+                
+                // Aplicar sellos de otros evaluadores que ya confirmaron
+                if (acta.getConfirmadoDecano() && !"DECANO".equalsIgnoreCase(rolFirmante)) {
+                    String res = firmaDigitalService.firmarDocumentoApp("SIMA", "123", pdfBase64, "DECANO");
+                    pdfBase64 = objectMapper.readTree(res).get("documento").asText();
+                }
+                if (acta.getConfirmadoCoordinador() && !"COORDINADOR".equalsIgnoreCase(rolFirmante)) {
+                    String res = firmaDigitalService.firmarDocumentoApp("SIMA", "123", pdfBase64, "COORDINADOR");
+                    pdfBase64 = objectMapper.readTree(res).get("documento").asText();
+                }
+                if (acta.getConfirmadoDocente() && !"DOCENTE".equalsIgnoreCase(rolFirmante)) {
+                    String res = firmaDigitalService.firmarDocumentoApp("SIMA", "123", pdfBase64, "DOCENTE");
+                    pdfBase64 = objectMapper.readTree(res).get("documento").asText();
+                }
+                
+                // Finalmente aplicar la firma actual
+                String p12Base64 = Base64.getEncoder().encodeToString(archivoFirma.getBytes());
+                String resFinal = firmaDigitalService.firmarDocumentoApp(p12Base64, password, pdfBase64, rolFirmante);
+                String pdfFirmadoBase64 = objectMapper.readTree(resFinal).get("documento").asText();
+                
+                byte[] pdFirmadoBytes = Base64.getDecoder().decode(pdfFirmadoBase64);
+                Files.write(filePath, pdFirmadoBytes);
+
+            } else {
+                // Modo Real: Leemos el archivo actual (que ya puede tener firmas reales PKCS7)
+                pdfBytes = Files.readAllBytes(filePath);
+                String pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
+                String p12Base64 = Base64.getEncoder().encodeToString(archivoFirma.getBytes());
+
+                // FirmaEC maneja el estibado (stacking) de firmas reales correctamente
+                String jsonRespuestaStr = firmaDigitalService.firmarDocumentoApp(p12Base64, password, pdfBase64, rolFirmante);
+                String pdfFirmadoBase64 = objectMapper.readTree(jsonRespuestaStr).get("documento").asText();
+
+                byte[] pdFirmadoBytes = Base64.getDecoder().decode(pdfFirmadoBase64);
+                Files.write(filePath, pdFirmadoBytes);
             }
-
-            // Convertir PDF local a Base64
-            byte[] pdfBytes = Files.readAllBytes(filePath);
-            String pdfBase64 = Base64.getEncoder().encodeToString(pdfBytes);
-
-            // Convertir el archivo .p12 (firma electrónica del docente) a Base64
-            String p12Base64 = Base64.getEncoder().encodeToString(archivoFirma.getBytes());
-
-            // 3. Enviar todo al WS del Gobierno (FirmaEC) para incrustar firma
-            String jsonRespuestaStr = firmaDigitalService.firmarDocumentoApp(p12Base64, password, pdfBase64);
-
-            // 4. Leer la respuesta e identificar el PDF firmado devuelto en formato Base64
-            // El API de FirmaEC responde un JSON con formato: {"documento": "base64str..."}
-            JsonNode respuestaJson = objectMapper.readTree(jsonRespuestaStr);
-            String pdfFirmadoBase64 = respuestaJson.get("documento").asText();
-
-            // 5. Sobrescribir el documento físico del acta con la nueva versión (que ya tiene la firma visible e interna)
-            byte[] pdFirmadoBytes = Base64.getDecoder().decode(pdfFirmadoBase64);
-            Files.write(filePath, pdFirmadoBytes);
 
             // 6. Actualizar el estado del Acta vía Repository/SP
             // El SP de confirmarActa marcará confirmacionDeRol = verdadero y 
