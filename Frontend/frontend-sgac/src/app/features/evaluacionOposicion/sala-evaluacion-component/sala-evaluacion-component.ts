@@ -83,7 +83,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
 
     this.autoSaveSub = this.notasChange$.pipe(
       debounceTime(2000),
-      distinctUntilChanged(),
+      //distinctUntilChanged(),
       filter(() => !this.formularioReadonly && !this.guardando)
     ).subscribe(() => this.ejecutarAutoGuardado());
 

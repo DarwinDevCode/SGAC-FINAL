@@ -40,12 +40,6 @@ public class EvaluacionMeritoOposicionController {
         }
     }
 
-    private Integer idUsuarioDeAuth(Authentication auth) {
-        if (auth != null && auth.getPrincipal() instanceof UsuarioPrincipal p)
-            return p.getIdUsuario();
-        return null;
-    }
-
     @PostMapping("/temas")
     public ResponseEntity<String> gestionarTemas(
             @Valid @RequestBody BancoTemasRequest request) {
@@ -110,8 +104,22 @@ public class EvaluacionMeritoOposicionController {
 
     @GetMapping("/mi-sala")
     public ResponseEntity<String> resolverMiSala(Authentication authentication) {
-        Integer id = idUsuarioDeAuth(authentication);
-        if (id == null) return ResponseEntity.status(401).build();
-        return json(service.resolverMiSala(id));
+        if (authentication == null ||
+                !(authentication.getPrincipal() instanceof UsuarioPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+        return json(service.resolverSalaUsuario(principal.getIdUsuario()));
     }
+
+    /*
+    @GetMapping("/mi-sala")
+    public ResponseEntity<String> resolverMiSala(Authentication authentication) {
+        Integer idUsuario = null;
+        if (authentication != null &&
+                authentication.getPrincipal() instanceof UsuarioPrincipal principal)
+            idUsuario = principal.getIdUsuario();
+        if (idUsuario == null) return ResponseEntity.status(401).build();
+        return json(service.resolverMiSala(idUsuario));
+    }
+     */
 }

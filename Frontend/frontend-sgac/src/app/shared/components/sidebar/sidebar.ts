@@ -32,10 +32,6 @@ export class SidebarComponent {
 
   userRole = computed(() => this.normalizeRole(this.authService.getUser()?.rolActual));
 
-  // exact: true  →  solo activo con coincidencia exacta de URL.
-  // Necesario en rutas padre que comparten prefijo con rutas hija:
-  //   /comision      (Tribunal)       → exact: true
-  //   /comision/sala (Sala de Eval.)  → exact: false (default)
   menus: Record<string, { label: string; icon: string; route: string; exact?: boolean }[]> = {
     ESTUDIANTE: [
       { label: 'Inicio',           icon: 'LayoutDashboard', route: '/postulante/dashboard' },
@@ -44,7 +40,7 @@ export class SidebarComponent {
       { label: 'Mis Postulaciones',icon: 'FolderOpen',      route: '/postulante/mis-postulaciones' },
       { label: 'Tribunal',         icon: 'Gavel',           route: '/postulante/comision' },
       { label: 'Mi Oposición',     icon: 'Mic',             route: '/postulante/mi-oposicion' },
-      { label: 'Ver Resultados',   icon: 'Award',           route: '/postulante/resultados' },
+      { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
       { label: 'Notificaciones',   icon: 'Bell',            route: '/notificaciones' },
     ],
     AYUDANTE_CATEDRA: [
@@ -59,6 +55,7 @@ export class SidebarComponent {
       { label: 'Cronograma',              icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Tribunal',                icon: 'Gavel',           route: '/comision',      exact: true },
       { label: 'Sala de Evaluación',      icon: 'MicVocal',        route: '/comision/sala' },
+      { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
       { label: 'Mis Ayudantes',           icon: 'Users',           route: '/docente/mis-ayudantes' },
       { label: 'Planificación Actividades',icon: 'CalendarClock',  route: '/docente/planificacion' },
       { label: 'Aprobar Informes',        icon: 'CheckSquare',     route: '/docente/aprobar-informes' },
@@ -68,11 +65,12 @@ export class SidebarComponent {
       { label: 'Inicio',                icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
       { label: 'Cronograma',            icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Gestionar Convocatorias',icon: 'FileText',       route: '/coordinador/convocatorias' },
+      { label: 'Validar Postulantes',   icon: 'CheckSquare',     route: '/coordinador/validaciones' },
       { label: 'Tribunal',              icon: 'Gavel',           route: '/comision',      exact: true },
       { label: 'Gestionar Oposición',   icon: 'ScrollText',      route: '/coordinador/oposicion' },
       { label: 'Sala de Evaluación',    icon: 'MicVocal',        route: '/comision/sala' },
-      { label: 'Validar Postulantes',   icon: 'CheckSquare',     route: '/coordinador/validaciones' },
-      { label: 'Seguimiento Mensual',   icon: 'BarChart3',       route: '/coordinador/seguimiento' },
+      { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
+      //{ label: 'Seguimiento Mensual',   icon: 'BarChart3',       route: '/coordinador/seguimiento' },
       { label: 'Resoluciones y Actas',  icon: 'FileSignature',   route: '/coordinador/resoluciones' },
       { label: 'Reportes y Consultas',  icon: 'ClipboardList',   route: '/coordinador/reportes' },
       { label: 'Notificaciones',        icon: 'Bell',            route: '/notificaciones' },
@@ -90,7 +88,9 @@ export class SidebarComponent {
       { label: 'Cronograma',          icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Tribunal',            icon: 'Gavel',           route: '/comision',      exact: true },
       { label: 'Sala de Evaluación',  icon: 'MicVocal',        route: '/comision/sala' },
-      { label: 'Designar Comisiones', icon: 'Users',           route: '/decano/comisiones' },
+      { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
+      //{ label: 'Validar Postulantes',   icon: 'CheckSquare',     route: '/coordinador/validaciones' },
+      //{ label: 'Designar Comisiones', icon: 'Users',           route: '/decano/comisiones' },
       { label: 'Auditoría y Reportes',icon: 'BarChart3',        route: '/decano/reportes' },
       { label: 'Notificaciones',      icon: 'Bell',            route: '/notificaciones' },
     ],

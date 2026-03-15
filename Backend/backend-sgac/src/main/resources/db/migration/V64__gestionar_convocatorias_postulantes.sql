@@ -1,21 +1,3 @@
--- V64__fn_resolver_sala.sql
--- ─────────────────────────────────────────────────────────────────────
--- fn_resolver_sala_usuario(p_id_usuario)
---
--- Resuelve automáticamente qué convocatoria debe ver un usuario cuando
--- llega a la Sala de Evaluación SIN idConvocatoria en la URL.
---
--- Lógica de prioridad:
---   1. Convocatoria donde el usuario es miembro de comisión Y tiene
---      alguna evaluación EN_CURSO (prioridad máxima — sala activa ahora)
---   2. Convocatoria donde el usuario es miembro de comisión Y tiene
---      alguna evaluación PROGRAMADA (sala que está a punto de usarse)
---   3. Primera convocatoria donde el usuario es miembro de comisión
---      (cualquier estado — al menos puede ver el cronograma)
---
--- Devuelve:
---   { exito, idConvocatoria, nombreAsignatura, nombreCarrera, rolIntegrante }
--- ─────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE FUNCTION postulacion.fn_resolver_sala_usuario(
     p_id_usuario INTEGER
 )

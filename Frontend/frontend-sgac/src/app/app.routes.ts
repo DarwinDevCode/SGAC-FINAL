@@ -52,6 +52,7 @@ import { MiOposicionEstudianteComponent } from './features/postulante/mi-oposici
 import { SalaEvaluacionComponent } from './features/evaluacionOposicion/sala-evaluacion-component/sala-evaluacion-component';
 import {CargaAcademicaComponent} from './features/admin/carga-academica/carga-academica';
 import { salaEvaluacionGuard } from './features/evaluacionOposicion/sala-evaluacion-guard-guard';
+import {RankingResultadosComponent} from './features/General/ranking-resultados-component/ranking-resultados-component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -67,7 +68,7 @@ export const routes: Routes = [
       { path: 'comision',                      component: GestionEvaluacionesComponent },
       { path: 'comision/sala', component: SalaEvaluacionComponent, canDeactivate: [salaEvaluacionGuard] },
       { path: 'comision/sala/:idConvocatoria', component: SalaEvaluacionComponent, canDeactivate: [salaEvaluacionGuard] },
-
+      { path: 'resultados-evaluacion', component: RankingResultadosComponent},
 
       // ── Admin ───────────────────────────────────────────────
       { path: 'admin/consulta',      component: AdminDashboard },
@@ -81,7 +82,7 @@ export const routes: Routes = [
       { path: 'postulante/dashboard',         component: PostulanteDashboard },
       { path: 'postulante/convocatorias',     component: ConvocatoriasComponent },
       { path: 'postulante/mis-postulaciones', component: EstadoPostulacionComponent },
-      { path: 'postulante/resultados',        component: ResultadosComponent },
+      //{ path: 'postulante/resultados',        component: ResultadosComponent },
       { path: 'postulante/meritos/:id',       component: MeritosComponent },
       { path: 'postulante/oposicion/:id',     component: MiOposicionEstudianteComponent },
       { path: 'postulante/comision',          component: ComisionSeleccion },
