@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.InformeMensualRequest;
@@ -19,14 +19,18 @@ import org.uteq.sgacfinal.service.SesionService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
-@Slf4j
+@Transactional(readOnly = true)
 public class InformeMensualServiceImpl implements InformeMensualService {
+
+    private static final Logger log = LoggerFactory.getLogger(InformeMensualServiceImpl.class);
+
 
     private final InformeMensualRepository informeRepository;
     private final TipoEstadoInformeRepository estadoInformeRepository;
@@ -35,6 +39,23 @@ public class InformeMensualServiceImpl implements InformeMensualService {
     private final AiReportService aiReportService;
     private final INotificacionService notificacionService;
     private final ObjectMapper objectMapper;
+
+    public InformeMensualServiceImpl(
+            InformeMensualRepository informeRepository,
+            TipoEstadoInformeRepository estadoInformeRepository,
+            AyudantiaRepository ayudantiaRepository,
+            SesionService sesionService,
+            AiReportService aiReportService,
+            INotificacionService notificacionService,
+            ObjectMapper objectMapper) {
+        this.informeRepository = informeRepository;
+        this.estadoInformeRepository = estadoInformeRepository;
+        this.ayudantiaRepository = ayudantiaRepository;
+        this.sesionService = sesionService;
+        this.aiReportService = aiReportService;
+        this.notificacionService = notificacionService;
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     @Transactional
@@ -62,14 +83,14 @@ public class InformeMensualServiceImpl implements InformeMensualService {
         }
 
         try {
-            String payloadJson = objectMapper.writeValueAsString(sesiones.stream().map(s -> 
-                new Object() {
-                    public final String fecha = s.getFecha() != null ? s.getFecha().toString() : "";
-                    public final String temaTratado = s.getTemaTratado();
-                    public final String descripcion = s.getDescripcion();
-                    public final Number horasObtenidas = s.getHorasDedicadas();
-                }
-            ).collect(Collectors.toList()));
+            String payloadJson = objectMapper.writeValueAsString(sesiones.stream().map(s -> {
+                Map<String, Object> map = new HashMap<>();
+                map.put("fecha", s.getFecha() != null ? s.getFecha().toString() : "");
+                map.put("temaTratado", s.getTemaTratado());
+                map.put("descripcion", s.getDescripcion());
+                map.put("horasObtenidas", s.getHorasDedicadas());
+                return map;
+            }).collect(Collectors.toList()));
 
             String borradorGenerado = aiReportService.generateBorradorInforme(payloadJson);
 
@@ -101,8 +122,8 @@ public class InformeMensualServiceImpl implements InformeMensualService {
 
             return mapToDto(informe);
         } catch (Exception e) {
-            log.error("Error al generar JSON de sesiones", e);
-            throw new RuntimeException("Error al procesar la información de las sesiones.");
+            log.error("Error crítico al generar borrador de informe: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al procesar la información de las sesiones: " + e.getMessage());
         }
     }
 

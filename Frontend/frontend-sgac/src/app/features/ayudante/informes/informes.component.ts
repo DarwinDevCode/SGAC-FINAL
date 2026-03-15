@@ -25,6 +25,7 @@ export class InformesComponent implements OnInit {
   error = '';
   success = '';
   idUsuario: number | null = null;
+  editModes: { [key: number]: boolean } = {}; // Track edit mode per informe
 
   ngOnInit(): void {
     const user = this.authService.getUser();
@@ -73,9 +74,18 @@ export class InformesComponent implements OnInit {
     ).subscribe({
       next: () => {
         this.success = 'Informe enviado a revisión con éxito.';
+        this.editModes[informe.idInformeMensual] = false;
         this.cargarInformes();
       },
       error: (err) => this.error = err.error?.message || 'Error al enviar a revisión.'
     });
+  }
+ 
+  toggleEdit(id: number) {
+    this.editModes[id] = !this.editModes[id];
+  }
+ 
+  isEditing(id: number): boolean {
+    return !!this.editModes[id];
   }
 }

@@ -85,7 +85,13 @@ export class SesionesComponent implements OnInit {
       next: (tipos) => {
         this.tiposEvidencia = tipos ?? [];
         this.tiposEvidenciaByExt = new Map(
-          this.tiposEvidencia.map((t) => [String(t.extensionPermitida || '').toLowerCase(), t])
+          this.tiposEvidencia.map((t) => {
+            let ext = String(t.extensionPermitida || '').toLowerCase();
+            if (ext.startsWith('.')) {
+              ext = ext.substring(1);
+            }
+            return [ext, t];
+          })
         );
       },
       error: () => {
@@ -366,9 +372,10 @@ export class SesionesComponent implements OnInit {
       idAyudantia: 0,
       descripcionActividad: this.form.controls.descripcionActividad.value,
       temaTratado: this.form.controls.temaTratado.value,
-      fecha: this.form.controls.fecha.value,
-      numeroAsistentes: this.form.controls.numeroAsistentes.value,
-      horasDedicadas: this.form.controls.horasDedicadas.value,
+      // Aseguramos formato YYYY-MM-DD si es un Date
+      fecha: this.formatDate(this.form.controls.fecha.value),
+      numeroAsistentes: Number(this.form.controls.numeroAsistentes.value || 0),
+      horasDedicadas: Number(this.form.controls.horasDedicadas.value || 0),
       evidencias,
     };
 
@@ -394,7 +401,19 @@ export class SesionesComponent implements OnInit {
           this.cargarSesiones();
         },
         error: (err) => {
-          this.formError = err?.error?.message || err?.message || 'No se pudo registrar la sesión. Intenta nuevamente.';
+          console.error('[SUBMIT-ERROR]', err);
+          
+          if (err?.error?.errors) {
+            // Manejo de errores de validación (Hibernate Validator)
+            const validationErrors = Object.values(err.error.errors).join('. ');
+            this.formError = `Error de validación: ${validationErrors}`;
+          } else if (err?.error) {
+            // Si hay un error estructurado pero no es de validación (ej: BadRequestException)
+            this.formError = err.error.message || JSON.stringify(err.error);
+          } else {
+            this.formError = err?.message || 'No se pudo registrar la sesión. Intenta nuevamente.';
+          }
+
           // Emitimos alerta en pantalla (AlertService fallback básico)
           if (this.formError.includes('20 horas') || this.formError.toLowerCase().includes('evidencia')) {
             alert(this.formError);
@@ -408,15 +427,25 @@ export class SesionesComponent implements OnInit {
     if (!u) return u;
 
     // Cloudinary: los PDFs suelen servirse correctamente como raw/upload.
-    // Si vienen como image/upload (por resource_type auto), el visor puede fallar.
     const isCloudinary = u.includes('res.cloudinary.com/');
     const isPdf = u.toLowerCase().includes('.pdf');
 
     if (isCloudinary && isPdf) {
       return u.replace('/image/upload/', '/raw/upload/');
     }
-
     return u;
+  }
+
+  private formatDate(date: any): string {
+    if (!date) return '';
+    if (typeof date === 'string') return date.split('T')[0]; // yyyy-MM-dd
+    if (date instanceof Date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+    return String(date);
   }
 
   abrirEvidencia(ev: EvidenciaResponseDTO): void {
