@@ -23,4 +23,6 @@ public class PuntajeJuradoRequest {
     private BigDecimal puntajeRespuestas;
 
     private boolean finalizar = false;
+
+    private Integer idConvocatoria;
 }

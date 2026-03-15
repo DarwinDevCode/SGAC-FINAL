@@ -1,3 +1,5 @@
+// src/app/core/models/evaluaciones/EvaluacionOposicion.ts
+
 export interface TurnoOposicion {
   idEvaluacionOposicion: number;
   orden:                 number;
@@ -15,6 +17,16 @@ export interface TurnoOposicion {
   nombreEstado:          string;
   puntajeFinal?:         number;
   jurados:               PuntajeJurado[];
+
+  /**
+   * ISO-8601 UTC del instante en que el servidor registró hora_inicio_real.
+   * Presente solo cuando estado === 'EN_CURSO'.
+   * Se usa en la lógica del timer para resistir el efecto F5:
+   *
+   *   segsTranscurridos = Math.floor((Date.now() - new Date(serverTimestamp)) / 1000)
+   *   timerSegundos     = Math.min(segsTranscurridos, BLOQUE_TOTAL_SEG)
+   */
+  serverTimestamp?:      string;
 }
 
 export interface PuntajeJurado {
@@ -61,6 +73,8 @@ export interface PuntajeJuradoPayload {
   puntajeExposicion:     number;
   puntajeRespuestas:     number;
   finalizar:             boolean;
+  /** Opcional: para activar el broadcast WS desde el backend */
+  idConvocatoria?:       number;
 }
 
 export interface SorteoPayload {

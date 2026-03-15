@@ -18,5 +18,5 @@ public interface IEvaluacionOposicionService {
     JsonNode consultarCronograma(Integer idConvocatoria);
     JsonNode obtenerMiTurno(Integer idConvocatoria, Integer idUsuario);
     StandardResponseDTO<List<ConvocatoriaOposicionDTO>> listarConvocatoriasParaOposicion();
-
+    JsonNode resolverSalaUsuario(Integer idUsuario);
 }

@@ -1,3 +1,4 @@
+// src/app/core/services/evaluaciones/evaluacion-oposicion-service.ts
 import { Injectable, inject }         from '@angular/core';
 import { HttpClient }                 from '@angular/common/http';
 import { Observable, throwError }     from 'rxjs';
@@ -9,12 +10,20 @@ import {
   PuntajeJuradoPayload,
   SorteoPayload
 } from '../../models/evaluaciones/EvaluacionOposicion';
+import {AuthService} from '../auth-service';
+
+/** Payload extendido que incluye idConvocatoria para el broadcast WS del backend */
+export interface RegistrarPuntajePayload extends PuntajeJuradoPayload {
+  idConvocatoria?: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class EvaluacionOposicionService {
   private http = inject(HttpClient);
   private readonly base = (environment as any).apiUrl ?? 'http://localhost:8080/api';
   private readonly API  = `${this.base}/oposicion`;
+  private authService = inject(AuthService);
+
 
   listarTemas(idConvocatoria: number): Observable<OposicionResponse> {
     return this.http.post<OposicionResponse>(`${this.API}/temas`,
@@ -22,8 +31,7 @@ export class EvaluacionOposicionService {
     ).pipe(catchError(this.handleError));
   }
 
-  registrarTemas(idConvocatoria: number,
-                 temas: { descripcionTema: string }[]): Observable<OposicionResponse> {
+  registrarTemas(idConvocatoria: number, temas: { descripcionTema: string }[]): Observable<OposicionResponse> {
     return this.http.post<OposicionResponse>(`${this.API}/temas`,
       { idConvocatoria, accion: 'REGISTRAR', temas }
     ).pipe(catchError(this.handleError));
@@ -50,27 +58,33 @@ export class EvaluacionOposicionService {
       .pipe(catchError(this.handleError));
   }
 
-  iniciarEvaluacion(idEvaluacionOposicion: number): Observable<OposicionResponse> {
+  iniciarEvaluacion(idEvaluacionOposicion: number, idConvocatoria?: number): Observable<OposicionResponse> {
     return this.http.patch<OposicionResponse>(`${this.API}/estado`,
-      { idEvaluacionOposicion, accion: 'INICIAR' }
+      { idEvaluacionOposicion, accion: 'INICIAR', idConvocatoria }
     ).pipe(catchError(this.handleError));
   }
 
-  marcarNoPresento(idEvaluacionOposicion: number): Observable<OposicionResponse> {
+  marcarNoPresento(idEvaluacionOposicion: number, idConvocatoria?: number): Observable<OposicionResponse> {
     return this.http.patch<OposicionResponse>(`${this.API}/estado`,
-      { idEvaluacionOposicion, accion: 'NO_PRESENTO' }
+      { idEvaluacionOposicion, accion: 'NO_PRESENTO', idConvocatoria }
     ).pipe(catchError(this.handleError));
   }
 
-  finalizarEvaluacion(idEvaluacionOposicion: number): Observable<OposicionResponse> {
+  finalizarEvaluacion(idEvaluacionOposicion: number, idConvocatoria?: number): Observable<OposicionResponse> {
     return this.http.patch<OposicionResponse>(`${this.API}/estado`,
-      { idEvaluacionOposicion, accion: 'FINALIZAR' }
+      { idEvaluacionOposicion, accion: 'FINALIZAR', idConvocatoria }
     ).pipe(catchError(this.handleError));
   }
 
-  registrarPuntaje(payload: PuntajeJuradoPayload): Observable<OposicionResponse> {
-    const { idUsuario, ...rest } = payload as any;   // omitir idUsuario del body
-    return this.http.post<OposicionResponse>(`${this.API}/puntaje`, rest)
+  registrarPuntaje(payload: RegistrarPuntajePayload): Observable<OposicionResponse> {
+    const idUsuario = this.authService.getUser()?.idUsuario;
+    const body = { ...payload, idUsuario: idUsuario };
+    return this.http.post<OposicionResponse>(`${this.API}/puntaje`, body)
+      .pipe(catchError(this.handleError));
+  }
+
+  listarConvocatoriasAptas(): Observable<ConvocatoriasAptasResponse> {
+    return this.http.get<ConvocatoriasAptasResponse>(`${this.API}/convocatorias-aptas`)
       .pipe(catchError(this.handleError));
   }
 
@@ -79,9 +93,9 @@ export class EvaluacionOposicionService {
     return throwError(() => new Error(msg));
   }
 
-  listarConvocatoriasAptas(): Observable<ConvocatoriasAptasResponse> {
+  resolverMiSala(): Observable<{ exito: boolean; idConvocatoria?: number; nombreAsignatura?: string; nombreCarrera?: string; rolIntegrante?: string; mensaje?: string; prioridad?: number }> {
     return this.http
-      .get<ConvocatoriasAptasResponse>(`${this.API}/convocatorias-aptas`)
+      .get<any>(`${this.API}/mi-sala`)
       .pipe(catchError(this.handleError));
   }
 }

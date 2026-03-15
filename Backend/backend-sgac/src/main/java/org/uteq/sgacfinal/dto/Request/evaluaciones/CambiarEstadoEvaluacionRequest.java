@@ -11,4 +11,6 @@ public class CambiarEstadoEvaluacionRequest {
 
     @NotNull(message = "La acción es requerida")
     private String accion;
+
+    private Integer idConvocatoria;
 }

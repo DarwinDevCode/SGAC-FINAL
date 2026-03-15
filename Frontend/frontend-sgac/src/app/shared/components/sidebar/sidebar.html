@@ -12,7 +12,11 @@
         {{ userRole().replace('_', ' ') }}
       </div>
 
-      <a *ngFor="let item of currentMenu()" [routerLink]="item.route" routerLinkActive="active-link" class="nav-item">
+      <a *ngFor="let item of currentMenu()"
+         [routerLink]="item.route"
+         routerLinkActive="active-link"
+         [routerLinkActiveOptions]="item.exact ? { exact: true } : { exact: false }"
+         class="nav-item">
         <lucide-icon [name]="item.icon" class="nav-icon"></lucide-icon>
         <div class="nav-label-wrapper">
           <span class="nav-label">{{ item.label }}</span>

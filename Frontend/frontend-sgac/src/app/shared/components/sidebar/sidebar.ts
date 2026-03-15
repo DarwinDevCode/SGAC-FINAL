@@ -14,15 +14,13 @@ import { NotificationWSService } from '../../../core/services/notification-ws-se
   styleUrl: './sidebar.css'
 })
 export class SidebarComponent {
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  private authService    = inject(AuthService);
+  private router         = inject(Router);
   private notificationWS = inject(NotificationWSService);
-  public postulanteService = inject(PostulanteService);
-  //userRole = computed(() => this.authService.getUser()?.rolActual || 'ESTUDIANTE');
+  public  postulanteService = inject(PostulanteService);
 
   private normalizeRole(rawRole?: string | null): string {
     if (!rawRole) return 'ESTUDIANTE';
-
     return rawRole
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
@@ -34,74 +32,77 @@ export class SidebarComponent {
 
   userRole = computed(() => this.normalizeRole(this.authService.getUser()?.rolActual));
 
-
-  menus: Record<string, any[]> = {
+  // exact: true  →  solo activo con coincidencia exacta de URL.
+  // Necesario en rutas padre que comparten prefijo con rutas hija:
+  //   /comision      (Tribunal)       → exact: true
+  //   /comision/sala (Sala de Eval.)  → exact: false (default)
+  menus: Record<string, { label: string; icon: string; route: string; exact?: boolean }[]> = {
     ESTUDIANTE: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/postulante/dashboard' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Convocatorias', icon: 'FileText', route: '/postulante/convocatorias' },
-      { label: 'Mis Postulaciones', icon: 'FolderOpen', route: '/postulante/mis-postulaciones' },
-      { label: 'Tribunal', icon: 'Gavel', route: '/postulante/comision' },
-      { label: 'Mi Oposición', icon: 'Mic', route: '/postulante/mi-oposicion' },
-      { label: 'Ver Resultados', icon: 'Award', route: '/postulante/resultados' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',           icon: 'LayoutDashboard', route: '/postulante/dashboard' },
+      { label: 'Cronograma',       icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Convocatorias',    icon: 'FileText',        route: '/postulante/convocatorias' },
+      { label: 'Mis Postulaciones',icon: 'FolderOpen',      route: '/postulante/mis-postulaciones' },
+      { label: 'Tribunal',         icon: 'Gavel',           route: '/postulante/comision' },
+      { label: 'Mi Oposición',     icon: 'Mic',             route: '/postulante/mi-oposicion' },
+      { label: 'Ver Resultados',   icon: 'Award',           route: '/postulante/resultados' },
+      { label: 'Notificaciones',   icon: 'Bell',            route: '/notificaciones' },
     ],
     AYUDANTE_CATEDRA: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Mis sesiones', icon: 'CalendarClock', route: '/ayudante/sesiones' },
-      { label: 'Mis Informes', icon: 'FileText', route: '/ayudante/informes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',        icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
+      { label: 'Cronograma',    icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Mis sesiones',  icon: 'CalendarClock',   route: '/ayudante/sesiones' },
+      { label: 'Mis Informes',  icon: 'FileText',        route: '/ayudante/informes' },
+      { label: 'Notificaciones',icon: 'Bell',            route: '/notificaciones' },
     ],
     DOCENTE: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/docente/dashboard' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Tribunal', icon: 'Gavel', route: '/comision' },
-      { label: 'Sala de Evaluación', icon: 'MicVocal', route: '/comision/sala' },
-      { label: 'Mis Ayudantes', icon: 'Users', route: '/docente/mis-ayudantes' },
-      { label: 'Planificación Actividades', icon: 'CalendarClock', route: '/docente/planificacion' },
-      { label: 'Aprobar Informes', icon: 'CheckSquare', route: '/docente/aprobar-informes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',                  icon: 'LayoutDashboard', route: '/docente/dashboard' },
+      { label: 'Cronograma',              icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Tribunal',                icon: 'Gavel',           route: '/comision',      exact: true },
+      { label: 'Sala de Evaluación',      icon: 'MicVocal',        route: '/comision/sala' },
+      { label: 'Mis Ayudantes',           icon: 'Users',           route: '/docente/mis-ayudantes' },
+      { label: 'Planificación Actividades',icon: 'CalendarClock',  route: '/docente/planificacion' },
+      { label: 'Aprobar Informes',        icon: 'CheckSquare',     route: '/docente/aprobar-informes' },
+      { label: 'Notificaciones',          icon: 'Bell',            route: '/notificaciones' },
     ],
     COORDINADOR: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Gestionar Convocatorias', icon: 'FileText', route: '/coordinador/convocatorias' },
-      { label: 'Tribunal', icon: 'Gavel', route: '/comision' },
-      { label: 'Gestionar Oposición', icon: 'ScrollText', route: '/coordinador/oposicion' },
-      { label: 'Sala de Evaluación', icon: 'MicVocal', route: '/comision/sala' },
-      { label: 'Validar Postulantes', icon: 'CheckSquare', route: '/coordinador/validaciones' },
-      { label: 'Seguimiento Mensual', icon: 'BarChart3', route: '/coordinador/seguimiento' },
-      { label: 'Resoluciones y Actas', icon: 'FileSignature', route: '/coordinador/resoluciones' },
-      { label: 'Reportes y Consultas', icon: 'ClipboardList', route: '/coordinador/reportes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',                icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
+      { label: 'Cronograma',            icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Gestionar Convocatorias',icon: 'FileText',       route: '/coordinador/convocatorias' },
+      { label: 'Tribunal',              icon: 'Gavel',           route: '/comision',      exact: true },
+      { label: 'Gestionar Oposición',   icon: 'ScrollText',      route: '/coordinador/oposicion' },
+      { label: 'Sala de Evaluación',    icon: 'MicVocal',        route: '/comision/sala' },
+      { label: 'Validar Postulantes',   icon: 'CheckSquare',     route: '/coordinador/validaciones' },
+      { label: 'Seguimiento Mensual',   icon: 'BarChart3',       route: '/coordinador/seguimiento' },
+      { label: 'Resoluciones y Actas',  icon: 'FileSignature',   route: '/coordinador/resoluciones' },
+      { label: 'Reportes y Consultas',  icon: 'ClipboardList',   route: '/coordinador/reportes' },
+      { label: 'Notificaciones',        icon: 'Bell',            route: '/notificaciones' },
     ],
     COMISION_SELECCION: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/comision/dashboard' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Evaluar Méritos', icon: 'FileText', route: '/comision/meritos' },
-      { label: 'Evaluar Oposición', icon: 'Users', route: '/comision/oposicion' },
-      { label: 'Ranking de Resultados', icon: 'BarChart3', route: '/comision/ranking' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',               icon: 'LayoutDashboard', route: '/comision/dashboard' },
+      { label: 'Cronograma',           icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Evaluar Méritos',      icon: 'FileText',        route: '/comision/meritos' },
+      { label: 'Evaluar Oposición',    icon: 'Users',           route: '/comision/oposicion' },
+      { label: 'Ranking de Resultados',icon: 'BarChart3',        route: '/comision/ranking' },
+      { label: 'Notificaciones',       icon: 'Bell',            route: '/notificaciones' },
     ],
     DECANO: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/decano/dashboard' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Tribunal', icon: 'Gavel', route: '/comision' },
-      { label: 'Sala de Evaluación', icon: 'MicVocal', route: '/comision/sala' },
-      { label: 'Designar Comisiones', icon: 'Users', route: '/decano/comisiones' },
-      { label: 'Auditoría y Reportes', icon: 'BarChart3', route: '/decano/reportes' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',              icon: 'LayoutDashboard', route: '/decano/dashboard' },
+      { label: 'Cronograma',          icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Tribunal',            icon: 'Gavel',           route: '/comision',      exact: true },
+      { label: 'Sala de Evaluación',  icon: 'MicVocal',        route: '/comision/sala' },
+      { label: 'Designar Comisiones', icon: 'Users',           route: '/decano/comisiones' },
+      { label: 'Auditoría y Reportes',icon: 'BarChart3',        route: '/decano/reportes' },
+      { label: 'Notificaciones',      icon: 'Bell',            route: '/notificaciones' },
     ],
     ADMINISTRADOR: [
-      { label: 'Inicio', icon: 'LayoutDashboard', route: '/admin/consulta' },
-      { label: 'Gestión Usuarios', icon: 'Users', route: '/admin/usuarios' },
-      { label: 'Carga Académica', icon: 'Briefcase', route: '/admin/carga-academica'},
-      { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
-      { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
-      { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },
-      { label: 'Roles y Permisos', icon: 'Settings', route: '/admin/rol-permiso' },
-      { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
+      { label: 'Inicio',             icon: 'LayoutDashboard', route: '/admin/consulta' },
+      { label: 'Gestión Usuarios',   icon: 'Users',           route: '/admin/usuarios' },
+      { label: 'Carga Académica',    icon: 'Briefcase',       route: '/admin/carga-academica' },
+      { label: 'Periodos Académicos',icon: 'CalendarClock',   route: '/admin/periodos' },
+      { label: 'Cronograma',         icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Configuración Global',icon: 'Settings',       route: '/admin/configuracion' },
+      { label: 'Roles y Permisos',   icon: 'Settings',        route: '/admin/rol-permiso' },
+      { label: 'Notificaciones',     icon: 'Bell',            route: '/notificaciones' },
     ],
   };
 

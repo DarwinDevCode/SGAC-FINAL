@@ -51,7 +51,7 @@ import { GestionEvaluacionesComponent } from './features/General/gestion-evaluac
 import { MiOposicionEstudianteComponent } from './features/postulante/mi-oposicion-estudiante/mi-oposicion-estudiante';
 import { SalaEvaluacionComponent } from './features/evaluacionOposicion/sala-evaluacion-component/sala-evaluacion-component';
 import {CargaAcademicaComponent} from './features/admin/carga-academica/carga-academica';
-
+import { salaEvaluacionGuard } from './features/evaluacionOposicion/sala-evaluacion-guard-guard';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -65,8 +65,9 @@ export const routes: Routes = [
       { path: 'notificaciones',                component: NotificacionesPageComponent },
       { path: 'cronograma',                    component: CronogramaActivoComponent },
       { path: 'comision',                      component: GestionEvaluacionesComponent },
-      { path: 'comision/sala',                 component: SalaEvaluacionComponent },
-      { path: 'comision/sala/:idConvocatoria', component: SalaEvaluacionComponent },
+      { path: 'comision/sala', component: SalaEvaluacionComponent, canDeactivate: [salaEvaluacionGuard] },
+      { path: 'comision/sala/:idConvocatoria', component: SalaEvaluacionComponent, canDeactivate: [salaEvaluacionGuard] },
+
 
       // ── Admin ───────────────────────────────────────────────
       { path: 'admin/consulta',      component: AdminDashboard },

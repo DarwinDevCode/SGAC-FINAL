@@ -1,4 +1,3 @@
-<!-- src/app/features/comite/sala-evaluacion/sala-evaluacion.html -->
 <div class="se-wrapper">
 
   <!-- TOAST -->
@@ -12,38 +11,60 @@
 
   <!-- HEADER -->
   <div class="se-header">
-    <div class="se-header-icon">
-      <lucide-icon name="mic-vocal" size="22"></lucide-icon>
-    </div>
-    <div>
+    <div class="se-header-icon"><lucide-icon name="mic-vocal" size="22"></lucide-icon></div>
+    <div style="flex:1">
       <h1 class="se-title">Sala de Evaluación en Vivo</h1>
-      <p class="se-subtitle">{{ esCoord ? 'Control del Coordinador' : 'Panel del Tribunal — ' + rolUsuario }}</p>
+      <p class="se-subtitle">
+        {{ esCoord ? 'Control del Coordinador' : 'Panel del Tribunal — ' + rolUsuario }}
+        <span *ngIf="salaInfo"> · {{ salaInfo }}</span>
+      </p>
+    </div>
+    <!-- Indicador WS -->
+    <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;
+                padding:.25rem .7rem;border-radius:20px;white-space:nowrap"
+         [ngStyle]="{
+           background: (wsEstado$ | async) === 'CONECTADO'  ? '#f0fdf4' :
+                       (wsEstado$ | async) === 'CONECTANDO' ? '#fffbeb' : '#fef2f2',
+           color:      (wsEstado$ | async) === 'CONECTADO'  ? '#15803d' :
+                       (wsEstado$ | async) === 'CONECTANDO' ? '#92400e' : '#dc2626',
+           border: '1px solid ' + ((wsEstado$ | async) === 'CONECTADO'  ? '#86efac' :
+                                   (wsEstado$ | async) === 'CONECTANDO' ? '#fcd34d' : '#fecaca')
+         }">
+      <span style="width:7px;height:7px;border-radius:50%;display:inline-block"
+            [ngStyle]="{ background: (wsEstado$ | async) === 'CONECTADO' ? '#15803d' :
+                                     (wsEstado$ | async) === 'CONECTANDO' ? '#d97706' : '#dc2626' }"></span>
+      {{ (wsEstado$ | async) === 'CONECTADO' ? 'En vivo' :
+      (wsEstado$ | async) === 'CONECTANDO' ? 'Conectando…' : 'Sin conexión' }}
     </div>
   </div>
 
   <!-- LOADER -->
   <div *ngIf="loading" class="se-state-box">
     <lucide-icon name="loader" size="26" class="se-spin se-icon-muted"></lucide-icon>
-    <p class="se-state-text">Cargando sala de evaluación...</p>
+    <p class="se-state-text">{{ loadingMsg }}</p>
   </div>
 
-  <div *ngIf="!loading" class="se-layout">
+  <!-- SIN CONVOCATORIA -->
+  <div *ngIf="!loading && sinConvocatoria" class="se-state-box">
+    <lucide-icon name="info" size="32" class="se-icon-muted"></lucide-icon>
+    <p class="se-state-text">{{ mensajeSinSala }}</p>
+  </div>
 
-    <!-- ════════════════════════════════════════════════════
-         PANEL IZQUIERDO — Lista de turnos
-    ════════════════════════════════════════════════════ -->
+  <!-- SALA PRINCIPAL -->
+  <div *ngIf="!loading && !sinConvocatoria" class="se-layout">
+
+    <!-- ── SIDEBAR: Turnos ──────────────────────────────────────── -->
     <aside class="se-sidebar">
       <p class="se-sidebar-label">Turnos ({{ turnos.length }})</p>
       <div *ngIf="turnos.length === 0" class="se-sidebar-empty">
         <lucide-icon name="calendar-x" size="20" class="se-icon-muted"></lucide-icon>
         <p>Sin cronograma</p>
       </div>
-      <div
-        *ngFor="let t of turnos"
-        class="se-turno-item"
-        [class.se-turno-item--active]="t.idEvaluacionOposicion === turnoActual?.idEvaluacionOposicion"
-        [class.se-turno-item--en-curso]="t.estado === 'EN_CURSO'"
-        (click)="seleccionarTurno(t)">
+      <div *ngFor="let t of turnos"
+           class="se-turno-item"
+           [class.se-turno-item--active]="t.idEvaluacionOposicion === turnoActual?.idEvaluacionOposicion"
+           [class.se-turno-item--en-curso]="t.estado === 'EN_CURSO'"
+           (click)="seleccionarTurno(t)">
         <div class="se-turno-top">
           <span class="se-turno-num">#{{ t.orden }}</span>
           <span class="se-badge" [ngClass]="badgeEstado(t.estado)">{{ t.nombreEstado }}</span>
@@ -53,16 +74,12 @@
       </div>
     </aside>
 
-    <!-- ════════════════════════════════════════════════════
-         PANEL PRINCIPAL — Detalle del turno seleccionado
-    ════════════════════════════════════════════════════ -->
+    <!-- ── PANEL PRINCIPAL ──────────────────────────────────────── -->
     <section class="se-main" *ngIf="turnoActual">
 
       <!-- Cabecera del turno -->
       <div class="se-turno-header">
-        <div class="se-turno-avatar-lg">
-          {{ turnoActual.nombres.charAt(0) }}{{ turnoActual.apellidos.charAt(0) }}
-        </div>
+        <div class="se-turno-avatar-lg">{{ turnoActual.nombres.charAt(0) }}{{ turnoActual.apellidos.charAt(0) }}</div>
         <div class="se-turno-info">
           <h2 class="se-turno-nombre-lg">{{ turnoActual.nombres }} {{ turnoActual.apellidos }}</h2>
           <p class="se-turno-meta">
@@ -75,86 +92,63 @@
             <strong>Tema:</strong> {{ turnoActual.tema }}
           </p>
         </div>
-        <span class="se-badge se-badge-lg" [ngClass]="badgeEstado(turnoActual.estado)">
-          {{ turnoActual.nombreEstado }}
-        </span>
+        <span class="se-badge se-badge-lg" [ngClass]="badgeEstado(turnoActual.estado)">{{ turnoActual.nombreEstado }}</span>
       </div>
 
-      <!-- ─── TIMER CIRCULAR (solo cuando EN_CURSO) ─────── -->
+      <!-- FIX 2: Timer circular con fórmula maestra -->
       <div *ngIf="turnoActual.estado === 'EN_CURSO'" class="se-timer-section">
-
         <div class="se-timer-wrap">
-          <!-- SVG circular -->
           <svg class="se-timer-svg" viewBox="0 0 100 100">
-            <!-- Pista de fondo -->
-            <circle cx="50" cy="50" r="44"
-                    fill="none" stroke="#f1f5f9" stroke-width="8"/>
-            <!-- Arco de progreso -->
-            <circle cx="50" cy="50" r="44"
-                    fill="none"
-                    [attr.stroke]="colorTimer"
-                    stroke-width="8"
-                    stroke-linecap="round"
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#f1f5f9" stroke-width="8"/>
+            <circle cx="50" cy="50" r="44" fill="none"
+                    [attr.stroke]="colorTimer" stroke-width="8" stroke-linecap="round"
                     [attr.stroke-dasharray]="svgCircunferencia"
                     [attr.stroke-dashoffset]="svgDashoffset"
                     transform="rotate(-90 50 50)"
                     style="transition: stroke-dashoffset 1s linear, stroke 0.5s ease"/>
-            <!-- Tiempo restante en el centro -->
-            <text x="50" y="46" text-anchor="middle"
-                  font-size="14" font-weight="700" fill="#1e293b">{{ tiempoRestante }}</text>
-            <text x="50" y="60" text-anchor="middle"
-                  font-size="7" fill="#94a3b8">restantes</text>
+            <text x="50" y="46" text-anchor="middle" font-size="14" font-weight="700" fill="#1e293b">{{ tiempoRestante }}</text>
+            <text x="50" y="60" text-anchor="middle" font-size="7" fill="#94a3b8">restantes</text>
           </svg>
-
-          <!-- Leyenda de segmentos -->
           <div class="se-timer-leyenda">
             <div class="se-leyenda-item" [class.se-leyenda-active]="segmentoActual==='expo'">
-              <span class="se-leyenda-dot" style="background:#15803d"></span>
-              Exposición (20 min)
+              <span class="se-leyenda-dot" style="background:#15803d"></span> Exposición (20 min)
             </div>
             <div class="se-leyenda-item" [class.se-leyenda-active]="segmentoActual==='preguntas'">
-              <span class="se-leyenda-dot" style="background:#1d4ed8"></span>
-              Preguntas (10 min)
+              <span class="se-leyenda-dot" style="background:#1d4ed8"></span> Preguntas (10 min)
             </div>
             <div class="se-leyenda-item" [class.se-leyenda-active]="segmentoActual==='transicion'">
-              <span class="se-leyenda-dot" style="background:#d97706"></span>
-              Transición (5 min)
+              <span class="se-leyenda-dot" style="background:#d97706"></span> Transición (5 min)
             </div>
           </div>
         </div>
-
-        <div class="se-segmento-badge" [class.se-seg-expo]="segmentoActual==='expo'"
+        <div class="se-segmento-badge"
+             [class.se-seg-expo]="segmentoActual==='expo'"
              [class.se-seg-preg]="segmentoActual==='preguntas'"
              [class.se-seg-trans]="segmentoActual==='transicion'"
              [class.se-seg-fin]="segmentoActual==='fin'">
-          <lucide-icon name="clock" size="14"></lucide-icon>
-          {{ labelSegmento }}
+          <lucide-icon name="clock" size="14"></lucide-icon> {{ labelSegmento }}
         </div>
       </div>
 
-      <!-- ─── CONTROLES COORDINADOR ──────────────────────── -->
+      <!-- Controles Coordinador (Iniciar / Cerrar) -->
       <div *ngIf="esCoord" class="se-coord-controls">
         <p class="se-section-label">Control del Coordinador</p>
         <div class="se-coord-btns">
-          <button *ngIf="turnoActual.estado === 'PROGRAMADA'"
-                  class="se-btn se-btn-iniciar" (click)="iniciarTurnoActual()">
-            <lucide-icon name="play-circle" size="16"></lucide-icon>
-            Iniciar Evaluación
+          <button *ngIf="turnoActual.estado === 'PROGRAMADA'" class="se-btn se-btn-iniciar" (click)="iniciarTurnoActual()">
+            <lucide-icon name="play-circle" size="16"></lucide-icon> Iniciar Evaluación
           </button>
-          <button *ngIf="turnoActual.estado === 'EN_CURSO'"
-                  class="se-btn se-btn-finalizar" (click)="finalizarTurnoActual()">
-            <lucide-icon name="lock" size="16"></lucide-icon>
-            Cerrar Acta
+          <button *ngIf="turnoActual.estado === 'EN_CURSO'" class="se-btn se-btn-finalizar" (click)="finalizarTurnoActual()">
+            <lucide-icon name="lock" size="16"></lucide-icon> Cerrar Acta
           </button>
           <span *ngIf="turnoActual.estado === 'FINALIZADA'" class="se-finalizada-msg">
-            <lucide-icon name="shield-check" size="16"></lucide-icon>
-            Acta cerrada e inmutable
+            <lucide-icon name="shield-check" size="16"></lucide-icon> Acta cerrada e inmutable
           </span>
         </div>
       </div>
 
-      <!-- ─── FORMULARIO DE NOTAS (JURADO) ──────────────── -->
-      <div *ngIf="!esCoord" class="se-form-section">
+      <!-- FIX 4: Formulario visible para TODOS los miembros del tribunal
+           incluida la Coordinadora. La condición es puedeCalificar, no !esCoord -->
+      <div *ngIf="formularioVisible" class="se-form-section">
         <div class="se-form-header">
           <p class="se-section-label">Mis Calificaciones</p>
           <span *ngIf="yaFinalizo" class="se-ya-finalizo">
@@ -162,23 +156,19 @@
           </span>
         </div>
 
-        <!-- Estado PROGRAMADA: aún no puede calificar -->
         <div *ngIf="turnoActual.estado === 'PROGRAMADA'" class="se-form-blocked">
           <lucide-icon name="clock" size="24" class="se-icon-muted"></lucide-icon>
           <p>Esperando que el Coordinador inicie la evaluación.</p>
         </div>
 
-        <!-- Estado NO_PRESENTO / FINALIZADA: mostrar nota o ausente -->
         <div *ngIf="turnoActual.estado === 'NO_PRESENTO'" class="se-form-blocked se-block-warn">
           <lucide-icon name="user-x" size="24" class="se-icon-warn"></lucide-icon>
           <p>El postulante no se presentó.</p>
         </div>
 
-        <!-- Formulario activo (EN_CURSO) o readonly (FINALIZADA + jurado) -->
-        <div *ngIf="turnoActual.estado === 'EN_CURSO' || (turnoActual.estado === 'FINALIZADA' && !esCoord)"
-             class="se-form">
+        <div *ngIf="turnoActual.estado === 'EN_CURSO' || turnoActual.estado === 'FINALIZADA'" class="se-form">
 
-          <!-- Material -->
+          <!-- FIX 3: (ngModelChange) dispara el auto-guardado con debounce -->
           <div class="se-field">
             <div class="se-field-label-row">
               <label class="se-label">Material de apoyo</label>
@@ -186,15 +176,14 @@
             </div>
             <div class="se-input-row">
               <input class="se-input" type="number" min="0" max="10" step="0.5"
-                     [(ngModel)]="pMaterial" [readonly]="formularioReadonly"
-                     [class.se-input-readonly]="formularioReadonly"/>
+                     [(ngModel)]="pMaterial" (ngModelChange)="onNotaChange()"
+                     [readonly]="formularioReadonly" [class.se-input-readonly]="formularioReadonly"/>
               <div class="se-bar-wrap">
                 <div class="se-bar-fill se-bar-green" [style.width.%]="(pMaterial / 10) * 100"></div>
               </div>
             </div>
           </div>
 
-          <!-- Exposición -->
           <div class="se-field">
             <div class="se-field-label-row">
               <label class="se-label">Dominio y fluidez (Exposición)</label>
@@ -202,15 +191,14 @@
             </div>
             <div class="se-input-row">
               <input class="se-input" type="number" min="0" max="4" step="0.5"
-                     [(ngModel)]="pExposicion" [readonly]="formularioReadonly"
-                     [class.se-input-readonly]="formularioReadonly"/>
+                     [(ngModel)]="pExposicion" (ngModelChange)="onNotaChange()"
+                     [readonly]="formularioReadonly" [class.se-input-readonly]="formularioReadonly"/>
               <div class="se-bar-wrap">
                 <div class="se-bar-fill se-bar-blue" [style.width.%]="(pExposicion / 4) * 100"></div>
               </div>
             </div>
           </div>
 
-          <!-- Respuestas -->
           <div class="se-field">
             <div class="se-field-label-row">
               <label class="se-label">Pertinencia de respuestas</label>
@@ -218,42 +206,36 @@
             </div>
             <div class="se-input-row">
               <input class="se-input" type="number" min="0" max="6" step="0.5"
-                     [(ngModel)]="pRespuestas" [readonly]="formularioReadonly"
-                     [class.se-input-readonly]="formularioReadonly"/>
+                     [(ngModel)]="pRespuestas" (ngModelChange)="onNotaChange()"
+                     [readonly]="formularioReadonly" [class.se-input-readonly]="formularioReadonly"/>
               <div class="se-bar-wrap">
                 <div class="se-bar-fill se-bar-purple" [style.width.%]="(pRespuestas / 6) * 100"></div>
               </div>
             </div>
           </div>
 
-          <!-- Total del jurado -->
           <div class="se-subtotal">
             <span>Mi subtotal</span>
-            <span class="se-subtotal-val" [class.se-subtotal-max]="subtotal === 20">
-              {{ subtotal | number:'1.1-2' }} / 20
-            </span>
+            <span class="se-subtotal-val" [class.se-subtotal-max]="subtotal === 20">{{ subtotal | number:'1.1-2' }} / 20</span>
           </div>
 
-          <!-- Botones de acción (solo si no está bloqueado) -->
           <div *ngIf="!formularioReadonly" class="se-form-btns">
             <button class="se-btn se-btn-guardar" (click)="guardarPuntaje(false)" [disabled]="guardando">
               <lucide-icon name="save" size="15"></lucide-icon>
               {{ guardando ? 'Guardando...' : 'Guardar borrador' }}
             </button>
             <button class="se-btn se-btn-finalizar-jurado" (click)="guardarPuntaje(true)" [disabled]="guardando">
-              <lucide-icon name="check-circle-2" size="15"></lucide-icon>
-              Finalizar y bloquear
+              <lucide-icon name="check-circle-2" size="15"></lucide-icon> Finalizar y bloquear
             </button>
           </div>
         </div>
       </div>
 
-      <!-- ─── PANEL DE PUNTAJES DEL TRIBUNAL (todos los roles) ─ -->
+      <!-- Panel de puntajes del tribunal -->
       <div class="se-jurados-section">
         <p class="se-section-label">Puntajes del Tribunal</p>
         <div class="se-jurados-grid">
-          <div *ngFor="let j of turnoActual.jurados" class="se-jurado-card"
-               [class.se-jurado-finalizo]="j.finalizo">
+          <div *ngFor="let j of turnoActual.jurados" class="se-jurado-card" [class.se-jurado-finalizo]="j.finalizo">
             <div class="se-jurado-top">
               <div class="se-jurado-avatar">{{ j.nombres.charAt(0) }}</div>
               <div>
@@ -263,28 +245,16 @@
               <lucide-icon *ngIf="j.finalizo" name="lock" size="14" class="se-icon-green se-jurado-lock"></lucide-icon>
             </div>
             <div class="se-jurado-scores" *ngIf="j.puntajeMaterial != null">
-              <div class="se-score-row">
-                <span>Material</span><span>{{ j.puntajeMaterial }}/10</span>
-              </div>
-              <div class="se-score-row">
-                <span>Exposición</span><span>{{ j.puntajeExposicion }}/4</span>
-              </div>
-              <div class="se-score-row">
-                <span>Respuestas</span><span>{{ j.puntajeRespuestas }}/6</span>
-              </div>
-              <div class="se-score-total">
-                <span>Subtotal</span><strong>{{ j.subtotal }}/20</strong>
-              </div>
+              <div class="se-score-row"><span>Material</span><span>{{ j.puntajeMaterial }}/10</span></div>
+              <div class="se-score-row"><span>Exposición</span><span>{{ j.puntajeExposicion }}/4</span></div>
+              <div class="se-score-row"><span>Respuestas</span><span>{{ j.puntajeRespuestas }}/6</span></div>
+              <div class="se-score-total"><span>Subtotal</span><strong>{{ j.subtotal }}/20</strong></div>
             </div>
-            <p *ngIf="j.puntajeMaterial == null" class="se-jurado-pending">
-              Pendiente de calificación
-            </p>
+            <p *ngIf="j.puntajeMaterial == null" class="se-jurado-pending">Pendiente de calificación</p>
           </div>
         </div>
 
-        <!-- Nota final si ya está FINALIZADA -->
-        <div *ngIf="turnoActual.estado === 'FINALIZADA' && turnoActual.puntajeFinal != null"
-             class="se-nota-final">
+        <div *ngIf="turnoActual.estado === 'FINALIZADA' && turnoActual.puntajeFinal != null" class="se-nota-final">
           <lucide-icon name="award" size="22"></lucide-icon>
           <div>
             <p class="se-nota-label">Promedio final de oposición</p>
@@ -295,11 +265,9 @@
 
     </section>
 
-    <!-- Sin turno seleccionado -->
-    <section *ngIf="!turnoActual && !loading" class="se-main se-main-empty">
+    <section *ngIf="!turnoActual" class="se-main se-main-empty">
       <lucide-icon name="mouse-pointer-click" size="36" class="se-icon-muted"></lucide-icon>
       <p>Selecciona un turno de la lista para ver los detalles.</p>
     </section>
-
   </div>
 </div>

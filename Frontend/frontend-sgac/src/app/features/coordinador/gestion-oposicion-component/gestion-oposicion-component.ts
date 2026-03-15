@@ -183,38 +183,6 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
 
   cerrarModalSorteo(): void { if (!this.sorteando) this.mostrarModalSorteo = false; }
 
-  iniciarTurno(turno: TurnoOposicion): void {
-    this.confirmar(`¿Iniciar la evaluación de ${turno.nombres} ${turno.apellidos}?`, () => {
-      this.svc.iniciarEvaluacion(turno.idEvaluacionOposicion).subscribe({
-        next: res => { this.toast(res.mensaje ?? 'Evaluación iniciada.', 'ok'); this.cargarCronograma(); },
-        error: (err: Error) => this.toast(err.message, 'err'),
-      });
-    });
-  }
-
-  marcarNoPresento(turno: TurnoOposicion): void {
-    this.confirmar(`¿Marcar a ${turno.nombres} ${turno.apellidos} como No Presentó?`, () => {
-      this.svc.marcarNoPresento(turno.idEvaluacionOposicion).subscribe({
-        next: res => { this.toast(res.mensaje ?? 'Marcado.', 'ok'); this.cargarCronograma(); },
-        error: (err: Error) => this.toast(err.message, 'err'),
-      });
-    });
-  }
-
-  finalizarTurno(turno: TurnoOposicion): void {
-    this.confirmar(
-      `¿Finalizar y cerrar el acta de ${turno.nombres} ${turno.apellidos}? Esta acción es irreversible.`,
-      () => {
-        this.svc.finalizarEvaluacion(turno.idEvaluacionOposicion).subscribe({
-          next: res => { this.toast(`Acta cerrada. Nota final: ${res.puntajeFinal}`, 'ok'); this.cargarCronograma(); },
-          error: (err: Error) => this.toast(err.message, 'err'),
-        });
-      },
-    );
-  }
-
-  // ── Helpers ──────────────────────────────────────────────
-
   get temasRestantes(): number { return Math.max(0, this.totalAptos - this.temas.length); }
 
   badgeEstado(e: string): string {
@@ -247,5 +215,41 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
     clearTimeout(this.toastTimer);
     this.toastMsg = msg; this.toastTipo = tipo;
     this.toastTimer = setTimeout(() => this.toastMsg = '', tipo === 'err' ? 9000 : 4000);
+  }
+
+  // src/app/features/coordinador/gestion-oposicion-component/gestion-oposicion-component.ts
+// (solo los métodos que llaman a iniciarEvaluacion, marcarNoPresento y finalizarEvaluacion
+//  — ahora pasan idConvocatoria para activar el broadcast WS)
+
+// ─── Reemplazar estos tres métodos en el componente existente ───────
+
+  iniciarTurno(turno: TurnoOposicion): void {
+    this.confirmar(`¿Iniciar la evaluación de ${turno.nombres} ${turno.apellidos}?`, () => {
+      this.svc.iniciarEvaluacion(turno.idEvaluacionOposicion, this.idConvocatoria).subscribe({
+        next:  res => { this.toast(res.mensaje ?? 'Evaluación iniciada.', 'ok'); this.cargarCronograma(); },
+        error: (err: Error) => this.toast(err.message, 'err'),
+      });
+    });
+  }
+
+  marcarNoPresento(turno: TurnoOposicion): void {
+    this.confirmar(`¿Marcar a ${turno.nombres} ${turno.apellidos} como No Presentó?`, () => {
+      this.svc.marcarNoPresento(turno.idEvaluacionOposicion, this.idConvocatoria).subscribe({
+        next:  res => { this.toast(res.mensaje ?? 'Marcado.', 'ok'); this.cargarCronograma(); },
+        error: (err: Error) => this.toast(err.message, 'err'),
+      });
+    });
+  }
+
+  finalizarTurno(turno: TurnoOposicion): void {
+    this.confirmar(
+      `¿Finalizar y cerrar el acta de ${turno.nombres} ${turno.apellidos}? Esta acción es irreversible.`,
+      () => {
+        this.svc.finalizarEvaluacion(turno.idEvaluacionOposicion, this.idConvocatoria).subscribe({
+          next:  res => { this.toast(`Acta cerrada. Nota final: ${res.puntajeFinal}`, 'ok'); this.cargarCronograma(); },
+          error: (err: Error) => this.toast(err.message, 'err'),
+        });
+      },
+    );
   }
 }

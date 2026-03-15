@@ -16,6 +16,7 @@ import org.uteq.sgacfinal.dto.Response.evaluaciones.ConvocatoriaOposicionDTO;
 import org.uteq.sgacfinal.exception.ComisionException;
 import org.uteq.sgacfinal.repository.evaluaciones.IEvaluacionOposicionRepository;
 import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionOposicionService;
+import org.uteq.sgacfinal.service.ws.EvaluacionWsService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
 
     private final IEvaluacionOposicionRepository repo;
     private final ObjectMapper objectMapper;
+    private final EvaluacionWsService wsService;
 
     @Override
     @Transactional
@@ -41,10 +43,6 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
             }
             String raw = repo.gestionarBancoTemas(
                     request.getIdConvocatoria(), request.getAccion(), temasJson);
-
-            log.info("\n\n\n\n\n\nRaw JSON : {}", raw);
-
-
             return evaluar(raw, "gestionarBancoTemas");
         } catch (ComisionException e) {
             throw e;
@@ -72,6 +70,60 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
 
     @Override
     @Transactional
+    public JsonNode cambiarEstadoEvaluacion(CambiarEstadoEvaluacionRequest request) {
+        try {
+            String raw = repo.cambiarEstadoEvaluacion(
+                    request.getIdEvaluacionOposicion(), request.getAccion());
+            JsonNode node = evaluar(raw, "cambiarEstadoEvaluacion");
+
+            // ── Broadcast WebSocket ───────────────────────────────────
+            if (request.getIdConvocatoria() != null) {
+                emitirCambioEstado(request, node);
+            }
+
+            return node;
+        } catch (ComisionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[EvaluacionOposicion] cambiarEstadoEvaluacion", e);
+            throw new ComisionException("Error al cambiar estado: " + e.getMessage());
+        }
+    }
+
+    private void emitirCambioEstado(CambiarEstadoEvaluacionRequest request, JsonNode result) {
+        String accion = request.getAccion().toUpperCase();
+
+        String nuevoEstado;
+        String nombreEstado;
+        switch (accion) {
+            case "INICIAR"      -> { nuevoEstado = "EN_CURSO";     nombreEstado = "En Curso";       }
+            case "FINALIZAR"    -> { nuevoEstado = "FINALIZADA";   nombreEstado = "Finalizada";     }
+            case "NO_PRESENTO"  -> { nuevoEstado = "NO_PRESENTO";  nombreEstado = "No Se Presentó"; }
+            default             -> { nuevoEstado = accion;         nombreEstado = accion;            }
+        }
+
+        String horaInicioReal  = result.path("horaReal").asText(null);
+        String serverTimestamp = result.path("serverTimestamp").asText(null);
+        String horaFinReal     = result.path("horaFin").asText(null);
+        Double puntajeFinal    = result.path("puntajeFinal").isNull()
+                ? null : result.path("puntajeFinal").asDouble();
+        String mensaje         = result.path("mensaje").asText(null);
+
+        wsService.broadcastCambioEstado(
+                request.getIdConvocatoria(),
+                request.getIdEvaluacionOposicion(),
+                nuevoEstado,
+                nombreEstado,
+                horaInicioReal,
+                serverTimestamp,        // ← nuevo
+                horaFinReal,
+                puntajeFinal,
+                mensaje
+        );
+    }
+
+    @Override
+    @Transactional
     public JsonNode registrarPuntajeJurado(PuntajeJuradoRequest request) {
         try {
             String raw = repo.registrarPuntajeJurado(
@@ -81,27 +133,28 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
                     request.getPuntajeExposicion().toPlainString(),
                     request.getPuntajeRespuestas().toPlainString(),
                     request.isFinalizar());
-            return evaluar(raw, "registrarPuntajeJurado");
+            JsonNode node = evaluar(raw, "registrarPuntajeJurado");
+
+            if (request.getIdConvocatoria() != null) {
+                boolean todosFinalizaron = node.path("todosFinalizaron").asBoolean(false);
+                Double  puntajeFinal     = todosFinalizaron
+                        ? node.path("puntajeFinal").asDouble() : null;
+                wsService.broadcastPuntajeActualizado(
+                        request.getIdConvocatoria(),
+                        request.getIdEvaluacionOposicion(),
+                        request.getIdUsuario(),
+                        todosFinalizaron,
+                        puntajeFinal,
+                        node.path("mensaje").asText(null)
+                );
+            }
+
+            return node;
         } catch (ComisionException e) {
             throw e;
         } catch (Exception e) {
             log.error("[EvaluacionOposicion] registrarPuntajeJurado", e);
             throw new ComisionException("Error al registrar puntaje: " + e.getMessage());
-        }
-    }
-
-    @Override
-    @Transactional
-    public JsonNode cambiarEstadoEvaluacion(CambiarEstadoEvaluacionRequest request) {
-        try {
-            String raw = repo.cambiarEstadoEvaluacion(
-                    request.getIdEvaluacionOposicion(), request.getAccion());
-            return evaluar(raw, "cambiarEstadoEvaluacion");
-        } catch (ComisionException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("[EvaluacionOposicion] cambiarEstadoEvaluacion", e);
-            throw new ComisionException("Error al cambiar estado: " + e.getMessage());
         }
     }
 
@@ -119,7 +172,6 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
         }
     }
 
-
     @Override
     @Transactional(readOnly = true)
     public JsonNode obtenerMiTurno(Integer idConvocatoria, Integer idUsuario) {
@@ -134,15 +186,43 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
         }
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public StandardResponseDTO<List<ConvocatoriaOposicionDTO>> listarConvocatoriasParaOposicion() {
+        try {
+            String json = repo.listarConvocatoriasParaOposicion();
+            return objectMapper.readValue(
+                    json,
+                    new TypeReference<StandardResponseDTO<List<ConvocatoriaOposicionDTO>>>() {});
+        } catch (Exception e) {
+            log.error("[ConvocatoriaOposicion] Error al listar convocatorias aptas: {}", e.getMessage());
+            return StandardResponseDTO.<List<ConvocatoriaOposicionDTO>>builder()
+                    .exito(false)
+                    .mensaje("Error al obtener las convocatorias para oposición: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public JsonNode resolverSalaUsuario(Integer idUsuario) {
+        try {
+            String raw = repo.resolverSalaUsuario(idUsuario);
+            return evaluar(raw, "resolverSalaUsuario");
+        } catch (ComisionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[EvaluacionOposicion] resolverSalaUsuario", e);
+            throw new ComisionException("Error al resolver la sala: " + e.getMessage());
+        }
+    }
 
     private JsonNode evaluar(String raw, String contexto) {
         try {
             JsonNode node = objectMapper.readTree(raw);
             if (node.isArray() && !node.isEmpty()) {
                 JsonNode first = node.get(0);
-                if (first.isObject()) {
-                    node = first.fields().next().getValue();
-                }
+                if (first.isObject()) node = first.fields().next().getValue();
             }
             if (!node.path("exito").asBoolean(true)) {
                 String msg = node.path("mensaje").asText("Error en " + contexto);
@@ -154,26 +234,6 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
         } catch (Exception e) {
             log.error("[EvaluacionOposicion] Error parseando respuesta de {}: {}", contexto, raw);
             throw new ComisionException("Respuesta inesperada del servidor.");
-        }
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public StandardResponseDTO<List<ConvocatoriaOposicionDTO>> listarConvocatoriasParaOposicion() {
-        try {
-            String json = repo.listarConvocatoriasParaOposicion();
-
-            return objectMapper.readValue(
-                    json,
-                    new TypeReference<StandardResponseDTO<List<ConvocatoriaOposicionDTO>>>() {}
-            );
-
-        } catch (Exception e) {
-            log.error("[ConvocatoriaOposicion] Error al listar convocatorias aptas: {}", e.getMessage());
-            return StandardResponseDTO.<List<ConvocatoriaOposicionDTO>>builder()
-                    .exito(false)
-                    .mensaje("Error al obtener las convocatorias para oposición: " + e.getMessage())
-                    .build();
         }
     }
 }

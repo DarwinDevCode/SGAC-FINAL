@@ -58,7 +58,6 @@ public class EvaluacionMeritoOposicionController {
         return json(service.cambiarEstadoEvaluacion(request));
     }
 
-
     @GetMapping("/cronograma/{idConvocatoria}")
     public ResponseEntity<String> obtenerCronograma(
             @PathVariable Integer idConvocatoria) {
@@ -101,5 +100,14 @@ public class EvaluacionMeritoOposicionController {
                 service.listarConvocatoriasParaOposicion();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/mi-sala")
+    public ResponseEntity<String> resolverMiSala(Authentication authentication) {
+        if (authentication == null ||
+                !(authentication.getPrincipal() instanceof UsuarioPrincipal principal)) {
+            return ResponseEntity.status(401).build();
+        }
+        return json(service.resolverSalaUsuario(principal.getIdUsuario()));
     }
 }

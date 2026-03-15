@@ -132,4 +132,12 @@ public interface IEvaluacionOposicionRepository
         """, nativeQuery = true)
     String listarConvocatoriasParaOposicion();
 
+    @Query(value = """
+    SELECT CAST(
+        postulacion.fn_resolver_sala_usuario(:pIdUsuario)
+    AS text)
+    """, nativeQuery = true)
+    String resolverSalaUsuario(
+            @Param("pIdUsuario") Integer pIdUsuario
+    );
 }
