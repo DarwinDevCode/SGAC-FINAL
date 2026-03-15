@@ -1,6 +1,6 @@
 <div class="se-wrapper">
 
-  <!-- TOAST -->
+  <!-- ══ TOAST (solo acciones manuales importantes) ══════════════════ -->
   <div *ngIf="toastMsg" class="se-toast"
        [class.se-toast-ok]="toastTipo==='ok'"
        [class.se-toast-err]="toastTipo==='err'"
@@ -9,7 +9,7 @@
     <span>{{ toastMsg }}</span>
   </div>
 
-  <!-- HEADER -->
+  <!-- ══ HEADER ══════════════════════════════════════════════════════ -->
   <div class="se-header">
     <div class="se-header-icon"><lucide-icon name="mic-vocal" size="22"></lucide-icon></div>
     <div style="flex:1">
@@ -19,41 +19,33 @@
         <span *ngIf="salaInfo"> · {{ salaInfo }}</span>
       </p>
     </div>
-    <!-- Indicador WS -->
-    <div style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:600;
-                padding:.25rem .7rem;border-radius:20px;white-space:nowrap"
-         [ngStyle]="{
-           background: (wsEstado$ | async) === 'CONECTADO'  ? '#f0fdf4' :
-                       (wsEstado$ | async) === 'CONECTANDO' ? '#fffbeb' : '#fef2f2',
-           color:      (wsEstado$ | async) === 'CONECTADO'  ? '#15803d' :
-                       (wsEstado$ | async) === 'CONECTANDO' ? '#92400e' : '#dc2626',
-           border: '1px solid ' + ((wsEstado$ | async) === 'CONECTADO'  ? '#86efac' :
-                                   (wsEstado$ | async) === 'CONECTANDO' ? '#fcd34d' : '#fecaca')
-         }">
-      <span style="width:7px;height:7px;border-radius:50%;display:inline-block"
-            [ngStyle]="{ background: (wsEstado$ | async) === 'CONECTADO' ? '#15803d' :
-                                     (wsEstado$ | async) === 'CONECTANDO' ? '#d97706' : '#dc2626' }"></span>
+    <!-- Indicador estado WS -->
+    <div class="se-ws-badge"
+         [class.se-ws-ok]="(wsEstado$ | async) === 'CONECTADO'"
+         [class.se-ws-warn]="(wsEstado$ | async) === 'CONECTANDO'"
+         [class.se-ws-err]="(wsEstado$ | async) === 'ERROR' || (wsEstado$ | async) === 'DESCONECTADO'">
+      <span class="se-ws-dot"></span>
       {{ (wsEstado$ | async) === 'CONECTADO' ? 'En vivo' :
       (wsEstado$ | async) === 'CONECTANDO' ? 'Conectando…' : 'Sin conexión' }}
     </div>
   </div>
 
-  <!-- LOADER -->
+  <!-- ══ LOADER ═══════════════════════════════════════════════════════ -->
   <div *ngIf="loading" class="se-state-box">
     <lucide-icon name="loader" size="26" class="se-spin se-icon-muted"></lucide-icon>
     <p class="se-state-text">{{ loadingMsg }}</p>
   </div>
 
-  <!-- SIN CONVOCATORIA -->
+  <!-- ══ SIN SALA ══════════════════════════════════════════════════════ -->
   <div *ngIf="!loading && sinConvocatoria" class="se-state-box">
     <lucide-icon name="info" size="32" class="se-icon-muted"></lucide-icon>
     <p class="se-state-text">{{ mensajeSinSala }}</p>
   </div>
 
-  <!-- SALA PRINCIPAL -->
+  <!-- ══ SALA PRINCIPAL ════════════════════════════════════════════════ -->
   <div *ngIf="!loading && !sinConvocatoria" class="se-layout">
 
-    <!-- ── SIDEBAR: Turnos ──────────────────────────────────────── -->
+    <!-- SIDEBAR: Lista de turnos -->
     <aside class="se-sidebar">
       <p class="se-sidebar-label">Turnos ({{ turnos.length }})</p>
       <div *ngIf="turnos.length === 0" class="se-sidebar-empty">
@@ -74,12 +66,14 @@
       </div>
     </aside>
 
-    <!-- ── PANEL PRINCIPAL ──────────────────────────────────────── -->
+    <!-- PANEL PRINCIPAL: Detalle del turno -->
     <section class="se-main" *ngIf="turnoActual">
 
       <!-- Cabecera del turno -->
       <div class="se-turno-header">
-        <div class="se-turno-avatar-lg">{{ turnoActual.nombres.charAt(0) }}{{ turnoActual.apellidos.charAt(0) }}</div>
+        <div class="se-turno-avatar-lg">
+          {{ turnoActual.nombres.charAt(0) }}{{ turnoActual.apellidos.charAt(0) }}
+        </div>
         <div class="se-turno-info">
           <h2 class="se-turno-nombre-lg">{{ turnoActual.nombres }} {{ turnoActual.apellidos }}</h2>
           <p class="se-turno-meta">
@@ -95,13 +89,14 @@
         <span class="se-badge se-badge-lg" [ngClass]="badgeEstado(turnoActual.estado)">{{ turnoActual.nombreEstado }}</span>
       </div>
 
-      <!-- FIX 2: Timer circular con fórmula maestra -->
+      <!-- Timer circular (Req. 1 — solo EN_CURSO) -->
       <div *ngIf="turnoActual.estado === 'EN_CURSO'" class="se-timer-section">
         <div class="se-timer-wrap">
           <svg class="se-timer-svg" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="44" fill="none" stroke="#f1f5f9" stroke-width="8"/>
             <circle cx="50" cy="50" r="44" fill="none"
-                    [attr.stroke]="colorTimer" stroke-width="8" stroke-linecap="round"
+                    [attr.stroke]="colorTimer"
+                    stroke-width="8" stroke-linecap="round"
                     [attr.stroke-dasharray]="svgCircunferencia"
                     [attr.stroke-dashoffset]="svgDashoffset"
                     transform="rotate(-90 50 50)"
@@ -130,7 +125,7 @@
         </div>
       </div>
 
-      <!-- Controles Coordinador (Iniciar / Cerrar) -->
+      <!-- Controles del Coordinador (Iniciar / Cerrar Acta) -->
       <div *ngIf="esCoord" class="se-coord-controls">
         <p class="se-section-label">Control del Coordinador</p>
         <div class="se-coord-btns">
@@ -146,44 +141,72 @@
         </div>
       </div>
 
-      <!-- FIX 4: Formulario visible para TODOS los miembros del tribunal
-           incluida la Coordinadora. La condición es puedeCalificar, no !esCoord -->
+      <!-- ══ FORMULARIO DE NOTAS ══════════════════════════════════════
+           Req. 3: visible para CUALQUIER miembro del tribunal (incluida
+           la Coordinadora). Condición: formularioVisible = puedeCalificar
+           AND estado IN (EN_CURSO, FINALIZADA).
+      ═════════════════════════════════════════════════════════════════ -->
       <div *ngIf="formularioVisible" class="se-form-section">
+
+        <!-- Header del formulario con indicador de sync (Req. 2) -->
         <div class="se-form-header">
           <p class="se-section-label">Mis Calificaciones</p>
-          <span *ngIf="yaFinalizo" class="se-ya-finalizo">
-            <lucide-icon name="lock" size="13"></lucide-icon> Calificación bloqueada
-          </span>
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <!-- Req. 2: indicador visual silencioso — sin toast -->
+            <span *ngIf="syncEstado === 'pendiente'" class="se-sync-badge se-sync-pending">
+              <lucide-icon name="clock-4" size="12"></lucide-icon> Pendiente...
+            </span>
+            <span *ngIf="syncEstado === 'guardando'" class="se-sync-badge se-sync-saving">
+              <lucide-icon name="loader" size="12" class="se-spin"></lucide-icon> Guardando...
+            </span>
+            <span *ngIf="syncEstado === 'sincronizado'" class="se-sync-badge se-sync-ok">
+              <lucide-icon name="cloud-check" size="12"></lucide-icon> Sincronizado
+            </span>
+            <span *ngIf="syncEstado === 'error'" class="se-sync-badge se-sync-err">
+              <lucide-icon name="cloud-off" size="12"></lucide-icon> Error al guardar
+            </span>
+            <!-- Bloqueo manual -->
+            <span *ngIf="yaFinalizo" class="se-ya-finalizo">
+              <lucide-icon name="lock" size="13"></lucide-icon> Bloqueado
+            </span>
+          </div>
         </div>
 
+        <!-- PROGRAMADA: esperar al coordinador -->
         <div *ngIf="turnoActual.estado === 'PROGRAMADA'" class="se-form-blocked">
           <lucide-icon name="clock" size="24" class="se-icon-muted"></lucide-icon>
           <p>Esperando que el Coordinador inicie la evaluación.</p>
         </div>
 
+        <!-- NO SE PRESENTÓ -->
         <div *ngIf="turnoActual.estado === 'NO_PRESENTO'" class="se-form-blocked se-block-warn">
           <lucide-icon name="user-x" size="24" class="se-icon-warn"></lucide-icon>
           <p>El postulante no se presentó.</p>
         </div>
 
+        <!-- FORMULARIO ACTIVO (EN_CURSO o FINALIZADA readonly) -->
         <div *ngIf="turnoActual.estado === 'EN_CURSO' || turnoActual.estado === 'FINALIZADA'" class="se-form">
 
-          <!-- FIX 3: (ngModelChange) dispara el auto-guardado con debounce -->
+          <!-- Criterio A: Material (max 10) -->
           <div class="se-field">
             <div class="se-field-label-row">
               <label class="se-label">Material de apoyo</label>
               <span class="se-max-badge">Máx. 10 pts</span>
             </div>
             <div class="se-input-row">
+              <!-- Req. 2: (ngModelChange) dispara el auto-guardado con debounce -->
               <input class="se-input" type="number" min="0" max="10" step="0.5"
-                     [(ngModel)]="pMaterial" (ngModelChange)="onNotaChange()"
-                     [readonly]="formularioReadonly" [class.se-input-readonly]="formularioReadonly"/>
+                     [(ngModel)]="pMaterial"
+                     (ngModelChange)="onNotaChange()"
+                     [readonly]="formularioReadonly"
+                     [class.se-input-readonly]="formularioReadonly"/>
               <div class="se-bar-wrap">
                 <div class="se-bar-fill se-bar-green" [style.width.%]="(pMaterial / 10) * 100"></div>
               </div>
             </div>
           </div>
 
+          <!-- Criterio B: Exposición (max 4) -->
           <div class="se-field">
             <div class="se-field-label-row">
               <label class="se-label">Dominio y fluidez (Exposición)</label>
@@ -191,14 +214,17 @@
             </div>
             <div class="se-input-row">
               <input class="se-input" type="number" min="0" max="4" step="0.5"
-                     [(ngModel)]="pExposicion" (ngModelChange)="onNotaChange()"
-                     [readonly]="formularioReadonly" [class.se-input-readonly]="formularioReadonly"/>
+                     [(ngModel)]="pExposicion"
+                     (ngModelChange)="onNotaChange()"
+                     [readonly]="formularioReadonly"
+                     [class.se-input-readonly]="formularioReadonly"/>
               <div class="se-bar-wrap">
                 <div class="se-bar-fill se-bar-blue" [style.width.%]="(pExposicion / 4) * 100"></div>
               </div>
             </div>
           </div>
 
+          <!-- Criterio C: Respuestas (max 6) -->
           <div class="se-field">
             <div class="se-field-label-row">
               <label class="se-label">Pertinencia de respuestas</label>
@@ -206,19 +232,25 @@
             </div>
             <div class="se-input-row">
               <input class="se-input" type="number" min="0" max="6" step="0.5"
-                     [(ngModel)]="pRespuestas" (ngModelChange)="onNotaChange()"
-                     [readonly]="formularioReadonly" [class.se-input-readonly]="formularioReadonly"/>
+                     [(ngModel)]="pRespuestas"
+                     (ngModelChange)="onNotaChange()"
+                     [readonly]="formularioReadonly"
+                     [class.se-input-readonly]="formularioReadonly"/>
               <div class="se-bar-wrap">
                 <div class="se-bar-fill se-bar-purple" [style.width.%]="(pRespuestas / 6) * 100"></div>
               </div>
             </div>
           </div>
 
+          <!-- Subtotal -->
           <div class="se-subtotal">
             <span>Mi subtotal</span>
-            <span class="se-subtotal-val" [class.se-subtotal-max]="subtotal === 20">{{ subtotal | number:'1.1-2' }} / 20</span>
+            <span class="se-subtotal-val" [class.se-subtotal-max]="subtotal === 20">
+              {{ subtotal | number:'1.1-2' }} / 20
+            </span>
           </div>
 
+          <!-- Req. 2: botones manuales — toast SOLO al finalizar -->
           <div *ngIf="!formularioReadonly" class="se-form-btns">
             <button class="se-btn se-btn-guardar" (click)="guardarPuntaje(false)" [disabled]="guardando">
               <lucide-icon name="save" size="15"></lucide-icon>
@@ -235,7 +267,9 @@
       <div class="se-jurados-section">
         <p class="se-section-label">Puntajes del Tribunal</p>
         <div class="se-jurados-grid">
-          <div *ngFor="let j of turnoActual.jurados" class="se-jurado-card" [class.se-jurado-finalizo]="j.finalizo">
+          <div *ngFor="let j of turnoActual.jurados"
+               class="se-jurado-card"
+               [class.se-jurado-finalizo]="j.finalizo">
             <div class="se-jurado-top">
               <div class="se-jurado-avatar">{{ j.nombres.charAt(0) }}</div>
               <div>
@@ -254,7 +288,8 @@
           </div>
         </div>
 
-        <div *ngIf="turnoActual.estado === 'FINALIZADA' && turnoActual.puntajeFinal != null" class="se-nota-final">
+        <div *ngIf="turnoActual.estado === 'FINALIZADA' && turnoActual.puntajeFinal != null"
+             class="se-nota-final">
           <lucide-icon name="award" size="22"></lucide-icon>
           <div>
             <p class="se-nota-label">Promedio final de oposición</p>
@@ -265,9 +300,11 @@
 
     </section>
 
+    <!-- Sin turno seleccionado -->
     <section *ngIf="!turnoActual" class="se-main se-main-empty">
       <lucide-icon name="mouse-pointer-click" size="36" class="se-icon-muted"></lucide-icon>
       <p>Selecciona un turno de la lista para ver los detalles.</p>
     </section>
+
   </div>
 </div>

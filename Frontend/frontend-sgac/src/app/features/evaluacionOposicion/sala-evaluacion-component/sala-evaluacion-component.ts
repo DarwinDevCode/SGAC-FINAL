@@ -1,4 +1,4 @@
-// sala-evaluacion-component.ts — Refactorización completa
+// sala-evaluacion-component.ts — Refactorización Total
 import {
   Component, OnInit, OnDestroy, inject
 } from '@angular/core';
@@ -7,12 +7,15 @@ import { FormsModule }         from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { ActivatedRoute }      from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter } from 'rxjs/operators';
 
 import { AuthService }                from '../../../core/services/auth-service';
 import { EvaluacionOposicionService } from '../../../core/services/evaluaciones/evaluacion-oposicion-service';
 import { EvaluacionWsClientService }  from '../../../core/services/evaluaciones/evaluacion-ws-client-service';
 import { TurnoOposicion }            from '../../../core/models/evaluaciones/EvaluacionOposicion';
+
+// Estado de sincronización del auto-guardado
+type SyncEstado = 'idle' | 'pendiente' | 'guardando' | 'sincronizado' | 'error';
 
 @Component({
   selector: 'app-sala-evaluacion',
@@ -28,38 +31,40 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   private svc     = inject(EvaluacionOposicionService);
   private wsSvc   = inject(EvaluacionWsClientService);
 
-  // ── Estado general ────────────────────────────────────────────────
-  loading     = true;
-  loadingMsg  = 'Cargando sala de evaluación...';
-  toastMsg    = '';
-  toastTipo   = 'ok';
-  private toastTimer: any;
-
+  // ── Estado de carga ───────────────────────────────────────────────
+  loading         = true;
+  loadingMsg      = 'Cargando sala de evaluación...';
   sinConvocatoria = false;
   mensajeSinSala  = '';
   salaInfo        = '';
 
-  // ── Conexión WS ───────────────────────────────────────────────────
-  wsEstado$  = this.wsSvc.estado$;
+  // ── Toasts (solo para acciones manuales importantes) ──────────────
+  toastMsg  = '';
+  toastTipo = 'ok';
+  private toastTimer: any;
+
+  // ── Indicador de sincronización silencioso (auto-save) ────────────
+  syncEstado: SyncEstado = 'idle';
+  private syncTimer: any;
+
+  // ── WebSocket ─────────────────────────────────────────────────────
+  wsEstado$ = this.wsSvc.estado$;
   private wsSub?: Subscription;
 
   // ── Usuario autenticado ───────────────────────────────────────────
   idUsuario  = 0;
   rolUsuario = '';
+  esCoord    = false;       // controla botones Iniciar/Cerrar Acta
+  puedeCalificar = false;   // true si el usuario está en la comisión
 
-  // FIX 4: La coordinadora también califica — esCoord solo controla
-  // si se muestran los botones de control (Iniciar/Cerrar), pero
-  // puedeCalificar es independiente y se activa para TODOS los miembros.
-  esCoord         = false;
-  puedeCalificar  = false;   // true cuando el usuario está en la comisión
-
+  // ── Convocatoria ──────────────────────────────────────────────────
   idConvocatoria = 0;
 
   // ── Turnos ────────────────────────────────────────────────────────
   turnos:      TurnoOposicion[] = [];
   turnoActual: TurnoOposicion | null = null;
 
-  /** true si hay evaluación EN_CURSO — usado por CanDeactivate (FIX 5) */
+  /** Expuesto para el CanDeactivate guard */
   hayEvaluacionEnCurso = false;
 
   // ── Formulario de notas ───────────────────────────────────────────
@@ -69,11 +74,12 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   guardando   = false;
   yaFinalizo  = false;
 
-  // FIX 3: Auto-guardado con debounce
+  // ── Auto-guardado reactivo ────────────────────────────────────────
   private notasChange$ = new Subject<void>();
   private autoSaveSub?: Subscription;
 
   // ── Timer ─────────────────────────────────────────────────────────
+  /** Duración total del bloque: 20 expo + 10 preguntas + 5 transición */
   readonly BLOQUE_TOTAL_SEG = 35 * 60;
   timerSegundos = 0;
   timerActivo   = false;
@@ -91,12 +97,14 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
       this.esCoord    = this.rolUsuario.toUpperCase().includes('COORDINADOR');
     }
 
-    // FIX 3: Configurar auto-guardado con 500ms de debounce
+    // Auto-guardado silencioso: 2 s de inactividad → borrador automático
     this.autoSaveSub = this.notasChange$.pipe(
-      debounceTime(500),
-      distinctUntilChanged()
-    ).subscribe(() => this.autoGuardar());
+      debounceTime(2000),
+      distinctUntilChanged(),
+      filter(() => !this.formularioReadonly && !this.guardando)
+    ).subscribe(() => this.ejecutarAutoGuardado());
 
+    // Resolver convocatoria
     const paramId = this.route.snapshot.paramMap.get('idConvocatoria');
     if (paramId) {
       this.idConvocatoria = Number(paramId);
@@ -107,7 +115,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
         next: res => {
           if (res.exito && res.idConvocatoria) {
             this.idConvocatoria = res.idConvocatoria;
-            this.salaInfo       = `${res.nombreAsignatura ?? ''} · ${res.nombreCarrera ?? ''}`;
+            this.salaInfo = `${res.nombreAsignatura ?? ''} · ${res.nombreCarrera ?? ''}`;
             this.arrancarSala();
           } else {
             this.loading         = false;
@@ -125,6 +133,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   }
 
   private arrancarSala(): void {
+    // Req. 1: carga mandatoria desde BD (SSoT) antes de conectar WS
     this.cargarCronograma();
     this.conectarWebSocket();
   }
@@ -132,6 +141,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearInterval(this.timerInterval);
     clearTimeout(this.toastTimer);
+    clearTimeout(this.syncTimer);
     this.wsSub?.unsubscribe();
     this.autoSaveSub?.unsubscribe();
     this.notasChange$.complete();
@@ -139,7 +149,132 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // WEBSOCKET
+  // CARGA DE DATOS (SSoT — Single Source of Truth)
+  // ═══════════════════════════════════════════════════════════════════
+
+  cargarCronograma(): void {
+    this.loading    = true;
+    this.loadingMsg = 'Recuperando estado desde la base de datos...';
+
+    this.svc.obtenerCronograma(this.idConvocatoria).subscribe({
+      next: res => {
+        this.loading = false;
+        this.turnos  = res.cronograma ?? [];
+
+        // Req. 1: si hay turno EN_CURSO, activar de inmediato sin esperar WS
+        const enCurso = this.turnos.find(t => t.estado === 'EN_CURSO');
+        this.hayEvaluacionEnCurso = !!enCurso;
+        if (enCurso) {
+          this.seleccionarTurno(enCurso);
+        }
+      },
+      error: (err: Error) => {
+        this.loading = false;
+        this.toast(err.message, 'err');
+      }
+    });
+  }
+
+  /** Recarga el turno activo desde BD para obtener la lista real de jurados.
+   *  Fix: el mensaje WS de CAMBIO_ESTADO no envía el array `jurados`, por lo que
+   *  siempre hay que ir a BD para recuperarlo y poder evaluar puedeCalificar.
+   *  @param onComplete callback opcional que se ejecuta tras actualizar el turno.
+   */
+  private recargarTurnoActual(onComplete?: () => void): void {
+    const cur = this.turnoActual;
+    if (!cur) return;
+    this.svc.obtenerCronograma(this.idConvocatoria).subscribe({
+      next: res => {
+        const actualizado = (res.cronograma ?? []).find(
+          t => t.idEvaluacionOposicion === cur.idEvaluacionOposicion
+        );
+        if (actualizado) {
+          // Fix 4: limpiar notas del turno anterior ANTES de cargar las del nuevo
+          this.resetForm();
+          this.turnoActual = actualizado;
+          // Ahora jurados está completo → detectarPuedeCalificar() funciona correctamente
+          this.detectarYaFinalizoYCargarNotas();
+          this.detectarPuedeCalificar();
+          onComplete?.();
+        }
+      },
+      error: () => {}
+    });
+  }
+
+  seleccionarTurno(turno: TurnoOposicion): void {
+    // Fix 2: hard reset total antes de cargar cualquier dato del nuevo turno.
+    // Orden obligatorio: primero limpiar, luego asignar.
+    // Esto elimina el "estado zombi" donde el timer o las notas del turno
+    // anterior siguen visibles durante el cambio.
+    clearInterval(this.timerInterval);  // detener timer anterior de forma mandatoria
+    this.timerSegundos  = 0;
+    this.timerActivo    = false;
+    this.resetForm();                   // pMaterial/pExposicion/pRespuestas = 0, flags = false
+
+    this.turnoActual = turno;
+
+    // Fix 3: ramificación por estado REAL que viene de la BD.
+    // No iniciar timer si el estado ya no es EN_CURSO.
+    if (turno.estado === 'EN_CURSO') {
+      // Cargar notas previas y detectar acceso al formulario
+      this.detectarYaFinalizoYCargarNotas();
+      this.detectarPuedeCalificar();
+      // Timer desde serverTimestamp del servidor (fórmula maestra anti-deriva)
+      this.iniciarTimerDesdeServidor(turno.serverTimestamp, turno.horaInicioReal);
+
+    } else if (turno.estado === 'FINALIZADA') {
+      // Turno ya cerrado: cargar notas históricas y bloquear formulario.
+      // No se toca el timer (queda en 0 por el hard reset de arriba).
+      this.detectarYaFinalizoYCargarNotas();
+      this.detectarPuedeCalificar();
+
+    } else {
+      // PROGRAMADA / NO_PRESENTO: no hay notas ni timer que restaurar
+      this.detectarPuedeCalificar();
+    }
+  }
+
+  /**
+   * Req. 3 + Req. 1: verifica si el usuario es miembro del tribunal.
+   * Aplica para Coordinadora, Decano y Docente por igual.
+   */
+  private detectarPuedeCalificar(): void {
+    const cur = this.turnoActual;
+    if (!cur) { this.puedeCalificar = false; return; }
+    this.puedeCalificar = cur.jurados.some(j => j.idUsuario === this.idUsuario);
+  }
+
+  /**
+   * Req. 1: Pre-carga las notas parciales desde usuario_comision (vía cronograma).
+   * El jurado nunca verá el formulario vacío tras F5 o navegación.
+   */
+  private detectarYaFinalizoYCargarNotas(): void {
+    const cur = this.turnoActual;
+    if (!cur) { this.yaFinalizo = false; return; }
+
+    const miJurado = cur.jurados.find(j => j.idUsuario === this.idUsuario);
+    this.yaFinalizo = miJurado?.finalizo ?? false;
+
+    if (miJurado) {
+      // Restaurar los puntajes guardados en BD — no queda formulario vacío
+      this.pMaterial   = miJurado.puntajeMaterial   ?? 0;
+      this.pExposicion = miJurado.puntajeExposicion ?? 0;
+      this.pRespuestas = miJurado.puntajeRespuestas ?? 0;
+    }
+  }
+
+  private resetForm(): void {
+    this.pMaterial     = 0;
+    this.pExposicion   = 0;
+    this.pRespuestas   = 0;
+    this.yaFinalizo    = false;
+    this.puedeCalificar = false;
+    this.syncEstado    = 'idle';
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // WEBSOCKET — Req. 5
   // ═══════════════════════════════════════════════════════════════════
 
   private conectarWebSocket(): void {
@@ -149,6 +284,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
       switch (msg.tipo) {
 
         case 'CAMBIO_ESTADO': {
+          // Actualizar lista lateral
           this.turnos = this.turnos.map(t =>
             t.idEvaluacionOposicion === msg.idEvaluacionOposicion
               ? { ...t,
@@ -162,7 +298,6 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
               : t
           );
 
-          // Actualizar hayEvaluacionEnCurso para el guard (FIX 5)
           this.hayEvaluacionEnCurso = this.turnos.some(t => t.estado === 'EN_CURSO');
 
           const current = this.turnoActual;
@@ -179,20 +314,33 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
               puntajeFinal:    msg.puntajeFinal    ?? current.puntajeFinal,
             } as TurnoOposicion;
 
-            // FIX 4: activar formulario para TODOS los miembros (incl. Coordinadora)
+            // Fix: al recibir EN_CURSO, el mensaje WS NO incluye el array de jurados.
+            // Si llamamos detectarPuedeCalificar() sobre el objeto parcial del spread,
+            // jurados estará vacío → puedeCalificar = false → formulario invisible.
+            // Solución: arrancar el timer ya (serverTimestamp viene en el mensaje)
+            // y forzar una recarga desde BD para obtener el array jurados completo.
+            // recargarTurnoActual() llama a detectarPuedeCalificar() en su callback.
             if (estadoAnterior === 'PROGRAMADA' && msg.nuevoEstado === 'EN_CURSO') {
-              this.detectarPuedeCalificar();
-              if (this.puedeCalificar) {
-                this.toast('La evaluación ha iniciado. ¡Ya puedes calificar!', 'ok');
-              }
-              // FIX 2: timer con serverTimestamp del servidor
-              this.iniciarTimer(msg.serverTimestamp, msg.horaInicioReal);
+              // Timer arranca inmediatamente con el timestamp del servidor
+              this.iniciarTimerDesdeServidor(msg.serverTimestamp, msg.horaInicioReal);
+              // Recarga desde BD → puebla jurados → detectarPuedeCalificar() → formulario visible
+              this.recargarTurnoActual(() => {
+                if (this.puedeCalificar) {
+                  this.toast('¡La evaluación ha iniciado! Ya puedes calificar.', 'ok');
+                }
+              });
             }
 
-            if (msg.nuevoEstado === 'FINALIZADA' && msg.puntajeFinal != null) {
+            if (msg.nuevoEstado === 'FINALIZADA') {
               clearInterval(this.timerInterval);
+              this.timerActivo          = false;
               this.hayEvaluacionEnCurso = false;
-              this.toast(`Acta cerrada. Nota final: ${msg.puntajeFinal}`, 'ok');
+              // Recargar para obtener puntajeFinal y bloquear formulario vía BD
+              this.recargarTurnoActual(() => {
+                if (msg.puntajeFinal != null) {
+                  this.toast(`Acta cerrada. Nota final: ${msg.puntajeFinal}`, 'ok');
+                }
+              });
             }
           }
           break;
@@ -201,10 +349,34 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
         case 'PUNTAJE_ACTUALIZADO': {
           const cur = this.turnoActual;
           if (cur && cur.idEvaluacionOposicion === msg.idEvaluacionOposicion) {
-            this.recargarTurnoActual();
-          }
-          if (msg.todosFinalizaron && msg.puntajeFinal != null) {
-            this.toast(`Todos los jurados finalizaron. Nota final: ${msg.puntajeFinal}`, 'ok');
+            // Fix 1: si todos finalizaron, el WS indica que el turno pasó a FINALIZADA.
+            // Aplicar el cambio de estado localmente SIN esperar F5:
+            //   · detener el timer
+            //   · marcar el turno como FINALIZADA en la lista lateral y en turnoActual
+            //   · recargar desde BD para obtener puntajes finales y bloquear el formulario
+            if (msg.todosFinalizaron) {
+              clearInterval(this.timerInterval);
+              this.timerActivo          = false;
+              this.hayEvaluacionEnCurso = false;
+
+              // Actualizar la lista lateral instantáneamente
+              this.turnos = this.turnos.map(t =>
+                t.idEvaluacionOposicion === msg.idEvaluacionOposicion
+                  ? { ...t, estado: 'FINALIZADA', nombreEstado: 'Finalizada',
+                    puntajeFinal: msg.puntajeFinal ?? t.puntajeFinal } as TurnoOposicion
+                  : t
+              );
+
+              // Recarga completa para obtener notas definitivas y bloquear formulario
+              this.recargarTurnoActual(() => {
+                if (msg.puntajeFinal != null) {
+                  this.toast(`Todos los jurados finalizaron. Nota final: ${msg.puntajeFinal}`, 'ok');
+                }
+              });
+            } else {
+              // Actualización parcial: solo refrescar las tarjetas de puntajes
+              this.recargarTurnoActual();
+            }
           }
           break;
         }
@@ -213,105 +385,22 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // CARGA DE DATOS
-  // ═══════════════════════════════════════════════════════════════════
-
-  cargarCronograma(): void {
-    this.loading    = true;
-    this.loadingMsg = 'Cargando cronograma...';
-    this.svc.obtenerCronograma(this.idConvocatoria).subscribe({
-      next: res => {
-        this.loading = false;
-        this.turnos  = res.cronograma ?? [];
-
-        // FIX 3 + FIX 5: Detectar turno EN_CURSO al cargar (efecto F5)
-        const enCurso = this.turnos.find(t => t.estado === 'EN_CURSO');
-        this.hayEvaluacionEnCurso = !!enCurso;
-        if (enCurso) this.seleccionarTurno(enCurso);
-      },
-      error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
-    });
-  }
-
-  private recargarTurnoActual(): void {
-    const cur = this.turnoActual;
-    if (!cur) return;
-    this.svc.obtenerCronograma(this.idConvocatoria).subscribe({
-      next: res => {
-        const actualizado = (res.cronograma ?? []).find(
-          t => t.idEvaluacionOposicion === cur.idEvaluacionOposicion
-        );
-        if (actualizado) {
-          this.turnoActual = actualizado;
-          this.detectarYaFinalizo();
-          this.detectarPuedeCalificar();
-        }
-      },
-      error: () => {}
-    });
-  }
-
-  seleccionarTurno(turno: TurnoOposicion): void {
-    this.turnoActual = turno;
-    this.resetForm();
-    this.detectarYaFinalizo();
-    this.detectarPuedeCalificar();
-
-    clearInterval(this.timerInterval);
-    if (turno.estado === 'EN_CURSO') {
-      // FIX 2: usar serverTimestamp para sincronización maestra
-      this.iniciarTimer(turno.serverTimestamp, turno.horaInicioReal);
-    } else {
-      this.timerSegundos = 0;
-      this.timerActivo   = false;
-    }
-  }
-
-  /** FIX 4: determina si el usuario logueado es miembro del tribunal
-   *  independientemente de si es Coordinadora, Decano o Docente. */
-  private detectarPuedeCalificar(): void {
-    const cur = this.turnoActual;
-    if (!cur) { this.puedeCalificar = false; return; }
-    const esMiembro = cur.jurados.some(j => j.idUsuario === this.idUsuario);
-    this.puedeCalificar = esMiembro;
-  }
-
-  private detectarYaFinalizo(): void {
-    const cur = this.turnoActual;
-    if (!cur) { this.yaFinalizo = false; return; }
-    const miJurado = cur.jurados.find(j => j.idUsuario === this.idUsuario);
-    this.yaFinalizo = miJurado?.finalizo ?? false;
-    // FIX 3: pre-cargar notas guardadas para no perder el borrador
-    if (miJurado) {
-      this.pMaterial   = miJurado.puntajeMaterial   ?? 0;
-      this.pExposicion = miJurado.puntajeExposicion ?? 0;
-      this.pRespuestas = miJurado.puntajeRespuestas ?? 0;
-    }
-  }
-
-  private resetForm(): void {
-    this.pMaterial = this.pExposicion = this.pRespuestas = 0;
-    this.yaFinalizo = false;
-    this.puedeCalificar = false;
-  }
-
-  // ═══════════════════════════════════════════════════════════════════
-  // FIX 2: TIMER MAESTRO — fórmula obligatoria
+  // TIMER MAESTRO — Req. 1
   //
-  //   Tiempo_Restante = BLOQUE - (Date.now() - new Date(serverTimestamp)) / 1000
+  // Fórmula obligatoria (Anti-Deriva):
+  //   T_restante = BLOQUE - ((Date.now() - new Date(serverTimestamp)) / 1000)
   //
-  // Todos los usuarios ven el mismo segundo exacto porque el cálculo
-  // siempre es relativo al timestamp del servidor, no a un contador local.
+  // Todos los miembros ven el mismo segundo exacto porque el cálculo
+  // es relativo al timestamp del servidor, nunca a un contador local.
   // ═══════════════════════════════════════════════════════════════════
 
-  iniciarTimer(serverTimestamp?: string, horaFallback?: string): void {
+  iniciarTimerDesdeServidor(serverTimestamp?: string, horaFallback?: string): void {
     clearInterval(this.timerInterval);
     this.timerActivo = true;
 
     if (serverTimestamp) {
       const serverEpoch = new Date(serverTimestamp).getTime();
       const calcular = () => {
-        // Fórmula maestra: tiempo basado en diferencia real con el servidor
         const transcurrido = Math.floor((Date.now() - serverEpoch) / 1000);
         this.timerSegundos = Math.max(0, Math.min(transcurrido, this.BLOQUE_TOTAL_SEG));
       };
@@ -319,7 +408,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
       this.timerInterval = setInterval(calcular, 1000);
 
     } else if (horaFallback) {
-      // Fallback para backends sin serverTimestamp
+      // Fallback para backends sin serverTimestamp (compatibilidad)
       const calcular = () => {
         const ahora = new Date();
         const [h, m, s] = horaFallback.split(':').map(Number);
@@ -335,7 +424,7 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
 
   get tiempoRestante(): string {
     const r = Math.max(0, this.BLOQUE_TOTAL_SEG - this.timerSegundos);
-    return `${Math.floor(r / 60).toString().padStart(2,'0')}:${(r % 60).toString().padStart(2,'0')}`;
+    return `${Math.floor(r / 60).toString().padStart(2, '0')}:${(r % 60).toString().padStart(2, '0')}`;
   }
 
   get timerPorcentaje():   number { return Math.min(100, (this.timerSegundos / this.BLOQUE_TOTAL_SEG) * 100); }
@@ -351,11 +440,11 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
   }
 
   get colorTimer(): string {
-    return { expo:'#15803d', preguntas:'#1d4ed8', transicion:'#d97706', fin:'#dc2626' }[this.segmentoActual];
+    return { expo: '#15803d', preguntas: '#1d4ed8', transicion: '#d97706', fin: '#dc2626' }[this.segmentoActual];
   }
 
   get labelSegmento(): string {
-    return { expo:'Exposición (20 min)', preguntas:'Preguntas (10 min)', transicion:'Transición (5 min)', fin:'Tiempo agotado' }[this.segmentoActual];
+    return { expo: 'Exposición (20 min)', preguntas: 'Preguntas (10 min)', transicion: 'Transición (5 min)', fin: 'Tiempo agotado' }[this.segmentoActual];
   }
 
   // ═══════════════════════════════════════════════════════════════════
@@ -366,7 +455,13 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
     const cur = this.turnoActual;
     if (!cur) return;
     this.svc.iniciarEvaluacion(cur.idEvaluacionOposicion, this.idConvocatoria).subscribe({
-      next: () => this.toast('Evaluación iniciada. ¡El tribunal puede calificar!', 'ok'),
+      next: () => {
+        this.toast('Evaluación iniciada. ¡El tribunal puede calificar!', 'ok');
+        // Fix 3: recargar desde BD para que el formulario de la coordinadora
+        // aparezca al instante sin necesidad de que llegue el mensaje WS.
+        // recargarTurnoActual() puebla jurados y activa puedeCalificar.
+        this.recargarTurnoActual();
+      },
       error: (err: Error) => this.toast(err.message, 'err')
     });
   }
@@ -375,59 +470,28 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
     const cur = this.turnoActual;
     if (!cur) return;
     this.svc.finalizarEvaluacion(cur.idEvaluacionOposicion, this.idConvocatoria).subscribe({
-      next: res => { this.hayEvaluacionEnCurso = false; this.toast(`Acta cerrada. Nota final: ${res.puntajeFinal}`, 'ok'); },
+      next: res => {
+        this.hayEvaluacionEnCurso = false;
+        clearInterval(this.timerInterval);
+        this.timerActivo = false;
+        this.toast(`Acta cerrada. Nota final: ${res.puntajeFinal}`, 'ok');
+        // Fix 4: el coordinador NO recibe su propio mensaje WS de vuelta por
+        // limitaciones del broker STOMP. Recargar desde BD para que el formulario
+        // pase a modo readonly instantáneamente, igual que los demás miembros.
+        this.recargarTurnoActual();
+      },
       error: (err: Error) => this.toast(err.message, 'err')
     });
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // FIX 3: AUTO-GUARDADO con debounce
-  // Se llama desde (ngModelChange) en cada campo de nota del template.
-  // Tras 500ms de inactividad dispara un borrador automático.
+  // FORMULARIO — Getters de visibilidad (Req. 3)
   // ═══════════════════════════════════════════════════════════════════
 
-  onNotaChange(): void {
-    if (!this.formularioReadonly) {
-      this.notasChange$.next();
-    }
-  }
-
-  private autoGuardar(): void {
-    const cur = this.turnoActual;
-    if (!cur || this.formularioReadonly || this.guardando) return;
-    if (this.pMaterial > 10 || this.pExposicion > 4 || this.pRespuestas > 6) return;
-    if (this.pMaterial < 0 || this.pExposicion < 0 || this.pRespuestas < 0) return;
-
-    // FIX 1: idUsuario NO va en el body — el backend lo extrae del JWT.
-    // El servicio ya lo omite en registrarPuntaje(), pero lo reforzamos aquí.
-    this.svc.registrarPuntaje({
-      idEvaluacionOposicion: cur.idEvaluacionOposicion,
-      idUsuario:             this.idUsuario,  // el servicio lo stripea del body
-      puntajeMaterial:       this.pMaterial,
-      puntajeExposicion:     this.pExposicion,
-      puntajeRespuestas:     this.pRespuestas,
-      finalizar:             false,
-      idConvocatoria:        this.idConvocatoria,
-    }).subscribe({
-      next: () => this.toast('Borrador guardado automáticamente.', 'ok'),
-      error: () => {} // fallo silencioso en auto-save
-    });
-  }
-
-  // ═══════════════════════════════════════════════════════════════════
-  // FORMULARIO DE NOTAS — guardado manual
-  // ═══════════════════════════════════════════════════════════════════
-
-  get subtotal(): number {
-    return (this.pMaterial || 0) + (this.pExposicion || 0) + (this.pRespuestas || 0);
-  }
-
-  // FIX 4: El formulario es visible para cualquier miembro del tribunal,
-  // incluyendo la Coordinadora. Ya no se bloquea por esCoord.
   get formularioVisible(): boolean {
-    if (!this.turnoActual) return false;
-    const estado = this.turnoActual.estado;
-    return (estado === 'EN_CURSO' || estado === 'FINALIZADA') && this.puedeCalificar;
+    if (!this.turnoActual || !this.puedeCalificar) return false;
+    const e = this.turnoActual.estado;
+    return e === 'EN_CURSO' || e === 'FINALIZADA';
   }
 
   get formularioReadonly(): boolean {
@@ -435,16 +499,83 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
     return this.turnoActual.estado === 'FINALIZADA' || this.yaFinalizo;
   }
 
+  // ═══════════════════════════════════════════════════════════════════
+  // AUTO-GUARDADO REACTIVO — Req. 2
+  //
+  // Cada cambio en los inputs emite a notasChange$.
+  // debounceTime(2000) espera 2 s de inactividad, luego guarda
+  // silenciosamente sin toast. Solo un indicador visual mínimo.
+  // ═══════════════════════════════════════════════════════════════════
+
+  /** Llamado desde (ngModelChange) en cada input del formulario */
+  onNotaChange(): void {
+    if (this.formularioReadonly) return;
+    this.syncEstado = 'pendiente';
+    this.notasChange$.next();
+  }
+
+  private ejecutarAutoGuardado(): void {
+    const cur = this.turnoActual;
+    if (!cur || this.formularioReadonly || this.guardando) return;
+    if (!this.rangosValidos()) return;
+
+    this.syncEstado = 'guardando';
+
+    // Req. 4: idUsuario extraído del AuthService, nunca del formulario
+    this.svc.registrarPuntaje({
+      idEvaluacionOposicion: cur.idEvaluacionOposicion,
+      idUsuario:             this.idUsuario,   // el servicio lo stripea del body
+      puntajeMaterial:       this.pMaterial,
+      puntajeExposicion:     this.pExposicion,
+      puntajeRespuestas:     this.pRespuestas,
+      finalizar:             false,            // siempre borrador en auto-save
+      idConvocatoria:        this.idConvocatoria,
+    }).subscribe({
+      next: () => {
+        // Req. 2: guardado silencioso — solo actualizar indicador visual
+        this.syncEstado = 'sincronizado';
+        // Limpiar indicador después de 3 s
+        clearTimeout(this.syncTimer);
+        this.syncTimer = setTimeout(() => this.syncEstado = 'idle', 3000);
+      },
+      error: () => {
+        this.syncEstado = 'error';
+        clearTimeout(this.syncTimer);
+        this.syncTimer = setTimeout(() => this.syncEstado = 'idle', 5000);
+      }
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // GUARDADO MANUAL — Req. 4
+  // ═══════════════════════════════════════════════════════════════════
+
+  get subtotal(): number {
+    return (this.pMaterial || 0) + (this.pExposicion || 0) + (this.pRespuestas || 0);
+  }
+
+  private rangosValidos(): boolean {
+    return this.pMaterial  >= 0 && this.pMaterial  <= 10
+      && this.pExposicion >= 0 && this.pExposicion <= 4
+      && this.pRespuestas >= 0 && this.pRespuestas <= 6;
+  }
+
   guardarPuntaje(finalizar: boolean): void {
     const cur = this.turnoActual;
     if (!cur || this.guardando) return;
 
-    if (this.pMaterial  < 0 || this.pExposicion < 0 || this.pRespuestas < 0) { this.toast('Los puntajes no pueden ser negativos.', 'warn'); return; }
-    if (this.pMaterial  > 10) { this.toast('Material: máximo 10 puntos.',   'warn'); return; }
-    if (this.pExposicion > 4) { this.toast('Exposición: máximo 4 puntos.',  'warn'); return; }
-    if (this.pRespuestas > 6) { this.toast('Respuestas: máximo 6 puntos.',  'warn'); return; }
+    if (!this.rangosValidos()) {
+      if (this.pMaterial  > 10) { this.toast('Material: máximo 10 puntos.',   'warn'); return; }
+      if (this.pExposicion > 4) { this.toast('Exposición: máximo 4 puntos.',  'warn'); return; }
+      if (this.pRespuestas > 6) { this.toast('Respuestas: máximo 6 puntos.',  'warn'); return; }
+      this.toast('Los puntajes no pueden ser negativos.', 'warn');
+      return;
+    }
 
     this.guardando = true;
+    this.syncEstado = 'guardando';
+
+    // Req. 4: payload íntegro — idUsuario del AuthService
     this.svc.registrarPuntaje({
       idEvaluacionOposicion: cur.idEvaluacionOposicion,
       idUsuario:             this.idUsuario,
@@ -454,19 +585,29 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
       finalizar,
       idConvocatoria:        this.idConvocatoria,
     }).subscribe({
-      next: () => {
-        this.guardando = false;
-        if (finalizar) this.yaFinalizo = true;
-        this.toast(finalizar ? 'Calificación bloqueada.' : 'Puntaje guardado.', 'ok');
+      next: res => {
+        this.guardando  = false;
+        this.syncEstado = 'sincronizado';
+        if (finalizar) {
+          this.yaFinalizo = true;
+          // Req. 2: toast SOLO al finalizar manualmente
+          this.toast('Calificación finalizada y bloqueada.', 'ok');
+        }
+        clearTimeout(this.syncTimer);
+        this.syncTimer = setTimeout(() => this.syncEstado = 'idle', 3000);
       },
-      error: (err: Error) => { this.guardando = false; this.toast(err.message, 'err'); }
+      error: (err: Error) => {
+        this.guardando  = false;
+        this.syncEstado = 'error';
+        this.toast(err.message, 'err');
+      }
     });
   }
 
   // ── Helpers ───────────────────────────────────────────────────────
 
   badgeEstado(e: string): string {
-    return ({ PROGRAMADA:'badge-blue', EN_CURSO:'badge-amber', FINALIZADA:'badge-green', NO_PRESENTO:'badge-red' } as any)[e] ?? 'badge-gray';
+    return ({ PROGRAMADA: 'badge-blue', EN_CURSO: 'badge-amber', FINALIZADA: 'badge-green', NO_PRESENTO: 'badge-red' } as any)[e] ?? 'badge-gray';
   }
 
   formatHora(h?: string):  string { return h ?? '—'; }
@@ -476,10 +617,10 @@ export class SalaEvaluacionComponent implements OnInit, OnDestroy {
     return `${d}/${m}/${y}`;
   }
 
-  private toast(msg: string, tipo: 'ok'|'err'|'warn'): void {
+  private toast(msg: string, tipo: 'ok' | 'err' | 'warn'): void {
     clearTimeout(this.toastTimer);
     this.toastMsg  = msg;
     this.toastTipo = tipo;
-    this.toastTimer = setTimeout(() => this.toastMsg = '', tipo === 'err' ? 9000 : 4000);
+    this.toastTimer = setTimeout(() => this.toastMsg = '', tipo === 'err' ? 9000 : 4500);
   }
 }
