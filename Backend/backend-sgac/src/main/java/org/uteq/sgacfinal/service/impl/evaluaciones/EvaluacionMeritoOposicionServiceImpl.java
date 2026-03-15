@@ -236,4 +236,18 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
             throw new ComisionException("Respuesta inesperada del servidor.");
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public JsonNode resolverMiSala(Integer idUsuario) {
+        try {
+            String raw = repo.resolverSalaUsuario(idUsuario);
+            return evaluar(raw, "resolverMiSala");
+        } catch (ComisionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[EvaluacionOposicion] resolverMiSala idUsuario={}", idUsuario, e);
+            throw new ComisionException("Error al resolver la sala del usuario: " + e.getMessage());
+        }
+    }
 }

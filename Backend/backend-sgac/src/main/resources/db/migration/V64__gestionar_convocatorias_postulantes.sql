@@ -151,3 +151,57 @@ $$;
 
 GRANT EXECUTE ON FUNCTION postulacion.fn_resolver_sala_usuario(INTEGER)
     TO app_user_default;
+
+
+CREATE OR REPLACE FUNCTION postulacion.fn_resolver_mi_sala(p_id_usuario INTEGER)
+    RETURNS JSONB
+    LANGUAGE plpgsql
+    SECURITY DEFINER
+    STABLE
+AS $$
+DECLARE
+    v_row RECORD;
+BEGIN
+    SELECT
+        cs.id_convocatoria,
+        a.nombre_asignatura,
+        ca.nombre_carrera
+    INTO v_row
+    FROM   seguridad.usuario_comision     uc
+               JOIN   postulacion.comision_seleccion cs ON cs.id_comision_seleccion = uc.id_comision_seleccion
+               JOIN   convocatoria.convocatoria       c  ON c.id_convocatoria       = cs.id_convocatoria
+               JOIN   academico.asignatura            a  ON a.id_asignatura         = c.id_asignatura
+               JOIN   academico.carrera               ca ON ca.id_carrera           = a.id_carrera
+    WHERE  uc.id_usuario = p_id_usuario
+      AND  uc.activo     = TRUE
+      AND  cs.activo     = TRUE
+      AND  c.activo      = TRUE
+      -- Solo convocatorias del período académico activo
+      AND  EXISTS (
+        SELECT 1 FROM academico.periodo_academico pa
+        WHERE pa.id_periodo_academico = c.id_periodo_academico
+          AND pa.activo = TRUE AND pa.estado = 'EN PROCESO'
+    )
+    ORDER BY cs.id_comision_seleccion DESC
+    LIMIT 1;
+
+    IF NOT FOUND THEN
+        RETURN jsonb_build_object(
+                'exito',   false,
+                'mensaje', 'No tienes ninguna comisión asignada en el período activo.'
+               );
+    END IF;
+
+    RETURN jsonb_build_object(
+            'exito',            true,
+            'idConvocatoria',   v_row.id_convocatoria,
+            'nombreAsignatura', v_row.nombre_asignatura,
+            'nombreCarrera',    v_row.nombre_carrera
+           );
+
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object('exito', false, 'mensaje', '[ERROR] ' || SQLERRM);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION postulacion.fn_resolver_mi_sala(INTEGER) TO app_user_default;
