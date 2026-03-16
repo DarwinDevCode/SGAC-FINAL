@@ -33,5 +33,7 @@ public class SesionResponseDTO {
     // Nuevo: fecha/hora de la observación
     private LocalDate fechaObservacion;
 
+    private Boolean tieneObservacion;
+
     private List<EvidenciaResponseDTO> evidencias;
 }

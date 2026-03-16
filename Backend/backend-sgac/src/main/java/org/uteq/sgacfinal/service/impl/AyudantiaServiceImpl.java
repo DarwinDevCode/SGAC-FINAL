@@ -108,28 +108,46 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
     @Override
     @Transactional(readOnly = true)
     public AyudantiaDetalleResponseDTO obtenerDetallescompletos(Integer idAyudantia) {
-        Ayudantia ayudantia = ayudantiaRepository.findAyudantiaConDetalles(idAyudantia)
+        Ayudantia ayudantia = ayudantiaRepository.findById(idAyudantia)
                 .orElseThrow(() -> new ResourceNotFoundException("Ayudantía no encontrada"));
+
+        Integer idUsuario = ayudantia.getPostulacion().getEstudiante().getUsuario().getIdUsuario();
+        
+        // Usamos el procedimiento almacenado para listar las sesiones del ayudante
+        List<Object[]> rows = ayudantiaRepository.findAllByAyudanteId(idUsuario);
+
+        List<RegistroActividadDetalleDTO> actividades = rows.stream()
+                .map(row -> {
+                    Integer idRegistro = (Integer) row[0];
+                    // Para cada actividad, recuperamos sus evidencias vía SP
+                    List<Object[]> evRows = ayudantiaRepository.findDetalleConEvidenciasById(idUsuario, idRegistro);
+                    
+                    List<EvidenciaDetalleDTO> evidencias = evRows.stream()
+                            .map(evRow -> EvidenciaDetalleDTO.builder()
+                                    .idEvidencia((Integer) evRow[0])
+                                    .nombreArchivo((String) evRow[1])
+                                    .rutaArchivo((String) evRow[2])
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    return RegistroActividadDetalleDTO.builder()
+                            .idRegistroActividad(idRegistro)
+                            .temaTratado((String) row[2])
+                            .descripcionActividad((String) row[3])
+                            .fecha(toLocalDate(row[1]))
+                            .horasDedicadas(toBigDecimal(row[5]))
+                            .estadoRevision((String) row[6])
+                            .evidencias(evidencias)
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         return AyudantiaDetalleResponseDTO.builder()
                 .idAyudantia(ayudantia.getIdAyudantia())
                 .fechaInicio(ayudantia.getFechaInicio())
                 .fechaFin(ayudantia.getFechaFin())
                 .horasCumplidas(ayudantia.getHorasCumplidas())
-                .actividades(ayudantia.getRegistrosActividad().stream()
-                        .map(ra -> RegistroActividadDetalleDTO.builder()
-                                .idRegistroActividad(ra.getIdRegistroActividad())
-                                .temaTratado(ra.getTemaTratado())
-                                .fecha(ra.getFecha())
-                                .horasDedicadas(ra.getHorasDedicadas())
-                                .estadoRevision(ra.getIdTipoEstadoRegistro().getNombreEstado()) // Ajustado al esquema
-                                .evidencias(ra.getEvidencias().stream()
-                                        .map(ev -> EvidenciaDetalleDTO.builder()
-                                                .idEvidencia(ev.getIdEvidenciaRegistroActividad())
-                                                .nombreArchivo(ev.getNombreArchivo())
-                                                .rutaArchivo(ev.getRutaArchivo())
-                                                .build()).collect(Collectors.toList()))
-                                .build()).collect(Collectors.toList()))
+                .actividades(actividades)
                 .build();
     }
 
@@ -141,10 +159,10 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
         return rawData.stream().map(row -> {
             return RegistroActividadDetalleDTO.builder()
                     .idRegistroActividad((Integer) row[0])
-                    .descripcionActividad((String) row[2])
-                    .temaTratado((String) row[3])
-                    .fecha(row[4] != null ? ((Date) row[4]).toLocalDate() : null)
-                    .horasDedicadas((BigDecimal) row[6])
+                    .temaTratado((String) row[2])
+                    .descripcionActividad((String) row[3])
+                    .fecha(toLocalDate(row[1]))
+                    .horasDedicadas(toBigDecimal(row[5]))
                     .build();
         }).collect(Collectors.toList());
     }
@@ -181,85 +199,62 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
     }
 
     private SesionResponseDTO mapearSesionListadoRow(Object[] row) {
-        // Índices según SELECT de findAllByAyudanteId:
-        // 0 id_registro_actividad
-        // 1 descripcion_actividad
+        // Índices según fn_listar_sesiones:
+        // 0 id_registro
+        // 1 fecha
         // 2 tema_tratado
-        // 3 fecha
+        // 3 descripcion
         // 4 numero_asistentes
         // 5 horas_dedicadas
-        // 6 id_tipo_estado_registro
-        // 7 nombre_estado
-        // 8 observaciones
-        // 9 fecha_observacion
+        // 6 estado
+        // 7 total_evidencias
+        // 8 tiene_observacion
 
-        Integer idTipoEstadoRegistro = row[6] != null ? ((Number) row[6]).intValue() : null;
-        String nombreEstado = row[7] != null ? row[7].toString() : null;
-
-        String observacion = (row[8] != null && !row[8].toString().isBlank())
-                ? row[8].toString()
-                : "Sin observaciones";
-
-        LocalDate fechaObs = toLocalDate(row[9]);
+        String nombreEstado = row[6] != null ? row[6].toString() : null;
+        Boolean tieneObs = row[8] != null && (Boolean) row[8];
 
         return SesionResponseDTO.builder()
-                .idRegistroActividad(row[0] != null ? ((Number) row[0]).intValue() : null)
-                .descripcionActividad((String) row[1])
+                .idRegistroActividad((Integer) row[0])
+                .descripcionActividad((String) row[3])
                 .temaTratado((String) row[2])
-                .fecha(toLocalDate(row[3]))
-                .numeroAsistentes(row[4] != null ? ((Number) row[4]).intValue() : null)
-                .horasDedicadas((BigDecimal) row[5])
-                .idTipoEstadoRegistro(idTipoEstadoRegistro)
-                // mantenemos estadoRevision por compatibilidad (mismo valor que nombreEstado)
+                .fecha(toLocalDate(row[1]))
+                .numeroAsistentes((Integer) row[4])
+                .horasDedicadas(toBigDecimal(row[5]))
+                // mantenemos estadoRevision por compatibilidad
                 .estadoRevision(nombreEstado)
                 .nombreEstado(nombreEstado)
-                .observacionDocente(observacion)
-                .fechaObservacion(fechaObs)
-                .evidencias(null)
+                .tieneObservacion(tieneObs)
+                .observacionDocente(tieneObs ? "OBSERVADO" : "Sin observaciones")
                 .build();
     }
 
     private EvidenciaResponseDTO mapearEvidenciaDetalleRow(Object[] row) {
-        // Índices según SELECT de findDetalleConEvidenciasById (solo evidencias):
-        // 0 id_evidencia_registro_actividad
+        // Índices según fn_evidencias_sesion:
+        // 0 id_evidencia
         // 1 nombre_archivo
         // 2 ruta_archivo
         // 3 mime_type
         // 4 tamanio_bytes
-        // 5 fecha_subida
-        // 6 id_tipo_estado_evidencia
-        // 7 nombre_estado_evidencia
-        // 8 observacion_evidencia
-        // 9 fecha_observacion_evidencia
+        // 5 tipo_evidencia
+        // 6 estado_evidencia
+        // 7 fecha_subida
 
         if (row[0] == null) {
             return null;
         }
 
-        Integer idTipoEstadoEvidencia = row[6] != null ? ((Number) row[6]).intValue() : null;
-        String nombreEstadoEvidencia = row[7] != null ? row[7].toString() : null;
-
-        String observacion = (row[8] != null && !row[8].toString().isBlank())
-                ? row[8].toString()
-                : "Sin observaciones";
+        String nombreEstadoEvidencia = row[6] != null ? row[6].toString() : null;
 
         return EvidenciaResponseDTO.builder()
-                .idEvidenciaRegistroActividad(((Number) row[0]).intValue())
+                .idEvidenciaRegistroActividad((Integer) row[0])
                 .nombreArchivo((String) row[1])
                 .rutaArchivo((String) row[2])
                 .mimeType((String) row[3])
-                .tamanioBytes(row[4] != null ? ((Number) row[4]).intValue() : null)
-                .fechaSubida(toLocalDate(row[5]))
-
-                // Ya no se envía tipo de evidencia (se infiere por mimeType)
-                .idTipoEvidencia(null)
-                .tipoEvidencia(null)
-
-                .idTipoEstadoEvidencia(idTipoEstadoEvidencia)
-                .estadoEvidencia(nombreEstadoEvidencia) // compatibilidad
+                .tamanioBytes((Integer) row[4])
+                .fechaSubida(toLocalDate(row[7]))
+                .tipoEvidencia((String) row[5])
+                .estadoEvidencia(nombreEstadoEvidencia)
                 .nombreEstadoEvidencia(nombreEstadoEvidencia)
-                .observacionDocente(observacion)
-                .fechaObservacion(toLocalDate(row[9]))
                 .build();
     }
 
@@ -267,7 +262,14 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
         if (value == null) return null;
         if (value instanceof LocalDate ld) return ld;
         if (value instanceof Date d) return d.toLocalDate();
+        if (value instanceof java.sql.Date d) return d.toLocalDate();
         if (value instanceof java.sql.Timestamp ts) return ts.toLocalDateTime().toLocalDate();
         return LocalDate.parse(value.toString());
+    }
+
+    private BigDecimal toBigDecimal(Object valor) {
+        if (valor == null) return BigDecimal.ZERO;
+        if (valor instanceof BigDecimal bd) return bd;
+        return new BigDecimal(valor.toString());
     }
 }
