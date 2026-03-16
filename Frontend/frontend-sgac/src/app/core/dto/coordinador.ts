@@ -46,4 +46,9 @@ export interface CoordinadorPostulanteReporteDTO {
     nombrePeriodo: string;
     fechaPostulacion: Date;
     estadoEvaluacion: string;
+    // Campos desglosados
+    puntajeMeritos?: number;
+    puntajeOposicion?: number;
+    puntajeTotal?: number;
+    observacionPostulacion?: string;
 }

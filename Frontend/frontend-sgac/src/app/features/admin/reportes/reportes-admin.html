@@ -1,0 +1,136 @@
+<div class="reportes-container">
+  <div class="header">
+    <h2 class="title">Centro de Reportes Globales</h2>
+    <div class="actions">
+      <button class="btn-pdf" (click)="exportarPDF()" [disabled]="!data.length">
+        <lucide-icon name="FileText" size="18"></lucide-icon> Exportar PDF
+      </button>
+      <button class="btn-excel" (click)="exportarExcel()" [disabled]="!data.length">
+        <lucide-icon name="FileSpreadsheet" size="18"></lucide-icon> Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  <div class="filters-card">
+    <div class="filter-group">
+      <label>Tipo de Reporte</label>
+      <select [(ngModel)]="selectedTipo" (change)="generarReporte()" class="input-field">
+        @for (tipo of tiposReporte; track tipo.id) {
+          <option [value]="tipo.id">{{ tipo.nombre }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-grid">
+      <!-- Filtros Cascada -->
+      <div class="filter-group" *ngIf="['carreras', 'asignaturas', 'personal', 'convocatorias'].includes(selectedTipo)">
+        <label>Facultad</label>
+        <select [(ngModel)]="filtros.idFacultad" (change)="onFacultadChange()" class="input-field">
+          <option [ngValue]="null">Todas las Facultades</option>
+          @for (f of facultades; track f.idFacultad) {
+            <option [ngValue]="f.idFacultad">{{ f.nombreFacultad }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="['asignaturas', 'personal'].includes(selectedTipo)">
+        <label>Carrera</label>
+        <select [(ngModel)]="filtros.idCarrera" (change)="onCarreraChange()" class="input-field">
+          <option [ngValue]="null">Todas las Carreras</option>
+          @for (c of carreras; track c.id) {
+            <option [ngValue]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="['convocatorias', 'postulantes'].includes(selectedTipo)">
+        <label>Asignatura</label>
+        <select [(ngModel)]="filtros.idAsignatura" (change)="generarReporte()" class="input-field">
+          <option [ngValue]="null">Todas las Asignaturas</option>
+          @for (a of asignaturas; track a.id) {
+            <option [ngValue]="a.id">{{ a.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="['convocatorias', 'postulantes'].includes(selectedTipo)">
+        <label>Periodo Académico</label>
+        <select [(ngModel)]="filtros.idPeriodo" (change)="generarReporte()" class="input-field">
+          <option [ngValue]="null">Todos los Periodos</option>
+          @for (p of periodos; track p.idPeriodoAcademico) {
+            <option [ngValue]="p.idPeriodoAcademico">{{ p.nombrePeriodo }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Otros Filtros -->
+      <div class="filter-group" *ngIf="selectedTipo === 'personal'">
+        <label>Tipo Personal</label>
+        <select [(ngModel)]="filtros.tipoPersonal" (change)="generarReporte()" class="input-field">
+          <option value="">Cualquiera</option>
+          <option value="DECANO">Decanos</option>
+          <option value="COORDINADOR">Coordinadores</option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="selectedTipo === 'usuarios'">
+        <label>Rol de Usuario</label>
+        <select [(ngModel)]="filtros.rolUsuario" (change)="generarReporte()" class="input-field">
+          <option value="">Todos los Roles</option>
+          <option value="ADMIN">Administrador</option>
+          <option value="DECANO">Decano</option>
+          <option value="COORDINADOR">Coordinador</option>
+          <option value="DOCENTE">Docente</option>
+          <option value="ESTUDIANTE">Estudiante</option>
+          <option value="AYUDANTE">Ayudante</option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="selectedTipo === 'usuarios'">
+        <label>Estado</label>
+        <select [(ngModel)]="filtros.activoUsuario" (change)="generarReporte()" class="input-field">
+          <option [ngValue]="null">Todos</option>
+          <option [ngValue]="true">Activos</option>
+          <option [ngValue]="false">Inactivos</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    @if (loading) {
+      <div class="loading-state">Cargando datos...</div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            @for (col of getColumns(); track col.key) {
+              <th>{{ col.label }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of data; track item) {
+            <tr>
+              @for (col of getColumns(); track col.key) {
+                <td>
+                  @if (col.key === 'activo') {
+                    <span class="status-pill" [class.active]="item[col.key]" [class.inactive]="!item[col.key]">
+                      {{ item[col.key] ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  } @else {
+                    {{ item[col.key] }}
+                  }
+                </td>
+              }
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="getColumns().length" class="text-center">No hay datos que coincidan con los filtros</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

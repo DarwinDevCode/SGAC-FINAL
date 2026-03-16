@@ -18,38 +18,35 @@
         <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
     </div>
     } @else {
-    <!-- Pestañas -->
-    <div class="tabs-container">
-        <button class="tab-button" [class.active]="activeTab === 'convocatorias'" (click)="cambiarTab('convocatorias')">
-            <lucide-icon name="briefcase" size="18"></lucide-icon>
-            Mis Convocatorias
-        </button>
-        <button class="tab-button" [class.active]="activeTab === 'postulantes'" (click)="cambiarTab('postulantes')">
-            <lucide-icon name="users" size="18"></lucide-icon>
-            Listado de Postulantes
-        </button>
+    <!-- Selección de Reporte -->
+    <div class="report-selection-container">
+        <div class="select-group">
+            <label for="tipoReporte">Tipo de Reporte:</label>
+            <select id="tipoReporte" [(ngModel)]="tipoReporte" (change)="filtroConvocatoria=''; filtroPostulante=''; filtroResultados=''">
+                <option value="convocatorias">Resumen de Convocatorias Propias</option>
+                <option value="postulantes">Listado Nominal de Postulantes</option>
+                <option value="resultados">Cuadro General de Resultados (Méritos y Oposición)</option>
+            </select>
+        </div>
+        
+        <div class="actions">
+            <button class="btn-export pdf" (click)="exportarPDF()">
+                <lucide-icon name="download" size="16"></lucide-icon> Exportar PDF
+            </button>
+            <button class="btn-export excel" (click)="exportarExcel()">
+                <lucide-icon name="download" size="16"></lucide-icon> Exportar Excel
+            </button>
+        </div>
     </div>
 
-    @if (activeTab === 'convocatorias') {
-    <div class="tab-content">
+    <!-- VISTA: RESUMEN DE CONVOCATORIAS -->
+    @if (tipoReporte === 'convocatorias') {
+    <div class="report-content-card">
         <div class="content-header">
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <h3 style="margin-bottom: 0;">Listado de Convocatorias Propias</h3>
-                <div style="position: relative; margin-left: 2rem;">
-                    <input type="text" [(ngModel)]="filtroConvocatoria" placeholder="Buscar convocatoria..."
-                        style="padding: 0.5rem 1rem 0.5rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; font-size: 0.875rem;">
-                    <lucide-icon name="search" size="16"
-                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8;"></lucide-icon>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button class="btn-export pdf" (click)="exportarConvocatoriasPDF()">
-                    <lucide-icon name="download" size="16"></lucide-icon> Descargar PDF
-                </button>
-                <button class="btn-export excel" (click)="exportarConvocatoriasExcel()">
-                    <lucide-icon name="download" size="16"></lucide-icon> Descargar Excel
-                </button>
+            <h3>Convocatorias publicadas</h3>
+            <div class="search-box">
+                <input type="text" [(ngModel)]="filtroConvocatoria" placeholder="Buscar convocatoria...">
+                <lucide-icon name="search" size="16"></lucide-icon>
             </div>
         </div>
 
@@ -58,11 +55,11 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Asignatura</th>
+                        <th>Asignatura / Carrera</th>
                         <th>Periodo</th>
                         <th>Vigencia</th>
                         <th class="text-center">Cupos</th>
-                        <th class="text-center">Postulantes</th>
+                        <th class="text-center">Resumen</th>
                         <th class="text-center">Estado</th>
                     </tr>
                 </thead>
@@ -70,17 +67,20 @@
                     @for (conv of convocatoriasFiltradas; track conv.idConvocatoria) {
                     <tr>
                         <td>#{{ conv.idConvocatoria }}</td>
-                        <td class="semi-bold">{{ conv.nombreAsignatura }}</td>
+                        <td>
+                            <div class="semi-bold">{{ conv.nombreAsignatura }}</div>
+                            <div class="text-xs text-muted">{{ conv.nombreCarrera }}</div>
+                        </td>
                         <td>{{ conv.nombrePeriodo }}</td>
                         <td>
                             <div style="font-size: 0.8rem; color: #64748b;">
-                                {{ conv.fechaInicio }} al<br>{{ conv.fechaFin }}
+                                {{ conv.fechaInicio }} - {{ conv.fechaFin }}
                             </div>
                         </td>
                         <td class="text-center">{{ conv.cuposAprobados }}</td>
                         <td class="text-center">
-                            <span class="badge" style="background:#f0f9ff; color:#0369a1; border: 1px solid #bae6fd;">
-                                {{ conv.numeroPostulantes }}
+                            <span class="badge-postulantes">
+                                <b>{{ conv.numeroPostulantes }}</b> postulantes
                             </span>
                         </td>
                         <td class="text-center">
@@ -103,27 +103,14 @@
     </div>
     }
 
-    @if (activeTab === 'postulantes') {
-    <div class="tab-content">
+    <!-- VISTA: LISTADO DE POSTULANTES -->
+    @if (tipoReporte === 'postulantes') {
+    <div class="report-content-card">
         <div class="content-header">
-            <div style="display: flex; gap: 1rem; align-items: center;">
-                <h3 style="margin-bottom: 0;">Listado Nominal de Estudiantes Postulantes</h3>
-                <div style="position: relative; margin-left: 2rem;">
-                    <input type="text" [(ngModel)]="filtroPostulante"
-                        placeholder="Buscar por nombre, cédula o estado..."
-                        style="padding: 0.5rem 1rem 0.5rem 2.5rem; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; font-size: 0.875rem; width: 300px;">
-                    <lucide-icon name="search" size="16"
-                        style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #94a3b8;"></lucide-icon>
-                </div>
-            </div>
-
-            <div class="actions">
-                <button class="btn-export pdf" (click)="exportarPostulantesPDF()">
-                    <lucide-icon name="download" size="16"></lucide-icon> Descargar PDF
-                </button>
-                <button class="btn-export excel" (click)="exportarPostulantesExcel()">
-                    <lucide-icon name="download" size="16"></lucide-icon> Descargar Excel
-                </button>
+            <h3>Nómina de postulantes</h3>
+            <div class="search-box">
+                <input type="text" [(ngModel)]="filtroPostulante" placeholder="Buscar por nombre, cédula...">
+                <lucide-icon name="search" size="16"></lucide-icon>
             </div>
         </div>
 
@@ -131,36 +118,90 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Cédula</th>
-                        <th>Estudiante</th>
-                        <th>Asignatura a la que Postula</th>
-                        <th>Periodo</th>
-                        <th>Fecha de Aplicación</th>
-                        <th class="text-center">Estado Actual</th>
+                        <th>Identificación</th>
+                        <th>Estudiante / Asignatura</th>
+                        <th>Fecha Aplicación</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Nota Final</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (post of postulantesFiltrados; track post.idPostulacion) {
                     <tr>
-                        <td style="font-family: monospace; color: #475569;">{{ post.cedula }}</td>
-                        <td class="semi-bold">{{ post.nombreEstudiante }}</td>
-                        <td>{{ post.nombreAsignatura }}</td>
-                        <td>{{ post.nombrePeriodo }}</td>
+                        <td style="font-family: monospace;">{{ post.cedula }}</td>
+                        <td>
+                            <div class="semi-bold">{{ post.nombreEstudiante }}</div>
+                            <div class="text-xs text-muted">{{ post.nombreAsignatura }}</div>
+                        </td>
                         <td class="text-muted">{{ post.fechaPostulacion | date:'mediumDate' }}</td>
                         <td class="text-center">
-                            <span class="badge" style="border: 1px solid transparent;" [ngStyle]="{
-                                            'background-color': post.estadoEvaluacion === 'EN_EVALUACION' || post.estadoEvaluacion === 'EN_PROCESO' ? '#fffbeb' : (post.estadoEvaluacion === 'APROBADO' || post.estadoEvaluacion === 'ASIGNADO' ? '#f0fdf4' : '#fef2f2'),
-                                            'color': post.estadoEvaluacion === 'EN_EVALUACION' || post.estadoEvaluacion === 'EN_PROCESO' ? '#b45309' : (post.estadoEvaluacion === 'APROBADO' || post.estadoEvaluacion === 'ASIGNADO' ? '#15803d' : '#b91c1c'),
-                                            'border-color': post.estadoEvaluacion === 'EN_EVALUACION' || post.estadoEvaluacion === 'EN_PROCESO' ? '#fde68a' : (post.estadoEvaluacion === 'APROBADO' || post.estadoEvaluacion === 'ASIGNADO' ? '#bbf7d0' : '#fecaca')
-                                        }">
+                            <span class="badge-status" [attr.data-status]="post.estadoEvaluacion">
                                 {{ post.estadoEvaluacion }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="total-score">{{ post.puntajeTotal | number:'1.2-2' }}</div>
+                        </td>
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted" style="padding: 2rem;">
+                            No se encontraron postulantes.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+
+    <!-- VISTA: CUADRO DE RESULTADOS (DESGLOSADO) -->
+    @if (tipoReporte === 'resultados') {
+    <div class="report-content-card">
+        <div class="content-header">
+            <h3>Cuadro General de Calificaciones</h3>
+            <div class="search-box" style="flex: 1; max-width: 400px;">
+                <input type="text" [(ngModel)]="filtroResultados" placeholder="Buscar por nombre, cédula o asignatura...">
+                <lucide-icon name="search" size="16"></lucide-icon>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table scores-table">
+                <thead>
+                    <tr>
+                        <th>Postulante</th>
+                        <th>Asignatura</th>
+                        <th class="text-center">Nota Méritos (20)</th>
+                        <th class="text-center">Nota Oposición (20)</th>
+                        <th class="text-center">Nota Total (40)</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (res of resultadosFiltrados; track res.idPostulacion) {
+                    <tr>
+                        <td>
+                            <div class="semi-bold">{{ res.nombreEstudiante }}</div>
+                            <div class="text-xs text-muted">{{ res.cedula }}</div>
+                        </td>
+                        <td>{{ res.nombreAsignatura }}</td>
+                        <td class="text-center score-cell merito">{{ res.puntajeMeritos | number:'1.2-2' }}</td>
+                        <td class="text-center score-cell oposicion">{{ res.puntajeOposicion | number:'1.2-2' }}</td>
+                        <td class="text-center score-cell total">
+                            <strong>{{ res.puntajeTotal | number:'1.2-2' }}</strong>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge-status" [attr.data-status]="res.estadoEvaluacion">
+                                {{ res.estadoEvaluacion }}
                             </span>
                         </td>
                     </tr>
                     } @empty {
                     <tr>
                         <td colspan="6" class="text-center text-muted" style="padding: 2rem;">
-                            No se encontraron postulantes.
+                            No hay resultados disponibles para desglosar.
                         </td>
                     </tr>
                     }

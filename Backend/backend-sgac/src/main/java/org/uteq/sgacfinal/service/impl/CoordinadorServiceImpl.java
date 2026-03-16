@@ -15,7 +15,12 @@ import org.uteq.sgacfinal.service.ICoordinadorService;
 import org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
+import org.uteq.sgacfinal.entity.EvaluacionMeritos;
+import org.uteq.sgacfinal.entity.EvaluacionOposicion;
+import org.uteq.sgacfinal.entity.UsuarioComision;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -165,16 +170,72 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
     public List<CoordinadorPostulanteReporteDTO> reportePostulantesPropios(Integer idUsuario) {
         List<Postulacion> postulaciones = postulacionRepository.findByCoordinadorPropioActivo(idUsuario);
 
-        return postulaciones.stream().map(p -> CoordinadorPostulanteReporteDTO.builder()
+        return postulaciones.stream().map(p -> {
+            // Cálculo de Méritos
+            BigDecimal totalMeritos = BigDecimal.ZERO;
+            if (p.getEvaluacionesMeritos() != null && !p.getEvaluacionesMeritos().isEmpty()) {
+                EvaluacionMeritos em = p.getEvaluacionesMeritos().get(0);
+                if (em.getNotaAsignatura() != null) totalMeritos = totalMeritos.add(em.getNotaAsignatura());
+                if (em.getNotaSemestres() != null) totalMeritos = totalMeritos.add(em.getNotaSemestres());
+                if (em.getNotaEventos() != null) totalMeritos = totalMeritos.add(em.getNotaEventos());
+                if (em.getNotaExperiencia() != null) totalMeritos = totalMeritos.add(em.getNotaExperiencia());
+            }
+
+            // Cálculo de Oposición (Promedio de los integrantes de la comisión)
+            BigDecimal totalOposicion = BigDecimal.ZERO;
+            if (p.getEvaluacionesOposicion() != null && !p.getEvaluacionesOposicion().isEmpty()) {
+                EvaluacionOposicion eo = p.getEvaluacionesOposicion().get(0);
+                List<UsuarioComision> integrantes = eo.getUsuariosComision();
+                
+                if (integrantes != null && !integrantes.isEmpty()) {
+                    BigDecimal sumaOposicion = BigDecimal.ZERO;
+                    int contIntegrantes = 0;
+                    for (UsuarioComision uc : integrantes) {
+                        BigDecimal puntajeIntegrante = BigDecimal.ZERO;
+                        boolean tieneNotas = false;
+                        if (uc.getPuntajeMaterial() != null) {
+                            puntajeIntegrante = puntajeIntegrante.add(uc.getPuntajeMaterial());
+                            tieneNotas = true;
+                        }
+                        if (uc.getPuntajeRespuestas() != null) {
+                            puntajeIntegrante = puntajeIntegrante.add(uc.getPuntajeRespuestas());
+                            tieneNotas = true;
+                        }
+                        if (uc.getPuntajeExposicion() != null) {
+                            puntajeIntegrante = puntajeIntegrante.add(uc.getPuntajeExposicion());
+                            tieneNotas = true;
+                        }
+                        
+                        if (tieneNotas) {
+                            sumaOposicion = sumaOposicion.add(puntajeIntegrante);
+                            contIntegrantes++;
+                        }
+                    }
+                    if (contIntegrantes > 0) {
+                        totalOposicion = sumaOposicion.divide(new BigDecimal(contIntegrantes), 2, RoundingMode.HALF_UP);
+                    }
+                }
+            }
+
+            BigDecimal puntajeTotal = totalMeritos.add(totalOposicion);
+
+            return CoordinadorPostulanteReporteDTO.builder()
                 .idPostulacion(p.getIdPostulacion())
-                .nombreEstudiante(p.getEstudiante().getUsuario().getNombres() + " " + p.getEstudiante().getUsuario().getApellidos())
-                .cedula(p.getEstudiante().getUsuario().getCedula())
-                .nombreAsignatura(p.getConvocatoria().getAsignatura().getNombreAsignatura())
-                .nombrePeriodo(p.getConvocatoria().getPeriodoAcademico().getNombrePeriodo())
+                .nombreEstudiante(p.getEstudiante() != null && p.getEstudiante().getUsuario() != null ? 
+                        p.getEstudiante().getUsuario().getNombres() + " " + p.getEstudiante().getUsuario().getApellidos() : "Desconocido")
+                .cedula(p.getEstudiante() != null && p.getEstudiante().getUsuario() != null ? p.getEstudiante().getUsuario().getCedula() : "N/A")
+                .nombreAsignatura(p.getConvocatoria() != null && p.getConvocatoria().getAsignatura() != null ? 
+                        p.getConvocatoria().getAsignatura().getNombreAsignatura() : "N/A")
+                .nombrePeriodo(p.getConvocatoria() != null && p.getConvocatoria().getPeriodoAcademico() != null ? 
+                        p.getConvocatoria().getPeriodoAcademico().getNombrePeriodo() : "N/A")
                 .fechaPostulacion(p.getFechaPostulacion())
                 .estadoEvaluacion(p.getEstadoPostulacion())
-                .build()
-        ).collect(Collectors.toList());
+                .puntajeMeritos(totalMeritos)
+                .puntajeOposicion(totalOposicion)
+                .puntajeTotal(puntajeTotal)
+                .observacionPostulacion(p.getObservaciones())
+                .build();
+        }).collect(Collectors.toList());
     }
 
     private CoordinadorResponseDTO mapearADTO(Coordinador entidad) {

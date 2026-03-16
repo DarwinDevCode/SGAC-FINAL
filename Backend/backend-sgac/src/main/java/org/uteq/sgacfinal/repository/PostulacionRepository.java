@@ -6,7 +6,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.uteq.sgacfinal.entity.Postulacion;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -40,16 +39,13 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
     boolean existePostulacionActiva(@Param("idEstudiante") Integer idEstudiante,
                                      @Param("idConvocatoria") Integer idConvocatoria);
 
-
     Postulacion findByIdPostulacion(Integer idPostulacion);
 
-    // Lista postulaciones por estado filtradas por carrera de la convocatoria
     @Query("SELECT p FROM Postulacion p WHERE p.estadoPostulacion = :estado " +
            "AND p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
     List<Postulacion> findByEstadoAndCarrera(@Param("estado") String estado,
                                              @Param("idCarrera") Integer idCarrera);
 
-    // Lista todas las postulaciones de una carrera
     @Query("SELECT p FROM Postulacion p WHERE p.convocatoria.asignatura.carrera.idCarrera = :idCarrera")
     List<Postulacion> findByCarrera(@Param("idCarrera") Integer idCarrera);
 
@@ -82,4 +78,8 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Intege
 
     @Query(value = "SELECT postulacion.fn_ver_detalle_postulacion(:idUsuario)", nativeQuery = true)
     String obtenerDetallePostulacion(@Param("idUsuario") Integer idUsuario);
+
+    long countByConvocatoria_Asignatura_Carrera_IdCarrera(Integer idCarrera);
+
+    long countByConvocatoria_IdConvocatoria(Integer idConvocatoria);
 }

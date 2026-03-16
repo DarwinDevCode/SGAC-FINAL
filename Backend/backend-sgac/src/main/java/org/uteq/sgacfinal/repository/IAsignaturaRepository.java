@@ -30,4 +30,7 @@ public interface IAsignaturaRepository extends JpaRepository<Asignatura, Integer
     @Query("SELECT a FROM Asignatura a JOIN FETCH a.carrera c")
     List<Asignatura> listarAsignaturasConCarrera();
 
+    List<Asignatura> findByCarrera_Facultad_IdFacultad(Integer idFacultad);
+
+    long countByCarrera_IdCarrera(Integer idCarrera);
 }

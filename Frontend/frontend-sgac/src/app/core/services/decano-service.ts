@@ -2,9 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DecanoResponseDTO, DecanoEstadisticasDTO, ConvocatoriaReporteDTO, LogAuditoriaDTO } from '../dto/decano';
+import { DecanoResponseDTO, DecanoEstadisticasDTO, ConvocatoriaReporteDTO, LogAuditoriaDTO, DecanoReporteCarreraDTO, DecanoReporteCoordinadorDTO } from '../dto/decano';
 import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { PostulacionResponseDTO } from '../dto/postulacion';
+import { AsignaturaDTO } from '../dto/asignatura';
+import { CoordinadorPostulanteReporteDTO } from '../dto/coordinador';
 
 @Injectable({
   providedIn: 'root'
@@ -46,5 +48,22 @@ export class DecanoService {
   // --- Postulaciones API ---
   listarPostulacionesPorConvocatoria(idConvocatoria: number): Observable<PostulacionResponseDTO[]> {
     return this.http.get<PostulacionResponseDTO[]>(`${this.API_POSTULACIONES}/convocatoria/${idConvocatoria}`);
+  }
+
+  // --- Reportes Avanzados para Decano ---
+  obtenerReporteCarreras(idFacultad: number): Observable<DecanoReporteCarreraDTO[]> {
+    return this.http.get<DecanoReporteCarreraDTO[]>(`${this.API_DECANOS}/facultad/${idFacultad}/reportes/carreras`);
+  }
+
+  obtenerReporteAsignaturas(idFacultad: number): Observable<AsignaturaDTO[]> {
+    return this.http.get<AsignaturaDTO[]>(`${this.API_DECANOS}/facultad/${idFacultad}/reportes/asignaturas`);
+  }
+
+  obtenerReportePostulantes(idFacultad: number): Observable<CoordinadorPostulanteReporteDTO[]> {
+    return this.http.get<CoordinadorPostulanteReporteDTO[]>(`${this.API_DECANOS}/facultad/${idFacultad}/reportes/postulantes`);
+  }
+
+  obtenerReporteCoordinadores(idFacultad: number): Observable<DecanoReporteCoordinadorDTO[]> {
+    return this.http.get<DecanoReporteCoordinadorDTO[]>(`${this.API_DECANOS}/facultad/${idFacultad}/reportes/coordinadores`);
   }
 }

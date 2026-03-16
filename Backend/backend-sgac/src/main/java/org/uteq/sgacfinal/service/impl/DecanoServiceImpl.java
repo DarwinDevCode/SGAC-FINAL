@@ -10,15 +10,13 @@ import org.uteq.sgacfinal.entity.Convocatoria;
 import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.entity.Coordinador;
 import org.uteq.sgacfinal.entity.LogAuditoria;
-import org.uteq.sgacfinal.repository.DecanoRepository;
-import org.uteq.sgacfinal.repository.IConvocatoriaRepository;
-import org.uteq.sgacfinal.repository.PostulacionRepository;
-import org.uteq.sgacfinal.repository.LogAuditoriaRepository;
+import org.uteq.sgacfinal.repository.*;
 import org.uteq.sgacfinal.service.IDecanoService;
-import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
-
+import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.entity.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,6 +30,9 @@ public class DecanoServiceImpl implements IDecanoService {
     private final IConvocatoriaRepository convocatoriaRepository;
     private final PostulacionRepository postulacionRepository;
     private final LogAuditoriaRepository logAuditoriaRepository;
+    private final CarreraRepository carreraRepository;
+    private final IAsignaturaRepository asignaturaRepository;
+    private final CoordinadorRepository coordinadorRepository;
 
     @Override
     public DecanoResponseDTO crear(DecanoRequestDTO request) {
@@ -147,16 +148,20 @@ public class DecanoServiceImpl implements IDecanoService {
         return convocatorias.stream().map(c -> {
             long postulantes = c.getPostulaciones() != null ? c.getPostulaciones().size() : 0L;
             
-            String nombreCoord = c.getAsignatura().getCarrera().getCoordinadores().stream()
-                    .filter(coord -> Boolean.TRUE.equals(coord.getActivo()))
-                    .findFirst()
-                    .map(coord -> coord.getUsuario().getNombres() + " " + coord.getUsuario().getApellidos())
-                    .orElse("Sin Coordinador Asignado");
+            String nombreCoord = "Sin Coordinador Asignado";
+            if (c.getAsignatura() != null && c.getAsignatura().getCarrera() != null && c.getAsignatura().getCarrera().getCoordinadores() != null) {
+                nombreCoord = c.getAsignatura().getCarrera().getCoordinadores().stream()
+                        .filter(coord -> Boolean.TRUE.equals(coord.getActivo()))
+                        .findFirst()
+                        .map(coord -> coord.getUsuario().getNombres() + " " + coord.getUsuario().getApellidos())
+                        .orElse("Sin Coordinador Asignado");
+            }
 
             return ConvocatoriaReporteDTO.builder()
                     .idConvocatoria(c.getIdConvocatoria())
-                    .nombreAsignatura(c.getAsignatura().getNombreAsignatura())
-                    .nombreCarrera(c.getAsignatura().getCarrera().getNombreCarrera())
+                    .nombreAsignatura(c.getAsignatura() != null ? c.getAsignatura().getNombreAsignatura() : "N/A")
+                    .nombreCarrera(c.getAsignatura() != null && c.getAsignatura().getCarrera() != null ? 
+                            c.getAsignatura().getCarrera().getNombreCarrera() : "N/A")
                     .nombreCoordinador(nombreCoord)
                     .fechaInicio(c.getFechaPublicacion())
                     .fechaFin(c.getFechaCierre())
@@ -170,13 +175,165 @@ public class DecanoServiceImpl implements IDecanoService {
     @Transactional(readOnly = true)
     public List<LogAuditoriaDTO> reporteAuditoriaPorFacultad(Integer idFacultad) {
         List<LogAuditoria> logs = logAuditoriaRepository.findByFacultadCoordinadores(idFacultad);
+        if (logs == null) return new ArrayList<>();
         return logs.stream().map(l -> LogAuditoriaDTO.builder()
                 .idLog(l.getIdLogAuditoria())
-                .nombreUsuario(l.getUsuario().getNombres() + " " + l.getUsuario().getApellidos())
+                .nombreUsuario(l.getUsuario() != null ? l.getUsuario().getNombres() + " " + l.getUsuario().getApellidos() : "N/A")
                 .accion(l.getAccion())
                 .tablaAfectada(l.getTablaAfectada())
                 .fechaHora(l.getFechaHora())
                 .build()).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DecanoReporteCarreraDTO> reporteCarreras(Integer idFacultad) {
+        System.out.println("DEBUG REPORTE: Generando reporte de carreras para idFacultad = " + idFacultad);
+        List<Carrera> carreras = carreraRepository.findByFacultad_IdFacultad(idFacultad);
+        System.out.println("DEBUG REPORTE: Carreras encontradas count = " + (carreras != null ? carreras.size() : 0));
+        return carreras.stream().map(c -> {
+            long asigCount = c.getAsignaturas() != null ? c.getAsignaturas().size() : 0;
+            long convCount = 0;
+            long postCount = 0;
+            if (c.getAsignaturas() != null) {
+                for (Asignatura a : c.getAsignaturas()) {
+                    if (a.getConvocatorias() != null) {
+                        convCount += a.getConvocatorias().size();
+                        for (Convocatoria conv : a.getConvocatorias()) {
+                            postCount += (conv.getPostulaciones() != null ? conv.getPostulaciones().size() : 0);
+                        }
+                    }
+                }
+            }
+            return DecanoReporteCarreraDTO.builder()
+                    .idCarrera(c.getIdCarrera())
+                    .nombreCarrera(c.getNombreCarrera())
+                    .totalAsignaturas(asigCount)
+                    .totalConvocatorias(convCount)
+                    .totalPostulantes(postCount)
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AsignaturaResponseDTO> reporteAsignaturas(Integer idFacultad) {
+        System.out.println("DEBUG REPORTE: Generando reporte de asignaturas para idFacultad = " + idFacultad);
+        List<Asignatura> asignaturas = asignaturaRepository.findByCarrera_Facultad_IdFacultad(idFacultad);
+        if (asignaturas == null) return new ArrayList<>();
+        System.out.println("DEBUG REPORTE: Asignaturas encontradas count = " + asignaturas.size());
+        return asignaturas.stream().map(a -> {
+            Integer idCarrera = (a.getCarrera() != null) ? a.getCarrera().getIdCarrera() : 0;
+            String nombreCarrera = (a.getCarrera() != null) ? a.getCarrera().getNombreCarrera() : "N/A";
+            return AsignaturaResponseDTO.builder()
+                .idAsignatura(a.getIdAsignatura())
+                .nombreAsignatura(a.getNombreAsignatura())
+                .idCarrera(idCarrera)
+                .nombreCarrera(nombreCarrera)
+                .activo(a.getActivo())
+                .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CoordinadorPostulanteReporteDTO> reportePostulantesFacultad(Integer idFacultad) {
+        try {
+            System.out.println("DEBUG POSTULANTES: Iniciando para facultad=" + idFacultad);
+            List<Postulacion> postulaciones = postulacionRepository.findByFacultadPropia(idFacultad);
+            if (postulaciones == null) return new ArrayList<>();
+            System.out.println("DEBUG POSTULANTES: Encontradas=" + postulaciones.size());
+            
+            return postulaciones.stream().map(p -> {
+                try {
+                    // Reutilizamos la lógica del coordinador pero para toda la facultad
+                    BigDecimal puntajeMeritos = BigDecimal.ZERO;
+                    if (p.getEvaluacionesMeritos() != null) {
+                        puntajeMeritos = p.getEvaluacionesMeritos().stream()
+                                .map(m -> {
+                                    BigDecimal total = BigDecimal.ZERO;
+                                    if (m.getNotaAsignatura() != null) total = total.add(m.getNotaAsignatura());
+                                    if (m.getNotaSemestres() != null) total = total.add(m.getNotaSemestres());
+                                    if (m.getNotaEventos() != null) total = total.add(m.getNotaEventos());
+                                    if (m.getNotaExperiencia() != null) total = total.add(m.getNotaExperiencia());
+                                    return total;
+                                })
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                    }
+
+                    BigDecimal puntajeOposicion = BigDecimal.ZERO;
+                    if (p.getEvaluacionesOposicion() != null && !p.getEvaluacionesOposicion().isEmpty()) {
+                        BigDecimal sumaTotal = BigDecimal.ZERO;
+                        int totalEvaluadores = 0;
+                        for (EvaluacionOposicion eo : p.getEvaluacionesOposicion()) {
+                            if (eo.getUsuariosComision() != null) {
+                                for (UsuarioComision uc : eo.getUsuariosComision()) {
+                                    BigDecimal puntajeUC = BigDecimal.ZERO;
+                                    if (uc.getPuntajeMaterial() != null) puntajeUC = puntajeUC.add(uc.getPuntajeMaterial());
+                                    if (uc.getPuntajeRespuestas() != null) puntajeUC = puntajeUC.add(uc.getPuntajeRespuestas());
+                                    if (uc.getPuntajeExposicion() != null) puntajeUC = puntajeUC.add(uc.getPuntajeExposicion());
+                                    
+                                    sumaTotal = sumaTotal.add(puntajeUC);
+                                    totalEvaluadores++;
+                                }
+                            }
+                        }
+                        if (totalEvaluadores > 0) {
+                            puntajeOposicion = sumaTotal.divide(BigDecimal.valueOf(totalEvaluadores), 2, RoundingMode.HALF_UP);
+                        }
+                    }
+
+                    return CoordinadorPostulanteReporteDTO.builder()
+                            .idPostulacion(p.getIdPostulacion())
+                            .cedula(p.getEstudiante() != null && p.getEstudiante().getUsuario() != null ? p.getEstudiante().getUsuario().getCedula() : "N/A")
+                            .nombreEstudiante(p.getEstudiante() != null && p.getEstudiante().getUsuario() != null ? 
+                                    p.getEstudiante().getUsuario().getNombres() + " " + p.getEstudiante().getUsuario().getApellidos() : "Desconocido")
+                            .nombreAsignatura(p.getConvocatoria() != null && p.getConvocatoria().getAsignatura() != null ? 
+                                    p.getConvocatoria().getAsignatura().getNombreAsignatura() : "N/A")
+                            .nombrePeriodo(p.getConvocatoria() != null && p.getConvocatoria().getPeriodoAcademico() != null ? 
+                                    p.getConvocatoria().getPeriodoAcademico().getNombrePeriodo() : "N/A")
+                            .fechaPostulacion(p.getFechaPostulacion())
+                            .estadoEvaluacion(p.getEstadoPostulacion())
+                            .puntajeMeritos(puntajeMeritos)
+                            .puntajeOposicion(puntajeOposicion)
+                            .puntajeTotal(puntajeMeritos.add(puntajeOposicion))
+                            .observacionPostulacion(p.getObservaciones())
+                            .build();
+                } catch (Exception ex) {
+                    System.err.println("ERROR PROCESANDO POSTULACION ID=" + p.getIdPostulacion() + ": " + ex.getMessage());
+                    ex.printStackTrace();
+                    return CoordinadorPostulanteReporteDTO.builder().idPostulacion(p.getIdPostulacion()).nombreEstudiante("ERROR").build();
+                }
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("ERROR CRITICO EN reportePostulantesFacultad: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DecanoReporteCoordinadorDTO> reporteCoordinadores(Integer idFacultad) {
+        List<Coordinador> coordinadores = coordinadorRepository.findByCarrera_Facultad_IdFacultad(idFacultad);
+        if (coordinadores == null) return new ArrayList<>();
+        return coordinadores.stream().map(c -> {
+            Integer idCarrera = (c.getCarrera() != null) ? c.getCarrera().getIdCarrera() : 0;
+            String nombreCarrera = (c.getCarrera() != null) ? c.getCarrera().getNombreCarrera() : "N/A";
+            String nombreCoord = (c.getUsuario() != null) ? c.getUsuario().getNombres() + " " + c.getUsuario().getApellidos() : "N/A";
+            
+            long convCount = (idCarrera != 0) ? convocatoriaRepository.countByAsignatura_Carrera_IdCarrera(idCarrera) : 0L;
+            long postCount = (idCarrera != 0) ? postulacionRepository.countByConvocatoria_Asignatura_Carrera_IdCarrera(idCarrera) : 0L;
+            
+            return DecanoReporteCoordinadorDTO.builder()
+                    .idCoordinador(c.getIdCoordinador())
+                    .nombreCoordinador(nombreCoord)
+                    .carrera(nombreCarrera)
+                    .convocatoriasCreadas(convCount)
+                    .postulantesGestionados(postCount)
+                    .estado(Boolean.TRUE.equals(c.getActivo()) ? "ACTIVO" : "INACTIVO")
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private DecanoResponseDTO mapearADTO(Decano entidad) {

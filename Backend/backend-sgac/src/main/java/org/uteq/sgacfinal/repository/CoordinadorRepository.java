@@ -32,4 +32,8 @@ public interface CoordinadorRepository extends JpaRepository<Coordinador, Intege
     List<Object[]> listarCoordinadoresSP();
 
     Optional<Coordinador> findByUsuario_IdUsuarioAndActivoTrue(Integer idUsuario);
+
+    List<Coordinador> findByCarrera_Facultad_IdFacultad(Integer idFacultad);
+
+    List<Coordinador> findByCarrera_IdCarrera(Integer idCarrera);
 }

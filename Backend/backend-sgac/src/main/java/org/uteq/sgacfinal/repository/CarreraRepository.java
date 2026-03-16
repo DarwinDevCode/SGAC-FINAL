@@ -24,4 +24,6 @@ public interface CarreraRepository extends JpaRepository<Carrera, Integer> {
     Integer desactivarCarrera(@Param("id") Integer idCarrera);
 
     List<Carrera> findByFacultad_IdFacultad(Integer idFacultad);
+
+    long countByFacultad_IdFacultad(Integer idFacultad);
 }

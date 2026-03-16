@@ -39,9 +39,6 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
 
     List<Convocatoria> findByPeriodoAcademico_IdPeriodoAcademico(Integer idPeriodo);
 
-//    @Query(value = "SELECT * FROM public.fn_listar_convocatorias_vista()", nativeQuery = true)
-//    List<Object[]> listarConvocatoriasVista();
-
     List<Convocatoria> findByActivoTrue();
     List<Convocatoria> findByActivoFalse();
 
@@ -49,9 +46,12 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
            "AND c.periodoAcademico.activo = true")
     List<Convocatoria> findByFacultadPropia(@Param("idFacultad") Integer idFacultad);
 
-    // Búsqueda de convocatorias para un coordinador específico (idUsuario del coordinador)
     @Query("SELECT c FROM Convocatoria c JOIN c.asignatura.carrera.coordinadores coord " +
            "WHERE coord.usuario.idUsuario = :idUsuario AND coord.activo = true " +
            "AND c.periodoAcademico.activo = true")
     List<Convocatoria> findByCoordinadorPropio(@Param("idUsuario") Integer idUsuario);
+
+    long countByAsignatura_Carrera_IdCarrera(Integer idCarrera);
+
+    long countByAsignatura_IdAsignatura(Integer idAsignatura);
 }

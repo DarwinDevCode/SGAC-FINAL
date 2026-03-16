@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -19,4 +20,10 @@ public class CoordinadorPostulanteReporteDTO {
     private String nombrePeriodo;
     private LocalDate fechaPostulacion;
     private String estadoEvaluacion;
+
+    // Campos desglosados
+    private BigDecimal puntajeMeritos;
+    private BigDecimal puntajeOposicion;
+    private BigDecimal puntajeTotal;
+    private String observacionPostulacion;
 }

@@ -20,7 +20,8 @@ export class ReportesComponent implements OnInit {
   coordinadorService = inject(CoordinadorService);
   authService = inject(AuthService);
 
-  activeTab: 'convocatorias' | 'postulantes' = 'convocatorias';
+  // New report types
+  tipoReporte: 'convocatorias' | 'postulantes' | 'resultados' = 'convocatorias';
   loading = false;
   errorMensaje = '';
 
@@ -30,13 +31,10 @@ export class ReportesComponent implements OnInit {
   // Paginación y Filtrado simple
   filtroConvocatoria = '';
   filtroPostulante = '';
+  filtroResultados = '';
 
   ngOnInit() {
     this.cargarDatos();
-  }
-
-  cambiarTab(tab: 'convocatorias' | 'postulantes') {
-    this.activeTab = tab;
   }
 
   cargarDatos() {
@@ -59,7 +57,7 @@ export class ReportesComponent implements OnInit {
       }
     });
 
-    // Cargar Postulantes
+    // Cargar Postulantes (includes scores now)
     this.coordinadorService.obtenerReportePostulantesPropios(user.idUsuario).subscribe({
       next: (data) => {
         this.postulantes = data;
@@ -93,15 +91,36 @@ export class ReportesComponent implements OnInit {
     );
   }
 
+  get resultadosFiltrados() {
+    if (!this.filtroResultados) return this.postulantes;
+    const filter = this.filtroResultados.toLowerCase();
+    return this.postulantes.filter(p =>
+      p.nombreEstudiante.toLowerCase().includes(filter) ||
+      p.cedula.includes(filter) ||
+      p.nombreAsignatura.toLowerCase().includes(filter)
+    );
+  }
+
   // ==========================================
   // EXPORTACIONES
   // ==========================================
 
-  exportarConvocatoriasPDF() {
+  exportarPDF() {
+    if (this.tipoReporte === 'convocatorias') this.exportarConvocatoriasPDF();
+    else if (this.tipoReporte === 'postulantes') this.exportarPostulantesPDF();
+    else if (this.tipoReporte === 'resultados') this.exportarResultadosPDF();
+  }
+
+  exportarExcel() {
+    if (this.tipoReporte === 'convocatorias') this.exportarConvocatoriasExcel();
+    else if (this.tipoReporte === 'postulantes') this.exportarPostulantesExcel();
+    else if (this.tipoReporte === 'resultados') this.exportarResultadosExcel();
+  }
+
+  private exportarConvocatoriasPDF() {
     const doc = new jsPDF();
     doc.text('Reporte de Convocatorias Propias', 14, 15);
 
-    // Formatting data for autotable
     const bodyArgs = this.convocatoriasFiltradas.map(c => [
       c.idConvocatoria,
       c.nombreAsignatura,
@@ -121,7 +140,7 @@ export class ReportesComponent implements OnInit {
     doc.save('Reporte_Convocatorias.pdf');
   }
 
-  exportarConvocatoriasExcel() {
+  private exportarConvocatoriasExcel() {
     const ws = XLSX.utils.json_to_sheet(this.convocatoriasFiltradas.map(c => ({
       ID: c.idConvocatoria,
       Asignatura: c.nombreAsignatura,
@@ -138,9 +157,9 @@ export class ReportesComponent implements OnInit {
     XLSX.writeFile(wb, "Reporte_Convocatorias.xlsx");
   }
 
-  exportarPostulantesPDF() {
+  private exportarPostulantesPDF() {
     const doc = new jsPDF();
-    doc.text('Reporte de Postulantes A Cargo', 14, 15);
+    doc.text('Reporte Nominal de Postulantes', 14, 15);
 
     const bodyArgs = this.postulantesFiltrados.map(p => [
       p.cedula,
@@ -148,29 +167,72 @@ export class ReportesComponent implements OnInit {
       p.nombreAsignatura,
       p.nombrePeriodo,
       new Date(p.fechaPostulacion).toLocaleDateString(),
-      p.estadoEvaluacion
+      p.estadoEvaluacion,
+      p.puntajeTotal || 0
     ]);
 
     autoTable(doc, {
       startY: 20,
-      head: [['Cédula', 'Estudiante', 'Asignatura', 'Periodo', 'Fecha Postulación', 'Estado']],
+      head: [['Cédula', 'Estudiante', 'Asignatura', 'Periodo', 'Fecha', 'Estado', 'Puntaje']],
       body: bodyArgs
     });
 
     doc.save('Reporte_Postulantes.pdf');
   }
 
-  exportarPostulantesExcel() {
+  private exportarPostulantesExcel() {
     const ws = XLSX.utils.json_to_sheet(this.postulantesFiltrados.map(p => ({
       Cédula: p.cedula,
       Estudiante: p.nombreEstudiante,
       Asignatura: p.nombreAsignatura,
       Periodo: p.nombrePeriodo,
       'Fecha Postulación': new Date(p.fechaPostulacion).toLocaleString(),
-      Estado: p.estadoEvaluacion
+      Estado: p.estadoEvaluacion,
+      'Puntaje Total': p.puntajeTotal
     })));
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Postulantes");
     XLSX.writeFile(wb, "Reporte_Postulantes.xlsx");
+  }
+
+  private exportarResultadosPDF() {
+    const doc = new jsPDF({ orientation: 'landscape' });
+    doc.text('Cuadro General de Resultados (Méritos y Oposición)', 14, 15);
+
+    const bodyArgs = this.resultadosFiltrados.map(p => [
+      p.cedula,
+      p.nombreEstudiante,
+      p.nombreAsignatura,
+      p.puntajeMeritos || 0,
+      p.puntajeOposicion || 0,
+      p.puntajeTotal || 0,
+      p.estadoEvaluacion
+    ]);
+
+    autoTable(doc, {
+      startY: 20,
+      head: [['Cédula', 'Estudiante', 'Asignatura', 'Méritos', 'Oposición', 'Total', 'Estado']],
+      body: bodyArgs,
+      theme: 'grid'
+    });
+
+    doc.save('Cuadro_Resultados_Finales.pdf');
+  }
+
+  private exportarResultadosExcel() {
+    const ws = XLSX.utils.json_to_sheet(this.resultadosFiltrados.map(p => ({
+      Cédula: p.cedula,
+      Estudiante: p.nombreEstudiante,
+      Asignatura: p.nombreAsignatura,
+      Periodo: p.nombrePeriodo,
+      'Puntaje Méritos': p.puntajeMeritos,
+      'Puntaje Oposición': p.puntajeOposicion,
+      'Total': p.puntajeTotal,
+      Estado: p.estadoEvaluacion,
+      Observaciones: p.observacionPostulacion
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Cuadro Resultados");
+    XLSX.writeFile(wb, "Cuadro_Resultados.xlsx");
   }
 }

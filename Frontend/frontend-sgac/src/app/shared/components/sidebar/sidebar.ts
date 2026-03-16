@@ -79,7 +79,8 @@ export class SidebarComponent {
       { label: 'Notificaciones', icon: 'Bell', route: '/notificaciones' },
     ],
     ADMINISTRADOR: [
-      { label: 'Consultas y Reportes', icon: 'BarChart3', route: '/admin/consulta' },
+      { label: 'Consultas y KPIs', icon: 'BarChart3', route: '/admin/consulta' },
+      { label: 'Reportes Globales', icon: 'ClipboardList', route: '/admin/reportes' },
       { label: 'Gestión Usuarios', icon: 'Users', route: '/admin/usuarios' },
       { label: 'Periodos Académicos', icon: 'CalendarClock', route: '/admin/periodos' },
       { label: 'Configuración Global', icon: 'Settings', route: '/admin/configuracion' },

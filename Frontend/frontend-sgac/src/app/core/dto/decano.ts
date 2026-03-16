@@ -43,3 +43,20 @@ export interface LogAuditoriaDTO {
     tablaAfectada: string;
     fechaHora: string; // LocalDateTime devuelto como string
 }
+
+export interface DecanoReporteCarreraDTO {
+    idCarrera: number;
+    nombreCarrera: string;
+    totalAsignaturas: number;
+    totalConvocatorias: number;
+    totalPostulantes: number;
+}
+
+export interface DecanoReporteCoordinadorDTO {
+    idCoordinador: number;
+    nombreCoordinador: string;
+    carrera: string;
+    convocatoriasCreadas: number;
+    postulantesGestionados: number;
+    estado: string;
+}

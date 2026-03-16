@@ -32,4 +32,6 @@ public interface DecanoRepository extends JpaRepository<Decano, Integer> {
     List<Decano> obtenerDecanosActivosSP();
 
     Optional<Decano> findByUsuario_IdUsuarioAndActivoTrue(Integer idUsuario);
+
+    List<Decano> findByFacultad_IdFacultad(Integer idFacultad);
 }

@@ -6,6 +6,7 @@ import { GestionCatalogosComponent } from './features/admin/gestion-catalogos/ge
 import { GestionPermisosComponent } from './features/admin/gestion-permisos/gestion-permisos';
 import { GestionPeriodosComponent } from './features/admin/gestion-periodos/gestion-periodos.component';
 import { DashboardComponent as AdminDashboard } from './features/admin/dashboard/dashboard';
+import { ReportesAdminComponent } from './features/admin/reportes/reportes-admin';
 
 // Postulante
 import { DashboardComponent as PostulanteDashboard } from './features/postulante/dashboard/dashboard.component';
@@ -22,6 +23,7 @@ import { ConvocatoriasVistaComponent as DecanoConvocatorias } from './features/d
 import { PostulantesVistaComponent as DecanoPostulantes } from './features/decano/postulantes-vista/postulantes-vista.component';
 import { ComisionesDecanoComponent } from './features/decano/comisiones/comisiones.component';
 import { AuditoriaComponent as DecanoAuditoria } from './features/decano/auditoria/auditoria';
+import { ReportesDecanoComponent } from './features/decano/reportes/reportes';
 // DecanoNotificaciones stub removido porque usaremos el global
 
 // Coordinador
@@ -66,6 +68,7 @@ export const routes: Routes = [
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
       { path: 'admin/rol-permiso', component: GestionPermisosComponent },
       { path: 'admin/periodos', component: GestionPeriodosComponent },
+      { path: 'admin/reportes', component: ReportesAdminComponent },
       { path: 'admin/notifications', component: PostulanteNotificaciones },
 
       // Postulante / Estudiante (routes for ESTUDIANTE role sidebar)
@@ -82,7 +85,7 @@ export const routes: Routes = [
       { path: 'decano/convocatorias', component: DecanoConvocatorias },
       { path: 'decano/postulantes/:idConvocatoria', component: DecanoPostulantes },
       { path: 'decano/comisiones', component: ComisionesDecanoComponent },
-      { path: 'decano/reportes', component: DecanoAuditoria },
+      { path: 'decano/reportes', component: ReportesDecanoComponent },
       { path: 'decano/notifications', component: PostulanteNotificaciones },
 
       // Coordinador

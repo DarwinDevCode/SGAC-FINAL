@@ -1,0 +1,186 @@
+<div class="main-content">
+    <div class="header">
+        <div class="title-container">
+            <h1 class="page-title">Reportes de Facultad</h1>
+            <p class="page-subtitle">Monitoreo integral de carreras, asignaturas, convocatorias y desempeño académico de su facultad.</p>
+        </div>
+    </div>
+
+    @if (loading) {
+    <div class="info-message">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:.75rem">Cargando datos de facultad...</p>
+    </div>
+    } @else if (errorMensaje) {
+    <div class="error-state">
+        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
+        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+    </div>
+    } @else {
+    <!-- Selección de Reporte -->
+    <div class="report-selection-container">
+        <div class="select-group">
+            <label for="tipoReporte">Tipo de Reporte:</label>
+            <select id="tipoReporte" [(ngModel)]="tipoReporte" (change)="cambiarReporte()">
+                <option value="carreras">Carreras de la Facultad</option>
+                <option value="asignaturas">Asignaturas de la Facultad</option>
+                <option value="convocatorias">Convocatorias de la Facultad</option>
+                <option value="postulantes">Listado de Postulantes (Facultad)</option>
+                <option value="coordinadores">Desempeño de Coordinadores</option>
+            </select>
+        </div>
+        
+        <div class="actions">
+            <button class="btn-export pdf" (click)="exportarPDF()">
+                <lucide-icon name="download" size="16"></lucide-icon> Exportar PDF
+            </button>
+            <button class="btn-export excel" (click)="exportarExcel()">
+                <lucide-icon name="download" size="16"></lucide-icon> Exportar Excel
+            </button>
+        </div>
+    </div>
+
+    <div class="report-content-card">
+        <div class="content-header">
+            <h3>
+                @if(tipoReporte === 'carreras') { Estadísticas por Carrera }
+                @if(tipoReporte === 'asignaturas') { Oferta Académica }
+                @if(tipoReporte === 'convocatorias') { Convocatorias de la Facultad }
+                @if(tipoReporte === 'postulantes') { Nómina General de Postulantes }
+                @if(tipoReporte === 'coordinadores') { Gestión de Coordinadores }
+            </h3>
+            <div class="search-box">
+                <input type="text" [(ngModel)]="filtro" placeholder="Filtrar resultados...">
+                <lucide-icon name="search" size="16"></lucide-icon>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <!-- CABECERAS DINÁMICAS -->
+                <thead>
+                    @if(tipoReporte === 'carreras') {
+                    <tr>
+                        <th>Carrera</th>
+                        <th class="text-center">Asignaturas</th>
+                        <th class="text-center">Convocatorias</th>
+                        <th class="text-center">Postulantes</th>
+                    </tr>
+                    }
+                    @if(tipoReporte === 'asignaturas') {
+                    <tr>
+                        <th>Asignatura</th>
+                        <th>Carrera</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                    }
+                    @if(tipoReporte === 'convocatorias') {
+                    <tr>
+                        <th>ID</th>
+                        <th>Asignatura / Carrera</th>
+                        <th>Coordinador</th>
+                        <th>Postulantes</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                    }
+                    @if(tipoReporte === 'postulantes') {
+                    <tr>
+                        <th>Postulante</th>
+                        <th>Asignatura</th>
+                        <th class="text-center">Mér. (20)</th>
+                        <th class="text-center">Opo. (20)</th>
+                        <th class="text-center">Total (40)</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                    }
+                    @if(tipoReporte === 'coordinadores') {
+                    <tr>
+                        <th>Coordinador</th>
+                        <th>Carrera</th>
+                        <th class="text-center">Convocatorias</th>
+                        <th class="text-center">Postulantes</th>
+                        <th class="text-center">Estado</th>
+                    </tr>
+                    }
+                </thead>
+
+                <!-- CONTENIDO DINÁMICO -->
+                <tbody>
+                    @for (item of dataFiltrada; track $index) {
+                    <tr>
+                        <!-- FILAS CARRERAS -->
+                        @if(tipoReporte === 'carreras') {
+                        <td><div class="semi-bold text-primary">{{ item.nombreCarrera }}</div></td>
+                        <td class="text-center">{{ item.totalAsignaturas }}</td>
+                        <td class="text-center">{{ item.totalConvocatorias }}</td>
+                        <td class="text-center">
+                            <span class="badge-postulantes"><b>{{ item.totalPostulantes }}</b></span>
+                        </td>
+                        }
+
+                        <!-- FILAS ASIGNATURAS -->
+                        @if(tipoReporte === 'asignaturas') {
+                        <td><div class="semi-bold">{{ item.nombreAsignatura }}</div></td>
+                        <td>{{ item.nombreCarrera }}</td>
+                        <td class="text-center">
+                            <span class="badge" [class.success]="item.activo" [class.secondary]="!item.activo">
+                                {{ item.activo ? 'ACTIVO' : 'INACTIVO' }}
+                            </span>
+                        </td>
+                        }
+
+                        <!-- FILAS CONVOCATORIAS -->
+                        @if(tipoReporte === 'convocatorias') {
+                        <td>#{{ item.idConvocatoria }}</td>
+                        <td>
+                            <div class="semi-bold">{{ item.nombreAsignatura }}</div>
+                            <div class="text-xs text-muted">{{ item.nombreCarrera }}</div>
+                        </td>
+                        <td>{{ item.nombreCoordinador }}</td>
+                        <td class="text-center"><b>{{ item.numeroPostulantes }}</b></td>
+                        <td class="text-center">
+                            <span class="badge" [class.success]="item.estado === 'ACTIVO'">{{ item.estado }}</span>
+                        </td>
+                        }
+
+                        <!-- FILAS POSTULANTES -->
+                        @if(tipoReporte === 'postulantes') {
+                        <td>
+                            <div class="semi-bold">{{ item.nombreEstudiante }}</div>
+                            <div class="text-xs text-muted">{{ item.cedula }}</div>
+                        </td>
+                        <td>{{ item.nombreAsignatura }}</td>
+                        <td class="text-center score-cell merito">{{ item.puntajeMeritos | number:'1.2-2' }}</td>
+                        <td class="text-center score-cell oposicion">{{ item.puntajeOposicion | number:'1.2-2' }}</td>
+                        <td class="text-center"><div class="total-score">{{ item.puntajeTotal | number:'1.2-2' }}</div></td>
+                        <td class="text-center">
+                            <span class="badge-status" [attr.data-status]="item.estadoEvaluacion">{{ item.estadoEvaluacion }}</span>
+                        </td>
+                        }
+
+                        <!-- FILAS COORDINADORES -->
+                        @if(tipoReporte === 'coordinadores') {
+                        <td><div class="semi-bold">{{ item.nombreCoordinador }}</div></td>
+                        <td>{{ item.carrera }}</td>
+                        <td class="text-center">{{ item.convocatoriasCreadas }}</td>
+                        <td class="text-center">{{ item.postulantesGestionados }}</td>
+                        <td class="text-center">
+                             <span class="badge" [class.success]="item.estado === 'ACTIVO'" [class.secondary]="item.estado !== 'ACTIVO'">
+                                {{ item.estado }}
+                            </span>
+                        </td>
+                        }
+                    </tr>
+                    } @empty {
+                    <tr>
+                        <td colspan="10" class="text-center text-muted" style="padding: 3rem;">
+                            No se encontraron datos para este reporte.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
+</div>

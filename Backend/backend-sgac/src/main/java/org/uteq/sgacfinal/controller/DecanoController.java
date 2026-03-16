@@ -6,12 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
+import org.uteq.sgacfinal.dto.Response.*;
 import org.uteq.sgacfinal.service.IDecanoService;
 
-import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
 import java.util.List;
 
 @RestController
@@ -35,6 +32,26 @@ public class DecanoController {
     @GetMapping("/facultad/{idFacultad}/auditoria")
     public ResponseEntity<List<LogAuditoriaDTO>> getAuditoria(@PathVariable Integer idFacultad) {
         return ResponseEntity.ok(decanoService.reporteAuditoriaPorFacultad(idFacultad));
+    }
+
+    @GetMapping("/facultad/{idFacultad}/reportes/carreras")
+    public ResponseEntity<List<DecanoReporteCarreraDTO>> getReporteCarreras(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.reporteCarreras(idFacultad));
+    }
+
+    @GetMapping("/facultad/{idFacultad}/reportes/asignaturas")
+    public ResponseEntity<List<AsignaturaResponseDTO>> getReporteAsignaturas(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.reporteAsignaturas(idFacultad));
+    }
+
+    @GetMapping("/facultad/{idFacultad}/reportes/postulantes")
+    public ResponseEntity<List<CoordinadorPostulanteReporteDTO>> getReportePostulantes(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.reportePostulantesFacultad(idFacultad));
+    }
+
+    @GetMapping("/facultad/{idFacultad}/reportes/coordinadores")
+    public ResponseEntity<List<DecanoReporteCoordinadorDTO>> getReporteCoordinadores(@PathVariable Integer idFacultad) {
+        return ResponseEntity.ok(decanoService.reporteCoordinadores(idFacultad));
     }
 
     @GetMapping
