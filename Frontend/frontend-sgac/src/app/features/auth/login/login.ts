@@ -1,79 +1,61 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { CommonModule }     from '@angular/common';
+import { FormsModule }      from '@angular/forms';
+import { Router }           from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService, AuthUser, LoginRequest } from '../../../core/services/auth-service';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  selector:    'app-login',
+  standalone:  true,
+  imports:     [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.css']
+  styleUrls:   ['./login.css']
 })
-
 export class LoginComponent {
+
   view: 'login' | 'forgot-password' = 'login';
   showPassword = false;
-  loading = false;
+  loading      = false;
+  errorMsg     = '';
 
   identifier = '';
-  password = '';
+  password   = '';
 
   private authService = inject(AuthService);
-  private router = inject(Router);
+  private router      = inject(Router);
 
-  handleLogin() {
+  handleLogin(): void {
     if (!this.identifier || !this.password) {
-      alert("Por favor ingrese sus credenciales");
+      this.errorMsg = 'Por favor ingrese sus credenciales.';
       return;
     }
 
-    this.loading = true;
+    this.loading  = true;
+    this.errorMsg = '';
 
     const payload: LoginRequest = {
-      usuario: this.identifier,
-      password: this.password
+      usuario:  this.identifier,
+      password: this.password,
     };
 
     this.authService.login(payload).subscribe({
       next: (res: AuthUser) => {
-        const role = res.rolActual;
-        this.redirectByRole(role);
-        console.log(role || "Sin rol asignado");
+        this.loading = false;
+        this.router.navigate(['/seleccionar-rol']);
       },
       error: (err: any) => {
-        this.loading = false;
-        const msg = err.error?.mensaje || "Credenciales incorrectas o servidor no disponible";
-        alert(msg);
+        this.loading  = false;
+        this.errorMsg = err.error?.message
+          ?? err.error?.mensaje
+          ?? 'Credenciales incorrectas o servidor no disponible.';
       }
     });
   }
 
-  handleForgotPassword() {
-    alert("Instrucciones enviadas. Si la cuenta existe, recibirá un correo pronto.");
+  handleForgotPassword(): void {
+    // TODO: implementar recuperación de contraseña
+    alert('Instrucciones enviadas. Si la cuenta existe, recibirá un correo pronto.');
     this.view = 'login';
-  }
-
-  private redirectByRole(role: string) {
-    const roleRoutes: Record<string, string> = {
-      'ADMINISTRADOR': '/admin/consulta',
-      'ESTUDIANTE': '/postulante/dashboard',
-      'DOCENTE': '/docente/dashboard',
-      'COORDINADOR': '/coordinador/dashboard',
-      'DECANO': '/decano/dashboard',
-      'AYUDANTE_CATEDRA': '/ayudante/dashboard'
-    };
-
-    //console.log(this.authService.getUser())
-
-    const target = roleRoutes[role];
-    if (target) {
-      this.router.navigate([target]);
-    } else {
-      alert("Rol no reconocido: " + role);
-      this.loading = false;
-    }
   }
 }

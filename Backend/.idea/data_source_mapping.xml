@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourcePerFileMappings">
+    <file url="dbSrc:///54d52b5c/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/database/SGAC-FINAL/schema/ayudantia/routine/fn_validar_estado_ayudantia@(integer).sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/java/org/uteq/sgacfinal/repository/IPermisoRepository.java" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V2__vistas.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V54__correcion_sp_registro_postulacion.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
@@ -44,7 +45,19 @@
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_34.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_35.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_36.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_37.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_38.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_39.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_4.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_40.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_41.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_42.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_43.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_44.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_45.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_46.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_47.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_48.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_5.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_6.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf/console_7.sql" value="e97fb5cb-23cc-4f18-9f1a-06c26e9b5dcf" />

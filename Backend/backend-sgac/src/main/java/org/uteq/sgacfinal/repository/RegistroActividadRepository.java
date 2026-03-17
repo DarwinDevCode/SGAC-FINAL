@@ -141,4 +141,7 @@ public interface RegistroActividadRepository extends JpaRepository<RegistroActiv
                          @Param("observaciones") String observaciones,
                          @Param("fechaObservacion") java.time.LocalDate fechaObservacion);
 
+
+
+
 }

@@ -1,8 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {BehaviorSubject, Observable, tap} from 'rxjs';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import {UsuarioDTO} from '../dto/usuario';
+import { UsuarioDTO } from '../dto/usuario';
 
 export interface LoginRequest {
   usuario: string;
@@ -10,47 +11,87 @@ export interface LoginRequest {
 }
 
 export interface TipoRolAuth {
-  idTipoRol: number;
+  idTipoRol:     number;
   nombreTipoRol: string;
-  activo: boolean;
+  activo:        boolean;
 }
 
 export interface AuthUser {
-  idUsuario: number;
-  nombres: string;
-  apellidos: string;
-  correo: string;
+  idUsuario:    number;
+  nombres:      string;
+  apellidos:    string;
+  correo:       string;
   nombreUsuario: string;
-  rolActual: string;
-  roles: TipoRolAuth[];
-  activo: boolean;
-  token?: string;
+  rolActual:    string | null;
+  roles:        TipoRolAuth[];
+  activo:       boolean;
+  token?:       string;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface SeleccionarRolRequest {
+  preAuthToken:   string;
+  rolSeleccionado: string;
+}
+
+export interface PreAuthData {
+  preAuthToken: string;
+  roles:        TipoRolAuth[];
+  nombres:      string;
+  apellidos:    string | null;
+  correo:       string;
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
-  private currentUserSubject = new BehaviorSubject<UsuarioDTO | null>(null);
 
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private readonly API_AUTH = `${this.baseUrl}/auth`;
+  private http   = inject(HttpClient);
+  private router = inject(Router);
 
-  private readonly TOKEN_KEY = 'token';
-  private readonly USER_KEY = 'user';
+  private readonly baseUrl   = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly API_AUTH  = `${this.baseUrl}/auth`;
+
+  private readonly TOKEN_KEY   = 'token';
+  private readonly USER_KEY    = 'user';
+  private readonly PREAUTH_KEY = 'sgac_preauth';  // temporal, solo durante selección
+
+  private currentUserSubject = new BehaviorSubject<AuthUser | null>(this.getUser());
 
   login(credentials: LoginRequest): Observable<AuthUser> {
     return this.http.post<AuthUser>(`${this.API_AUTH}/login`, credentials).pipe(
       tap((res) => {
-        try {
-          if (res?.token) {
-            localStorage.setItem(this.TOKEN_KEY, res.token);
-          }
-          localStorage.setItem(this.USER_KEY, JSON.stringify(res));
-        } catch (error) {
-          console.error('El navegador bloqueó el acceso al localStorage. Verifica si estás en modo incógnito.', error);
+        const preAuthData: PreAuthData = {
+          preAuthToken: res.token!,
+          roles:        res.roles,
+          nombres:      res.nombres,
+          apellidos:    res.apellidos,
+          correo:       res.correo,
+        };
+        localStorage.setItem(this.PREAUTH_KEY, JSON.stringify(preAuthData));
+      })
+    );
+  }
+
+  seleccionarRol(rolSeleccionado: string): Observable<AuthUser> {
+    const preAuthData = this.getPreAuthData();
+    if (!preAuthData) {
+      throw new Error('No hay datos de pre-autenticación. Inicia sesión nuevamente.');
+    }
+
+    const request: SeleccionarRolRequest = {
+      preAuthToken:    preAuthData.preAuthToken,
+      rolSeleccionado: rolSeleccionado,
+    };
+
+    return this.http.post<AuthUser>(`${this.API_AUTH}/seleccionar-rol`, request).pipe(
+      tap((res) => {
+        // Ahora sí guardamos el token definitivo y los datos del usuario
+        if (res.token) {
+          localStorage.setItem(this.TOKEN_KEY, res.token);
         }
+        localStorage.setItem(this.USER_KEY, JSON.stringify(res));
+        // Limpiar el pre-auth temporal — ya no es necesario
+        localStorage.removeItem(this.PREAUTH_KEY);
+        this.currentUserSubject.next(res);
       })
     );
   }
@@ -58,6 +99,9 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.PREAUTH_KEY);
+    this.currentUserSubject.next(null);
+    this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
@@ -69,14 +113,22 @@ export class AuthService {
     return user ? JSON.parse(user) as AuthUser : null;
   }
 
-  getCurrentUser(): UsuarioDTO | null {
+  getCurrentUser(): AuthUser | null {
     return this.currentUserSubject.value;
   }
 
+  getPreAuthData(): PreAuthData | null {
+    const raw = localStorage.getItem(this.PREAUTH_KEY);
+    return raw ? JSON.parse(raw) as PreAuthData : null;
+  }
+
   hasRole(roles: string[]): boolean {
-    const user = this.getCurrentUser();
-    if (!user || !user.rolActual)
-      return false;
+    const user = this.getUser();
+    if (!user?.rolActual) return false;
     return roles.includes(user.rolActual);
+  }
+
+  getRolActivo(): string | null {
+    return this.getUser()?.rolActual ?? null;
   }
 }

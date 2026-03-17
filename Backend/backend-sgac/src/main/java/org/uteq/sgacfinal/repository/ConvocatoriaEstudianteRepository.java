@@ -11,12 +11,6 @@ import java.util.List;
 
 @Repository
 public interface ConvocatoriaEstudianteRepository extends JpaRepository<Convocatoria, Integer> {
-
-
-
-
-
-
     interface ValidacionContextoProjection {
         Integer getIdEstudiante();
         Boolean getEsValido();

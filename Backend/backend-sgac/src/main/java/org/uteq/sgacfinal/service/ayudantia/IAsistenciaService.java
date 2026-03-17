@@ -7,13 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 public interface IAsistenciaService {
-    JsonNode consultarParticipantes(Integer idAyudantia);
-    JsonNode cargarParticipantesMasivo(Integer idAyudantia,
+    Integer resolverIdAyudantia();
+    Integer resolverIdRegistro();
+
+    Object consultarParticipantes(Integer idAyudantia);
+    Object cargarParticipantesMasivo(Integer idAyudantia,
                                        List<Map<String, String>> participantes);
     byte[] generarPlantillaExcel();
-    JsonNode previewExcelImport(MultipartFile file);
-    JsonNode inicializarAsistencia(Integer idRegistro);
-    JsonNode guardarAsistencias(Integer idRegistro,
+    Object previewExcelImport(MultipartFile file);
+    Object inicializarAsistencia(Integer idRegistro);
+    Object guardarAsistencias(Integer idRegistro,
                                 List<Map<String, Object>> asistencias);
-    JsonNode consultarAsistencia(Integer idRegistro);
+    Object consultarAsistencia(Integer idRegistro);
 }

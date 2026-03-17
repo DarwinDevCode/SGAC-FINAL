@@ -9,7 +9,6 @@ import org.uteq.sgacfinal.dto.Request.*;
 import org.uteq.sgacfinal.dto.Response.MensajeResponseDTO;
 import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
-import org.uteq.sgacfinal.security.JwtService;
 import org.uteq.sgacfinal.service.IAuthService;
 import org.uteq.sgacfinal.service.IUsuariosService;
 
@@ -19,19 +18,20 @@ import java.util.List;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final IAuthService authService;
-    private final IUsuariosService usuarioService;
-    private final JwtService jwtService;
+
+    private final IAuthService      authService;
+    private final IUsuariosService  usuarioService;
 
     private ResponseEntity<MensajeResponseDTO> created(String mensaje) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new MensajeResponseDTO(mensaje, true));
     }
 
+    // ── Registro de usuarios (sin cambios) ──────────────────────────────
+
     @PostMapping("/registro-global")
     public ResponseEntity<MensajeResponseDTO> registroGlobal(
             @Valid @RequestBody RegistroUsuarioGlobalRequest dto) {
-
         usuarioService.registrarUsuarioGlobal(dto);
         return created("Usuario registrado. Las credenciales han sido enviadas al correo: " + dto.getCorreo());
     }
@@ -90,12 +90,29 @@ public class AuthController {
         return created("Estudiante promovido a ayudante correctamente.");
     }
 
+    // ── PASO 1: Login — devuelve Pre-Auth Token + lista de roles ────────
+
+    /**
+     * Valida las credenciales y responde con:
+     *   - token: Pre-Auth Token (5 min) — NO es el token definitivo.
+     *   - roles: lista de roles que tiene el usuario.
+     *   - rolActual: null — indica que aún debe seleccionarse un rol.
+     *
+     * El frontend debe leer que rolActual == null y redirigir al
+     * componente SelectorRolComponent en lugar de ir directamente al
+     * dashboard.
+     */
     @PostMapping("/login")
-    public ResponseEntity<UsuarioResponseDTO> login(@RequestBody LoginRequestDTO request) {
-        UsuarioResponseDTO usuario = authService.loginUsuario(request);
-        String token = jwtService.generateToken(usuario.getNombreUsuario(), usuario.getRolActual());
-        usuario.setToken(token);
-        return ResponseEntity.ok(usuario);
+    public ResponseEntity<UsuarioResponseDTO> login(
+            @RequestBody LoginRequestDTO request) {
+        // authService.loginUsuario ahora devuelve un Pre-Auth Token
+        return ResponseEntity.ok(authService.loginUsuario(request));
+    }
+
+    @PostMapping("/seleccionar-rol")
+    public ResponseEntity<UsuarioResponseDTO> seleccionarRol(
+            @RequestBody SeleccionarRolRequestDTO request) {
+        return ResponseEntity.ok(authService.seleccionarRol(request));
     }
 
     @GetMapping

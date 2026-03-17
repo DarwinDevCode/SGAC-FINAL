@@ -2,21 +2,30 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
+import { AuthService } from '../services/auth-service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const token = localStorage.getItem('token');
-  const router = inject(Router);
+  const authService = inject(AuthService);
+  const router      = inject(Router);
+  const token    = authService.getToken();
+  const rolActivo = authService.getRolActivo();
+  let clonedReq = req;
 
-  const cloned = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-    : req;
+  if (token) {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
 
-  return next(cloned).pipe(
+    if (rolActivo)
+      headers['X-Active-Role'] = rolActivo;
+
+    clonedReq = req.clone({ setHeaders: headers });
+  }
+
+  return next(clonedReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if ((error.status === 401 || error.status === 403) && token) {
-        // Token inválido o expirado — limpiar sesión y redirigir al login
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        authService.logout();
         router.navigate(['/login']);
       }
       return throwError(() => error);

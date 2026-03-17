@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router'; // Añadido Router y RouterLink
 import { LucideAngularModule } from 'lucide-angular';
-import { Subscription, switchMap, catchError, of, forkJoin } from 'rxjs';
+import { Subscription, switchMap, catchError, of } from 'rxjs';
 import { AyudanteService } from '../../../core/services/ayudante-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { PostulanteService } from '../../../core/services/postulante-service';
@@ -16,7 +17,7 @@ import {
 @Component({
   selector: 'app-ayudante-actividades',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, RouterLink],
   templateUrl: './actividades.html',
   styleUrl: './actividades.css',
 })
@@ -25,6 +26,7 @@ export class ActividadesComponent implements OnInit, OnDestroy {
   private ayudanteService = inject(AyudanteService);
   private authService = inject(AuthService);
   private postulanteService = inject(PostulanteService);
+  private router = inject(Router); // Inyectamos el router para la navegación
   private http = inject(HttpClient);
   private subs = new Subscription();
 
@@ -61,15 +63,14 @@ export class ActividadesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Process: Get Estudiante -> Get Accepted Postulation -> Get Ayudantia -> Load Activities
     this.subs.add(
       this.http.get<any>(`http://localhost:8080/api/estudiantes/usuario/${user.idUsuario}`).pipe(
         switchMap(estudiante => {
           return this.postulanteService.misPostulaciones(estudiante.idEstudiante);
         }),
         switchMap(postulaciones => {
-          const aceptada = postulaciones.find(p => p.estadoPostulacion === 'APROBADO' || p.estadoPostulacion === 'ACEPTADO');
-          if (!aceptada) throw new Error('No se encontró una postulación aprobada para este ciclo.');
+          const aceptada = postulaciones.find(p => p.estadoPostulacion === 'APROBADO' || p.estadoPostulacion === 'ACEPTADO' || p.estadoPostulacion === 'SELECCIONADO');
+          if (!aceptada) throw new Error('No se encontró una ayudantía activa para este ciclo.');
           return this.ayudanteService.obtenerAyudantiaPorPostulacion(aceptada.idPostulacion);
         }),
         switchMap(ayudantia => {
@@ -89,6 +90,17 @@ export class ActividadesComponent implements OnInit, OnDestroy {
         }
       })
     );
+  }
+
+
+  irAAsistencia(act: RegistroActividadResponseDTO): void {
+    if (!this.ayudantia) return;
+    this.router.navigate([
+      '/ayudante/actividades',
+      this.ayudantia.idAyudantia,
+      'asistencia',
+      act.idRegistroActividad
+    ]);
   }
 
   onSubmit() {

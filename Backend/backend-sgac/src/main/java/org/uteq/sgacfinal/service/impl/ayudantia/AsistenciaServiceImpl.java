@@ -1,6 +1,6 @@
 package org.uteq.sgacfinal.service.impl.ayudantia;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.exception.BadRequestException;
 import org.uteq.sgacfinal.repository.ayudantia.AsistenciaRepository;
 import org.uteq.sgacfinal.service.ayudantia.IAsistenciaService;
+import org.uteq.sgacfinal.service.security.SecurityContextService;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -22,14 +23,27 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
 
     private final AsistenciaRepository repo;
     private final ObjectMapper         objectMapper;
+    private final SecurityContextService contextoSvc;
+
     private static final long     MAX_FILE_BYTES     = 2L * 1024 * 1024;
     private static final String[] EXPECTED_HEADERS   = {"Nombre Completo", "Curso", "Paralelo"};
 
     @Override
-    public JsonNode consultarParticipantes(Integer idAyudantia) {
+    public Integer resolverIdAyudantia() {
+        return contextoSvc.obtenerIdAyudantia();
+    }
+
+    @Override
+    public Integer resolverIdRegistro() {
+        Integer idAyudantia = resolverIdAyudantia();
+        return contextoSvc.obtenerIdRegistroActivo(idAyudantia);
+    }
+
+    @Override
+    public Object consultarParticipantes(Integer idAyudantia) {
         try {
             String raw = repo.consultarParticipantes(idAyudantia);
-            return objectMapper.readTree(raw);
+            return parsear(raw);
         } catch (Exception e) {
             log.error("[Asistencia] consultarParticipantes id={}", idAyudantia, e);
             throw new BadRequestException("Error al consultar participantes: " + e.getMessage());
@@ -37,8 +51,8 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
     }
 
     @Override
-    public JsonNode cargarParticipantesMasivo(Integer idAyudantia,
-                                              List<Map<String, String>> participantes) {
+    public Object cargarParticipantesMasivo(Integer idAyudantia,
+                                            List<Map<String, String>> participantes) {
         try {
             String json = objectMapper.writeValueAsString(participantes);
             String raw  = repo.cargarParticipantesMasivo(idAyudantia, json);
@@ -96,39 +110,35 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
     }
 
     @Override
-    public JsonNode previewExcelImport(MultipartFile file) {
+    public Object previewExcelImport(MultipartFile file) {
         if (file == null || file.isEmpty() || file.getSize() == 0) {
-            return error("El archivo está vacío (0 bytes).");
+            return error("El archivo está vacío.");
         }
         if (file.getSize() > MAX_FILE_BYTES) {
-            return error(String.format("El archivo supera el límite de 2 MB (tamaño recibido: %.1f MB).",
-                    file.getSize() / (1024.0 * 1024.0)));
+            return error(String.format("El archivo supera el límite de 2 MB."));
         }
+
         String filename = Optional.ofNullable(file.getOriginalFilename()).orElse("");
         if (!filename.toLowerCase().endsWith(".xlsx")) {
-            return error("Solo se permiten archivos .xlsx. Para archivos CSV, conviértelos primero a Excel.");
+            return error("Solo se permiten archivos .xlsx.");
         }
 
         try (Workbook wb = new XSSFWorkbook(file.getInputStream())) {
             Sheet sheet = wb.getSheetAt(0);
             Row headerRow = sheet.getRow(0);
-            if (headerRow == null) {
-                return error("El archivo no contiene fila de encabezados.");
-            }
+            if (headerRow == null) return error("El archivo no contiene fila de encabezados.");
+
             for (int i = 0; i < EXPECTED_HEADERS.length; i++) {
                 Cell cell = headerRow.getCell(i);
-                String actual = cell != null ? cell.getStringCellValue().trim() : "";
+                String actual = (cell != null) ? cell.getStringCellValue().trim() : "";
                 if (!EXPECTED_HEADERS[i].equalsIgnoreCase(actual)) {
-                    return error(String.format(
-                            "Encabezado incorrecto en columna %d. Esperado: \"%s\", encontrado: \"%s\". " +
-                                    "Descargue la plantilla oficial.",
-                            i + 1, EXPECTED_HEADERS[i], actual));
+                    return error("Encabezado incorrecto en columna " + (i+1));
                 }
             }
 
             List<Map<String, Object>> filas = new ArrayList<>();
-            Set<String> seenKeys    = new HashSet<>();
-            boolean     tieneErrores = false;
+            Set<String> seenKeys = new HashSet<>();
+            boolean tieneErrores = false;
 
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                 Row row = sheet.getRow(r);
@@ -139,102 +149,100 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
                 String paralelo = cellStr(row.getCell(2));
 
                 List<String> errores = new ArrayList<>();
-
-                if (nombre == null || nombre.isBlank())
-                    errores.add("El nombre completo es obligatorio.");
-                 else if (nombre.matches(".*\\d.*"))
+                if (nombre == null || nombre.isBlank()) {
+                    errores.add("El nombre es obligatorio.");
+                } else if (nombre.matches(".*\\d.*")) {
                     errores.add("El nombre no debe contener números.");
-                else if (nombre.length() > 255)
-                    errores.add("El nombre supera los 255 caracteres.");
-
-                String clave = (nombre + "|" + curso + "|" + paralelo).toLowerCase().strip();
-                if (!seenKeys.add(clave)) {
-                    errores.add("Fila duplicada dentro del archivo.");
                 }
 
-                boolean filaTieneError = !errores.isEmpty();
-                if (filaTieneError) tieneErrores = true;
+                String clave = (nombre + "|" + curso + "|" + paralelo).toLowerCase().strip();
+                if (!seenKeys.add(clave)) errores.add("Fila duplicada.");
+
+                if (!errores.isEmpty()) tieneErrores = true;
 
                 Map<String, Object> fila = new LinkedHashMap<>();
-                fila.put("fila",          r + 1);          // nro fila visible (1-based para el usuario)
+                fila.put("fila", r + 1);
                 fila.put("nombreCompleto", nombre != null ? nombre : "");
-                fila.put("curso",          curso   != null ? curso   : "");
-                fila.put("paralelo",       paralelo != null ? paralelo : "");
-                fila.put("errores",        errores);
-                fila.put("valida",         !filaTieneError);
+                fila.put("curso", curso != null ? curso : "");
+                fila.put("paralelo", paralelo != null ? paralelo : "");
+                fila.put("errores", errores);
+                fila.put("valida", errores.isEmpty());
                 filas.add(fila);
             }
 
-            if (filas.isEmpty()) {
-                return error("El archivo no contiene datos. Solo se detectaron los encabezados.");
-            }
+            if (filas.isEmpty()) return error("El archivo no contiene datos.");
 
             Map<String, Object> result = new LinkedHashMap<>();
-            result.put("exito",        !tieneErrores);
-            result.put("tieneErrores",  tieneErrores);
-            result.put("totalFilas",    filas.size());
-            result.put("filas",         filas);
-            result.put("mensaje",       tieneErrores
-                    ? "El archivo contiene errores. Corrígelos antes de importar."
-                    : String.format("Archivo válido. %d participante(s) listos para importar.", filas.size())
-            );
-            return objectMapper.valueToTree(result);
+            result.put("exito", !tieneErrores);
+            result.put("tieneErrores", tieneErrores);
+            result.put("totalFilas", filas.size());
+            result.put("filas", filas);
+            result.put("mensaje", tieneErrores ? "Errores detectados." : "Archivo válido.");
 
-        } catch (BadRequestException e) {
-            throw e;
+            return result; // Retornamos el Map directamente para que Jackson lo serialice bien
+
         } catch (Exception e) {
             log.error("[Asistencia] Error procesando Excel", e);
-            return error("No se pudo leer el archivo. Asegúrate de que sea un .xlsx válido.");
+            return error("No se pudo leer el archivo Excel.");
         }
     }
 
     @Override
-    public JsonNode inicializarAsistencia(Integer idRegistro) {
+    public Object inicializarAsistencia(Integer idRegistro) {
         try {
             String raw = repo.inicializarAsistencia(idRegistro);
             return parsear(raw);
         } catch (Exception e) {
             log.error("[Asistencia] inicializarAsistencia registro={}", idRegistro, e);
-            throw new BadRequestException("Error al inicializar asistencia: " + e.getMessage());
+            throw new BadRequestException("Error al inicializar asistencia.");
         }
     }
 
     @Override
-    public JsonNode guardarAsistencias(Integer idRegistro,
-                                       List<Map<String, Object>> asistencias) {
+    public Object guardarAsistencias(Integer idRegistro, List<Map<String, Object>> asistencias) {
         try {
             String json = objectMapper.writeValueAsString(asistencias);
             String raw  = repo.guardarAsistencias(idRegistro, json);
             return parsear(raw);
-        } catch (BadRequestException e) {
-            throw e;
         } catch (Exception e) {
             log.error("[Asistencia] guardarAsistencias registro={}", idRegistro, e);
-            throw new BadRequestException("Error al guardar asistencias: " + e.getMessage());
+            throw new BadRequestException("Error al guardar asistencias.");
         }
     }
 
     @Override
-    public JsonNode consultarAsistencia(Integer idRegistro) {
+    public Object consultarAsistencia(Integer idRegistro) {
         try {
             String raw = repo.consultarAsistencia(idRegistro);
-            return objectMapper.readTree(raw);
+            return parsear(raw);
         } catch (Exception e) {
             log.error("[Asistencia] consultarAsistencia registro={}", idRegistro, e);
-            throw new BadRequestException("Error al consultar asistencia: " + e.getMessage());
+            throw new BadRequestException("Error al consultar asistencia.");
         }
     }
 
-    private JsonNode parsear(String raw) {
+    /**
+     * Mapea un String JSON a un Objeto de Java (Map o List) para evitar
+     * que Jackson exponga las propiedades internas de JsonNode.
+     */
+    private Object parsear(String raw) {
         try {
-            return objectMapper.readTree(raw);
-        } catch (Exception e) {
-            throw new BadRequestException("Respuesta inesperada del servidor.");
+            if (raw == null || raw.isBlank()) return null;
+            return objectMapper.readValue(raw, Object.class);
+        } catch (JsonProcessingException e) {
+            log.error("Error parseando respuesta JSON: {}", raw, e);
+            throw new BadRequestException("Respuesta del servidor con formato inválido.");
         }
     }
 
-    private JsonNode error(String mensaje) {
-        return objectMapper.valueToTree(Map.of("exito", false, "mensaje", mensaje));
+    /**
+     * Retorna un mapa de error estándar.
+     */
+    private Map<String, Object> error(String mensaje) {
+        Map<String, Object> err = new HashMap<>();
+        err.put("exito", false);
+        err.put("mensaje", mensaje);
+        return err;
     }
 
     private String cellStr(Cell cell) {

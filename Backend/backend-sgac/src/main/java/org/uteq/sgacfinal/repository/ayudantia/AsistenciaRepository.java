@@ -51,4 +51,20 @@ public class AsistenciaRepository {
                 idRegistro
         );
     }
+
+    public Integer obtenerIdAyudantiaPorUsuario(Integer idUsuario) {
+        return jdbcTemplate.queryForObject(
+                "SELECT ayudantia.fn_obtener_id_ayudantia_por_usuario(?::integer)",
+                Integer.class,
+                idUsuario
+        );
+    }
+
+    public Integer obtenerIdRegistroActivoPorAyudantia(Integer idAyudantia) {
+        return jdbcTemplate.queryForObject(
+                "SELECT ayudantia.fn_obtener_id_registro_activo_por_ayudantia(?::integer)",
+                Integer.class,
+                idAyudantia
+        );
+    }
 }

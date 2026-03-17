@@ -46,6 +46,7 @@ export class SidebarComponent {
     AYUDANTE_CATEDRA: [
       { label: 'Inicio',        icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
       { label: 'Cronograma',    icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Asistencia', icon: 'Landmark', route: '/ayudante/actividades/asistencia'},
       { label: 'Mis sesiones',  icon: 'CalendarClock',   route: '/ayudante/sesiones' },
       { label: 'Mis Informes',  icon: 'FileText',        route: '/ayudante/informes' },
       { label: 'Notificaciones',icon: 'Bell',            route: '/notificaciones' },
@@ -96,7 +97,7 @@ export class SidebarComponent {
       { label: 'Notificaciones',      icon: 'Bell',            route: '/notificaciones' },
     ],
     ADMINISTRADOR: [
-      { label: 'Inicio',             icon: 'LayoutDashboard', route: '/admin/consulta' },
+      { label: 'Inicio',             icon: 'LayoutDashboard', route: '/admin/dashboard' },
       { label: 'Gestión Usuarios',   icon: 'Users',           route: '/admin/usuarios' },
       { label: 'Carga Académica',    icon: 'Briefcase',       route: '/admin/carga-academica' },
       { label: 'Periodos Académicos',icon: 'CalendarClock',   route: '/admin/periodos' },

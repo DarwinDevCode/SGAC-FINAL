@@ -1,0 +1,176 @@
+/* Página principal - Minimalismo puro */
+.sr-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8fafc; /* Gris azulado muy tenue */
+  font-family: 'Inter', system-ui, sans-serif;
+  padding: 2rem;
+}
+
+.sr-container {
+  width: 100%;
+  max-width: 700px;
+  animation: slideUp 0.4s ease-out;
+}
+
+/* Header */
+.sr-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.sr-logo-icon {
+  width: 54px;
+  height: 54px;
+  background: #166534; /* Tu verde institucional */
+  color: white;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(22, 101, 52, 0.2);
+}
+
+.sr-logo-title {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+/* Card de bienvenida */
+.sr-welcome {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.sr-avatar {
+  width: 46px;
+  height: 46px;
+  background: #f1f5f9;
+  color: #166534;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.sr-welcome-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.sr-welcome-sub {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Grid de Roles */
+.sr-roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.sr-rol-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 2.5rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.sr-rol-card:hover:not(:disabled) {
+  transform: translateY(-6px);
+  border-color: #166534;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.sr-rol-card:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Círculos con iconos (Minimalistas) */
+.sr-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+/* Colores Pastel */
+.rol-estudiante  { background: #f0fdf4; color: #166534; }
+.rol-coordinador { background: #eff6ff; color: #1d4ed8; }
+.rol-admin       { background: #f5f3ff; color: #7c3aed; }
+.rol-decano      { background: #fffbeb; color: #b45309; }
+.rol-docente     { background: #ecfeff; color: #0891b2; }
+.rol-ayudante    { background: #fff1f2; color: #be123c; }
+.rol-default     { background: #f8fafc; color: #475569; }
+
+.sr-rol-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sr-rol-desc {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* Footer */
+.sr-footer {
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+.sr-btn-volver {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+}
+
+.sr-btn-volver:hover { color: #166534; }
+
+/* Animación */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sr-spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

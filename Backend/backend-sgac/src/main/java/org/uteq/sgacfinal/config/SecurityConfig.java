@@ -34,6 +34,7 @@ import java.util.Arrays;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final JwtService jwtService;
     private final IUsuariosRepository usuarioRepository;
 
@@ -49,12 +50,11 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         return new AuthenticationProvider() {
             @Override
-            public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+            public Authentication authenticate(Authentication authentication)
+                    throws AuthenticationException {
                 String username = authentication.getName();
                 String password = authentication.getCredentials().toString();
-
                 UserDetails user = userDetailsService().loadUserByUsername(username);
-
                 if (!passwordEncoder().matches(password, user.getPassword())) {
                     throw new BadCredentialsException("Contraseña incorrecta");
                 }
@@ -72,7 +72,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -91,35 +92,44 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/ws-sgac/**").permitAll()
+                                "/api/auth/login",
+                                "/api/auth/seleccionar-rol"
+                        ).permitAll()
+                        .requestMatchers("/ws-sgac/**").permitAll()
+
+                        .requestMatchers("/api/docente/dashboard/**")
+                        .hasAuthority("DOCENTE")
                         .requestMatchers(
-                                "/api/auth/login").permitAll()
-                        .requestMatchers(
-                                "/api/docente/dashboard/**").hasAuthority("DOCENTE")
-                        .requestMatchers(
-                                "/api/auth/promover-estudiante").hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
+                                "/api/auth/promover-estudiante")
+                        .hasAnyAuthority("ADMINISTRADOR", "COORDINADOR")
                         .requestMatchers(
                                 "/api/convocatorias/crear",
-                                "/api/convocatorias/editar/**").hasAnyAuthority("DECANO", "COORDINADOR")
+                                "/api/convocatorias/editar/**")
+                        .hasAnyAuthority("DECANO", "COORDINADOR")
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/tipos-rol/**",
-                                "/api/permisos/**").hasAnyAuthority("ADMINISTRADOR")
+                                "/api/permisos/**")
+                        .hasAnyAuthority("ADMINISTRADOR")
+                        .requestMatchers("/api/sesiones/**")
+                        .hasAuthority("AYUDANTE_CATEDRA")
+                        .requestMatchers("/api/notificaciones/**")
+                        .authenticated()
                         .requestMatchers(
-                                "/api/sesiones/**").hasAuthority("AYUDANTE_CATEDRA")
-                        .requestMatchers(
-                                "/api/notificaciones/**").authenticated()
-                        .requestMatchers(
-                                "/api/evaluaciones/oposicion/postulacion/**").hasAuthority("ESTUDIANTE")
-                        .requestMatchers(
-                                "/api/convocatorias/**").authenticated()
+                                "/api/evaluaciones/oposicion/postulacion/**")
+                        .hasAuthority("ESTUDIANTE")
+                        .requestMatchers("/api/convocatorias/**")
+                        .authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter(),
+                        UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -127,17 +137,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200")); // Tu origen
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200"));
+        configuration.setAllowedMethods(
+                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
                 "Accept",
                 "X-Active-Role"
         ));
-
         configuration.setAllowCredentials(true);
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

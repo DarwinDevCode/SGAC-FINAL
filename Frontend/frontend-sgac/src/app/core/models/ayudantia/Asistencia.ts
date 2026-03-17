@@ -1,3 +1,8 @@
+export interface ContextoAsistencia {
+  idAyudantia: number;
+  idRegistro:  number;
+}
+
 export interface Participante {
   idParticipante: number;
   idAyudantia:    number;

@@ -6,6 +6,8 @@ import { GestionCatalogosComponent } from './features/admin/gestion-catalogos/ge
 import { GestionPermisosComponent } from './features/admin/gestion-permisos/gestion-permisos';
 import { GestionPeriodosComponent } from './features/admin/gestion-periodos/gestion-periodos.component';
 import { DashboardComponent as AdminDashboard } from './features/admin/dashboard/dashboard';
+import { SelectorRolComponent } from './features/auth/selector-rol-component/selector-rol-component';
+import { selectorRolGuard } from './core/guards/selector-rol-guard-guard';
 
 // Postulante
 import { DashboardComponent as PostulanteDashboard } from './features/postulante/dashboard/dashboard.component';
@@ -58,9 +60,13 @@ import {
   EvaluacionMeritosComponent
 } from './features/coordinador/evaluacion-meritos-component/evaluacion-meritos-component';
 import {coordinadorGuard} from './features/coordinador/auth';
+import {
+  AsistenciaDinamicaComponent
+} from './features/ayudante/asistencia-dinamica-component/asistencia-dinamica-component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'seleccionar-rol', component: SelectorRolComponent, canActivate: [selectorRolGuard],},
 
   {
     path: '',
@@ -76,7 +82,7 @@ export const routes: Routes = [
       { path: 'resultados-evaluacion', component: RankingResultadosComponent},
 
       // ── Admin ───────────────────────────────────────────────
-      { path: 'admin/consulta',      component: AdminDashboard },
+      { path: 'admin/dashboard',      component: AdminDashboard },
       { path: 'admin/usuarios',      component: GestionUsuarios },
       { path: 'admin/configuracion', component: GestionCatalogosComponent },
       { path: 'admin/carga-academica', component: CargaAcademicaComponent},
@@ -117,10 +123,9 @@ export const routes: Routes = [
       // ── Ayudante ────────────────────────────────────────────
       { path: 'ayudante/dashboard',   component: AyudanteDashboard },
       { path: 'ayudante/actividades', component: AyudanteActividades },
-      { path: 'ayudante/informes',    component: AyudanteInformes },
+      { path: 'ayudante/actividades/asistencia', component: AsistenciaDinamicaComponent },
       { path: 'ayudante/sesiones',    component: SesionesComponent },
 
-      // ── Docente ─────────────────────────────────────────────
       { path: 'docente/dashboard',                              component: DocenteDashboardComponent },
       { path: 'docente/mis-ayudantes',                          component: MisAyudantesComponent },
       { path: 'docente/aprobar-informes',                       component: MisAyudantesComponent },

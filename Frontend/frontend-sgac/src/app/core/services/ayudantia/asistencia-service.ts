@@ -2,59 +2,92 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Participante, CargaMasivaResponse, PreviewResponse, DetalleAsistencia, GuardarAsistenciaResponse } from '../../models/ayudantia/Asistencia';
+import {
+  Participante,
+  CargaMasivaResponse,
+  PreviewResponse,
+  DetalleAsistencia,
+  GuardarAsistenciaResponse,
+  ContextoAsistencia
+} from '../../models/ayudantia/Asistencia';
 
 @Injectable({ providedIn: 'root' })
 export class AsistenciaService {
   private http = inject(HttpClient);
+
+  // Base URL ajustada al controlador refactorizado
   private readonly base = `${(environment as any).apiUrl ?? 'http://localhost:8080/api'}/asistencia`;
 
-  consultarParticipantes(idAyudantia: number): Observable<Participante[]> {
-    return this.http.get<Participante[]>(
-      `${this.base}/ayudantia/${idAyudantia}/participantes`
-    );
+  /**
+   * Obtiene el contexto (idAyudantia e idRegistro) del usuario autenticado.
+   */
+  obtenerContexto(): Observable<ContextoAsistencia> {
+    return this.http.get<ContextoAsistencia>(`${this.base}/contexto`);
   }
 
+  /**
+   * Consulta los participantes de la ayudantía activa.
+   * El ID se resuelve internamente en el backend.
+   */
+  consultarParticipantes(): Observable<Participante[]> {
+    return this.http.get<Participante[]>(`${this.base}/participantes`);
+  }
+
+  /**
+   * Realiza la carga masiva de alumnos.
+   * No requiere ID en la URL; el backend lo toma del contexto del ayudante.
+   */
   cargarParticipantesMasivo(
-    idAyudantia: number,
     participantes: { nombreCompleto: string; curso: string; paralelo: string }[]
   ): Observable<CargaMasivaResponse> {
     return this.http.post<CargaMasivaResponse>(
-      `${this.base}/ayudantia/${idAyudantia}/participantes/masivo`,
+      `${this.base}/participantes/masivo`,
       { participantes }
     );
   }
 
+  /**
+   * Descarga la plantilla de Excel para la carga de alumnos.
+   */
   descargarPlantilla(): Observable<Blob> {
     return this.http.get(`${this.base}/plantilla-excel`, { responseType: 'blob' });
   }
 
+  /**
+   * Envía el Excel para obtener una previsualización de los datos.
+   */
   previewExcel(file: File): Observable<PreviewResponse> {
     const fd = new FormData();
     fd.append('file', file);
     return this.http.post<PreviewResponse>(`${this.base}/preview-excel`, fd);
   }
 
-  inicializarAsistencia(idRegistro: number): Observable<{ exito: boolean; mensaje: string }> {
+  /**
+   * Inicializa la lista de asistencia para la sesión actual.
+   */
+  inicializarAsistencia(): Observable<{ exito: boolean; mensaje: string }> {
     return this.http.post<{ exito: boolean; mensaje: string }>(
-      `${this.base}/registro/${idRegistro}/inicializar`,
+      `${this.base}/inicializar`,
       {}
     );
   }
 
+  /**
+   * Guarda los cambios realizados en la toma de asistencia.
+   */
   guardarAsistencias(
-    idRegistro: number,
     asistencias: { idParticipante: number; asistio: boolean }[]
   ): Observable<GuardarAsistenciaResponse> {
     return this.http.put<GuardarAsistenciaResponse>(
-      `${this.base}/registro/${idRegistro}/guardar`,
+      `${this.base}/guardar`,
       { asistencias }
     );
   }
 
-  consultarAsistencia(idRegistro: number): Observable<DetalleAsistencia[]> {
-    return this.http.get<DetalleAsistencia[]>(
-      `${this.base}/registro/${idRegistro}`
-    );
+  /**
+   * Consulta el detalle de asistencia (quién asistió y quién no) de la sesión.
+   */
+  consultarAsistencia(): Observable<DetalleAsistencia[]> {
+    return this.http.get<DetalleAsistencia[]>(`${this.base}/detalle`);
   }
 }

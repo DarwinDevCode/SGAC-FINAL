@@ -108,7 +108,7 @@ import {
   BookOpenText,
   Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX, SearchX,
   Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
-  Tag
+  Tag, LayoutGrid, Landmark, Square, FileSpreadsheet
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -213,7 +213,11 @@ export const appConfig: ApplicationConfig = {
         Table,
         Star,
         LockOpen,
-        Tag
+        Tag,
+        LayoutGrid,
+        Landmark,
+        Square,
+        FileSpreadsheet
       })
     )
   ]

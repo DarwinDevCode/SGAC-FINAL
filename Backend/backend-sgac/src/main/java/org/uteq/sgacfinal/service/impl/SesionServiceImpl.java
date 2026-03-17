@@ -36,6 +36,7 @@ public class SesionServiceImpl implements SesionService {
     private final ObjectMapper objectMapper;
     private final IUploadService uploadService;
 
+
     @Override
     @Transactional
     public List<SesionListadoResponse> listarSesiones(
@@ -121,14 +122,16 @@ public class SesionServiceImpl implements SesionService {
     public RegistrarSesionResponse registrarSesion(
             Integer idUsuario, RegistrarSesionRequest request, List<MultipartFile> archivos) {
 
-        // 1) Obtención automática del ID de la ayudantía activa para el usuario
+        log.error("Iniciando registro de sesion:   " + idUsuario);
+
         Integer idAyudantia = ayudantiaRepository
-                .findIdAyudantiaActivaByUsuario(idUsuario)
+                .ayudantiaPorUsuario(idUsuario)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "No se encontró una ayudantía activa (EN_PROGRESO) para el usuario con ID: " + idUsuario
+                        "No se encontró una ayudantía con estado ACTIVO (ID 21) para el usuario: " + idUsuario
                 ));
 
-        // Validaciones de archivos y coherencia (se mantienen tus reglas)
+        log.info("Iniciando registro de sesion:   " + idAyudantia);
+
         if (archivos == null || archivos.isEmpty()) {
             throw new IllegalArgumentException("Debe adjuntar al menos un archivo de evidencia.");
         }
@@ -160,10 +163,7 @@ public class SesionServiceImpl implements SesionService {
             }
         }
 
-        // 3) Persistencia mediante la función de PostgreSQL
         String evidenciasJson = serializarEvidencias(request.getEvidencias());
-
-        // Capturamos como Lista para evitar el ClassCastException
         List<Object[]> resultados = registroActividadRepository.registrarActividad(
                 idUsuario,
                 idAyudantia,
@@ -174,8 +174,6 @@ public class SesionServiceImpl implements SesionService {
                 request.getHorasDedicadas(),
                 evidenciasJson
         );
-
-        // 4) Procesamiento del resultado de la función
         if (resultados == null || resultados.isEmpty()) {
             throw new IllegalStateException("Error crítico: La base de datos no devolvió respuesta al procesar la actividad.");
         }

@@ -59,7 +59,9 @@ export class GestionEvaluacionesComponent implements OnInit {
     const rolMap: Record<string, string> = {
       DECANO: 'DECANO', COORDINADOR: 'COORDINADOR', DOCENTE: 'DOCENTE'
     };
-    this.rolUsuario    = rolMap[user.rolActual?.toUpperCase()] ?? 'DOCENTE';
+
+    const rolBusqueda = user.rolActual?.toUpperCase() || '';
+    this.rolUsuario = rolMap[rolBusqueda] ?? 'DOCENTE';
     this.esCoordinador = this.rolUsuario === 'COORDINADOR';
 
     // ── Llamadas en paralelo ──────────────────────────────────

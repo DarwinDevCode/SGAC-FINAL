@@ -1,12 +1,17 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { finalize } from 'rxjs/operators';
+import { finalize, switchMap } from 'rxjs/operators';
 import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { of } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth-service';
 import { SesionService } from '../../../core/services/sesion-service';
 import { CatalogosService } from '../../../core/services/catalogos-service';
+import { AyudanteService } from '../../../core/services/ayudante-service';
+import { PostulanteService } from '../../../core/services/postulante-service';
+
 import { SesionResponseDTO } from '../../../core/dto/sesion-response-dto';
 import { EvidenciaResponseDTO } from '../../../core/dto/evidencia-response-dto';
 import { RegistrarSesionRequest } from '../../../core/dto/registrar-sesion-request';
@@ -27,6 +32,11 @@ type RegistrarSesionForm = {
   evidencias: FormArray<FormGroup<EvidenciaForm>>;
 };
 
+const EXTENSIONES_SOPORTADAS: Record<string, number> = {
+  '.jpg': 21,
+  '.pdf': 20,
+  '.docx': 22
+};
 @Component({
   selector: 'app-sesiones',
   standalone: true,
@@ -38,21 +48,23 @@ export class SesionesComponent implements OnInit {
   private authService = inject(AuthService);
   private sesionService = inject(SesionService);
   private catalogosService = inject(CatalogosService);
+  private ayudanteService = inject(AyudanteService);
+  private postulanteService = inject(PostulanteService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   sesiones: SesionResponseDTO[] = [];
   sesionSeleccionada: SesionResponseDTO | null = null;
+  idAyudantiaReal: number | null = null;
 
   isLoading = true;
   isDetailLoading = false;
   errorMessage = '';
 
-  // Modal registro
   isModalOpen = false;
   isSubmitting = false;
   formError = '';
   selectedFiles: File[] = [];
-
   readonly maxFiles = 5;
 
   form: FormGroup<RegistrarSesionForm> = this.fb.group({
@@ -65,7 +77,6 @@ export class SesionesComponent implements OnInit {
   }) as FormGroup<RegistrarSesionForm>;
 
   private idAyudante: number | null = null;
-
   tiposEvidencia: TipoEvidencia[] = [];
   private tiposEvidenciaByExt = new Map<string, TipoEvidencia>();
 
@@ -76,294 +87,71 @@ export class SesionesComponent implements OnInit {
       this.errorMessage = 'No se pudo identificar al usuario actual.';
       return;
     }
-
-    // Asunción del proyecto: idAyudante coincide con idUsuario autenticado.
     this.idAyudante = user.idUsuario;
 
-    // Catálogo de tipos de evidencia (para validar extensiones permitidas)
     this.catalogosService.getTiposEvidencia().subscribe({
       next: (tipos) => {
         this.tiposEvidencia = tipos ?? [];
         this.tiposEvidenciaByExt = new Map(
           this.tiposEvidencia.map((t) => [String(t.extensionPermitida || '').toLowerCase(), t])
         );
-      },
-      error: () => {
-        // Si falla el catálogo, igual dejamos registrar pero sin validación por extensión.
-        this.tiposEvidencia = [];
-        this.tiposEvidenciaByExt = new Map();
-      },
+      }
     });
 
+    this.obtenerContextoAyudantia();
     this.cargarSesiones();
   }
 
-  private extensionDeArchivo(file: File): string {
-    const name = file.name || '';
-    const idx = name.lastIndexOf('.');
-    if (idx < 0) return '';
-    return name.substring(idx + 1).toLowerCase();
+  private obtenerContextoAyudantia() {
+    if (!this.idAyudante) return;
+    this.ayudanteService.obtenerAyudantePorUsuario(this.idAyudante).pipe(
+      switchMap(est => this.postulanteService.misPostulaciones(est.idUsuario)),
+      switchMap(posts => {
+        const activa = posts.find(p => p.estadoPostulacion === 'SELECCIONADO' || p.estadoPostulacion === 'ACEPTADO' || p.estadoPostulacion === 'APROBADO');
+        return activa ? this.ayudanteService.obtenerAyudantiaPorPostulacion(activa.idPostulacion) : of(null);
+      })
+    ).subscribe(ayud => {
+      this.idAyudantiaReal = ayud?.idAyudantia ?? null;
+    });
   }
 
-  private tipoEvidenciaParaArchivo(file: File): TipoEvidencia | null {
-    const ext = this.extensionDeArchivo(file);
-    if (!ext) return null;
-    return this.tiposEvidenciaByExt.get(ext) ?? null;
-  }
-
-  get evidenciasFA(): FormArray<FormGroup<EvidenciaForm>> {
-    return this.form.controls.evidencias;
-  }
-
-  get canSubmit(): boolean {
-    return this.form.valid && this.selectedFiles.length > 0 && !this.isSubmitting;
-  }
-
-  abrirModalRegistro(): void {
-    this.isModalOpen = true;
-    this.formError = '';
-
-    // Pre-carga: fecha de hoy (yyyy-MM-dd)
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0');
-    const dd = String(today.getDate()).padStart(2, '0');
-    this.form.controls.fecha.setValue(`${yyyy}-${mm}-${dd}`);
-  }
-
-  cerrarModalRegistro(): void {
-    if (this.isSubmitting) return;
-    this.isModalOpen = false;
-    this.formError = '';
-    this.form.reset();
-    // Mantener estructura tipada: reponer defaults
-    this.form.controls.numeroAsistentes.setValue(0);
-    this.form.controls.horasDedicadas.setValue(0);
-    this.selectedFiles = [];
-    this.evidenciasFA.clear();
+  irAAsistencia(s: SesionResponseDTO) {
+    if (!this.idAyudantiaReal) {
+      alert('No se pudo determinar el ID de la ayudantía activa.');
+      return;
+    }
+    this.router.navigate(['/ayudante/sesiones', this.idAyudantiaReal, 'asistencia', s.idRegistroActividad]);
   }
 
   cargarSesiones(): void {
     if (this.idAyudante == null) return;
-
     this.isLoading = true;
     this.errorMessage = '';
-
-    this.sesionService
-      .listarMisSesiones(this.idAyudante)
+    this.sesionService.listarMisSesiones(this.idAyudante)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (data) => {
-          this.sesiones = data ?? [];
-          if (
-            this.sesionSeleccionada &&
-            !this.sesiones.some(
-              (s) => s.idRegistroActividad === this.sesionSeleccionada?.idRegistroActividad
-            )
-          ) {
-            this.sesionSeleccionada = null;
-          }
-        },
-        error: () => {
-          this.errorMessage = 'No se pudieron cargar tus sesiones. Intenta nuevamente.';
-          this.sesiones = [];
-        },
+        next: (data) => this.sesiones = data ?? [],
+        error: () => this.errorMessage = 'No se pudieron cargar tus sesiones.'
       });
-  }
-
-  // --- Estados / badges ---
-  private normalizarEstado(valor: string | undefined | null): string {
-    return String(valor ?? '')
-      .trim()
-      .toUpperCase();
-  }
-
-  getEstadoSesion(s: SesionResponseDTO): string {
-    // Backend nuevo: nombreEstado. Compat: estadoRevision.
-    return this.normalizarEstado(s.nombreEstado ?? s.estadoRevision);
-  }
-
-  getEstadoEvidencia(ev: EvidenciaResponseDTO): string {
-    // Backend nuevo: nombreEstadoEvidencia. Compat: estadoEvidencia.
-    return this.normalizarEstado(ev.nombreEstadoEvidencia ?? ev.estadoEvidencia);
-  }
-
-  statusClass(estado: string | undefined | null): string {
-    const e = this.normalizarEstado(estado);
-    if (e === 'PENDIENTE') return 'status-pendiente';
-    if (e === 'APROBADO') return 'status-aprobado';
-    if (e === 'OBSERVADO') return 'status-observado';
-    if (e === 'RECHAZADO') return 'status-rechazado';
-    return 'status-default';
-  }
-
-  /**
-   * Regla: puede editarse si está OBSERVADO y se está dentro de las 24h desde fechaObservacion.
-   */
-  dentroPlazo24Horas(fechaObservacionIso?: string | null): boolean {
-    if (!fechaObservacionIso) return false;
-
-    // fechaObservacion viene como LocalDate (yyyy-MM-dd). Interpretamos inicio de día local.
-    const d = new Date(fechaObservacionIso);
-    if (Number.isNaN(d.getTime())) return false;
-
-    const ahora = Date.now();
-    const diffMs = ahora - d.getTime();
-    const horas = diffMs / (1000 * 60 * 60);
-
-    return horas >= 0 && horas <= 24;
-  }
-
-  puedeEditarSesion(s: SesionResponseDTO): boolean {
-    return this.getEstadoSesion(s) === 'OBSERVADO' && this.dentroPlazo24Horas(s.fechaObservacion);
-  }
-
-  puedeEditarEvidencia(ev: EvidenciaResponseDTO): boolean {
-    return this.getEstadoEvidencia(ev) === 'OBSERVADO' && this.dentroPlazo24Horas(ev.fechaObservacion);
-  }
-
-  tooltipObservado(): string {
-    return 'Tienes 24 horas para corregir este registro desde la fecha de observación';
-  }
-
-  verDetalle(idRegistroActividad: number): void {
-    if (this.idAyudante == null) return;
-
-    if (this.sesionSeleccionada?.idRegistroActividad === idRegistroActividad) {
-      this.sesionSeleccionada = null;
-      return;
-    }
-
-    this.isDetailLoading = true;
-    this.errorMessage = '';
-
-    // Mantener datos del listado (cabecera) y solo inyectar evidencias desde el endpoint.
-    const base = this.sesiones.find((s) => s.idRegistroActividad === idRegistroActividad) ?? null;
-
-    this.sesionService
-      .obtenerDetalleMiSesion(this.idAyudante, idRegistroActividad)
-      .pipe(finalize(() => (this.isDetailLoading = false)))
-      .subscribe({
-        next: (detalle) => {
-          const evidencias = detalle?.evidencias ?? [];
-          this.sesionSeleccionada = {
-            ...(base ?? { idRegistroActividad }),
-            evidencias,
-          };
-        },
-        error: () => {
-          this.errorMessage = 'No se pudo cargar el detalle de la sesión seleccionada.';
-        },
-      });
-  }
-
-  // Acciones de edición (placeholder UI)
-  editarSesion(s: SesionResponseDTO): void {
-    // Aquí puedes abrir un modal de edición o navegar a otra pantalla.
-    // Por ahora, solo mantenemos el hook para la UI.
-    console.log('Editar sesión', s.idRegistroActividad);
-  }
-
-  editarEvidencia(ev: EvidenciaResponseDTO): void {
-    console.log('Editar evidencia', ev.idEvidenciaRegistroActividad);
-  }
-
-  onFilesSelected(fileList: FileList | null): void {
-    if (!fileList) return;
-
-    this.formError = '';
-
-    const incoming = Array.from(fileList);
-    const available = this.maxFiles - this.selectedFiles.length;
-
-    if (available <= 0) {
-      this.formError = `Solo puedes adjuntar hasta ${this.maxFiles} archivos.`;
-      return;
-    }
-
-    const toAdd = incoming.slice(0, available);
-    if (incoming.length > available) {
-      this.formError = `Solo se agregaron ${available} archivo(s). Máximo permitido: ${this.maxFiles}.`;
-    }
-
-    // Validación cliente: si ya cargamos catálogo, filtramos solo extensiones permitidas
-    const invalidFiles: string[] = [];
-
-    // Validación cliente: si ya cargamos catálogo, filtramos solo extensiones permitidas
-    toAdd.forEach((file) => {
-      const tipo = this.tiposEvidencia.length > 0 ? this.tipoEvidenciaParaArchivo(file) : null;
-
-      if (this.tiposEvidencia.length > 0 && !tipo) {
-        invalidFiles.push(file.name);
-        return;
-      }
-
-      this.selectedFiles.push(file);
-
-      this.evidenciasFA.push(
-        this.fb.group<EvidenciaForm>({
-          idTipoEvidencia: this.fb.nonNullable.control(tipo?.id ?? 1, [Validators.required, Validators.min(1)]),
-          nombreArchivo: this.fb.nonNullable.control(file.name, [Validators.required, Validators.maxLength(150)]),
-        }) as FormGroup<EvidenciaForm>
-      );
-    });
-
-    if (invalidFiles.length > 0) {
-      this.formError = `Archivo(s) no permitido(s): ${invalidFiles.join(', ')}.`;
-    }
-  }
-
-  removeFile(index: number): void {
-    if (index < 0 || index >= this.selectedFiles.length) return;
-
-    // Mantener sincronía: borrar en ambos arreglos por índice
-    this.selectedFiles.splice(index, 1);
-    this.evidenciasFA.removeAt(index);
   }
 
   submitRegistro(): void {
-    if (this.idAyudante == null) return;
-
+    if (this.idAyudante == null || !this.canSubmit) return;
     this.formError = '';
+    this.isSubmitting = true;
 
-    // Validación cliente: no llamar si no hay archivos
-    if (this.selectedFiles.length === 0) {
-      this.formError = 'Adjunta al menos 1 evidencia.';
-      return;
-    }
-
-    if (this.selectedFiles.length > this.maxFiles) {
-      this.formError = `Máximo permitido: ${this.maxFiles} archivos.`;
-      return;
-    }
-
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      this.formError = 'Revisa los campos requeridos.';
-      return;
-    }
-
-    // 1) Evidencias (sin ruta/mime/tamaño) - sincronizadas por índice con selectedFiles
+    // SOLUCIÓN AL ERROR TS2322: Aseguramos que idTipoEvidencia nunca sea undefined
     const evidencias: EvidenciaRequest[] = this.selectedFiles.map((file, i) => {
       const evCtrl = this.evidenciasFA.at(i);
-      const idTipo = evCtrl?.controls.idTipoEvidencia.value ?? 1;
-      const nombre = evCtrl?.controls.nombreArchivo.value ?? file.name;
-
       return {
-        idTipoEvidencia: idTipo,
-        nombreArchivo: nombre,
+        // Usamos el operador de aserción no nula o un fallback
+        idTipoEvidencia: evCtrl.controls.idTipoEvidencia.value ?? 1,
+        nombreArchivo: evCtrl.controls.nombreArchivo.value ?? file.name,
       };
     });
 
-    if (evidencias.length === 0) {
-      this.formError = 'Debe existir al menos 1 evidencia.';
-      return;
-    }
-
-    // 2) Request completo (backend exige idAyudantia + evidencias)
     const request: RegistrarSesionRequest = {
-      // Placeholder: el backend debe recalcularlo desde idUsuario. Evita @NotNull.
-      idAyudantia: 0,
+      idAyudantia: this.idAyudantiaReal || 0,
       descripcionActividad: this.form.controls.descripcionActividad.value,
       temaTratado: this.form.controls.temaTratado.value,
       fecha: this.form.controls.fecha.value,
@@ -372,95 +160,121 @@ export class SesionesComponent implements OnInit {
       evidencias,
     };
 
-    // Chequeo final de coherencia índice files <-> evidencias
-    if (request.evidencias.length !== this.selectedFiles.length) {
-      this.formError = 'Error interno: evidencias y archivos no coinciden.';
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    this.sesionService
-      .registrarSesion(this.idAyudante, request, this.selectedFiles)
+    this.sesionService.registrarSesion(this.idAyudante, request, this.selectedFiles)
       .pipe(finalize(() => (this.isSubmitting = false)))
       .subscribe({
         next: (res) => {
-          if (!res?.exito) {
-            this.formError = res?.mensaje || 'No se pudo registrar la sesión.';
-            return;
+          if (res?.exito) {
+            this.cerrarModalRegistro();
+            this.cargarSesiones();
+          } else {
+            this.formError = res?.mensaje || 'Error al registrar.';
           }
-
-          this.cerrarModalRegistro();
-          this.cargarSesiones();
         },
-        error: () => {
-          this.formError = 'No se pudo registrar la sesión. Intenta nuevamente.';
-        },
+        error: () => this.formError = 'Error de conexión.'
       });
   }
 
-  private normalizarUrlEvidencia(url: string): string {
-    const u = (url || '').trim();
-    if (!u) return u;
+  // --- Métodos de UI y Lógica Auxiliar ---
+  get evidenciasFA() { return this.form.controls.evidencias; }
+  get canSubmit() { return this.form.valid && this.selectedFiles.length > 0 && !this.isSubmitting; }
 
-    // Cloudinary: los PDFs suelen servirse correctamente como raw/upload.
-    // Si vienen como image/upload (por resource_type auto), el visor puede fallar.
-    const isCloudinary = u.includes('res.cloudinary.com/');
-    const isPdf = u.toLowerCase().includes('.pdf');
-
-    if (isCloudinary && isPdf) {
-      return u.replace('/image/upload/', '/raw/upload/');
-    }
-
-    return u;
-  }
-
-  abrirEvidencia(ev: EvidenciaResponseDTO): void {
-    const urlOriginal = (ev?.rutaArchivo || '').trim();
-    if (!urlOriginal) {
-      this.errorMessage = 'La evidencia no tiene una URL válida.';
+  verDetalle(idRegistroActividad: number): void {
+    if (this.idAyudante == null) return;
+    if (this.sesionSeleccionada?.idRegistroActividad === idRegistroActividad) {
+      this.sesionSeleccionada = null;
       return;
     }
+    this.isDetailLoading = true;
+    const base = this.sesiones.find((s) => s.idRegistroActividad === idRegistroActividad) ?? null;
+    this.sesionService.obtenerDetalleMiSesion(this.idAyudante, idRegistroActividad)
+      .pipe(finalize(() => (this.isDetailLoading = false)))
+      .subscribe({
+        next: (detalle) => {
+          this.sesionSeleccionada = { ...(base as any), evidencias: detalle?.evidencias ?? [] };
+        }
+      });
+  }
 
-    const url = this.normalizarUrlEvidencia(urlOriginal);
+  onFilesSelected(fileList: FileList | null): void {
+    if (!fileList) return;
 
-    // Caso 1: si el recurso está bajo nuestro backend, el interceptor puede adjuntar Authorization
-    // y además podemos abrirlo en nueva pestaña como URL normal.
-    // Si es un recurso externo (ej Cloudinary) y está protegido, abrir directo fallará con 401.
-    try {
-      const target = new URL(url, window.location.origin);
-      const isSameOrigin = target.origin === window.location.origin;
-      const isBackend = target.origin.includes('localhost:8080') || target.pathname.includes('/api/');
+    this.formError = '';
+    const incoming = Array.from(fileList);
 
-      if (isSameOrigin || isBackend) {
-        window.open(target.toString(), '_blank', 'noopener');
+    incoming.forEach((file) => {
+      // 1. Extraer extensión
+      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+
+      // 2. Buscar el ID (Corregido a camelCase: extensionPermitida e idTipoEvidencia)
+      let idTipo = this.tiposEvidencia.find(t =>
+        (t.extensionPermitida || '').toLowerCase() === ext
+      )?.id;
+
+      // 3. Fallback a la constante si el catálogo no ha cargado
+      if (!idTipo) {
+        idTipo = EXTENSIONES_SOPORTADAS[ext];
+      }
+
+      // 4. Validación de soporte
+      if (!idTipo) {
+        this.formError = `El archivo "${file.name}" no es permitido. Solo se aceptan: ${Object.keys(EXTENSIONES_SOPORTADAS).join(', ')}`;
         return;
       }
 
-      // Caso 2: URL externa (Cloudinary u otro CDN).
-      window.open(target.toString(), '_blank', 'noopener');
-    } catch {
-      window.open(url, '_blank', 'noopener');
-    }
+      // 5. Agregar al formulario y a la lista de archivos
+      if (this.selectedFiles.length < this.maxFiles) {
+        this.selectedFiles.push(file);
+
+        this.evidenciasFA.push(
+          this.fb.group<EvidenciaForm>({
+            idTipoEvidencia: this.fb.nonNullable.control(idTipo, [Validators.required]),
+            nombreArchivo: this.fb.nonNullable.control(file.name, [Validators.required]),
+          }) as FormGroup<EvidenciaForm>
+        );
+      } else {
+        this.formError = `Máximo ${this.maxFiles} archivos permitidos.`;
+      }
+    });
   }
 
-  trackById = (_: number, s: SesionResponseDTO): number => s.idRegistroActividad;
-
-  esImagen(ev: EvidenciaResponseDTO): boolean {
-    return (ev.mimeType || '').toLowerCase().startsWith('image/');
+  /*
+  onFilesSelected(fileList: FileList | null): void {
+    if (!fileList) return;
+    Array.from(fileList).forEach((file) => {
+      this.selectedFiles.push(file);
+      this.evidenciasFA.push(this.fb.group({
+        idTipoEvidencia: [1, Validators.required],
+        nombreArchivo: [file.name, Validators.required]
+      }) as any);
+    });
   }
 
-  iconoEvidencia(ev: EvidenciaResponseDTO): string {
-    const mime = (ev.mimeType || '').toLowerCase();
-    if (mime.includes('pdf')) return 'file-text';
-    if (mime.includes('word')) return 'file-text';
-    if (mime.includes('excel') || mime.includes('spreadsheet')) return 'file-spreadsheet';
-    if (mime.includes('zip') || mime.includes('rar')) return 'file-archive';
-    if (this.esImagen(ev)) return 'image';
-    return 'file';
+   */
+
+  removeFile(index: number) { this.selectedFiles.splice(index, 1); this.evidenciasFA.removeAt(index); }
+  abrirModalRegistro() { this.isModalOpen = true; this.form.controls.fecha.setValue(new Date().toISOString().split('T')[0]); }
+  cerrarModalRegistro() { this.isModalOpen = false; this.form.reset(); this.selectedFiles = []; this.evidenciasFA.clear(); }
+
+  // Helpers de Estado
+  private normalizarEstado = (v: any) => String(v ?? '').toUpperCase();
+  getEstadoSesion = (s: any) => this.normalizarEstado(s.nombreEstado ?? s.estadoRevision);
+  getEstadoEvidencia = (ev: any) => this.normalizarEstado(ev.nombreEstadoEvidencia ?? ev.estadoEvidencia);
+  statusClass(estado: string) {
+    if (estado === 'PENDIENTE') return 'status-pendiente';
+    if (estado === 'APROBADO') return 'status-aprobado';
+    if (estado === 'OBSERVADO') return 'status-observado';
+    return 'status-default';
   }
 
-  cerrarDetalle(): void {
-    this.sesionSeleccionada = null;
-  }
+  esImagen = (ev: any) => (ev.mimeType || '').startsWith('image/');
+  iconoEvidencia = (ev: any) => (ev.mimeType?.includes('pdf') ? 'file-text' : 'image');
+  abrirEvidencia = (ev: any) => window.open(ev.rutaArchivo, '_blank');
+  cerrarDetalle = () => this.sesionSeleccionada = null;
+  tooltipObservado = () => 'Plazo de 24h para corregir';
+  puedeEditarSesion = (s: any) => this.getEstadoSesion(s) === 'OBSERVADO';
+  puedeEditarEvidencia = (ev: any) => this.getEstadoEvidencia(ev) === 'OBSERVADO';
+  trackById = (_: number, s: SesionResponseDTO) => s.idRegistroActividad;
+  editarSesion = (s: any) => console.log('Editar', s.idRegistroActividad);
+  editarEvidencia = (ev: any) => console.log('Editar ev', ev.idEvidenciaRegistroActividad);
 }

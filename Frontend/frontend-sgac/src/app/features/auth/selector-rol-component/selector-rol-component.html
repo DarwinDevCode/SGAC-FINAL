@@ -1,0 +1,60 @@
+<div class="sr-page">
+  <div class="sr-container">
+
+    <header class="sr-header">
+      <div class="sr-logo-icon">
+        <lucide-icon name="layout-grid" size="26"></lucide-icon>
+      </div>
+      <span class="sr-logo-title">SGAC — UTEQ</span>
+    </header>
+
+    @if (preAuthData) {
+      <div class="sr-welcome">
+        <div class="sr-avatar">
+          {{ preAuthData.nombres.charAt(0) }}{{ (preAuthData.apellidos || '').charAt(0) }}
+        </div>
+        <div class="sr-welcome-info">
+          <h1 class="sr-welcome-title">Bienvenido, {{ preAuthData.nombres }}</h1>
+          <p class="sr-welcome-sub">Selecciona un rol para iniciar tu sesión</p>
+        </div>
+      </div>
+    }
+
+    @if (errorMsg) {
+      <div class="sr-error-msg" style="color: #dc2626; background: #fef2f2; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.85rem; text-align: center; border: 1px solid #fee2e2;">
+        {{ errorMsg }}
+      </div>
+    }
+
+    <div class="sr-roles-grid">
+      @for (rol of preAuthData?.roles; track rol.nombreTipoRol) {
+        <button
+          class="sr-rol-card"
+          (click)="seleccionar(rol.nombreTipoRol)"
+          [disabled]="cargandoRol !== null">
+
+          <div class="sr-circle" [ngClass]="getConfig(rol.nombreTipoRol).claseColor">
+            @if (cargandoRol === rol.nombreTipoRol) {
+              <lucide-icon name="loader-2" class="sr-spin" size="30"></lucide-icon>
+            } @else {
+              <lucide-icon [name]="getConfig(rol.nombreTipoRol).icono" size="30"></lucide-icon>
+            }
+          </div>
+
+          <div class="sr-rol-info">
+            <span class="sr-rol-label">{{ getConfig(rol.nombreTipoRol).etiqueta }}</span>
+            <p class="sr-rol-desc">{{ getConfig(rol.nombreTipoRol).descripcion }}</p>
+          </div>
+        </button>
+      }
+    </div>
+
+    <footer class="sr-footer">
+      <button class="sr-btn-volver" (click)="volverAlLogin()">
+        <lucide-icon name="arrow-left" size="16"></lucide-icon>
+        Cerrar sesión e ir al inicio
+      </button>
+    </footer>
+
+  </div>
+</div>
