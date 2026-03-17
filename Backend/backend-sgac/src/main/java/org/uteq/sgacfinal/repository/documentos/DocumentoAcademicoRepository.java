@@ -15,8 +15,8 @@ public interface DocumentoAcademicoRepository extends JpaRepository<DocumentoAca
         SELECT d FROM DocumentoAcademico d 
         JOIN FETCH d.idTipoDocumento t
         WHERE d.activo = true 
-          AND d.idPeriodo.id = :idPeriodo
-          AND (d.idConvocatoria IS NULL OR d.idConvocatoria.id = :idConvocatoria)
+          AND d.idPeriodo.idPeriodoAcademico = :idPeriodo
+          AND (d.idConvocatoria IS NULL OR d.idConvocatoria.idConvocatoria = :idConvocatoria)
         ORDER BY d.fechaSubida DESC
     """)
     List<DocumentoAcademico> buscarDocumentosPorContexto(
