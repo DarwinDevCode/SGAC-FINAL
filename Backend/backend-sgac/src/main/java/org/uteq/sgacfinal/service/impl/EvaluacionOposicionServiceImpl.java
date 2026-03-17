@@ -16,9 +16,12 @@ import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.IEvaluacionOposicionService;
 import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.dto.Request.NotificationRequest;
+import org.uteq.sgacfinal.entity.BancoTema;
+import org.uteq.sgacfinal.repository.BancoTemaRepository;
 
 import java.sql.Date;
-import java.sql.Time;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +35,7 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
     private final ComisionSeleccionRepository comisionSeleccionRepository;
     private final PostulacionRepository postulacionRepository;
     private final INotificacionService notificacionService;
+    private final BancoTemaRepository bancoTemaRepository;
 
     @Override
     public EvaluacionOposicionResponseDTO crear(EvaluacionOposicionRequestDTO request) {
@@ -124,6 +128,11 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
         comisionSeleccionRepository.findById(request.getIdComisionSeleccion())
                 .orElseThrow(() -> new RuntimeException("Comisión no encontrada con ID: " + request.getIdComisionSeleccion()));
 
+        // Validar citación con mínimo 7 días de anticipación
+        if (request.getFechaEvaluacion().isBefore(java.time.LocalDate.now().plusDays(7))) {
+            throw new RuntimeException("La citación debe realizarse con un mínimo de siete días de anticipación.");
+        }
+
         // 2. Create the EvaluacionOposicion record via the stored procedure
         Integer idEvaluacion = evaluacionOposicionRepository.registrarEvaluacionOposicion(
                 request.getIdPostulacion(),
@@ -190,5 +199,31 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
         }
 
         return buscarPorId(idEvaluacion);
+    }
+
+    @Override
+    public EvaluacionOposicionResponseDTO sortearTema(Integer idEvaluacionOposicion) {
+        EvaluacionOposicion evaluacion = evaluacionOposicionRepository.findById(idEvaluacionOposicion)
+                .orElseThrow(() -> new RuntimeException("Evaluación de oposición no encontrada con ID: " + idEvaluacionOposicion));
+
+        // Obtener temas disponibles para la convocatoria
+        List<BancoTema> temas = bancoTemaRepository.findByIdConvocatoriaIdConvocatoriaAndActivoTrue(
+                evaluacion.getPostulacion().getConvocatoria().getIdConvocatoria());
+        
+        if (temas.isEmpty()) {
+            throw new RuntimeException("No hay temas disponibles en el banco para esta convocatoria.");
+        }
+
+        // Sortear tema aleatorio
+        Collections.shuffle(temas);
+        BancoTema temaSorteado = temas.get(0);
+
+        // Actualizar evaluación
+        evaluacion.setTemaSorteado(temaSorteado.getDescripcionTema());
+        evaluacion.setTimestampSorteo(LocalDateTime.now());
+        evaluacion.setTemaExposicion(temaSorteado.getDescripcionTema());
+
+        EvaluacionOposicion guardada = evaluacionOposicionRepository.save(evaluacion);
+        return mapearADTO(guardada);
     }
 }

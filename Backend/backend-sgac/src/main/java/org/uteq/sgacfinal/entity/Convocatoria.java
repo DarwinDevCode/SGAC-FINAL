@@ -43,6 +43,15 @@ public class Convocatoria {
     @Column(name = "activo")
     private Boolean activo;
 
+    @Column(name = "fecha_inicio_postulacion")
+    private LocalDate fechaInicioPostulacion;
+
+    @Column(name = "fecha_fin_postulacion")
+    private LocalDate fechaFinPostulacion;
+
+    @Column(name = "fecha_publicacion_resultados")
+    private LocalDate fechaPublicacionResultados;
+
     @OneToMany(mappedBy = "convocatoria", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("convocatoria")
     private List<Postulacion> postulaciones = new ArrayList<>();

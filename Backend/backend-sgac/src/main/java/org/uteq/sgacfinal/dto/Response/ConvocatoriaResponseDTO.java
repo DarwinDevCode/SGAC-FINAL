@@ -22,6 +22,9 @@ public class ConvocatoriaResponseDTO {
     private LocalDate fechaCierre;
     private String estado;
     private Boolean activo;
+    private LocalDate fechaInicioPostulacion;
+    private LocalDate fechaFinPostulacion;
+    private LocalDate fechaPublicacionResultados;
     private Integer idCarrera;
     private String nombreCarrera;
     private Integer idFacultad;

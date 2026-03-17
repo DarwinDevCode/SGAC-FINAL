@@ -14,8 +14,8 @@
 
       <a *ngFor="let item of currentMenu()"
          [routerLink]="item.route"
-         routerLinkActive="active-link"
-         [routerLinkActiveOptions]="item.exact ? { exact: true } : { exact: false }"
+         [queryParams]="item.queryParams || {}"
+         [class.active-link]="isItemActive(item)"
          class="nav-item">
         <lucide-icon [name]="item.icon" class="nav-icon"></lucide-icon>
         <div class="nav-label-wrapper">

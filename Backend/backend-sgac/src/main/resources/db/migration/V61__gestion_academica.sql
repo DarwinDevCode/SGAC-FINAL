@@ -230,7 +230,6 @@ EXCEPTION
         RAISE EXCEPTION 'Error en fn_gestionar_carga_docente: % (SQLSTATE: %)', SQLERRM, SQLSTATE;
 END;
 $$;
-
 -- Índice único requerido por el ON CONFLICT del upsert
 CREATE UNIQUE INDEX IF NOT EXISTS uq_docente_asignatura
     ON academico.docente_asignatura (id_docente, id_asignatura);

@@ -1,0 +1,42 @@
+<div class="comunicacion-container p-6">
+  <div class="header mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Canal de Comunicación</h1>
+    <p class="text-gray-600">Interactúa con tu docente y coordinador sobre tus actividades de ayudantía.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
+    <!-- Lista de Ayudantías (si tuviera varias, por ahora asumo una activa) -->
+    <div class="lg:col-span-1 bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col">
+      <div class="p-4 bg-gray-50 border-bottom font-semibold text-gray-700">
+        Mis Ayudantías Activas
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <div *ngIf="isLoadingAyu" class="p-8 text-center">
+            <i-lucide name="loader-2" class="animate-spin h-8 w-8 text-blue-500 mx-auto"></i-lucide>
+        </div>
+        <div *ngFor="let ayu of ayudantias" 
+             (click)="seleccionarAyudantia(ayu.idAyudantia)"
+             [class.active]="ayu.idAyudantia === idAyudantiaSeleccionada"
+             class="ayu-item p-4 border-b cursor-pointer hover:bg-blue-50 transition-colors">
+          <div class="font-medium text-blue-900">{{ ayu.asignatura }}</div>
+          <div class="text-xs text-gray-500 mt-1">Coordinador: {{ ayu.coordinador }}</div>
+          <div class="flex justify-between items-center mt-2">
+            <span class="badge" [ngClass]="ayu.estado === 'ACTIVA' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'">
+                {{ ayu.estado }}
+            </span>
+            <span class="text-xs text-gray-400">{{ ayu.periodo }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat -->
+    <div class="lg:col-span-2 h-full">
+      <app-chat-interno *ngIf="idAyudantiaSeleccionada" [idAyudantia]="idAyudantiaSeleccionada"></app-chat-interno>
+      <div *ngIf="!idAyudantiaSeleccionada" class="h-full flex flex-col items-center justify-center bg-gray-50 rounded-xl border border-dashed text-gray-400">
+        <i-lucide name="message-square" class="h-16 w-16 mb-4 opacity-20"></i-lucide>
+        <p>Selecciona una ayudantía para iniciar la comunicación.</p>
+      </div>
+    </div>
+  </div>
+</div>

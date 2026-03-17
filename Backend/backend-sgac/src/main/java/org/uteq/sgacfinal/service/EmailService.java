@@ -334,6 +334,109 @@ public class EmailService {
         """.formatted(nombreDocente, filaActuales, bloqueRevocadas);
     }
 
+    @Async
+    public void enviarNotificacionEstado(
+            String destinatario,
+            String nombrePostulante,
+            String asignatura,
+            String nuevoEstado,
+            String observacion) {
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromAddress, SYSTEM_NAME);
+            helper.setTo(destinatario);
+            helper.setSubject("📋 SGAC — Actualización de su postulación: " + nuevoEstado);
+            helper.setText(buildEstadoPostulacionTemplate(nombrePostulante, asignatura, nuevoEstado, observacion), true);
+
+            mailSender.send(message);
+            log.info("[EmailService] Notificación de estado enviada a: {}", destinatario);
+
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+            log.error("[EmailService] Error al enviar notificación de estado a {}: {}", destinatario, e.getMessage());
+        }
+    }
+
+    private String buildEstadoPostulacionTemplate(
+            String nombrePostulante,
+            String asignatura,
+            String nuevoEstado,
+            String observacion) {
+
+        String colorEstado = switch (nuevoEstado.toUpperCase()) {
+            case "APROBADO", "SELECCIONADO" -> "#16a34a"; // green-600
+            case "RECHAZADO", "ANULADO"     -> "#dc2626"; // red-600
+            case "OBSERVADO"                -> "#ea580c"; // orange-600
+            default                         -> "#2563eb"; // blue-600
+        };
+
+        String observacionHtml = (observacion != null && !observacion.isEmpty())
+                ? """
+                  <div style="margin-top:24px;padding:16px;background:#fef2f2;border-left:4px solid #ef4444;border-radius:4px;">
+                    <p style="margin:0;font-size:14px;font-weight:600;color:#991b1b;">Observaciones del revisor:</p>
+                    <p style="margin:4px 0 0;font-size:14px;color:#7f1d1d;line-height:1.5;">%s</p>
+                  </div>
+                  """.formatted(observacion)
+                : "";
+
+        return """
+        <!DOCTYPE html>
+        <html lang="es">
+        <head><meta charset="UTF-8"/></head>
+        <body style="margin:0;padding:0;background:#f8fafc;font-family:'Segoe UI',Arial,sans-serif;">
+          <table width="100%%" cellpadding="0" cellspacing="0" style="background:#f8fafc;padding:32px 16px;">
+            <tr><td align="center">
+              <table width="600" cellpadding="0" cellspacing="0"
+                     style="background:#ffffff;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,.05);overflow:hidden;">
+                
+                <!-- Navbar -->
+                <tr>
+                  <td style="background:#1e3a5f;padding:24px 40px;">
+                    <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-.5px;">🎓 SGAC</span>
+                  </td>
+                </tr>
+
+                <!-- Content -->
+                <tr>
+                  <td style="padding:40px;">
+                    <p style="margin:0 0 16px;font-size:18px;font-weight:700;color:#1e293b;">
+                      Hola %s,
+                    </p>
+                    <p style="margin:0 0 24px;font-size:15px;color:#475569;line-height:1.6;">
+                      Te informamos que ha habido una actualización en el estado de tu postulación para la asignatura de:
+                      <strong style="color:#1e3a5f;">%s</strong>.
+                    </p>
+
+                    <div style="display:inline-block;padding:8px 16px;background:%s;color:#ffffff;border-radius:20px;font-size:14px;font-weight:600;">
+                      Estado actual: %s
+                    </div>
+
+                    %s
+
+                    <p style="margin:32px 0 0;font-size:14px;color:#64748b;">
+                      Puedes revisar más detalles ingresando al sistema con tu cuenta institucional.
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- Footer -->
+                <tr>
+                  <td style="background:#f1f5f9;padding:20px 40px;text-align:center;">
+                    <p style="margin:0;font-size:12px;color:#94a3b8;">
+                      © 2025 Universidad Técnica Estatal de Quevedo — SGAC
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+        </html>
+        """.formatted(nombrePostulante, asignatura, colorEstado, nuevoEstado, observacionHtml);
+    }
+
     private String formatRolName(String rol) {
         return switch (rol.toUpperCase()) {
             case "ESTUDIANTE"      -> "Estudiante";

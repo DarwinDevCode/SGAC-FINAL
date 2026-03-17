@@ -28,6 +28,11 @@ export class ResultadosComponent implements OnInit, OnDestroy {
   loading = true;
   idEstudianteBase = 0;
 
+  // Modal Documentos
+  mostrarModalDocumentos = false;
+  loadingDocumentos = false;
+  documentosPostulacion: any[] = [];
+
   ngOnInit(): void {
     const user = this.authService.getUser();
     if (user) {
@@ -107,5 +112,32 @@ export class ResultadosComponent implements OnInit, OnDestroy {
     if (e === 'OPOSICION_EVALUADA') return 3;
     if (e === 'APROBADO' || e === 'RECHAZADO') return 4;
     return 1;
+  }
+
+  abrirModalDocumentos(p: any) {
+    this.mostrarModalDocumentos = true;
+    this.loadingDocumentos = true;
+    this.subs.add(
+      this.postulanteService.listarDocumentosPostulacion(p.idPostulacion).subscribe({
+        next: (docs) => {
+          this.documentosPostulacion = docs || [];
+          this.loadingDocumentos = false;
+        },
+        error: () => {
+          this.documentosPostulacion = [];
+          this.loadingDocumentos = false;
+        }
+      })
+    );
+  }
+
+  cerrarModalDocumentos() {
+    this.mostrarModalDocumentos = false;
+    this.documentosPostulacion = [];
+  }
+
+  verDocumento(idRequisito: number) {
+    const url = this.postulanteService.urlVisualizarDocumento(idRequisito);
+    window.open(url, '_blank');
   }
 }

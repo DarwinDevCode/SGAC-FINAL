@@ -1,3 +1,4 @@
+DROP FUNCTION IF EXISTS seguridad.fn_validar_contexto_estudiante(INTEGER);
 CREATE OR REPLACE FUNCTION seguridad.fn_validar_contexto_estudiante(
     p_id_usuario INTEGER,
     OUT p_id_estudiante INTEGER,
@@ -48,6 +49,7 @@ $$;
 
 -- ==================================================================================
 
+DROP FUNCTION IF EXISTS academico.fn_verificar_elegibilidad_academica(integer);
 CREATE OR REPLACE FUNCTION academico.fn_verificar_elegibilidad_academica(
     p_id_estudiante integer,
     OUT p_es_elegible boolean,
@@ -85,6 +87,7 @@ $$;
 
 
 
+DROP FUNCTION IF EXISTS convocatoria.fn_listar_convocatorias_estudiante(INTEGER);
 CREATE OR REPLACE FUNCTION convocatoria.fn_listar_convocatorias_estudiante(
     p_id_usuario INTEGER
 )

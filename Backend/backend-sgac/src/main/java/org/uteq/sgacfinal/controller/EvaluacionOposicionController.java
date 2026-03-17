@@ -65,4 +65,14 @@ public class EvaluacionOposicionController {
                     .body("Error al listar evaluaciones: " + e.getMessage());
         }
     }
+
+    @PostMapping("/sortear/{idEvaluacionOposicion}")
+    public ResponseEntity<?> sortearTema(@PathVariable Integer idEvaluacionOposicion) {
+        try {
+            return ResponseEntity.ok(evaluacionService.sortearTema(idEvaluacionOposicion));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al sortear el tema: " + e.getMessage());
+        }
+    }
 }

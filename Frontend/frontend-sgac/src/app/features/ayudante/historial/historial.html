@@ -1,0 +1,111 @@
+<div class="historial-page">
+
+  <div class="page-header">
+    <div>
+      <h1>
+        <i-lucide name="history" class="inline-icon"></i-lucide>
+        Mi Historial de Ayudantías
+      </h1>
+      <p class="subtitle">Trazabilidad completa de tus ayudantías por asignatura y período académico. Conservado por un mínimo de 2 años.</p>
+    </div>
+    <button (click)="cargarHistorial()" class="btn-refresh">
+      <i-lucide name="refresh-cw" class="w-4 h-4 mr-1"></i-lucide>
+      Actualizar
+    </button>
+  </div>
+
+  <!-- Resumen estadístico -->
+  <div class="stats-row" *ngIf="historial.length > 0">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i-lucide name="book-open" class="w-5 h-5"></i-lucide></div>
+      <div>
+        <div class="stat-value">{{ historial.length }}</div>
+        <div class="stat-label">Ayudantías</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i-lucide name="clock" class="w-5 h-5"></i-lucide></div>
+      <div>
+        <div class="stat-value">{{ horasTotales | number:'1.0-1' }}</div>
+        <div class="stat-label">Horas Acumuladas</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon purple"><i-lucide name="calendar-check-2" class="w-5 h-5"></i-lucide></div>
+      <div>
+        <div class="stat-value">{{ sesionesTotales }}</div>
+        <div class="stat-label">Sesiones Totales</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon amber"><i-lucide name="trophy" class="w-5 h-5"></i-lucide></div>
+      <div>
+        <div class="stat-value">{{ aprobadas }}</div>
+        <div class="stat-label">Aprobadas</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado de carga -->
+  <div *ngIf="isLoading" class="loading-container">
+    <i-lucide name="loader-2" class="w-12 h-12 animate-spin text-blue-500"></i-lucide>
+    <p>Cargando historial...</p>
+  </div>
+
+  <div *ngIf="errorMessage && !isLoading" class="error-card">
+    <i-lucide name="alert-triangle" class="w-5 h-5"></i-lucide>
+    {{ errorMessage }}
+  </div>
+
+  <!-- Tabla de historial -->
+  <div *ngIf="!isLoading && historial.length > 0" class="table-container">
+    <table class="historial-table">
+      <thead>
+        <tr>
+          <th>Período Académico</th>
+          <th>Asignatura</th>
+          <th>Código</th>
+          <th>Fecha Inicio</th>
+          <th>Fecha Fin</th>
+          <th class="text-center">Horas</th>
+          <th class="text-center">Sesiones</th>
+          <th class="text-center">Estado</th>
+          <th class="text-center">Resultado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of historial" class="table-row">
+          <td>
+            <div class="period-cell">
+              <span class="period-name">{{ h.nombrePeriodo }}</span>
+              <span class="period-dates">{{ formatDate(h.inicioPeriodo) }} — {{ formatDate(h.finPeriodo) }}</span>
+            </div>
+          </td>
+          <td><span class="asignatura-name">{{ h.nombreAsignatura }}</span></td>
+          <td><code class="code-badge">{{ h.codigoAsignatura }}</code></td>
+          <td class="date-col">{{ formatDate(h.fechaInicio) }}</td>
+          <td class="date-col">{{ h.fechaFin ? formatDate(h.fechaFin) : '—' }}</td>
+          <td class="text-center">
+            <span class="horas-badge">{{ h.horasCumplidas | number:'1.0-1' }}h</span>
+          </td>
+          <td class="text-center">
+            <span class="sesiones-badge">{{ h.totalSesiones }}</span>
+          </td>
+          <td class="text-center">
+            <span class="badge" [ngClass]="getEstadoClass(h.estadoAyudantia)">{{ h.estadoAyudantia || '—' }}</span>
+          </td>
+          <td class="text-center">
+            <span class="badge" [ngClass]="getResultadoClass(h.resultadoFinal)">{{ h.resultadoFinal || 'EN CURSO' }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!isLoading && historial.length === 0 && !errorMessage" class="empty-state">
+    <i-lucide name="folder-open" class="w-16 h-16 opacity-20"></i-lucide>
+    <h3>Sin historial registrado</h3>
+    <p>Aún no tienes ayudantías registradas en el sistema.</p>
+  </div>
+
+</div>

@@ -1,0 +1,54 @@
+<div class="comunicacion-page">
+
+  <div class="page-header">
+    <div>
+      <h1><i-lucide name="message-square" class="inline-icon indigo"></i-lucide> Canal de Supervisión</h1>
+      <p class="subtitle">Revisa y supervisa la comunicación de todas las ayudantías activas.</p>
+    </div>
+  </div>
+
+  <div class="layout-grid">
+    <div class="panel-list">
+      <div class="list-header">
+        <span>Ayudantías Registradas</span>
+        <span class="badge-count indigo">{{ ayudantias.length }}</span>
+      </div>
+      <div class="search-box">
+        <i-lucide name="search" class="w-4 h-4 text-gray-400"></i-lucide>
+        <input [(ngModel)]="searchQuery" placeholder="Buscar..." />
+      </div>
+
+      <div *ngIf="isLoading" class="loading-state">
+        <i-lucide name="loader-2" class="w-8 h-8 animate-spin text-indigo-500"></i-lucide>
+      </div>
+
+      <div class="list-items">
+        <div *ngFor="let a of filteredAyudantias"
+             (click)="seleccionar(a)"
+             class="list-item"
+             [class.active]="a.idAyudantia === idAyudantiaSeleccionada">
+          <div class="item-avatar indigo">{{ a.nombreEstudiante.charAt(0) || '?' }}</div>
+          <div class="item-info">
+            <div class="item-name">{{ a.nombreEstudiante }}</div>
+            <div class="item-sub">{{ a.asignatura }}</div>
+          </div>
+          <span class="item-badge" [class.active-badge]="a.estado === 'ACTIVA'">
+            {{ a.estado }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-chat">
+      <app-chat-interno-decano
+        *ngIf="idAyudantiaSeleccionada"
+        [idAyudantia]="idAyudantiaSeleccionada">
+      </app-chat-interno-decano>
+
+      <div *ngIf="!idAyudantiaSeleccionada" class="no-selection">
+        <i-lucide name="message-square" class="w-16 h-16 opacity-20"></i-lucide>
+        <p>Selecciona una ayudantía para ver su canal.</p>
+      </div>
+    </div>
+  </div>
+</div>

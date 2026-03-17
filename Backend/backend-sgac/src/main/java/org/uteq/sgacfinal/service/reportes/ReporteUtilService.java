@@ -165,6 +165,135 @@ public class ReporteUtilService {
         }
     }
 
+    public byte[] generarActaOficialPdf(String tipoActa,
+                                        String asignatura,
+                                        String periodo,
+                                        String[] cabeceras,
+                                        String[] campos,
+                                        List<Map<String, Object>> filas,
+                                        String tribunal,
+                                        String nombreUsuario) {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            Document doc = new Document(PageSize.A4, 50, 50, 72, 54);
+            PdfWriter writer = PdfWriter.getInstance(doc, out);
+            writer.setPageEvent(new FooterPdfEvent(nombreUsuario));
+
+            doc.open();
+
+            // 1. Logo institucional
+            try {
+                ClassPathResource logoRes = new ClassPathResource("static/logo-uteq.png");
+                if (logoRes.exists()) {
+                    Image logo = Image.getInstance(logoRes.getURL());
+                    logo.scaleToFit(100, 50);
+                    logo.setAlignment(Element.ALIGN_CENTER);
+                    doc.add(logo);
+                }
+            } catch (Exception e) {
+                log.debug("[Reporte] Logo UTEQ no disponible para acta.");
+            }
+
+            // 2. Encabezado formal
+            Font fH1 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK);
+            Font fH2 = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.BLACK);
+            Font fNormal = FontFactory.getFont(FontFactory.HELVETICA, 10, Color.BLACK);
+            Font fBold = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.BLACK);
+
+            Paragraph pInst = new Paragraph("UNIVERSIDAD TÉCNICA ESTATAL DE QUEVEDO", fH1);
+            pInst.setAlignment(Element.ALIGN_CENTER);
+            doc.add(pInst);
+
+            Paragraph pSub = new Paragraph("SISTEMA DE GESTIÓN DE AUXILIATURAS DE CÁTEDRA (SGAC)", fH2);
+            pSub.setAlignment(Element.ALIGN_CENTER);
+            pSub.setSpacingAfter(20);
+            doc.add(pSub);
+
+            Paragraph pTipo = new Paragraph(tipoActa.toUpperCase(), fH2);
+            pTipo.setAlignment(Element.ALIGN_CENTER);
+            pTipo.setSpacingAfter(10);
+            doc.add(pTipo);
+
+            // 3. Metadatos del acta
+            PdfPTable meta = new PdfPTable(2);
+            meta.setWidthPercentage(100);
+            meta.setSpacingAfter(15);
+            meta.setWidths(new float[]{30, 70});
+
+            meta.addCell(crearCeldaLimpia("Asignatura:", fBold));
+            meta.addCell(crearCeldaLimpia(asignatura, fNormal));
+            meta.addCell(crearCeldaLimpia("Periodo Académico:", fBold));
+            meta.addCell(crearCeldaLimpia(periodo, fNormal));
+            meta.addCell(crearCeldaLimpia("Fecha de Generación:", fBold));
+            meta.addCell(crearCeldaLimpia(LocalDateTime.now().format(FMT_FECHA), fNormal));
+            doc.add(meta);
+
+            // 4. Cuerpo de resultados
+            doc.add(new Paragraph("Considerando los resultados obtenidos en el proceso, se detalla el siguiente orden de prelación:", fNormal));
+            doc.add(new Paragraph(" ", fNormal));
+
+            PdfPTable tabla = new PdfPTable(cabeceras.length);
+            tabla.setWidthPercentage(100);
+            tabla.setWidths(calcularAnchoColumnas(cabeceras));
+
+            // Cabeceras de tabla
+            for (String cab : cabeceras) {
+                PdfPCell cell = new PdfPCell(new Phrase(cab, fBold));
+                cell.setBackgroundColor(new Color(0xEC, 0xF0, 0xF1));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(6);
+                tabla.addCell(cell);
+            }
+
+            // Datos
+            for (Map<String, Object> dato : filas) {
+                for (String campo : campos) {
+                    Object val = dato.get(campo);
+                    String texto = val == null ? "-" : formatearCelda(val);
+                    PdfPCell cell = new PdfPCell(new Phrase(texto, fNormal));
+                    cell.setPadding(5);
+                    if (val instanceof Number) cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    tabla.addCell(cell);
+                }
+            }
+            doc.add(tabla);
+
+            // 5. Sección de firmas
+            doc.add(new Paragraph("\n\nPara constancia de lo actuado, firman los responsables:", fNormal));
+            doc.add(new Paragraph("\n\n"));
+
+            PdfPTable firmas = new PdfPTable(2);
+            firmas.setWidthPercentage(100);
+            firmas.setSpacingBefore(30);
+
+            PdfPCell cFirma1 = new PdfPCell(new Phrase("\n\n__________________________\nCOORDINADOR DE CARRERA", fNormal));
+            cFirma1.setBorder(Rectangle.NO_BORDER);
+            cFirma1.setHorizontalAlignment(Element.ALIGN_CENTER);
+            firmas.addCell(cFirma1);
+
+            PdfPCell cFirma2 = new PdfPCell(new Phrase("\n\n__________________________\nSECRETARÍA ACADÉMICA", fNormal));
+            cFirma2.setBorder(Rectangle.NO_BORDER);
+            cFirma2.setHorizontalAlignment(Element.ALIGN_CENTER);
+            firmas.addCell(cFirma2);
+
+            doc.add(firmas);
+
+            doc.close();
+            return out.toByteArray();
+
+        } catch (Exception e) {
+            log.error("[Reporte] Error generando Acta: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al generar el Acta oficial.");
+        }
+    }
+
+    private PdfPCell crearCeldaLimpia(String texto, Font fuente) {
+        PdfPCell cell = new PdfPCell(new Phrase(texto, fuente));
+        cell.setBorder(Rectangle.NO_BORDER);
+        cell.setPadding(2);
+        return cell;
+    }
+
     public byte[] exportarPdf(String titulo,
                               String[] cabeceras,
                               String[] campos,

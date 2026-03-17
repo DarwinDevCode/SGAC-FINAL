@@ -15,4 +15,7 @@ public class ConvocatoriaRequestDTO {
     private LocalDate fechaCierre;
     private String estado;
     private Boolean activo;
+    private LocalDate fechaInicioPostulacion;
+    private LocalDate fechaFinPostulacion;
+    private LocalDate fechaPublicacionResultados;
 }

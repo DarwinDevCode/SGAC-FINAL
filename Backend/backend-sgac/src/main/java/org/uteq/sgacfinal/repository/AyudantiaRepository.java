@@ -127,4 +127,6 @@ public interface AyudantiaRepository extends JpaRepository<Ayudantia, Integer> {
 
     @Query(value = "SELECT ayudantia.fn_obtener_id_ayudantia(:idUsuario)", nativeQuery = true)
     Optional<Integer> findIdAyudantiaActivaByUsuario(@Param("idUsuario") Integer idUsuario);
+    @Query(value = "SELECT h.* FROM ayudantia.v_historial_estudiante h WHERE h.id_usuario = :idUsuario", nativeQuery = true)
+    List<Object[]> findHistorialByUsuario(@Param("idUsuario") Integer idUsuario);
 }

@@ -1,0 +1,16 @@
+.comunicacion-container {
+  min-height: calc(100vh - 100px);
+  background: #f1f5f9;
+}
+
+.ayu-item.active {
+  background: #eff6ff;
+  border-left: 4px solid #2563eb;
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 9999px;
+}

@@ -113,6 +113,7 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
 
         return AyudantiaDetalleResponseDTO.builder()
                 .idAyudantia(ayudantia.getIdAyudantia())
+                .idPostulacion(ayudantia.getPostulacion() != null ? ayudantia.getPostulacion().getIdPostulacion() : null)
                 .fechaInicio(ayudantia.getFechaInicio())
                 .fechaFin(ayudantia.getFechaFin())
                 .horasCumplidas(ayudantia.getHorasCumplidas())
@@ -261,6 +262,39 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
                 .observacionDocente(observacion)
                 .fechaObservacion(toLocalDate(row[9]))
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Integer> buscarIdAyudantiaActivaPorUsuario(Integer idUsuario) {
+        return ayudantiaRepository.findIdAyudantiaActivaByUsuario(idUsuario);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<org.uteq.sgacfinal.dto.Response.HistorialAyudantiaDTO> listarHistorialEstudiante(Integer idUsuario) {
+        List<Object[]> rows = ayudantiaRepository.findHistorialByUsuario(idUsuario);
+        return rows.stream().map(r -> {
+            BigDecimal horas = r[11] != null ? new BigDecimal(r[11].toString()) : BigDecimal.ZERO;
+            Integer sesiones = r[12] != null ? ((Number) r[12]).intValue() : 0;
+            return org.uteq.sgacfinal.dto.Response.HistorialAyudantiaDTO.builder()
+                    .idAyudantia(r[0] != null ? ((Number) r[0]).intValue() : null)
+                    .idPostulacion(r[1] != null ? ((Number) r[1]).intValue() : null)
+                    .nombreEstudiante(r[2] != null ? r[2].toString() : null)
+                    .cedula(r[3] != null ? r[3].toString() : null)
+                    .nombreAsignatura(r[4] != null ? r[4].toString() : null)
+                    .codigoAsignatura(r[5] != null ? r[5].toString() : null)
+                    .nombrePeriodo(r[6] != null ? r[6].toString() : null)
+                    .inicioPeriodo(toLocalDate(r[7]))
+                    .finPeriodo(toLocalDate(r[8]))
+                    .fechaInicio(toLocalDate(r[9]))
+                    .fechaFin(toLocalDate(r[10]))
+                    .horasCumplidas(horas)
+                    .totalSesiones(sesiones)
+                    .resultadoFinal(r[13] != null ? r[13].toString() : "EN_CURSO")
+                    .estadoAyudantia(r[14] != null ? r[14].toString() : null)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private LocalDate toLocalDate(Object value) {

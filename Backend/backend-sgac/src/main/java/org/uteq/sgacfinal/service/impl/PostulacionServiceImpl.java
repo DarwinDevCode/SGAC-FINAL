@@ -15,8 +15,10 @@ import org.uteq.sgacfinal.entity.Estudiante;
 import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.repository.EstudianteRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
+import org.uteq.sgacfinal.service.EmailService;
 import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IPostulacionService;
+import org.uteq.sgacfinal.entity.Usuario;
 
 
 import java.util.Collections;
@@ -34,6 +36,7 @@ public class PostulacionServiceImpl implements IPostulacionService {
     private final PostulacionRepository postulacionRepository;
     private final EstudianteRepository estudianteRepository;
     private final INotificacionService notificacionService;
+    private final EmailService emailService;
     private final ObjectMapper objectMapper;
 
     @Override
@@ -121,25 +124,46 @@ public class PostulacionServiceImpl implements IPostulacionService {
         postulacion.setObservaciones(observacion);
         
         try {
-            System.out.println("Actualizando postulación ID: " + idPostulacion + " a estado: " + nuevoEstado);
+            log.info("Actualizando postulación ID: {} a estado: {}", idPostulacion, nuevoEstado);
             postulacionRepository.save(postulacion);
         } catch (Exception ex) {
-            System.err.println("Error al guardar postulación: " + ex.getMessage());
-            ex.printStackTrace();
-            throw new RuntimeException("Error al actualizar el estado de la postulación en la base de datos: " + ex.getMessage(), ex);
+            log.error("Error al guardar postulación: {}", ex.getMessage());
+            throw new RuntimeException("Error al actualizar el estado de la postulación: " + ex.getMessage(), ex);
         }
 
         if (postulacion.getEstudiante() != null && postulacion.getEstudiante().getUsuario() != null) {
-            String mensaje = "Tu postulación ha cambiado de estado a: " + nuevoEstado;
+            Usuario usuario = postulacion.getEstudiante().getUsuario();
+            String nombrePostulante = usuario.getNombres() + " " + usuario.getApellidos();
+            String asignatura = postulacion.getConvocatoria().getAsignatura().getNombreAsignatura();
+            
+            String mensaje = String.format("Tu postulación para %s ha cambiado de estado a: %s", asignatura, nuevoEstado);
 
+            // 1. Notificación en canal interno (WS + DB)
+            NotificationRequest notificationRequest = NotificationRequest.builder()
+                    .titulo("Actualización de Postulación")
+                    .mensaje(mensaje)
+                    .tipo("POSTULACION_ESTADO")
+                    .idReferencia(idPostulacion)
+                    .build();
 
-        NotificationRequest notificationRequest = new NotificationRequest();
+            try {
+                notificacionService.enviarNotificacion(usuario.getIdUsuario(), notificationRequest);
+            } catch (Exception e) {
+                log.warn("No se pudo enviar notificación interna: {}", e.getMessage());
+            }
 
-
-            notificacionService.enviarNotificacion(
-                    postulacion.getEstudiante().getUsuario().getIdUsuario(),
-                    notificationRequest
-            );
+            // 2. Notificación por Correo Institucional
+            try {
+                emailService.enviarNotificacionEstado(
+                        usuario.getCorreo(),
+                        nombrePostulante,
+                        asignatura,
+                        nuevoEstado,
+                        observacion
+                );
+            } catch (Exception e) {
+                log.warn("No se pudo enviar correo de notificación: {}", e.getMessage());
+            }
         }
     }
 

@@ -35,6 +35,7 @@ CREATE INDEX IF NOT EXISTS idx_postulacion_tipo_estado
     ON postulacion.postulacion(id_tipo_estado_postulacion);
 
 -- 7. Vista Actualizada (Sin la columna legacy 'estado_postulacion')
+DROP VIEW IF EXISTS postulacion.v_postulacion_con_estado;
 CREATE OR REPLACE VIEW postulacion.v_postulacion_con_estado AS
 SELECT
     p.id_postulacion,

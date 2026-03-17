@@ -1,9 +1,11 @@
 <div class="gestion-container">
     <div class="section-header">
-        <div class="title-container">
-            <h2 class="title">Seguimiento Mensual</h2>
-            <p class="subtitle">Monitoreo de actividades y horas de los ayudantes activos.</p>
-        </div>
+        <div class="header-section">
+        <h2 class="title">{{ esModoChat ? 'Canal de Comunicación Interna' : 'Seguimiento Mensual' }}</h2>
+        <p class="subtitle">
+            {{ esModoChat ? 'Seleccione un ayudante para iniciar o ver la conversación.' : 'Monitoreo de actividades y horas de los ayudantes activos.' }}
+        </p>
+    </div>
     </div>
 
     @if (loading) {
@@ -31,6 +33,7 @@
                     <th>Asignatura</th>
                     <th>Horas Asignadas</th>
                     <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,6 +43,14 @@
                     <td>{{ a.asignatura || '—' }}</td>
                     <td>{{ a.horasAyudante || '—' }}</td>
                     <td><span class="status-pill aprobado">Activo</span></td>
+                    <td class="actions">
+                        <button class="btn-icon" [routerLink]="['/coordinador/seguimiento', a.idAyudantia]" title="Ver Detalles">
+                            <lucide-icon name="eye" size="18"></lucide-icon>
+                        </button>
+                        <button class="btn-icon chat" [routerLink]="['/coordinador/seguimiento', a.idAyudantia]" [queryParams]="{tab: 'chat'}" title="Ir al Chat">
+                            <lucide-icon name="message-square" size="18"></lucide-icon>
+                        </button>
+                    </td>
                 </tr>
                 }
             </tbody>

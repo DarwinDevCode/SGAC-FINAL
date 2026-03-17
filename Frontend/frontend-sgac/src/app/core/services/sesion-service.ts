@@ -104,4 +104,8 @@ export class SesionService {
       { params }
     );
   }
+
+  obtenerIdAyudantiaActiva(idUsuario: number): Observable<number> {
+    return this.http.get<number>(`${this.baseUrl}/ayudantias/activa/${idUsuario}`);
+  }
 }

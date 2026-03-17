@@ -41,7 +41,12 @@
                         }}</span>
                     <button class="btn-estado"
                         (click)="iniciarCambioActividad(act.idRegistroActividad, act.estadoRevision); $event.stopPropagation()">
-                        Cambiar estado
+                        Estado
+                    </button>
+                    <button class="btn-evaluar"
+                        (click)="iniciarEvaluacion(act.idRegistroActividad); $event.stopPropagation()"
+                        title="Evaluar Desempeño">
+                        <lucide-icon name="file-text" size="16"></lucide-icon> Evaluar
                     </button>
                     <lucide-icon [name]="act.expandido ? 'chevron-up' : 'chevron-down'" [size]="18"></lucide-icon>
                 </div>
@@ -99,6 +104,11 @@
         }
     </div>
     }
+
+    <!-- Chat Interno -->
+    <div class="mt-8 px-4">
+        <app-chat-interno-docente [idAyudantia]="idAyudantia"></app-chat-interno-docente>
+    </div>
 </div>
 
 <!-- Modal cambio de estado -->
@@ -126,6 +136,31 @@
             <button class="btn-confirm" (click)="confirmarCambio()" [disabled]="guardando">
                 @if (guardando) { <span>Guardando...</span> } @else {
                 <lucide-icon name="send" [size]="14"></lucide-icon> Confirmar
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Evaluación de Desempeño -->
+@if (modalVisible && modalTipo === 'evaluacion') {
+<div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Evaluación de Desempeño</h3>
+        
+        <label class="modal-label">Puntaje (1-10)</label>
+        <input type="number" class="modal-input" [(ngModel)]="puntajeEvaluacion" min="1" max="10">
+        
+        <label class="modal-label">Retroalimentación Estructurada</label>
+        <textarea class="modal-textarea" rows="4" [(ngModel)]="retroalimentacionEvaluacion" 
+            placeholder="Ingrese los comentarios sobre el desempeño del ayudante en esta sesión..."></textarea>
+        
+        <div class="modal-footer">
+            <button class="btn-cancel" (click)="cerrarModal()">Cancelar</button>
+            <button class="btn-confirm" (click)="guardarEvaluacion()" [disabled]="guardando">
+                @if (guardando) { <span>Guardando...</span> } @else {
+                <lucide-icon name="send" [size]="14"></lucide-icon> Guardar Evaluación
                 }
             </button>
         </div>

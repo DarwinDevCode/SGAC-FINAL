@@ -1,0 +1,116 @@
+<div class="detalle-container">
+  <header class="header">
+    <button class="btn-back" (click)="volver()">
+      <lucide-icon name="arrow-left" size="20"></lucide-icon>
+      Volver al listado
+    </button>
+    <div class="title-section">
+      <h2 class="title">Seguimiento de Ayudantía #{{ idAyudantia }}</h2>
+      <p class="subtitle">Supervisión de sesiones, comunicación y aprobación de informes.</p>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button [class.active]="tabActiva === 'sesiones'" (click)="cambiarTab('sesiones')">
+      <lucide-icon name="file-text" size="18"></lucide-icon>
+      Sesiones Registradas
+    </button>
+    <button [class.active]="tabActiva === 'informes'" (click)="cambiarTab('informes')">
+      <lucide-icon name="check-square" size="18"></lucide-icon>
+      Informes Mensuales
+    </button>
+    <button [class.active]="tabActiva === 'chat'" (click)="cambiarTab('chat')">
+      <lucide-icon name="message-circle" size="18"></lucide-icon>
+      Chat Interno
+    </button>
+    <button [class.active]="tabActiva === 'documentos'" (click)="cambiarTab('documentos')">
+      <lucide-icon name="paperclip" size="18"></lucide-icon>
+      Documentos
+    </button>
+  </nav>
+
+  <div class="tab-content">
+    <!-- SESIONES -->
+    <div *ngIf="tabActiva === 'sesiones'" class="sesiones-view">
+      <div *ngIf="loading" class="loading-state">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p>Cargando sesiones...</p>
+      </div>
+
+      <div *ngIf="!loading && actividades.length === 0" class="empty-state">
+        <lucide-icon name="calendar" size="40"></lucide-icon>
+        <p>No se han registrado sesiones aún.</p>
+      </div>
+
+      <div *ngFor="let act of actividades" class="act-card">
+        <div class="act-header" (click)="toggleActividad(act)">
+          <div class="act-info">
+            <span class="act-date">{{ act.fecha | date:'mediumDate' }}</span>
+            <h4 class="act-title">{{ act.temaTratado }}</h4>
+          </div>
+          <div class="act-status">
+            <span [class]="getEstadoClass(act.estadoRevision)">{{ act.estadoRevision }}</span>
+            <lucide-icon [name]="act.expandido ? 'chevron-up' : 'chevron-down'" size="20"></lucide-icon>
+          </div>
+        </div>
+
+        <div *ngIf="act.expandido" class="act-body">
+          <p class="act-desc"><strong>Descripción:</strong> {{ act.descripcionActividad }}</p>
+          <div class="evidencias-list">
+            <h5>Evidencias:</h5>
+            <div *ngFor="let ev of act.evidencias" class="ev-item">
+              <span>{{ ev.nombreArchivo }}</span>
+              <span [class]="getEstadoClass(ev.estadoEvidencia)">{{ ev.estadoEvidencia }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFORMES -->
+    <div *ngIf="tabActiva === 'informes'" class="informes-view">
+      <div class="info-banner">
+        <lucide-icon name="info" size="20"></lucide-icon>
+        <p>Aquí puede aprobar los informes mensuales que ya han sido revisados por el docente.</p>
+      </div>
+      <!-- Listado de informes... (simulado por ahora) -->
+      <p class="text-center py-8 text-gray-500">Módulo de aprobación de informes en etapa final de integración.</p>
+    </div>
+
+    <!-- CHAT -->
+    <div *ngIf="tabActiva === 'chat'" class="chat-view">
+      <app-chat-interno-coordinador [idAyudantia]="idAyudantia"></app-chat-interno-coordinador>
+    </div>
+
+    <!-- DOCUMENTOS -->
+    <div *ngIf="tabActiva === 'documentos'" class="documentos-view">
+      <div *ngIf="loadingDocumentos" class="loading-state" style="display:flex; flex-direction:column; align-items:center;  padding: 3rem; color: #64748b;">
+        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+        <p style="margin-top:1rem">Cargando requisitos del ayudante...</p>
+      </div>
+
+      <div *ngIf="!loadingDocumentos && documentos.length === 0" class="empty-state" style="text-align:center; padding: 4rem; color: #94a3b8;">
+        <lucide-icon name="folder-open" size="48" style="margin-bottom:1rem; opacity:0.5"></lucide-icon>
+        <p>No se encontraron documentos de postulación asociados a esta ayudantía.</p>
+      </div>
+
+      <div *ngIf="!loadingDocumentos && documentos.length > 0" class="docs-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:1.25rem;">
+        <div *ngFor="let doc of documentos" class="doc-card" style="display:flex; flex-direction:column; gap:1rem; padding:1.25rem; border:1px solid #e2e8f0; border-radius:0.75rem; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.05); transition:transform 0.2s, box-shadow 0.2s; cursor:default;">
+          <div style="display:flex; gap:1rem; align-items:flex-start">
+            <div style="padding:0.6rem; background:#f1f5f9; border-radius:0.5rem; color:#64748b;">
+              <lucide-icon name="file-text" size="24"></lucide-icon>
+            </div>
+            <div style="display:flex; flex-direction:column; overflow:hidden">
+              <span style="font-weight:600; font-size:0.95rem; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" [title]="doc.nombreRequisito">{{ doc.nombreRequisito }}</span>
+              <span style="font-size:0.8rem; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" [title]="doc.nombreArchivo">{{ doc.nombreArchivo }}</span>
+            </div>
+          </div>
+          <button (click)="verDocumento(doc.idRequisitoAdjunto)" style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.6rem; border:1px solid #e2e8f0; border-radius:0.5rem; background:#f8fafc; color:#1e293b; font-size:0.85rem; font-weight:500; cursor:pointer; transition:all 0.2s;">
+            <lucide-icon name="eye" size="16"></lucide-icon>
+            Visualizar Documento
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

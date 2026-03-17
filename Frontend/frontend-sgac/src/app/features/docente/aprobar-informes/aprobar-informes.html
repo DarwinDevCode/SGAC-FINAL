@@ -1,0 +1,126 @@
+<div class="informes-page">
+
+  <div class="page-header">
+    <div>
+      <h1><i-lucide name="file-check" class="inline-icon"></i-lucide> Revisión de Informes Mensuales</h1>
+      <p class="subtitle">Informes pendientes de revisión generados por tus ayudantes. Tras tu aprobación, pasan al Coordinador.</p>
+    </div>
+    <button (click)="cargarInformes()" class="btn-refresh">
+      <i-lucide name="refresh-cw" class="w-4 h-4"></i-lucide> Actualizar
+    </button>
+  </div>
+
+  <!-- Flujo visual -->
+  <div class="flujo-card">
+    <div class="flujo-paso activo">
+      <i-lucide name="user" class="w-5 h-5"></i-lucide>
+      <span>Ayudante genera informe</span>
+    </div>
+    <i-lucide name="chevron-right" class="w-4 h-4 text-gray-400"></i-lucide>
+    <div class="flujo-paso current">
+      <i-lucide name="graduation-cap" class="w-5 h-5"></i-lucide>
+      <span><strong>Docente revisa</strong> ← Tú aquí</span>
+    </div>
+    <i-lucide name="chevron-right" class="w-4 h-4 text-gray-400"></i-lucide>
+    <div class="flujo-paso">
+      <i-lucide name="shield-check" class="w-5 h-5"></i-lucide>
+      <span>Coordinador aprueba</span>
+    </div>
+  </div>
+
+  <!-- Mensajes de estado -->
+  <div *ngIf="successMsg" class="success-banner">
+    <i-lucide name="check-circle" class="w-5 h-5"></i-lucide> {{ successMsg }}
+  </div>
+  <div *ngIf="errorMsg" class="error-banner">
+    <i-lucide name="alert-triangle" class="w-5 h-5"></i-lucide> {{ errorMsg }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="loading-state">
+    <i-lucide name="loader-2" class="w-10 h-10 animate-spin"></i-lucide>
+    <p>Cargando informes...</p>
+  </div>
+
+  <!-- Lista de informes pendientes -->
+  <div *ngIf="!isLoading && informes.length > 0" class="informes-grid">
+    <div *ngFor="let inf of informes" class="informe-card">
+      <div class="card-header-row">
+        <div class="mes-badge">{{ getMesNombre(inf.mes) }} {{ inf.anio }}</div>
+        <span class="badge" [ngClass]="getEstadoClass(inf.estado)">{{ inf.estado }}</span>
+      </div>
+
+      <div class="card-body">
+        <div class="info-row">
+          <i-lucide name="user" class="w-4 h-4"></i-lucide>
+          <span><strong>Ayudante:</strong> {{ getNombreAyudante(inf) }}</span>
+        </div>
+        <div class="info-row">
+          <i-lucide name="book-open" class="w-4 h-4"></i-lucide>
+          <span><strong>Asignatura:</strong> {{ getNombreAsignatura(inf) }}</span>
+        </div>
+        <div class="info-row" *ngIf="inf.fechaGeneracion">
+          <i-lucide name="calendar" class="w-4 h-4"></i-lucide>
+          <span><strong>Generado:</strong> {{ inf.fechaGeneracion | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="observaciones-box" *ngIf="inf.observaciones">
+          <p class="obs-label">Observaciones previas:</p>
+          <p class="obs-text">{{ inf.observaciones }}</p>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-aprobar" (click)="abrirModal(inf, 'aprobar')">
+          <i-lucide name="check-circle" class="w-4 h-4"></i-lucide>
+          Aprobar y Enviar al Coordinador
+        </button>
+        <button class="btn-rechazar" (click)="abrirModal(inf, 'rechazar')">
+          <i-lucide name="x-circle" class="w-4 h-4"></i-lucide>
+          Rechazar con Observaciones
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="!isLoading && informes.length === 0 && !errorMsg" class="empty-state">
+    <i-lucide name="inbox" class="w-16 h-16 opacity-20"></i-lucide>
+    <h3>Sin informes pendientes</h3>
+    <p>No tienes informes esperando tu revisión en este momento.</p>
+  </div>
+
+</div>
+
+<!-- ── Modal de confirmación ────────────────────────────────────── -->
+<div *ngIf="modalVisible" class="modal-overlay" (click)="cerrarModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header" [class.header-aprobar]="modalAccion === 'aprobar'" [class.header-rechazar]="modalAccion === 'rechazar'">
+      <i-lucide [name]="modalAccion === 'aprobar' ? 'check-circle' : 'x-circle'" class="w-6 h-6"></i-lucide>
+      <h3>{{ modalAccion === 'aprobar' ? 'Aprobar Informe' : 'Rechazar Informe' }}</h3>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" *ngIf="modalInforme">
+        Informe de <strong>{{ getMesNombre(modalInforme.mes) }} {{ modalInforme.anio }}</strong> —
+        Ayudante: <strong>{{ getNombreAyudante(modalInforme) }}</strong>
+      </p>
+
+      <div class="form-group">
+        <label>
+          {{ modalAccion === 'aprobar' ? 'Observaciones (opcional)' : 'Observaciones (requerido para rechazar)' }}
+        </label>
+        <textarea [(ngModel)]="modalObservaciones" rows="4"
+          [placeholder]="modalAccion === 'aprobar' ? 'Comentarios adicionales...' : 'Explica el motivo del rechazo...'"
+          class="obs-textarea"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button (click)="confirmar()" [disabled]="guardando"
+        [class.btn-confirmar-aprobar]="modalAccion === 'aprobar'"
+        [class.btn-confirmar-rechazar]="modalAccion === 'rechazar'">
+        <i-lucide [name]="guardando ? 'loader-2' : (modalAccion === 'aprobar' ? 'check' : 'x')" class="w-4 h-4" [class.animate-spin]="guardando"></i-lucide>
+        {{ guardando ? 'Procesando...' : (modalAccion === 'aprobar' ? 'Confirmar Aprobación' : 'Confirmar Rechazo') }}
+      </button>
+    </div>
+  </div>
+</div>

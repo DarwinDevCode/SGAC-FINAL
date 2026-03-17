@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +54,21 @@ public class EvaluacionOposicion {
 
     @Column(name = "puntaje_total_oposicion", precision = 5, scale = 2)
     private BigDecimal puntajeTotalOposicion;
+
+    @Column(name = "puntaje_material", precision = 5, scale = 2)
+    private BigDecimal puntajeMaterial;
+
+    @Column(name = "puntaje_exposicion", precision = 5, scale = 2)
+    private BigDecimal puntajeExposicion;
+
+    @Column(name = "puntaje_respuestas", precision = 5, scale = 2)
+    private BigDecimal puntajeRespuestas;
+
+    @Column(name = "tema_sorteado", length = 200)
+    private String temaSorteado;
+
+    @Column(name = "timestamp_sorteo")
+    private LocalDateTime timestampSorteo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_estado_evaluacion")

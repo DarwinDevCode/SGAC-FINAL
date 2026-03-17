@@ -1,0 +1,54 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="header-info">
+      <i-lucide name="message-circle" class="w-5 h-5 text-blue-600"></i-lucide>
+      <div class="header-text">
+        <h3>Seguimiento de Ayudantía</h3>
+        <span class="subtitle">Chat con Ayudante #{{ idAyudantia }}</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button (click)="cargarHistorial()" title="Recargar historial" class="action-btn">
+        <i-lucide name="refresh-cw" class="w-4 h-4"></i-lucide>
+      </button>
+    </div>
+  </div>
+
+  <div class="chat-messages" #scrollContainer>
+    <div *ngIf="mensajes.length === 0" class="empty-state">
+      <i-lucide name="ghost" class="w-12 h-12 text-gray-300"></i-lucide>
+      <p>No hay mensajes en esta conversación.</p>
+    </div>
+
+    <div *ngFor="let msg of mensajes" 
+         [ngClass]="{'msg-own': msg.idUsuarioEmisor === userId, 'msg-other': msg.idUsuarioEmisor !== userId}"
+         class="msg-wrapper">
+      <div class="msg-bubble shadow-sm" [ngClass]="{'bg-blue-600 text-white': msg.idUsuarioEmisor === userId, 'bg-gray-100 text-gray-800': msg.idUsuarioEmisor !== userId}">
+        <div class="msg-meta" *ngIf="msg.idUsuarioEmisor !== userId">
+            <span class="sender-name">{{ msg.nombreEmisor || 'Usuario' }}</span>
+        </div>
+        <p class="msg-text">{{ msg.mensaje }}</p>
+        <div class="msg-footer">
+          <span class="msg-time">{{ msg.fechaEnvio | date:'shortTime' }}</span>
+          <i-lucide *ngIf="msg.idUsuarioEmisor === userId" [name]="msg.leido ? 'check-check' : 'check'" class="w-3 h-3 ml-1"></i-lucide>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input-area border-t p-3 bg-white">
+    <div class="input-wrapper flex items-center gap-2 bg-gray-50 rounded-full px-4 py-1 border focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+      <input type="text" 
+             [(ngModel)]="nuevoMensaje" 
+             (keyup.enter)="enviar()" 
+             placeholder="Escribe un mensaje..." 
+             class="flex-1 bg-transparent border-none outline-none py-2 text-sm text-gray-700">
+      
+      <button (click)="enviar()" 
+              [disabled]="!nuevoMensaje.trim() || isSending"
+              class="send-btn p-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
+        <i-lucide [name]="isSending ? 'loader-2' : 'send'" [class.animate-spin]="isSending" class="w-4 h-4"></i-lucide>
+      </button>
+    </div>
+  </div>
+</div>

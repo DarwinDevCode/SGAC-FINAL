@@ -18,4 +18,6 @@ public interface IEvaluacionOposicionService {
     List<EvaluacionOposicionResponseDTO> listarTodas();
 
     EvaluacionOposicionResponseDTO asignarComisionAPostulacion(AsignarComisionRequestDTO request);
+
+    EvaluacionOposicionResponseDTO sortearTema(Integer idEvaluacionOposicion);
 }

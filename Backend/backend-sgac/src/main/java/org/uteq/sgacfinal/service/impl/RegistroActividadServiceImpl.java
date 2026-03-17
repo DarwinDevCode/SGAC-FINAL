@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class RegistroActividadServiceImpl implements IRegistroActividadService {
 
     private final RegistroActividadRepository registroRepository;
+    private final org.uteq.sgacfinal.service.ComunicacionService comunicacionService;
 
     @Override
     public RegistroActividadResponseDTO crear(RegistroActividadRequestDTO request) {
@@ -33,6 +34,19 @@ public class RegistroActividadServiceImpl implements IRegistroActividadService {
 
         if (idGenerado == -1) {
             throw new RuntimeException("Error al registrar la actividad.");
+        }
+
+        // Alerta automática si no hay evidencias (el request DTO debería tenerlas o subir archivos después)
+        // En este flujo, si el ayudante registra sin subir archivos, disparamos la alerta.
+        if (request.getEvidencias() == null || request.getEvidencias().isEmpty()) {
+            try {
+                comunicacionService.generarAlertaFaltaEvidencia(
+                        request.getIdAyudantia(), 
+                        request.getTemaTratado() != null ? request.getTemaTratado() : "Sin tema"
+                );
+            } catch (Exception e) {
+                // No bloqueamos el registro por falla en la alerta
+            }
         }
 
         return buscarPorId(idGenerado);

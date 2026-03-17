@@ -103,6 +103,9 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
         entity.setCuposDisponibles(dto.getCuposDisponibles());
         entity.setEstado(dto.getEstado());
         entity.setActivo(dto.getActivo());
+        entity.setFechaInicioPostulacion(dto.getFechaInicioPostulacion());
+        entity.setFechaFinPostulacion(dto.getFechaFinPostulacion());
+        entity.setFechaPublicacionResultados(dto.getFechaPublicacionResultados());
 
         if(dto.getIdPeriodoAcademico() != null) {
             PeriodoAcademico periodo = periodoRepo.findById(dto.getIdPeriodoAcademico())

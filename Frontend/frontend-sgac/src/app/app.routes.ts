@@ -33,6 +33,8 @@ import { EvaluacionesComponent } from './features/coordinador/evaluaciones/evalu
 import { ReportesComponent as CoordinadorReportes } from './features/coordinador/reportes/reportes';
 import { SelectorOposicionComponent } from './features/coordinador/selector-oposicion-component/selector-oposicion-component';
 import { GestionOposicionComponent }  from './features/coordinador/gestion-oposicion-component/gestion-oposicion-component';
+import { SeguimientoDetalleComponent } from './features/coordinador/seguimiento/seguimiento-detalle.component';
+
 
 // Ayudante
 import { DashboardComponent as AyudanteDashboard } from './features/ayudante/dashboard/dashboard.component';
@@ -87,7 +89,6 @@ export const routes: Routes = [
       { path: 'postulante/dashboard',         component: PostulanteDashboard },
       { path: 'postulante/convocatorias',     component: ConvocatoriasComponent },
       { path: 'postulante/mis-postulaciones', component: EstadoPostulacionComponent },
-      //{ path: 'postulante/resultados',        component: ResultadosComponent },
       { path: 'postulante/meritos/:id',       component: MeritosComponent },
       { path: 'postulante/oposicion/:id',     component: MiOposicionEstudianteComponent },
       { path: 'postulante/comision',          component: ComisionSeleccion },
@@ -98,6 +99,7 @@ export const routes: Routes = [
       { path: 'decano/postulantes/:idConvocatoria', component: DecanoPostulantes },
       { path: 'decano/comisiones',                  component: ComisionesDecanoComponent },
       { path: 'decano/reportes',                    component: DecanoAuditoria },
+      { path: 'decano/comunicacion', loadComponent: () => import('./features/decano/comunicacion/comunicacion').then(m => m.ComunicacionDecanoComponent) },
 
       // ── Coordinador ─────────────────────────────────────────
       { path: 'coordinador/dashboard',                   component: CoordinadorDashboard },
@@ -109,22 +111,27 @@ export const routes: Routes = [
       { path: 'coordinador/oposicion',                   component: SelectorOposicionComponent },
       { path: 'coordinador/oposicion/:idConvocatoria',   component: GestionOposicionComponent },
       { path: 'coordinador/seguimiento',   component: SeguimientoComponent },
+      { path: 'coordinador/seguimiento/:idAyudantia', component: SeguimientoDetalleComponent },
+      { path: 'coordinador/comunicacion', loadComponent: () => import('./features/coordinador/comunicacion/comunicacion').then(m => m.ComunicacionCoordinadorComponent) },
       { path: 'coordinador/resoluciones',  component: ResolucionesComponent },
       { path: 'coordinador/evaluaciones',  component: EvaluacionesComponent },
       { path: 'coordinador/reportes',      component: CoordinadorReportes },
       { path: 'coordinador/notifications', component: PostulanteNotificaciones },
 
       // ── Ayudante ────────────────────────────────────────────
-      { path: 'ayudante/dashboard',   component: AyudanteDashboard },
-      { path: 'ayudante/actividades', component: AyudanteActividades },
-      { path: 'ayudante/informes',    component: AyudanteInformes },
-      { path: 'ayudante/sesiones',    component: SesionesComponent },
+      { path: 'ayudante/dashboard',     component: AyudanteDashboard },
+      { path: 'ayudante/actividades',   component: AyudanteActividades },
+      { path: 'ayudante/informes',      component: AyudanteInformes },
+      { path: 'ayudante/sesiones',      component: SesionesComponent },
+      { path: 'ayudante/comunicacion',  loadComponent: () => import('./features/ayudante/comunicacion/comunicacion').then(m => m.ComunicacionAyudanteComponent) },
+      { path: 'ayudante/historial',     loadComponent: () => import('./features/ayudante/historial/historial').then(m => m.HistorialAyudanteComponent) },
 
       // ── Docente ─────────────────────────────────────────────
       { path: 'docente/dashboard',                              component: DocenteDashboardComponent },
       { path: 'docente/mis-ayudantes',                          component: MisAyudantesComponent },
-      { path: 'docente/aprobar-informes',                       component: MisAyudantesComponent },
+      { path: 'docente/aprobar-informes',                       loadComponent: () => import('./features/docente/aprobar-informes/aprobar-informes').then(m => m.AprobarInformesDocenteComponent) },
       { path: 'docente/mis-ayudantes/:idAyudantia/actividades', component: ActividadesAyudanteComponent },
+      { path: 'docente/comunicacion', loadComponent: () => import('./features/docente/comunicacion/comunicacion').then(m => m.ComunicacionDocenteComponent) },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],

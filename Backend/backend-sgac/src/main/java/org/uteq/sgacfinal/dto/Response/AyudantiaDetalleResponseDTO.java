@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class AyudantiaDetalleResponseDTO {
     private Integer idAyudantia;
+    private Integer idPostulacion;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
     private Integer horasCumplidas;

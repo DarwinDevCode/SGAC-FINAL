@@ -101,4 +101,8 @@ export class CoordinadorService {
       { params: { idOrigen: idOrigen.toString(), idDestino: idDestino.toString() } }
     );
   }
+
+  obtenerDetalleAyudantiaCompleto(idAyudantia: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/ayudantia-detalle/${idAyudantia}/completo`);
+  }
 }

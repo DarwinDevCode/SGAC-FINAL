@@ -92,10 +92,61 @@
                         <lucide-icon name="users" size="16"></lucide-icon>
                         Oposición
                     </a>
+                    <button (click)="abrirModalDocumentos(p)" class="btn-secondary-small">
+                        <lucide-icon name="paperclip" size="16"></lucide-icon>
+                        Documentos
+                    </button>
                 </div>
             </div>
         </div>
         }
+    </div>
+    }
+
+    <!-- Modal de Documentos -->
+    @if (mostrarModalDocumentos) {
+    <div class="modal-backdrop" (click)="cerrarModalDocumentos()">
+        <div class="modal-box" (click)="$event.stopPropagation()" style="max-width:600px; padding: 0;">
+            <div class="modal-header" style="padding: 1.25rem 1.5rem; border-bottom: 1px solid hsl(var(--border));">
+                <div>
+                    <h3 style="margin:0; font-weight:600; font-size:1.1rem;">Documentos de Postulación</h3>
+                    <p style="margin: .2rem 0 0 0; font-size: .85rem; color: hsl(var(--muted-foreground));">Lista de requisitos adjuntos para esta convocatoria.</p>
+                </div>
+                <button (click)="cerrarModalDocumentos()" style="background:none; border:none; cursor:pointer; color:hsl(var(--muted-foreground));">
+                    <lucide-icon name="x" size="20"></lucide-icon>
+                </button>
+            </div>
+            
+            <div style="padding:1.5rem; max-height: 400px; overflow-y: auto;">
+                @if (loadingDocumentos) {
+                    <div style="display:flex; flex-direction:column; align-items:center; padding: 2rem; color: hsl(var(--muted-foreground));">
+                        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+                        <p style="margin-top:.75rem">Cargando documentos...</p>
+                    </div>
+                } @else if (documentosPostulacion.length === 0) {
+                    <p style="text-align:center; padding: 2rem; color: hsl(var(--muted-foreground));">No se encontraron documentos adjuntos.</p>
+                } @else {
+                    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                        @for (doc of documentosPostulacion; track doc.idRequisitoAdjunto) {
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding: 0.75rem 1rem; border: 1px solid hsl(var(--border)); border-radius: 0.5rem; background: hsl(var(--muted)/0.3);">
+                                <div style="display:flex; flex-direction:column; gap:0.1rem;">
+                                    <span style="font-weight:500; font-size:0.9rem;">{{ doc.nombreRequisito }}</span>
+                                    <span style="font-size:0.8rem; color:hsl(var(--muted-foreground));">{{ doc.nombreArchivo }}</span>
+                                </div>
+                                <button (click)="verDocumento(doc.idRequisitoAdjunto)" 
+                                        style="display:flex; align-items:center; gap:0.4rem; padding: 0.4rem 0.8rem; border: 1px solid hsl(var(--border)); border-radius: 0.4rem; background: white; cursor:pointer; font-size:0.85rem; transition: all 0.2s;">
+                                    <lucide-icon name="eye" size="14"></lucide-icon>
+                                    Ver
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div style="padding: 1.25rem 1.5rem; border-top: 1px solid hsl(var(--border)); display: flex; justify-content: flex-end;">
+                <button (click)="cerrarModalDocumentos()" class="btn-primary-small" style="padding: 0.5rem 1rem;">Cerrar</button>
+            </div>
+        </div>
     </div>
     }
 </div>
