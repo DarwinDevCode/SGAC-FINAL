@@ -57,4 +57,8 @@ public class CloudinaryUploadServiceImpl {
             throw new RuntimeException("No se pudo subir el archivo: " + originalName);
         }
     }
+
+    public void delete(String publicId) throws IOException {
+        cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+    }
 }

@@ -1,0 +1,78 @@
+/* documento-gestion.component.css */
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.dg-toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  display: flex; align-items: center; gap: .55rem;
+  padding: .7rem 1rem; border-radius: 10px;
+  font-size: .85rem; font-weight: 500;
+  box-shadow: 0 4px 14px rgba(0,0,0,.14); z-index: 9999;
+  max-width: 380px; animation: dg-slide-up .2s ease-out;
+}
+@keyframes dg-slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.dg-toast--ok  { background:#f0fdf4; border:1px solid #86efac; color:#15803d; }
+.dg-toast--err { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+
+/* ── Fila de filtros ──────────────────────────────────────────── */
+.dg-filters-row {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+}
+.dg-conv-select-wrap {
+  min-width: 240px; flex-shrink: 0;
+}
+.dg-badge-global {
+  display: inline-flex; align-items: center; gap: .35rem;
+  flex-shrink: 0;
+}
+
+/* ── Celda de documento ───────────────────────────────────────── */
+.dg-doc-cell { display: flex; align-items: center; gap: .65rem; }
+
+/* ── Badge de extensión ───────────────────────────────────────── */
+.dg-ext-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 38px; height: 22px; border-radius: 4px;
+  font-size: .65rem; font-weight: 800; letter-spacing: .04em; flex-shrink: 0;
+}
+.ext-pdf   { background:#fee2e2; color:#991b1b; }
+.ext-doc   { background:#dbeafe; color:#1e40af; }
+.ext-xls   { background:#dcfce7; color:#166534; }
+.ext-img   { background:#f3e8ff; color:#6b21a8; }
+.ext-other { background:hsl(var(--muted)/.4); color:hsl(var(--muted-foreground)); }
+
+/* ── Aviso global (Administrador) ────────────────────────────── */
+.dg-global-notice {
+  display: flex; align-items: center; gap: .5rem;
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: var(--radius); padding: .65rem .875rem;
+  font-size: .8rem; color: #1d4ed8;
+}
+
+/* ── Dropzone ─────────────────────────────────────────────────── */
+.dg-dropzone {
+  border: 2px dashed hsl(var(--border)); border-radius: var(--radius);
+  padding: 2rem 1rem; display: flex; flex-direction: column;
+  align-items: center; gap: .5rem; cursor: pointer; text-align: center;
+  transition: border-color .15s, background .15s;
+  background: hsl(var(--muted)/.12);
+}
+.dg-dropzone:hover      { border-color: hsl(var(--primary)/.5); background: hsl(var(--primary)/.04); }
+.dg-dropzone--drag      { border-color: hsl(var(--primary));    background: hsl(var(--primary)/.08); }
+.dg-dropzone--filled    { border-color: #86efac; background: #f0fdf4; }
+
+.dg-dz-icon     { color: hsl(var(--muted-foreground)); }
+.dg-dz-icon--ok { color: #15803d; }
+.dg-dz-hint     { font-size: .82rem; color: hsl(var(--muted-foreground)); margin: 0; }
+.dg-dz-filename { font-size: .875rem; font-weight: 600; color: #15803d; margin: 0; }
+.dg-dz-size     { font-size: .75rem; color: hsl(var(--muted-foreground)); margin: 0; }
+.dg-dz-current  { font-size: .72rem; color: hsl(var(--muted-foreground)); margin: 0; }
+
+/* ── Formulario del modal ─────────────────────────────────────── */
+.dg-form { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
+
+/* ── Spinner ──────────────────────────────────────────────────── */
+@keyframes dg-spin { to { transform: rotate(360deg); } }
+.spin { animation: dg-spin .75s linear infinite; display: inline-flex; }

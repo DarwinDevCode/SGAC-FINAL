@@ -17,6 +17,7 @@
   --input: 0 0% 88%;
   --ring: 125 53% 24%;
   --radius: 0.5rem;
+  --radius-lg: var(--radius);
 }
 
 * {

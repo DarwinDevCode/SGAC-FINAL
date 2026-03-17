@@ -63,6 +63,8 @@ import {coordinadorGuard} from './features/coordinador/auth';
 import {
   AsistenciaDinamicaComponent
 } from './features/ayudante/asistencia-dinamica-component/asistencia-dinamica-component';
+import {DocumentoGestionComponent} from './features/General/documento-gestion-component/documento-gestion-component';
+import {DocumentoVisorComponent} from './features/General/documento-visor-component/documento-visor-component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -80,6 +82,10 @@ export const routes: Routes = [
       { path: 'comision/sala', component: SalaEvaluacionComponent, canDeactivate: [salaEvaluacionGuard] },
       { path: 'comision/sala/:idConvocatoria', component: SalaEvaluacionComponent, canDeactivate: [salaEvaluacionGuard] },
       { path: 'resultados-evaluacion', component: RankingResultadosComponent},
+      { path: 'documentos-visor',        component: DocumentoVisorComponent },
+      { path: 'documentos-gestion',    component: DocumentoGestionComponent },
+
+
 
       // ── Admin ───────────────────────────────────────────────
       { path: 'admin/dashboard',      component: AdminDashboard },
@@ -126,6 +132,7 @@ export const routes: Routes = [
       { path: 'ayudante/actividades/asistencia', component: AsistenciaDinamicaComponent },
       { path: 'ayudante/sesiones',    component: SesionesComponent },
 
+      // ── Docente ────────────────────────────────────────────
       { path: 'docente/dashboard',                              component: DocenteDashboardComponent },
       { path: 'docente/mis-ayudantes',                          component: MisAyudantesComponent },
       { path: 'docente/aprobar-informes',                       component: MisAyudantesComponent },

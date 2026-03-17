@@ -1,0 +1,85 @@
+.dv-wrapper {
+  display: flex; flex-direction: column; gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.dv-header {
+  display: flex; align-items: center; gap: .875rem;
+}
+.dv-header-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: hsl(var(--primary)/.12); color: hsl(var(--primary));
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.dv-title    { font-size: 1.35rem; font-weight: 700; color: hsl(var(--foreground)); margin: 0; }
+.dv-subtitle { font-size: .82rem; color: hsl(var(--muted-foreground)); margin: .2rem 0 0; }
+
+/* ── Sección ──────────────────────────────────────────────────── */
+.dv-section { display: flex; flex-direction: column; gap: .75rem; }
+
+.dv-section-label {
+  display: flex; align-items: center; gap: .45rem;
+  font-size: .7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .07em; color: hsl(var(--muted-foreground));
+}
+
+/* ── Grid de tarjetas ─────────────────────────────────────────── */
+.dv-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: .875rem;
+}
+
+/* ── Tarjeta ──────────────────────────────────────────────────── */
+.dv-card {
+  display: flex; align-items: center; gap: .875rem;
+  background: hsl(var(--card)); border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-lg); padding: .875rem 1rem;
+  cursor: pointer; transition: box-shadow .18s, transform .12s;
+  box-shadow: 0 1px 3px rgba(0,0,0,.04);
+}
+.dv-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.1);
+  transform: translateY(-1px);
+}
+.dv-card--conv {
+  border-left: 3px solid hsl(var(--primary)/.5);
+}
+
+/* ── Contenido de la tarjeta ──────────────────────────────────── */
+.dv-card-icon  { flex-shrink: 0; }
+.dv-card-body  { flex: 1; min-width: 0; }
+.dv-card-nombre {
+  font-size: .875rem; font-weight: 600; color: hsl(var(--foreground));
+  margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.dv-card-tipo {
+  font-size: .75rem; color: hsl(var(--muted-foreground)); margin: .15rem 0 0;
+}
+.dv-card-meta {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .7rem; color: hsl(var(--muted-foreground)); margin: .25rem 0 0;
+}
+
+/* ── Botón ver ────────────────────────────────────────────────── */
+.dv-btn-ver {
+  flex-shrink: 0; width: 30px; height: 30px;
+  border-radius: var(--radius); border: 1px solid hsl(var(--border));
+  background: hsl(var(--secondary)); color: hsl(var(--muted-foreground));
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background .12s, color .12s;
+}
+.dv-card:hover .dv-btn-ver {
+  background: hsl(var(--primary)/.1); color: hsl(var(--primary));
+  border-color: hsl(var(--primary)/.3);
+}
+
+/* ── Spinner ──────────────────────────────────────────────────── */
+@keyframes dv-spin { to { transform: rotate(360deg); } }
+.dv-spin { animation: dv-spin .75s linear infinite; display: inline-flex; }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .dv-grid { grid-template-columns: 1fr; }
+  .dv-wrapper { padding: 1rem; }
+}

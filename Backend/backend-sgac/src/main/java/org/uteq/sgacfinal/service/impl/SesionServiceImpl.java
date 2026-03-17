@@ -18,6 +18,7 @@ import org.uteq.sgacfinal.repository.ProgresoRepository;
 import org.uteq.sgacfinal.repository.RegistroActividadRepository;
 import org.uteq.sgacfinal.service.IUploadService;
 import org.uteq.sgacfinal.service.SesionService;
+import org.uteq.sgacfinal.service.cloudinary.CloudinaryUploadServiceImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -34,7 +35,7 @@ public class SesionServiceImpl implements SesionService {
     private final AyudantiaRepository ayudantiaRepository;
     private final ProgresoRepository progresoRepository;
     private final ObjectMapper objectMapper;
-    private final IUploadService uploadService;
+    private final CloudinaryUploadServiceImpl uploadService;
 
 
     @Override

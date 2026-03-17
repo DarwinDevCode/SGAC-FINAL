@@ -37,6 +37,7 @@ export class SidebarComponent {
       { label: 'Inicio',           icon: 'LayoutDashboard', route: '/postulante/dashboard' },
       { label: 'Cronograma',       icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Convocatorias',    icon: 'FileText',        route: '/postulante/convocatorias' },
+      { label: 'Documentos',       icon: 'Library',         route: '/documentos-visor' },
       { label: 'Mis Postulaciones',icon: 'FolderOpen',      route: '/postulante/mis-postulaciones' },
       { label: 'Tribunal',         icon: 'Gavel',           route: '/postulante/comision' },
       { label: 'Mi Oposición',     icon: 'Mic',             route: '/postulante/mi-oposicion' },
@@ -46,6 +47,7 @@ export class SidebarComponent {
     AYUDANTE_CATEDRA: [
       { label: 'Inicio',        icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
       { label: 'Cronograma',    icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Documentos',       icon: 'Library',         route: '/documentos-visor' },
       { label: 'Asistencia', icon: 'Landmark', route: '/ayudante/actividades/asistencia'},
       { label: 'Mis sesiones',  icon: 'CalendarClock',   route: '/ayudante/sesiones' },
       { label: 'Mis Informes',  icon: 'FileText',        route: '/ayudante/informes' },
@@ -54,6 +56,7 @@ export class SidebarComponent {
     DOCENTE: [
       { label: 'Inicio',                  icon: 'LayoutDashboard', route: '/docente/dashboard' },
       { label: 'Cronograma',              icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Documentos',       icon: 'Library',         route: '/documentos-visor' },
       { label: 'Tribunal',                icon: 'Gavel',           route: '/comision',      exact: true },
       { label: 'Sala de Evaluación',      icon: 'MicVocal',        route: '/comision/sala' },
       { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
@@ -65,6 +68,7 @@ export class SidebarComponent {
     COORDINADOR: [
       { label: 'Inicio',                icon: 'LayoutDashboard', route: '/coordinador/dashboard' },
       { label: 'Cronograma',            icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Gestión Documentos',    icon: 'Files',           route: '/documentos-gestion' },
       { label: 'Gestionar Convocatorias',icon: 'FileText',       route: '/coordinador/convocatorias' },
       { label: 'Validar Postulantes',   icon: 'CheckSquare',     route: '/coordinador/validaciones' },
       { label: 'Tribunal',              icon: 'Gavel',           route: '/comision',      exact: true },
@@ -88,6 +92,7 @@ export class SidebarComponent {
     DECANO: [
       { label: 'Inicio',              icon: 'LayoutDashboard', route: '/decano/dashboard' },
       { label: 'Cronograma',          icon: 'CalendarDays',    route: '/cronograma' },
+      { label: 'Documentos',       icon: 'Library',         route: '/documentos-visor' },
       { label: 'Tribunal',            icon: 'Gavel',           route: '/comision',      exact: true },
       { label: 'Sala de Evaluación',  icon: 'MicVocal',        route: '/comision/sala' },
       { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
@@ -100,6 +105,7 @@ export class SidebarComponent {
       { label: 'Inicio',             icon: 'LayoutDashboard', route: '/admin/dashboard' },
       { label: 'Gestión Usuarios',   icon: 'Users',           route: '/admin/usuarios' },
       { label: 'Carga Académica',    icon: 'Briefcase',       route: '/admin/carga-academica' },
+      { label: 'Gestión Documentos',    icon: 'Files',           route: '/documentos-gestion' },
       { label: 'Periodos Académicos',icon: 'CalendarClock',   route: '/admin/periodos' },
       { label: 'Cronograma',         icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Configuración Global',icon: 'Settings',       route: '/admin/configuracion' },
