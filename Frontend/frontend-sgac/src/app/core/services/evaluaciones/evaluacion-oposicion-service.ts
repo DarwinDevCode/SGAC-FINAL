@@ -1,4 +1,3 @@
-// src/app/core/services/evaluaciones/evaluacion-oposicion-service.ts
 import { Injectable, inject }         from '@angular/core';
 import { HttpClient }                 from '@angular/common/http';
 import { Observable, throwError }     from 'rxjs';
@@ -12,7 +11,6 @@ import {
 } from '../../models/evaluaciones/EvaluacionOposicion';
 import {AuthService} from '../auth-service';
 
-/** Payload extendido que incluye idConvocatoria para el broadcast WS del backend */
 export interface RegistrarPuntajePayload extends PuntajeJuradoPayload {
   idConvocatoria?: number;
 }
@@ -20,8 +18,8 @@ export interface RegistrarPuntajePayload extends PuntajeJuradoPayload {
 @Injectable({ providedIn: 'root' })
 export class EvaluacionOposicionService {
   private http = inject(HttpClient);
-  private readonly base = (environment as any).apiUrl ?? 'http://localhost:8080/api';
-  private readonly API  = `${this.base}/oposicion`;
+  private readonly baseUrl = environment.apiUrl;
+  private readonly API  = `${this.baseUrl}/oposicion`;
   private authService = inject(AuthService);
 
 

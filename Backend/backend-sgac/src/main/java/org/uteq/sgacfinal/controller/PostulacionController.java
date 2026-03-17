@@ -5,7 +5,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.Response.RespuestaOperacionDTO;
 import org.uteq.sgacfinal.dto.Response.TipoRequisitoPostulacionResponseDTO;
+import org.uteq.sgacfinal.dto.Response.convocatorias.TribunalEvaluacionResponseDTO;
 import org.uteq.sgacfinal.service.ILogAuditoriaService;
 import org.uteq.sgacfinal.service.IPostulacionService;
 import lombok.RequiredArgsConstructor;
@@ -14,17 +16,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.service.ITipoRequisitoPostulacionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.uteq.sgacfinal.service.convocatorias.IPostulacionTypeService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/postulaciones")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class PostulacionController {
     private final IPostulacionService postulacionService;
     private final ITipoRequisitoPostulacionService requisitoService;
     private final ILogAuditoriaService logAuditoriaService;
+    private final IPostulacionTypeService postulacionTypeService;
+
+    @GetMapping("/tribunal/{idUsuario}")
+    public ResponseEntity<RespuestaOperacionDTO<TribunalEvaluacionResponseDTO>> obtenerTribunalEvaluacion(
+            @PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(postulacionTypeService.obtenerTribunalEvaluacion(idUsuario));
+    }
 
     @PostMapping(value = "/registrar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registrar(
@@ -45,9 +54,6 @@ public class PostulacionController {
         }
     }
 
-
-
-
     @GetMapping("/listar-activos")
     public ResponseEntity<List<TipoRequisitoPostulacionResponseDTO>> listar() {
         return ResponseEntity.ok(requisitoService.listarRequisitosActivos());
@@ -61,7 +67,6 @@ public class PostulacionController {
                                            HttpServletRequest request) {
         try {
             postulacionService.actualizarEstado(id, estado, observacion);
-            // Audit log
             try {
                 if (idCoordinador != null) {
                     logAuditoriaService.registrar(LogAuditoriaRequestDTO.builder()
@@ -126,10 +131,6 @@ public class PostulacionController {
         }
     }
 
-    /**
-     * Verifica si un estudiante (por su idUsuario) ya se postuló a una convocatoria específica.
-     * GET /api/postulaciones/existe?idEstudiante={idUsuario}&idConvocatoria={id}
-     */
     @GetMapping("/existe")
     public ResponseEntity<?> existe(
             @RequestParam Integer idEstudiante,
@@ -143,12 +144,6 @@ public class PostulacionController {
         }
     }
 
-    /**
-     * Obtiene el detalle completo de la postulación activa del estudiante.
-     * Incluye: información de postulación, convocatoria, cronograma de etapas,
-     * documentos adjuntos y resumen de estados.
-     * GET /api/postulaciones/mi-postulacion/{idUsuario}
-     */
     @GetMapping("/mi-postulacion/{idUsuario}")
     public ResponseEntity<?> obtenerMiPostulacion(@PathVariable Integer idUsuario) {
         try {

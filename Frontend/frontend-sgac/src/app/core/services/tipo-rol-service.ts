@@ -8,7 +8,7 @@ import { RolResumenDTO } from '../dto/rol-resumen-dto';
   providedIn: 'root',
 })
 export class TipoRolService {
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private apiUrl = `${this.baseUrl}/tipos-rol`;
   http = inject(HttpClient)
 

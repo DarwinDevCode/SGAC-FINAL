@@ -12,7 +12,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class SupervisionService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
 
   getMisAyudantes() {
     return this.http.get<Ayudante[]>(`${this.baseUrl}/docente/mis-ayudantes`).pipe(

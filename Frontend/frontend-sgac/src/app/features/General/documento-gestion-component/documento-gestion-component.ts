@@ -1,278 +1,316 @@
 import {
-  Component, Input, OnInit, OnDestroy,
-  inject, signal, computed
+  Component,
+  Input,
+  OnInit,
+  OnDestroy,
+  inject,
+  signal,
+  computed,
+  effect,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { Subscription } from 'rxjs';
-import { forkJoin } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 
-import { DocumentoAcademicoService } from '../../../core/services/documentos/documento-academico-service';
 import { AuthService } from '../../../core/services/auth-service';
+import { DocumentoService } from '../../../core/services/documentos/documento-academico-service';
 import {
-  ConvocatoriaActivaResponse,
-  DocumentoResponse,
-  TipoDocumentoResponse,
+  Facultad,
+  Carrera,
+  TipoDocumento,
+  DocumentoVisor,
+  NivelDocumento,
+  DocumentoCrearRequest,
+  DocumentoActualizarRequest,
 } from '../../../core/models/documentos/documento-academico';
 
+interface Toast {
+  msg: string;
+  tipo: 'ok' | 'err';
+}
+
 @Component({
-  selector:    'app-documento-gestion',
-  standalone:  true,
-  imports:     [CommonModule, FormsModule, LucideAngularModule],
+  selector: 'app-documento-gestion',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './documento-gestion-component.html',
-  styleUrls:   ['./documento-gestion-component.css'],
+  styleUrls: ['./documento-gestion-component.css'],
 })
 export class DocumentoGestionComponent implements OnInit, OnDestroy {
-  @Input() idConvocatoriaInicial?: number | null;
+  private readonly docService = inject(DocumentoService);
+  private readonly authService = inject(AuthService);
+  private readonly subs = new Subscription();
 
-  private svc   = inject(DocumentoAcademicoService);
-  private auth  = inject(AuthService);
-  private subs  = new Subscription();
+  protected readonly NivelDocumento = NivelDocumento;
 
-  readonly esCoordinador = computed(() =>
-    this.auth.getUser()?.rolActual?.toUpperCase() === 'COORDINADOR'
+  @Input() soloLectura = false;
+
+  // Signals de Estado
+  facultades = signal<Facultad[]>([]);
+  carreras = signal<Carrera[]>([]);
+  tiposDocumento = signal<TipoDocumento[]>([]);
+  documentos = signal<DocumentoVisor[]>([]);
+
+  // Estado UI
+  loading = signal(true);
+  guardando = signal(false);
+  cargandoCarreras = signal(false);
+  modalAbierto = signal(false);
+  confirmacion = signal<number | null>(null);
+  toast = signal<Toast | null>(null);
+  filtroNombre = signal('');
+
+  // Formulario
+  formNombre = signal('');
+  formIdTipo = signal<number | null>(null);
+  formNivel = signal<NivelDocumento>(NivelDocumento.GLOBAL);
+  formIdFacultad = signal<number | null>(null);
+  formIdCarrera = signal<number | null>(null);
+  archivoSeleccionado = signal<File | null>(null);
+  arrastrandoArchivo = signal(false);
+  modoEdicion = signal(false);
+  documentoEditando = signal<number | null>(null);
+
+  // Computed
+  esCoordinador = computed(() =>
+    this.authService.getUser()?.rolActual?.toUpperCase() === 'COORDINADOR'
   );
 
-  documentos     = signal<DocumentoResponse[]>([]);
-  tipos          = signal<TipoDocumentoResponse[]>([]);
-  convocatorias  = signal<ConvocatoriaActivaResponse[]>([]);
-  loading        = signal(true);
-  guardando      = signal(false);
-  isDragging     = signal(false);
-  idConvFiltro = signal<number | null>(null);
-  mostrarModal = signal(false);
-  modoEdicion  = signal(false);
-  editandoId   = signal<number | null>(null);
-  formNombre      = '';
-  formIdTipo:   number | null = null;
-  formIdConv:   number | null = null;
-  archivoSel:   File | null   = null;
+  documentosFiltrados = computed(() => {
+    const docs = this.documentos();
+    const filtro = this.filtroNombre().toLowerCase().trim();
+    return filtro
+      ? docs.filter(d =>
+        d.nombreMostrar.toLowerCase().includes(filtro) ||
+        d.tipoDocumento.toLowerCase().includes(filtro))
+      : docs;
+  });
 
-  // ── Búsqueda ───────────────────────────────────────────────────
-  busqueda = '';
+  mostrarSelectCarreras = computed(() =>
+    !this.esCoordinador() &&
+    this.formNivel() === NivelDocumento.CARRERA &&
+    this.formIdFacultad() !== null
+  );
 
-  // ── Confirm eliminar ───────────────────────────────────────────
-  confirmId = signal<number | null>(null);
+  constructor() {
+    effect(() => {
+      const nivel = this.formNivel();
+      if (!this.esCoordinador()) {
+        if (nivel === NivelDocumento.GLOBAL) {
+          this.formIdFacultad.set(null);
+          this.formIdCarrera.set(null);
+        } else if (nivel === NivelDocumento.FACULTAD) {
+          this.formIdCarrera.set(null);
+        }
+      }
+    }, { allowSignalWrites: true });
 
-  // ── Toast ──────────────────────────────────────────────────────
-  toast = signal<{ msg: string; tipo: 'ok' | 'err' } | null>(null);
-  private toastTimer?: ReturnType<typeof setTimeout>;
-
-  // ── Computed ───────────────────────────────────────────────────
-  get filtrados(): DocumentoResponse[] {
-    const b = this.busqueda.toLowerCase().trim();
-    return b
-      ? this.documentos().filter(
-        d => d.nombreMostrar.toLowerCase().includes(b) ||
-          d.tipoNombre.toLowerCase().includes(b)
-      )
-      : this.documentos();
+    effect(() => {
+      const idFac = this.formIdFacultad();
+      if (!this.esCoordinador() && this.formNivel() === NivelDocumento.CARRERA && idFac) {
+        this.cargarCarreras(idFac);
+      }
+    }, { allowSignalWrites: true });
   }
 
-  // ── Ciclo de vida ──────────────────────────────────────────────
   ngOnInit(): void {
-    this.idConvFiltro.set(this.idConvocatoriaInicial ?? null);
-
-    // Carga paralela de catálogos + documentos + convocatorias (si coord.)
-    const base$ = forkJoin({
-      tipos:     this.svc.listarTipos(),
-      documentos: this.svc.listarVisor(this.idConvFiltro()),
-    });
-
-    if (this.esCoordinador()) {
-      // Coordinador: carga las tres colecciones en paralelo
-      this.subs.add(
-        forkJoin({
-          tipos:        this.svc.listarTipos(),
-          documentos:   this.svc.listarVisor(this.idConvFiltro()),
-          convocatorias: this.svc.listarConvocatoriasActivas(),
-        }).subscribe({
-          next: ({ tipos, documentos, convocatorias }) => {
-            this.tipos.set(tipos);
-            this.documentos.set(documentos);
-            this.convocatorias.set(convocatorias);
-            this.loading.set(false);
-          },
-          error: () => {
-            this.loading.set(false);
-            this.showToast('Error al cargar los datos iniciales.', 'err');
-          },
-        })
-      );
-    } else {
-      // Administrador: no necesita lista de convocatorias
-      this.subs.add(
-        base$.subscribe({
-          next: ({ tipos, documentos }) => {
-            this.tipos.set(tipos);
-            this.documentos.set(documentos);
-            this.loading.set(false);
-          },
-          error: () => {
-            this.loading.set(false);
-            this.showToast('Error al cargar los datos iniciales.', 'err');
-          },
-        })
-      );
-    }
+    this.cargarDatosIniciales();
   }
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    clearTimeout(this.toastTimer);
   }
 
-  // ── Cambiar filtro de convocatoria (visor) ─────────────────────
-  onFiltroConvChange(idConv: number | null): void {
-    this.idConvFiltro.set(idConv);
-    this.recargarDocumentos();
-  }
+  private cargarDatosIniciales(): void {
+    const user = this.authService.getUser();
+    if (!user?.idUsuario) return;
 
-  private recargarDocumentos(): void {
     this.loading.set(true);
     this.subs.add(
-      this.svc.listarVisor(this.idConvFiltro()).subscribe({
-        next:  docs => { this.documentos.set(docs); this.loading.set(false); },
-        error: ()   => { this.loading.set(false); this.showToast('Error al cargar documentos.', 'err'); },
+      forkJoin({
+        facultades: this.docService.obtenerFacultades(),
+        tipos: this.docService.obtenerTiposDocumento(),
+        documentos: this.docService.listarDocumentos(user.idUsuario, user.rolActual || 'ESTUDIANTE')
+      }).subscribe({
+        next: (res) => {
+          this.facultades.set(res.facultades);
+          this.tiposDocumento.set(res.tipos);
+          this.documentos.set(res.documentos);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.mostrarToast(err.message, 'err');
+          this.loading.set(false);
+        }
       })
     );
   }
 
-  // ── Modal ──────────────────────────────────────────────────────
-  abrirModalNuevo(): void {
-    this.modoEdicion.set(false);
-    this.editandoId.set(null);
-    this.formNombre = '';
-    this.formIdTipo = null;
-    // Administrador → siempre global (null). Coordinador → elige convocatoria.
-    this.formIdConv = this.esCoordinador() ? (this.idConvFiltro() ?? null) : null;
-    this.archivoSel = null;
-    this.mostrarModal.set(true);
-  }
-
-  abrirModalEditar(doc: DocumentoResponse): void {
-    this.modoEdicion.set(true);
-    this.editandoId.set(doc.id);
-    this.formNombre = doc.nombreMostrar;
-    this.formIdTipo = doc.idTipoDocumento;
-    this.formIdConv = doc.idConvocatoria ?? null;
-    this.archivoSel = null;
-    this.mostrarModal.set(true);
-  }
-
-  cerrarModal(): void {
-    this.mostrarModal.set(false);
-    this.archivoSel = null;
-  }
-
-  // ── Dropzone ───────────────────────────────────────────────────
-  onDragOver(e: DragEvent): void  { e.preventDefault(); this.isDragging.set(true); }
-  onDragLeave(): void             { this.isDragging.set(false); }
-  onDrop(e: DragEvent): void {
-    e.preventDefault();
-    this.isDragging.set(false);
-    const file = e.dataTransfer?.files?.[0];
-    if (file) this.archivoSel = file;
-  }
-  onFileChange(e: Event): void {
-    const input = e.target as HTMLInputElement;
-    if (input.files?.[0]) this.archivoSel = input.files[0];
-  }
-
-  // ── Guardar ────────────────────────────────────────────────────
-  guardar(): void {
-    if (!this.formNombre.trim() || !this.formIdTipo) {
-      this.showToast('Completa nombre y tipo de documento.', 'err');
-      return;
-    }
-    if (!this.modoEdicion() && !this.archivoSel) {
-      this.showToast('Selecciona un archivo para subir.', 'err');
-      return;
-    }
-
-    this.guardando.set(true);
-
-    const accion$ = this.modoEdicion()
-      ? this.svc.actualizar(
-        this.editandoId()!, this.formNombre, this.formIdTipo, this.archivoSel
-      )
-      : this.svc.subir(
-        this.archivoSel!,
-        this.formNombre,
-        this.formIdTipo,
-        // Administrador → null (global). Coordinador → convocatoria elegida.
-        this.esCoordinador() ? this.formIdConv : null
-      );
-
+  private cargarCarreras(idFacultad: number): void {
+    this.cargandoCarreras.set(true);
     this.subs.add(
-      accion$.subscribe({
-        next: doc => {
-          this.guardando.set(false);
-          this.cerrarModal();
-          if (this.modoEdicion()) {
-            this.documentos.update(list => list.map(d => d.id === doc.id ? doc : d));
-          } else {
-            this.documentos.update(list => [doc, ...list]);
-          }
-          this.showToast(
-            this.modoEdicion() ? 'Documento actualizado.' : 'Documento subido correctamente.',
-            'ok'
-          );
+      this.docService.obtenerCarreras(idFacultad).subscribe({
+        next: (res) => {
+          this.carreras.set(res);
+          this.cargandoCarreras.set(false);
         },
-        error: err => {
-          this.guardando.set(false);
-          this.showToast(err.error?.message ?? 'Error al guardar el documento.', 'err');
-        },
+        error: () => this.cargandoCarreras.set(false)
       })
     );
   }
 
-  // ── Eliminar ───────────────────────────────────────────────────
-  solicitarEliminar(id: number): void  { this.confirmId.set(id); }
-  cancelarEliminar(): void             { this.confirmId.set(null); }
+  abrirModalCrear(): void {
+    this.modoEdicion.set(false);
+    this.resetearFormulario();
+    if (this.esCoordinador()) this.formNivel.set(NivelDocumento.CARRERA);
+    this.modalAbierto.set(true);
+  }
+
+  abrirModalEditar(doc: DocumentoVisor): void {
+    this.modoEdicion.set(true);
+    this.documentoEditando.set(doc.idDocumento);
+    this.formNombre.set(doc.nombreMostrar);
+    const tipo = this.tiposDocumento().find(t => t.nombre === doc.tipoDocumento);
+    this.formIdTipo.set(tipo?.id || null);
+
+    if (doc.nombreCarrera) this.formNivel.set(NivelDocumento.CARRERA);
+    else if (doc.nombreFacultad) this.formNivel.set(NivelDocumento.FACULTAD);
+    else this.formNivel.set(NivelDocumento.GLOBAL);
+
+    this.modalAbierto.set(true);
+  }
+
+  guardarDocumento(): void {
+    if (!this.validarFormulario()) return;
+    this.guardando.set(true);
+    const user = this.authService.getUser();
+
+    // ESTRATEGIA FLAGS (1/0) PARA COORDINADOR
+    const facVal = this.esCoordinador()
+      ? (this.formNivel() === NivelDocumento.FACULTAD || this.formNivel() === NivelDocumento.CARRERA ? 1 : 0)
+      : this.formIdFacultad();
+
+    const carVal = this.esCoordinador()
+      ? (this.formNivel() === NivelDocumento.CARRERA ? 1 : 0)
+      : this.formIdCarrera();
+
+    if (this.modoEdicion()) {
+      const req: DocumentoActualizarRequest = {
+        idDocumento: this.documentoEditando()!,
+        nombreMostrar: this.formNombre(),
+        idTipoDoc: this.formIdTipo()!,
+        idFacultad: facVal,
+        idCarrera: carVal,
+        idUsuario: user!.idUsuario
+      };
+      this.subs.add(this.docService.actualizarDocumento(req).subscribe({
+        next: () => this.finalizarProceso('Documento actualizado'),
+        error: (err) => { this.guardando.set(false); this.mostrarToast(err.message, 'err'); }
+      }));
+    } else {
+      const req: DocumentoCrearRequest = {
+        archivo: this.archivoSeleccionado()!,
+        nombre: this.formNombre(),
+        idTipo: this.formIdTipo()!,
+        idUsuario: user!.idUsuario,
+        idFacultad: facVal,
+        idCarrera: carVal
+      };
+      this.subs.add(this.docService.crearDocumento(req).subscribe({
+        next: () => this.finalizarProceso('Documento subido correctamente'),
+        error: (err) => { this.guardando.set(false); this.mostrarToast(err.message, 'err'); }
+      }));
+    }
+  }
 
   confirmarEliminar(): void {
-    const id = this.confirmId();
+    const id = this.confirmacion();
     if (!id) return;
-    this.subs.add(
-      this.svc.eliminar(id).subscribe({
-        next: () => {
-          this.documentos.update(list => list.filter(d => d.id !== id));
-          this.confirmId.set(null);
-          this.showToast('Documento desactivado.', 'ok');
-        },
-        error: err => {
-          this.confirmId.set(null);
-          this.showToast(err.error?.message ?? 'Error al eliminar.', 'err');
-        },
-      })
-    );
+    this.subs.add(this.docService.eliminarDocumento(id).subscribe({
+      next: () => {
+        this.documentos.update(list => list.filter(d => d.idDocumento !== id));
+        this.confirmacion.set(null);
+        this.mostrarToast('Documento eliminado', 'ok');
+      },
+      error: (err) => this.mostrarToast(err.message, 'err')
+    }));
   }
 
-  // ── Helpers UI ─────────────────────────────────────────────────
-  formatBytes(bytes: number | null): string {
-    if (!bytes) return '—';
-    if (bytes < 1024)        return `${bytes} B`;
-    if (bytes < 1048576)     return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1048576).toFixed(1)} MB`;
-  }
+  // --- HELPERS VISUALES (REFACTORIZADOS) ---
 
-  extBadgeClass(ext: string | null): string {
+  obtenerEtiquetaExtension(ext: string | null): string {
     const e = (ext ?? '').toLowerCase();
-    if (e === 'pdf')                       return 'ext-pdf';
-    if (['doc', 'docx'].includes(e))       return 'ext-doc';
-    if (['xls', 'xlsx'].includes(e))       return 'ext-xls';
+    if (['doc', 'docx'].includes(e)) return 'WORD';
+    if (['xls', 'xlsx'].includes(e)) return 'EXCEL';
+    if (['png', 'jpg', 'jpeg', 'gif'].includes(e)) return 'IMG';
+    if (!ext) return 'FILE';
+    return e.toUpperCase();
+  }
+
+  obtenerIconoLucide(ext: string | null): string {
+    const e = (ext ?? '').toLowerCase();
+    if (e === 'pdf') return 'file-text';
+    if (['doc', 'docx'].includes(e)) return 'file-word';
+    if (['xls', 'xlsx'].includes(e)) return 'sheet';
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(e)) return 'image';
+    return 'file';
+  }
+
+  obtenerClaseExtension(ext: string | null): string {
+    const e = (ext ?? '').toLowerCase();
+    if (e === 'pdf') return 'ext-pdf';
+    if (['doc', 'docx'].includes(e)) return 'ext-doc';
+    if (['xls', 'xlsx'].includes(e)) return 'ext-xls';
     if (['jpg', 'jpeg', 'png'].includes(e)) return 'ext-img';
     return 'ext-other';
   }
 
-  private showToast(msg: string, tipo: 'ok' | 'err'): void {
-    clearTimeout(this.toastTimer);
+  formatearBytes = (b: number | null) => !b ? '—' : b < 1024 ? `${b} B` : b < 1048576 ? `${(b / 1024).toFixed(1)} KB` : `${(b / 1048576).toFixed(1)} MB`;
+  obtenerNivelBadge = (d: DocumentoVisor) => !d.nombreFacultad ? 'blue' : !d.nombreCarrera ? 'amber' : 'green';
+  obtenerTextoNivel = (d: DocumentoVisor) => !d.nombreFacultad ? 'Global' : !d.nombreCarrera ? 'Facultad' : 'Carrera';
+  solicitarEliminar = (id: number) => this.confirmacion.set(id);
+  cancelarEliminar = () => this.confirmacion.set(null);
+  cerrarModal = () => this.modalAbierto.set(false);
+  onDragOver = (e: DragEvent) => { e.preventDefault(); this.arrastrandoArchivo.set(true); };
+  onDragLeave = () => this.arrastrandoArchivo.set(false);
+
+  private finalizarProceso(msg: string): void {
+    this.guardando.set(false);
+    this.modalAbierto.set(false);
+    this.mostrarToast(msg, 'ok');
+    this.cargarDatosIniciales();
+  }
+
+  private validarFormulario(): boolean {
+    if (!this.formNombre().trim()) { this.mostrarToast('Nombre requerido', 'err'); return false; }
+    if (!this.formIdTipo()) { this.mostrarToast('Seleccione un tipo', 'err'); return false; }
+    if (!this.modoEdicion() && !this.archivoSeleccionado()) { this.mostrarToast('Archivo requerido', 'err'); return false; }
+    return true;
+  }
+
+  private resetearFormulario(): void {
+    this.formNombre.set('');
+    this.formIdTipo.set(null);
+    this.formNivel.set(NivelDocumento.GLOBAL);
+    this.formIdFacultad.set(null);
+    this.formIdCarrera.set(null);
+    this.archivoSeleccionado.set(null);
+  }
+
+  onFileChange = (e: Event) => {
+    const input = e.target as HTMLInputElement;
+    if (input.files?.[0]) this.archivoSeleccionado.set(input.files[0]);
+  }
+
+  onDrop = (e: DragEvent) => {
+    e.preventDefault();
+    this.arrastrandoArchivo.set(false);
+    if (e.dataTransfer?.files?.[0]) this.archivoSeleccionado.set(e.dataTransfer.files[0]);
+  }
+
+  private mostrarToast(msg: string, tipo: 'ok' | 'err'): void {
     this.toast.set({ msg, tipo });
-    this.toastTimer = setTimeout(
-      () => this.toast.set(null),
-      tipo === 'err' ? 8000 : 4000
-    );
+    setTimeout(() => this.toast.set(null), 4000);
   }
 }

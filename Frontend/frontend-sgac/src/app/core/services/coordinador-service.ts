@@ -20,7 +20,7 @@ export interface ComisionSeleccionDTO {
 export class CoordinadorService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private readonly API_COORDINADORES = `${this.baseUrl}/coordinadores`;
   private readonly API_CONVOCATORIAS = `${this.baseUrl}/convocatorias`;
   private readonly API_POSTULACIONES = `${this.baseUrl}/postulaciones`;

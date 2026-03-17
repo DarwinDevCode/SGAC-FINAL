@@ -1,43 +1,36 @@
 package org.uteq.sgacfinal.repository.documentos;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 import org.uteq.sgacfinal.dto.Request.documentos.*;
 import org.uteq.sgacfinal.dto.Response.RespuestaOperacionDTO;
 import org.uteq.sgacfinal.dto.Response.documentos.*;
+import org.uteq.sgacfinal.util.DatabaseService;
 
 import java.util.List;
-import java.util.Map;
 
 @Repository
+@RequiredArgsConstructor
 public class DocumentoRepository {
-
-    private final JdbcTemplate jdbcTemplate;
-    private final ObjectMapper objectMapper;
-
-    public DocumentoRepository(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.objectMapper = objectMapper;
-    }
+    private final DatabaseService db;
 
     public RespuestaOperacionDTO<List<FacultadResponseDTO>> getFacultades() {
-        return ejecutarConsulta("fn_get_facultades_activas", "academico", null,
+        return db.ejecutarFuncion("academico", "fn_get_facultades_activas", null,
                 new TypeReference<List<FacultadResponseDTO>>() {});
     }
 
     public RespuestaOperacionDTO<List<CarreraResponseDTO>> getCarreras(Integer idFacultad) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("p_id_facultad", idFacultad);
-        return ejecutarConsulta("fn_get_carreras_activas", "academico", params,
+
+        return db.ejecutarFuncion("academico", "fn_get_carreras_activas", params,
                 new TypeReference<List<CarreraResponseDTO>>() {});
     }
 
     public RespuestaOperacionDTO<List<TipoDocumentoResponseDTO>> getTiposDocumento() {
-        return ejecutarConsulta("fn_get_tipos_documento_activos", "ayudantia", null,
+        return db.ejecutarFuncion("ayudantia", "fn_get_tipos_documento_activos", null,
                 new TypeReference<List<TipoDocumentoResponseDTO>>() {});
     }
 
@@ -52,7 +45,7 @@ public class DocumentoRepository {
                 .addValue("p_id_facultad", req.idFacultad())
                 .addValue("p_id_carrera", req.idCarrera());
 
-        return ejecutarConsulta("fn_insertar_documento", "ayudantia", params,
+        return db.ejecutarFuncion("ayudantia", "fn_insertar_documento", params,
                 new TypeReference<DocumentoIdResponseDTO>() {});
     }
 
@@ -62,9 +55,10 @@ public class DocumentoRepository {
                 .addValue("p_nombre_mostrar", req.nombreMostrar())
                 .addValue("p_id_tipo_doc", req.idTipoDoc())
                 .addValue("p_id_facultad", req.idFacultad())
-                .addValue("p_id_carrera", req.idCarrera());
+                .addValue("p_id_carrera", req.idCarrera())
+                .addValue("p_id_usuario", req.idUsuario());
 
-        return ejecutarConsulta("fn_actualizar_documento", "ayudantia", params,
+        return db.ejecutarFuncion("ayudantia", "fn_actualizar_documento", params,
                 new TypeReference<Void>() {});
     }
 
@@ -72,7 +66,7 @@ public class DocumentoRepository {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("p_id_documento", idDocumento);
 
-        return ejecutarConsulta("fn_eliminar_documento", "ayudantia", params,
+        return db.ejecutarFuncion("ayudantia", "fn_eliminar_documento", params,
                 new TypeReference<DocumentoEliminadoResponseDTO>() {});
     }
 
@@ -81,26 +75,7 @@ public class DocumentoRepository {
                 .addValue("p_id_usuario", idUsuario)
                 .addValue("p_nombre_rol", rol);
 
-        return ejecutarConsulta("fn_listar_documentos_visor", "ayudantia", params,
+        return db.ejecutarFuncion("ayudantia", "fn_listar_documentos_visor", params,
                 new TypeReference<List<DocumentoVisorResponseDTO>>() {});
-    }
-
-    private <T> RespuestaOperacionDTO<T> ejecutarConsulta(String funcion, String esquema, MapSqlParameterSource params, TypeReference<T> typeRef) {
-        try {
-            SimpleJdbcCall jdbcCall = new SimpleJdbcCall(jdbcTemplate)
-                    .withSchemaName(esquema)
-                    .withFunctionName(funcion);
-
-            Map<String, Object> out = (params != null) ? jdbcCall.execute(params) : jdbcCall.execute();
-
-            boolean valido = (boolean) out.get("valido");
-            String mensaje = (String) out.get("mensaje");
-
-            T datos = objectMapper.convertValue(out.get("datos"), typeRef);
-
-            return new RespuestaOperacionDTO<>(valido, mensaje, datos);
-        } catch (Exception e) {
-            return new RespuestaOperacionDTO<>(false, "Error de conexión/mapeo: " + e.getMessage(), null);
-        }
     }
 }

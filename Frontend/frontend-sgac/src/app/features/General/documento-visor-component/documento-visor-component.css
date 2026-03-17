@@ -1,85 +1,165 @@
-.dv-wrapper {
-  display: flex; flex-direction: column; gap: 1.25rem;
+.visor-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   padding: 1.5rem;
 }
 
-.dv-header {
-  display: flex; align-items: center; gap: .875rem;
-}
-.dv-header-icon {
-  width: 44px; height: 44px; border-radius: 10px;
-  background: hsl(var(--primary)/.12); color: hsl(var(--primary));
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.dv-title    { font-size: 1.35rem; font-weight: 700; color: hsl(var(--foreground)); margin: 0; }
-.dv-subtitle { font-size: .82rem; color: hsl(var(--muted-foreground)); margin: .2rem 0 0; }
+.visor-header { margin-bottom: 0.5rem; }
+.visor-title { font-size: 1.75rem; font-weight: 700; color: hsl(var(--foreground)); margin: 0; }
+.visor-subtitle { font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin: 0.5rem 0 0; }
 
-/* ── Sección ──────────────────────────────────────────────────── */
-.dv-section { display: flex; flex-direction: column; gap: .75rem; }
+/* ────────────────────────────────────────────────────────────────────────── */
+/* FILTROS */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-.dv-section-label {
-  display: flex; align-items: center; gap: .45rem;
-  font-size: .7rem; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .07em; color: hsl(var(--muted-foreground));
+.visor-filters { display: flex; gap: 1rem; }
+.search-wrapper { position: relative; flex: 1; max-width: 450px; }
+.search-icon { position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); color: hsl(var(--muted-foreground)); }
+.search-input { padding-left: 2.75rem !important; width: 100%; }
+
+.input-field {
+  padding: 0.75rem 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 0.875rem;
+  transition: all 0.12s;
 }
 
-/* ── Grid de tarjetas ─────────────────────────────────────────── */
-.dv-grid {
+.input-field:focus { outline: none; border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1); }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* GRID Y TARJETAS */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.visor-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: .875rem;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.25rem;
 }
 
-/* ── Tarjeta ──────────────────────────────────────────────────── */
-.dv-card {
-  display: flex; align-items: center; gap: .875rem;
-  background: hsl(var(--card)); border: 1px solid hsl(var(--border));
-  border-radius: var(--radius-lg); padding: .875rem 1rem;
-  cursor: pointer; transition: box-shadow .18s, transform .12s;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-}
-.dv-card:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,.1);
-  transform: translateY(-1px);
-}
-.dv-card--conv {
-  border-left: 3px solid hsl(var(--primary)/.5);
+.visor-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 
-/* ── Contenido de la tarjeta ──────────────────────────────────── */
-.dv-card-icon  { flex-shrink: 0; }
-.dv-card-body  { flex: 1; min-width: 0; }
-.dv-card-nombre {
-  font-size: .875rem; font-weight: 600; color: hsl(var(--foreground));
-  margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.dv-card-tipo {
-  font-size: .75rem; color: hsl(var(--muted-foreground)); margin: .15rem 0 0;
-}
-.dv-card-meta {
-  display: flex; align-items: center; gap: .3rem;
-  font-size: .7rem; color: hsl(var(--muted-foreground)); margin: .25rem 0 0;
+.visor-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  border-color: hsl(var(--primary) / 0.2);
 }
 
-/* ── Botón ver ────────────────────────────────────────────────── */
-.dv-btn-ver {
-  flex-shrink: 0; width: 30px; height: 30px;
-  border-radius: var(--radius); border: 1px solid hsl(var(--border));
-  background: hsl(var(--secondary)); color: hsl(var(--muted-foreground));
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: background .12s, color .12s;
-}
-.dv-card:hover .dv-btn-ver {
-  background: hsl(var(--primary)/.1); color: hsl(var(--primary));
-  border-color: hsl(var(--primary)/.3);
+.visor-card--global { border-left: 4px solid #3b82f6; }
+.visor-card--facultad { border-left: 4px solid #f59e0b; }
+.visor-card--carrera { border-left: 4px solid #10b981; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* ICONOS SOFT BADGES */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.doc-icon-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 10px;
+  min-width: 65px;
+  height: 65px;
+  flex-shrink: 0;
 }
 
-/* ── Spinner ──────────────────────────────────────────────────── */
-@keyframes dv-spin { to { transform: rotate(360deg); } }
-.dv-spin { animation: dv-spin .75s linear infinite; display: inline-flex; }
+.doc-icon-badge span { font-size: 9px; font-weight: 800; }
 
-/* ── Responsive ───────────────────────────────────────────────── */
+.ext-pdf { background: #fef2f2; color: #dc2626; }
+.ext-doc { background: #eff6ff; color: #2563eb; }
+.ext-xls { background: #f0fdf4; color: #16a34a; }
+.ext-img { background: #faf5ff; color: #7c3aed; }
+.ext-other { background: #f8fafc; color: #64748b; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* CONTENIDO Y BADGES DE NIVEL */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.visor-card-content { flex: 1; min-width: 0; }
+.visor-card-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.visor-card-type { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin: 0.35rem 0 0.75rem; }
+.visor-card-meta { display: flex; align-items: center; gap: 0.75rem; }
+.meta-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.75rem; color: hsl(var(--muted-foreground)); }
+
+.visor-level-badge {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.badge-global { background: #dbeafe; color: #1e40af; }
+.badge-facultad { background: #fef3c7; color: #b45309; }
+.badge-carrera { background: #dcfce7; color: #15803d; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* ACCIONES (SOLO OJO) */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.visor-card-actions { flex-shrink: 0; }
+
+.action-btn {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.1);
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background: hsl(var(--primary));
+  color: white;
+  transform: scale(1.1);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* ANIMACIONES */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+@keyframes doc-spin { to { transform: rotate(360deg); } }
+.doc-spin { animation: doc-spin 0.75s linear infinite; }
+
+.visor-loading, .visor-empty { padding: 5rem 1rem; text-align: center; color: hsl(var(--muted-foreground)); }
+
 @media (max-width: 640px) {
-  .dv-grid { grid-template-columns: 1fr; }
-  .dv-wrapper { padding: 1rem; }
+  .visor-grid { grid-template-columns: 1fr; }
+  .visor-card { flex-direction: column; align-items: flex-start; }
+  .action-btn { width: 100%; margin-top: 1rem; }
+  .doc-icon-badge { height: 50px; width: 100%; flex-direction: row; }
 }

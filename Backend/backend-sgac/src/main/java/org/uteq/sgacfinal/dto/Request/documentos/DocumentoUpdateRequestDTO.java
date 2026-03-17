@@ -5,5 +5,6 @@ public record DocumentoUpdateRequestDTO(
     String nombreMostrar,
     Integer idTipoDoc,
     Integer idFacultad,
-    Integer idCarrera
+    Integer idCarrera,
+    Integer idUsuario
 ) {}

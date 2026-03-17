@@ -8,8 +8,8 @@ import { TipoSancionRequest, TipoSancionResponse } from '../../models/catalogos/
 @Injectable({ providedIn: 'root' })
 export class TipoSancionService {
 
-  private readonly env = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private baseUrl = `${this.env}/admin/catalogos-maestros/tipos-sancion`;
+  private readonly env = environment.apiUrl;
+  private readonly baseUrl = `${this.env}/admin/catalogos-maestros/tipos-sancion`;
 
   constructor(private http: HttpClient) {}
 

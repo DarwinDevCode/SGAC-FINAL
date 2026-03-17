@@ -12,7 +12,8 @@ import {
 @Injectable({ providedIn: 'root' })
 export class CargaAcademicaService {
   private http = inject(HttpClient);
-  private base = `${(environment as any).apiUrl ?? 'http://localhost:8080/api'}/carga-academica`;
+  private readonly env = environment.apiUrl;
+  private readonly base = `${this.env}/carga-academica`;
 
   getDocentes(): Observable<DocenteActivoDTO[]> {
     return this.http.get<DocenteActivoDTO[]>(`${this.base}/docentes`);

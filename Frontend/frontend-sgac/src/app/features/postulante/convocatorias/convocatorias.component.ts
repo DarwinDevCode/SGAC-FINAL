@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { ConvocatoriaService } from '../../../core/services/convocatoria-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { TipoRequisitoPostulacionResponseDTO } from '../../../core/dto/postulacion';

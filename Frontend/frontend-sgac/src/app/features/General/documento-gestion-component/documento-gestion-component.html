@@ -1,298 +1,182 @@
-<div class="gestion-container">
+<div class="doc-gestion-container">
 
-  <!-- ══ TOAST ══════════════════════════════════════════════════ -->
   @if (toast()) {
-    <div class="dg-toast"
-         [class.dg-toast--ok]="toast()!.tipo === 'ok'"
-         [class.dg-toast--err]="toast()!.tipo === 'err'">
-      <lucide-icon [name]="toast()!.tipo === 'ok' ? 'circle-check-big' : 'circle-x'"
-                   size="15"></lucide-icon>
+    <div class="doc-toast" [class.doc-toast--success]="toast()!.tipo === 'ok'" [class.doc-toast--error]="toast()!.tipo === 'err'">
+      <lucide-icon [name]="toast()!.tipo === 'ok' ? 'circle-check' : 'alert-circle'" size="16"></lucide-icon>
       <span>{{ toast()!.msg }}</span>
     </div>
   }
 
-  <!-- ══ CABECERA ═══════════════════════════════════════════════ -->
-  <div class="section-header">
-    <div class="title-container">
-      <h1 class="title">Documentos Académicos</h1>
-      <p class="subtitle">
-        @if (esCoordinador()) {
-          Documentos de tus convocatorias y reglamentos generales del periodo activo
-        } @else {
-          Reglamentos y resoluciones globales del periodo activo
-        }
-      </p>
+  <div class="doc-header">
+    <div>
+      <h1 class="doc-title">Gestión de Documentos</h1>
+      <p class="doc-subtitle">Administra los documentos académicos del sistema</p>
     </div>
-    <button class="btn btn-primary" (click)="abrirModalNuevo()">
-      <lucide-icon name="upload" size="16"></lucide-icon>
-      Subir documento
-    </button>
+    @if (!soloLectura) {
+      <button class="btn btn-primary" (click)="abrirModalCrear()">
+        <lucide-icon name="plus" size="16"></lucide-icon> Subir documento
+      </button>
+    }
   </div>
 
-  <!-- ══ FILTROS ════════════════════════════════════════════════ -->
-  <div class="search-card">
-    <div class="dg-filters-row">
-
-      <!-- Buscador -->
-      <div class="search-wrapper" style="flex:1">
-        <lucide-icon name="search" size="18" class="search-icon"></lucide-icon>
-        <input class="input-field search-input" type="text"
-               placeholder="Buscar por nombre o tipo…"
-               [(ngModel)]="busqueda" />
-      </div>
-
-      <!-- Selector de convocatoria SOLO para Coordinador -->
-      @if (esCoordinador()) {
-        <div class="dg-conv-select-wrap">
-          <select class="input-field"
-                  [ngModel]="idConvFiltro()"
-                  (ngModelChange)="onFiltroConvChange($event)">
-            <option [ngValue]="null">
-              <lucide-icon name="globe" size="13"></lucide-icon>
-              Todos
-            </option>
-            @for (conv of convocatorias(); track conv.idConvocatoria) {
-              <option [ngValue]="conv.idConvocatoria">
-                {{ conv.nombreAsignatura }}
-              </option>
-            }
-          </select>
-        </div>
-      }
-
-      <!-- Administrador: etiqueta informativa -->
-      @if (!esCoordinador()) {
-        <span class="badge blue dg-badge-global">
-          <lucide-icon name="globe" size="12"></lucide-icon>
-          Documentos globales del periodo activo
-        </span>
-      }
-
+  <div class="doc-filters">
+    <div class="search-wrapper">
+      <lucide-icon name="search" size="18" class="search-icon"></lucide-icon>
+      <input class="input-field search-input" type="text" placeholder="Buscar..." [ngModel]="filtroNombre()" (ngModelChange)="filtroNombre.set($event)"/>
     </div>
   </div>
 
-  <!-- ══ TABLA ══════════════════════════════════════════════════ -->
-  <div class="table-card">
-    <table class="data-table">
+  <div class="doc-table-wrapper">
+    <table class="doc-table">
       <thead>
       <tr>
         <th>Documento</th>
         <th>Tipo</th>
         <th>Alcance</th>
-        <th class="td-right">Tamaño</th>
+        <th class="text-right">Tamaño</th>
         <th>Fecha</th>
-        <th class="td-right">Acciones</th>
+        @if (!soloLectura) { <th class="text-right">Acciones</th> }
       </tr>
       </thead>
       <tbody>
         @if (loading()) {
-          <tr>
-            <td colspan="6" class="td-empty">
-              <lucide-icon name="loader" size="18" class="spin"></lucide-icon>
-              Cargando…
-            </td>
-          </tr>
-        } @else if (filtrados.length === 0) {
-          <tr>
-            <td colspan="6" class="td-empty td-muted">
-              Sin documentos para el filtro seleccionado.
-            </td>
-          </tr>
+          <tr><td [attr.colspan]="soloLectura ? 5 : 6" class="td-empty"><lucide-icon name="loader" size="18" class="doc-spin"></lucide-icon> Cargando...</td></tr>
+        } @else if (documentosFiltrados().length === 0) {
+          <tr><td [attr.colspan]="soloLectura ? 5 : 6" class="td-empty td-muted"><lucide-icon name="inbox" size="20"></lucide-icon> Sin documentos</td></tr>
         } @else {
-          @for (doc of filtrados; track doc.id) {
+          @for (doc of documentosFiltrados(); track doc.idDocumento) {
             <tr>
               <td>
-                <div class="dg-doc-cell">
-                  <span class="dg-ext-badge" [class]="extBadgeClass(doc.extension)">
-                    {{ (doc.extension ?? '?').toUpperCase() }}
-                  </span>
+                <div class="doc-cell">
+                  <div class="doc-icon-badge" [class]="obtenerClaseExtension(doc.extension)">
+                    <lucide-icon [name]="obtenerIconoLucide(doc.extension)" size="16"></lucide-icon>
+                    <span>{{ obtenerEtiquetaExtension(doc.extension) }}</span>
+                  </div>
                   <div>
-                    <p class="full-name">{{ doc.nombreMostrar }}</p>
-                    <p class="user-email">{{ doc.tipoCodigo }}</p>
+                    <p class="doc-nombre">{{ doc.nombreMostrar }}</p>
+                    <p class="doc-codigo">{{ doc.tipoDocumento }}</p>
                   </div>
                 </div>
               </td>
-              <td class="td-muted">{{ doc.tipoNombre }}</td>
-              <td>
-                @if (doc.esGlobal) {
-                  <span class="badge blue">General</span>
-                } @else {
-                  <span class="badge amber">Convocatoria</span>
-                }
-              </td>
-              <td class="td-right td-muted">{{ formatBytes(doc.pesoBytes) }}</td>
-              <td class="td-muted">{{ doc.fechaSubida | date:'dd/MM/yyyy' }}</td>
-              <td class="td-right">
-                <a [href]="doc.rutaArchivo" target="_blank"
-                   rel="noopener noreferrer"
-                   class="btn-icon" title="Ver documento">
-                  <lucide-icon name="eye" size="16"></lucide-icon>
-                </a>
-                <button class="btn-icon" (click)="abrirModalEditar(doc)" title="Editar">
-                  <lucide-icon name="pencil" size="16"></lucide-icon>
-                </button>
-                <button class="btn-icon" (click)="solicitarEliminar(doc.id)"
-                        title="Desactivar">
-                  <lucide-icon name="trash-2" size="16"></lucide-icon>
-                </button>
-              </td>
+              <td class="td-muted">{{ doc.tipoDocumento }}</td>
+              <td><span class="badge" [class]="'badge-' + obtenerNivelBadge(doc)">{{ obtenerTextoNivel(doc) }}</span></td>
+              <td class="text-right td-muted">{{ formatearBytes(doc.pesoBytes) }}</td>
+              <td class="td-muted">{{ doc.fechaSubida | date: 'dd/MM/yyyy' }}</td>
+              @if (!soloLectura) {
+                <td class="text-right">
+                  <a [href]="doc.rutaArchivo" target="_blank" class="btn-icon"><lucide-icon name="download" size="16"></lucide-icon></a>
+                  <button class="btn-icon" (click)="abrirModalEditar(doc)"><lucide-icon name="pencil" size="16"></lucide-icon></button>
+                  <button class="btn-icon btn-icon--danger" (click)="solicitarEliminar(doc.idDocumento)"><lucide-icon name="trash-2" size="16"></lucide-icon></button>
+                </td>
+              }
             </tr>
           }
         }
       </tbody>
     </table>
   </div>
-
 </div>
 
-<!-- ══ MODAL SUBIR / EDITAR ═══════════════════════════════════ -->
-@if (mostrarModal()) {
+@if (modalAbierto()) {
   <div class="modal-backdrop" (click)="cerrarModal()">
-    <div class="modal-box modal-box--md" (click)="$event.stopPropagation()">
-
+    <div class="modal-box modal-box--lg" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <div>
-          <h3 class="modal-title">
-            <lucide-icon [name]="modoEdicion() ? 'pencil' : 'upload'" size="16"></lucide-icon>
-            {{ modoEdicion() ? 'Editar documento' : 'Subir documento' }}
-          </h3>
-          <p class="modal-subtitle">Máx. 10 MB · PDF, Word, Excel, imágenes</p>
+          <h2 class="modal-title"><lucide-icon [name]="modoEdicion() ? 'pencil' : 'upload'" size="18"></lucide-icon> {{ modoEdicion() ? 'Editar Documento' : 'Subir Documento' }}</h2>
+          <p class="modal-subtitle">PDF, Word, Excel, imágenes (Máx 10MB)</p>
         </div>
-        <button class="btn-icon" (click)="cerrarModal()" [disabled]="guardando()">
-          <lucide-icon name="x" size="18"></lucide-icon>
-        </button>
+        <button class="btn-icon" (click)="cerrarModal()" [disabled]="guardando()"><lucide-icon name="x" size="20"></lucide-icon></button>
       </div>
 
-      <div class="dg-form">
-
-        <!-- ── Nombre ──────────────────────────────────────────── -->
+      <div class="modal-body">
         <div class="form-group">
           <label>Nombre visible *</label>
-          <input class="input-field" type="text" [(ngModel)]="formNombre"
-                 placeholder="Ej: Reglamento de Ayudantías 2025" />
+          <input class="input-field" type="text" [ngModel]="formNombre()" (ngModelChange)="formNombre.set($event)"/>
         </div>
 
-        <!-- ── Tipo dinámico (Signal) ───────────────────────────── -->
         <div class="form-group">
           <label>Tipo de documento *</label>
-          <select class="input-field" [(ngModel)]="formIdTipo">
+          <select class="input-field" [ngModel]="formIdTipo()" (ngModelChange)="formIdTipo.set($event)">
             <option [ngValue]="null">— Seleccionar tipo —</option>
-            @for (tipo of tipos(); track tipo.id) {
-              <option [ngValue]="tipo.id">{{ tipo.nombre }}</option>
-            }
+            @for (tipo of tiposDocumento(); track tipo.id) { <option [ngValue]="tipo.id">{{ tipo.nombre }}</option> }
           </select>
-          @if (tipos().length === 0) {
-            <small class="td-muted">Cargando tipos…</small>
-          }
         </div>
 
-        <!-- ── Selector de convocatoria (SOLO Coordinador) ─────── -->
-        @if (esCoordinador()) {
+        <div class="form-group">
+          <label>Nivel de visibilidad *</label>
+          <div class="radio-group">
+            @if (!esCoordinador()) {
+              <label class="radio-option">
+                <input type="radio" [value]="NivelDocumento.GLOBAL" [checked]="formNivel() === NivelDocumento.GLOBAL" (change)="formNivel.set(NivelDocumento.GLOBAL)"/>
+                <span><strong>Global</strong><small>Toda la universidad</small></span>
+              </label>
+            }
+            <label class="radio-option">
+              <input type="radio" [value]="NivelDocumento.FACULTAD" [checked]="formNivel() === NivelDocumento.FACULTAD" (change)="formNivel.set(NivelDocumento.FACULTAD)"/>
+              <span><strong>{{ esCoordinador() ? 'Mi Facultad' : 'Por Facultad' }}</strong><small>Solo tu facultad</small></span>
+            </label>
+            <label class="radio-option">
+              <input type="radio" [value]="NivelDocumento.CARRERA" [checked]="formNivel() === NivelDocumento.CARRERA" (change)="formNivel.set(NivelDocumento.CARRERA)"/>
+              <span><strong>{{ esCoordinador() ? 'Mi Carrera' : 'Por Carrera' }}</strong><small>Solo tu carrera</small></span>
+            </label>
+          </div>
+        </div>
+
+        @if (!esCoordinador() && formNivel() !== NivelDocumento.GLOBAL) {
           <div class="form-group">
-            <label>Convocatoria asociada</label>
-            <select class="input-field" [(ngModel)]="formIdConv">
-              <option [ngValue]="null">
-                Sin convocatoria — documento global del periodo
-              </option>
-              @for (conv of convocatorias(); track conv.idConvocatoria) {
-                <option [ngValue]="conv.idConvocatoria">
-                  {{ conv.nombreAsignatura }} · {{ conv.nombreDocente }}
-                </option>
-              }
+            <label>Facultad *</label>
+            <select class="input-field" [ngModel]="formIdFacultad()" (ngModelChange)="formIdFacultad.set($event)">
+              <option [ngValue]="null">— Seleccionar facultad —</option>
+              @for (fac of facultades(); track fac.id) { <option [ngValue]="fac.id">{{ fac.nombre }}</option> }
             </select>
-            <small class="td-muted">
-              Déjalo vacío para que el documento sea visible por todos.
-            </small>
           </div>
         }
 
-        <!-- ── Administrador: aviso de alcance global ──────────── -->
-        @if (!esCoordinador()) {
-          <div class="dg-global-notice">
-            <lucide-icon name="globe" size="14"></lucide-icon>
-            <span>
-              Este documento se publicará como <strong>general</strong>
-              para todo el periodo activo.
-            </span>
+        @if (mostrarSelectCarreras()) {
+          <div class="form-group">
+            <label>Carrera *</label>
+            <select class="input-field" [ngModel]="formIdCarrera()" (ngModelChange)="formIdCarrera.set($event)">
+              <option [ngValue]="null">— Seleccionar carrera —</option>
+              @for (car of carreras(); track car.id) { <option [ngValue]="car.id">{{ car.nombre }}</option> }
+            </select>
           </div>
         }
 
-        <!-- ── Dropzone ────────────────────────────────────────── -->
         <div class="form-group">
           <label>{{ modoEdicion() ? 'Reemplazar archivo (opcional)' : 'Archivo *' }}</label>
-          <div class="dg-dropzone"
-               [class.dg-dropzone--drag]="isDragging()"
-               [class.dg-dropzone--filled]="!!archivoSel"
-               (dragover)="onDragOver($event)"
-               (dragleave)="onDragLeave()"
-               (drop)="onDrop($event)"
-               (click)="fileRef.click()">
-            <input #fileRef type="file" hidden
-                   accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
-                   (change)="onFileChange($event)">
-            @if (archivoSel) {
-              <lucide-icon name="file-check" size="28" class="dg-dz-icon--ok"></lucide-icon>
-              <p class="dg-dz-filename">{{ archivoSel.name }}</p>
-              <p class="dg-dz-size">{{ formatBytes(archivoSel.size) }}</p>
+          <div class="dropzone" [class.dropzone--drag]="arrastrandoArchivo()" [class.dropzone--filled]="!!archivoSeleccionado()"
+               (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)" (click)="fileInput.click()">
+            <input #fileInput type="file" hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg" (change)="onFileChange($event)"/>
+            @if (archivoSeleccionado()) {
+              <lucide-icon name="file-check" size="32" style="color:#15803d"></lucide-icon>
+              <p class="dz-filename">{{ archivoSeleccionado()!.name }}</p>
             } @else {
-              <lucide-icon name="cloud-upload" size="28" class="dg-dz-icon"></lucide-icon>
-              <p class="dg-dz-hint">Arrastra el archivo aquí o haz clic para seleccionar</p>
-              @if (modoEdicion()) {
-                <p class="dg-dz-current">
-                  Se conservará el archivo actual si no seleccionas uno nuevo
-                </p>
-              }
+              <lucide-icon name="cloud-upload" size="32"></lucide-icon>
+              <p class="dz-hint">Arrastra o haz clic aquí</p>
             }
           </div>
         </div>
+      </div>
 
-        <div class="form-footer">
-          <button class="btn btn-ghost" (click)="cerrarModal()"
-                  [disabled]="guardando()">Cancelar</button>
-          <button class="btn btn-primary" (click)="guardar()"
-                  [disabled]="guardando()">
-            @if (guardando()) {
-              <lucide-icon name="loader" size="16" class="spin"></lucide-icon>
-              Guardando…
-            } @else {
-              <lucide-icon [name]="modoEdicion() ? 'save' : 'upload'" size="16"></lucide-icon>
-              {{ modoEdicion() ? 'Guardar cambios' : 'Subir' }}
-            }
-          </button>
-        </div>
-
+      <div class="modal-footer">
+        <button class="btn btn-ghost" (click)="cerrarModal()" [disabled]="guardando()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarDocumento()" [disabled]="guardando()">
+          @if (guardando()) { <lucide-icon name="loader" size="16" class="doc-spin"></lucide-icon> }
+          {{ modoEdicion() ? 'Actualizar' : 'Subir' }}
+        </button>
       </div>
     </div>
   </div>
 }
 
-<!-- ══ MODAL CONFIRMAR ELIMINAR ═══════════════════════════════ -->
-@if (confirmId()) {
+@if (confirmacion() !== null) {
   <div class="modal-backdrop">
-    <div class="modal-box modal-box--md">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <lucide-icon name="alert-triangle" size="16"
-                       style="color:#d97706"></lucide-icon>
-          ¿Desactivar documento?
-        </h3>
-        <button class="btn-icon" (click)="cancelarEliminar()">
-          <lucide-icon name="x" size="18"></lucide-icon>
-        </button>
-      </div>
-      <div style="padding:1.25rem 1.5rem">
-        <p style="font-size:.875rem;color:hsl(var(--foreground));margin:0">
-          El archivo será marcado como inactivo y eliminado de Cloudinary.
-          Esta acción no puede deshacerse.
-        </p>
-      </div>
-      <div class="form-footer" style="padding:1rem 1.5rem">
+    <div class="modal-box modal-box--sm">
+      <div class="modal-header"><h3 class="modal-title">¿Eliminar documento?</h3></div>
+      <div class="modal-body"><p>Esta acción no se puede deshacer y borrará el archivo físico.</p></div>
+      <div class="modal-footer">
         <button class="btn btn-ghost" (click)="cancelarEliminar()">Cancelar</button>
-        <button class="btn btn-primary" style="background:#dc2626"
-                (click)="confirmarEliminar()">
-          <lucide-icon name="trash-2" size="15"></lucide-icon>
-          Sí, desactivar
-        </button>
+        <button class="btn btn-primary btn-danger" (click)="confirmarEliminar()">Sí, Eliminar</button>
       </div>
     </div>
   </div>

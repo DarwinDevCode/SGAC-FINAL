@@ -14,13 +14,9 @@ import {
 @Injectable({ providedIn: 'root' })
 export class AsistenciaService {
   private http = inject(HttpClient);
+  private readonly baseUrl   = environment.apiUrl;
+  private readonly base = `${this.baseUrl}/asistencia`;
 
-  // Base URL ajustada al controlador refactorizado
-  private readonly base = `${(environment as any).apiUrl ?? 'http://localhost:8080/api'}/asistencia`;
-
-  /**
-   * Obtiene el contexto (idAyudantia e idRegistro) del usuario autenticado.
-   */
   obtenerContexto(): Observable<ContextoAsistencia> {
     return this.http.get<ContextoAsistencia>(`${this.base}/contexto`);
   }

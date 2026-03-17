@@ -8,8 +8,7 @@ import { TipoRolDTO } from '../dto/tipo-rol';
 @Injectable({ providedIn: 'root' })
 export class UsuarioService {
   private http = inject(HttpClient);
-
-  private readonly baseUrl = (environment as any).apiUrl ?? 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private readonly API_AUTH = `${this.baseUrl}/auth`;
 
   getRolesActivos(): Observable<TipoRolDTO[]> {

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, forkJoin } from 'rxjs';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { PostulacionResponseDTO } from '../../../core/dto/postulacion';
 
@@ -80,7 +80,7 @@ export class ResultadosComponent implements OnInit, OnDestroy {
               Number(result.meritos.notaExperiencia || 0) +
               Number(result.meritos.notaSemestres || 0);
           }
-          // La oposición a veces puede no ser una nota sino un estado en este backend, 
+          // La oposición a veces puede no ser una nota sino un estado en este backend,
           // pero si hubiera nota se sumaría. Aquí marcamos como completada si tiene M y OP
 
           postUI.notaFinal = notaM;

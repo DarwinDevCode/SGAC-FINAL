@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { EvaluacionOposicionResponseDTO } from '../../../core/dto/evaluacion';
 
 @Component({

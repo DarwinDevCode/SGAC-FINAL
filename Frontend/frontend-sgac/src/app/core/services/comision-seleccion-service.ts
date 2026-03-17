@@ -11,8 +11,7 @@ import {EvaluacionOposicionDTO} from '../dto/evaluacion-oposicion';
 })
 export class ComisionSeleccionService {
   private http = inject(HttpClient);
-
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private readonly apiUrlComisiones = `${this.baseUrl}/comisiones`;
   private readonly apiUrlEvaluaciones = `${this.baseUrl}/evaluaciones`;
 

@@ -15,7 +15,7 @@ import {ResultadoMasivoResponseDTO} from '../dto/resultado-masivo-response-dto';
   providedIn: 'root'
 })
 export class PermisoService {
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private apiUrl = `${this.baseUrl}/permisos`;
 
   http = inject(HttpClient);

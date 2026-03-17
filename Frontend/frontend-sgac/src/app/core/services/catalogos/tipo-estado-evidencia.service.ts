@@ -7,8 +7,8 @@ import { TipoEstadoEvidenciaRequest, TipoEstadoEvidenciaResponse } from '../../m
 
 @Injectable({ providedIn: 'root' })
 export class TipoEstadoEvidenciaService {
-  private readonly env = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private baseUrl = `${this.env}/admin/catalogos-maestros/estados-evidencia`;
+  private readonly env   = environment.apiUrl;
+  private readonly baseUrl = `${this.env}/admin/catalogos-maestros/estados-evidencia`;
 
   constructor(private http: HttpClient) {}
 

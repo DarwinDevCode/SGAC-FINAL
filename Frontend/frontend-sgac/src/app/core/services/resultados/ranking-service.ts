@@ -9,7 +9,8 @@ import {AuthService} from '../auth-service';
 @Injectable({ providedIn: 'root' })
 export class RankingService {
   private http = inject(HttpClient);
-  private readonly API = `${(environment as any).apiUrl ?? 'http://localhost:8080/api'}/ranking`;
+  private readonly baseUrl = environment.apiUrl;
+  private readonly API = `${this.baseUrl}/ranking`;
   private authService = inject(AuthService);
 
   private headers(): HttpHeaders {

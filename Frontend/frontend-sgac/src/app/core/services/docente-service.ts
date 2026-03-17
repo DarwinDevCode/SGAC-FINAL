@@ -15,7 +15,8 @@ import {
 })
 export class DocenteService {
   private http = inject(HttpClient);
-  private readonly API = `${(environment as any).apiUrl || 'http://localhost:8080/api'}/docentes`;
+  private readonly baseUrl = environment.apiUrl;
+  private readonly API = `${this.baseUrl}/docentes`;
 
   listarActivos(): Observable<DocenteDTO[]> {
     return this.http.get<DocenteDTO[]>(this.API);

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../../core/services/auth-service';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { NotificacionResponseDTO } from '../../../core/dto/notificacion';
 
 @Component({

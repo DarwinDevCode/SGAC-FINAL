@@ -1,107 +1,73 @@
-<div class="dv-wrapper">
-
-  <!-- ── Cabecera ──────────────────────────────────────────────── -->
-  <div class="dv-header">
-    <div class="dv-header-icon">
-      <lucide-icon name="folder-open" size="22"></lucide-icon>
-    </div>
+<div class="visor-container">
+  <div class="visor-header">
     <div>
-      <h2 class="dv-title">{{ titulo }}</h2>
-      <p class="dv-subtitle">Documentos del periodo académico activo</p>
+      <h1 class="visor-title">{{ titulo }}</h1>
+      <p class="visor-subtitle">Documentos académicos oficiales disponibles para tu perfil</p>
     </div>
   </div>
 
-  <!-- ── Buscador ──────────────────────────────────────────────── -->
-  <div class="search-card">
+  <div class="visor-filters">
     <div class="search-wrapper">
       <lucide-icon name="search" size="18" class="search-icon"></lucide-icon>
-      <input class="input-field search-input" type="text"
-             placeholder="Buscar documento o tipo…"
-             [(ngModel)]="busqueda" />
+      <input
+        class="input-field search-input"
+        type="text"
+        placeholder="Buscar por nombre o tipo de documento…"
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
     </div>
   </div>
 
-  <!-- ── Loading ───────────────────────────────────────────────── -->
   @if (loading()) {
-    <div class="info-message">
-      <lucide-icon name="loader" size="28" class="dv-spin"></lucide-icon>
-      <p>Cargando documentos…</p>
+    <div class="visor-loading">
+      <lucide-icon name="loader" size="32" class="doc-spin"></lucide-icon>
+      <p>Consultando repositorio…</p>
     </div>
-  }
-
-  <!-- ── Sin resultados ────────────────────────────────────────── -->
-  @if (!loading() && documentos().length === 0) {
-    <div class="info-message">
-      <lucide-icon name="folder-x" size="40"
-                   style="color:hsl(var(--muted-foreground))"></lucide-icon>
-      <p>No hay documentos disponibles para el periodo activo.</p>
+  } @else if (documentosFiltrados().length === 0) {
+    <div class="visor-empty">
+      <lucide-icon name="inbox" size="48" class="icon-muted"></lucide-icon>
+      <p>No se encontraron documentos académicos</p>
     </div>
-  }
+  } @else {
+    <div class="visor-grid">
+      @for (doc of documentosFiltrados(); track doc.idDocumento) {
+        <div class="visor-card" [class]="'visor-card--' + obtenerClaseNivel(doc)">
 
-  <!-- ══ Reglamentos y resoluciones generales ══════════════════ -->
-  @if (!loading() && globales.length > 0) {
-    <div class="dv-section">
-      <div class="dv-section-label">
-        <lucide-icon name="globe" size="14"></lucide-icon>
-        Reglamentos y resoluciones generales
-        <span class="badge-count">{{ globales.length }}</span>
-      </div>
-      <div class="dv-grid">
-        @for (doc of globales; track doc.id) {
-          <div class="dv-card" (click)="abrirDocumento(doc.rutaArchivo)">
-            <div class="dv-card-icon" [style.color]="extColor(doc.extension)">
-              <lucide-icon [name]="extIcon(doc.extension)" size="28"></lucide-icon>
-            </div>
-            <div class="dv-card-body">
-              <p class="dv-card-nombre">{{ doc.nombreMostrar }}</p>
-              <p class="dv-card-tipo">{{ doc.tipoNombre }}</p>
-              <p class="dv-card-meta">
-                <lucide-icon name="calendar" size="11"></lucide-icon>
-                {{ doc.fechaSubida | date:'dd/MM/yyyy' }}
-                &nbsp;·&nbsp;
-                {{ formatBytes(doc.pesoBytes) }}
-              </p>
-            </div>
-            <button class="dv-btn-ver" title="Abrir en nueva pestaña">
-              <lucide-icon name="external-link" size="14"></lucide-icon>
-            </button>
+          <div class="visor-level-badge" [class]="'badge-' + obtenerClaseNivel(doc)">
+            {{ obtenerEtiquetaNivel(doc) }}
           </div>
-        }
-      </div>
-    </div>
-  }
 
-  <!-- ══ Documentos de la convocatoria ═════════════════════════ -->
-  @if (!loading() && porConvocatoria.length > 0) {
-    <div class="dv-section">
-      <div class="dv-section-label">
-        <lucide-icon name="file-text" size="14"></lucide-icon>
-        Documentos de la convocatoria
-        <span class="badge-count">{{ porConvocatoria.length }}</span>
-      </div>
-      <div class="dv-grid">
-        @for (doc of porConvocatoria; track doc.id) {
-          <div class="dv-card dv-card--conv" (click)="abrirDocumento(doc.rutaArchivo)">
-            <div class="dv-card-icon" [style.color]="extColor(doc.extension)">
-              <lucide-icon [name]="extIcon(doc.extension)" size="28"></lucide-icon>
-            </div>
-            <div class="dv-card-body">
-              <p class="dv-card-nombre">{{ doc.nombreMostrar }}</p>
-              <p class="dv-card-tipo">{{ doc.tipoNombre }}</p>
-              <p class="dv-card-meta">
-                <lucide-icon name="calendar" size="11"></lucide-icon>
-                {{ doc.fechaSubida | date:'dd/MM/yyyy' }}
-                &nbsp;·&nbsp;
-                {{ formatBytes(doc.pesoBytes) }}
-              </p>
-            </div>
-            <button class="dv-btn-ver" title="Abrir documento">
-              <lucide-icon name="external-link" size="14"></lucide-icon>
-            </button>
+          <div class="doc-icon-badge" [class]="obtenerClaseExtension(doc.extension)">
+            <lucide-icon [name]="obtenerIconoLucide(doc.extension)" size="20"></lucide-icon>
+            <span>{{ obtenerEtiquetaExtension(doc.extension) }}</span>
           </div>
-        }
-      </div>
+
+          <div class="visor-card-content">
+            <h3 class="visor-card-title" [title]="doc.nombreMostrar">
+              {{ doc.nombreMostrar }}
+            </h3>
+            <p class="visor-card-type">{{ doc.tipoDocumento }}</p>
+
+            <div class="visor-card-meta">
+              <span class="meta-item">
+                <lucide-icon name="calendar" size="14"></lucide-icon>
+                {{ doc.fechaSubida | date: 'dd/MM/yyyy' }}
+              </span>
+              <span class="meta-item">
+                <lucide-icon name="database" size="14"></lucide-icon>
+                {{ formatearBytes(doc.pesoBytes) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="visor-card-actions">
+            <a [href]="doc.rutaArchivo" target="_blank" class="action-btn action-btn--view" title="Ver documento">
+              <lucide-icon name="eye" size="20"></lucide-icon>
+            </a>
+          </div>
+        </div>
+      }
     </div>
   }
-
 </div>

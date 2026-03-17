@@ -14,8 +14,9 @@ import {
 export class EvaluacionMeritosService {
 
   private http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
   private readonly API =
-    `${(environment as any).apiUrl ?? 'http://localhost:8080/api'}/evaluacion-meritos`;
+    `${this.baseUrl}/evaluacion-meritos`;
 
   listar(): Observable<ListaPostulacionesMeritosResponse> {
     return this.http

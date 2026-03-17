@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
-import { PostulacionRequestDTO, PostulacionResponseDTO } from '../dto/postulacion';
+import { environment } from '../../../../environments/environment';
+import { PostulacionRequestDTO, PostulacionResponseDTO } from '../../dto/postulacion';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 })
 export class PostulacionService {
   private http = inject(HttpClient);
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private apiUrl = `${this.baseUrl}/postulaciones`;
 
   registrar(request: PostulacionRequestDTO, files: File[], tiposRequisito: number[]): Observable<any> {

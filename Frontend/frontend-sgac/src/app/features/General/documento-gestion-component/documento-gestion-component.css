@@ -1,78 +1,208 @@
-/* documento-gestion.component.css */
+/** ════════════════════════════════════════════════════════════════════════════ */
+/** ESTILOS: GESTIÓN DE DOCUMENTOS ACADÉMICOS */
+/** ════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Toast ────────────────────────────────────────────────────── */
-.dg-toast {
-  position: fixed; bottom: 1.5rem; right: 1.5rem;
-  display: flex; align-items: center; gap: .55rem;
-  padding: .7rem 1rem; border-radius: 10px;
-  font-size: .85rem; font-weight: 500;
-  box-shadow: 0 4px 14px rgba(0,0,0,.14); z-index: 9999;
-  max-width: 380px; animation: dg-slide-up .2s ease-out;
-}
-@keyframes dg-slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: none; }
-}
-.dg-toast--ok  { background:#f0fdf4; border:1px solid #86efac; color:#15803d; }
-.dg-toast--err { background:#fef2f2; border:1px solid #fecaca; color:#dc2626; }
+/* ────────────────────────────────────────────────────────────────────────── */
+/* CONTENEDOR PRINCIPAL */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-/* ── Fila de filtros ──────────────────────────────────────────── */
-.dg-filters-row {
-  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+.doc-gestion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
 }
-.dg-conv-select-wrap {
-  min-width: 240px; flex-shrink: 0;
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* TOAST (Notificaciones) */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.doc-toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  max-width: 400px;
+  animation: toast-slide-in 0.25s ease-out;
 }
-.dg-badge-global {
-  display: inline-flex; align-items: center; gap: .35rem;
+
+.doc-toast--success {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  color: #15803d;
+}
+
+.doc-toast--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* CABECERA Y FILTROS */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.doc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.doc-title { font-size: 1.75rem; font-weight: 700; margin: 0; }
+.doc-subtitle { font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin: 0.5rem 0 0; }
+
+.doc-filters { display: flex; align-items: center; gap: 1rem; }
+.search-wrapper { position: relative; flex: 1; min-width: 240px; }
+.search-icon { position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); color: hsl(var(--muted-foreground)); }
+.search-input { padding-left: 2.75rem !important; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* TABLA */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.doc-table-wrapper { border: 1px solid hsl(var(--border)); border-radius: 8px; overflow: hidden; }
+.doc-table { width: 100%; border-collapse: collapse; background: hsl(var(--card)); }
+.doc-table thead { background: hsl(var(--muted) / 0.5); border-bottom: 1px solid hsl(var(--border)); }
+.doc-table th {
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  border-right: 1px solid hsl(var(--border));
+}
+.doc-table tbody tr { border-bottom: 1px solid hsl(var(--border)); transition: background 0.12s; }
+.doc-table tbody tr:hover { background: hsl(var(--muted) / 0.25); }
+.doc-table td { padding: 1rem; vertical-align: middle; border-right: 1px solid hsl(var(--border)); }
+.doc-table td:last-child, .doc-table th:last-child { border-right: none; }
+
+.td-empty { text-align: center; padding: 2rem 1rem; color: hsl(var(--muted-foreground)); display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+.td-muted { color: hsl(var(--muted-foreground)); font-size: 0.875rem; }
+.text-right { text-align: right; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* CENTRALIZACIÓN: ICONOS DE DOCUMENTO (BADGES) */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.doc-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+/* Base del Badge */
+.doc-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  min-width: 68px; /* Ancho fijo para uniformidad */
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
   flex-shrink: 0;
 }
 
-/* ── Celda de documento ───────────────────────────────────────── */
-.dg-doc-cell { display: flex; align-items: center; gap: .65rem; }
-
-/* ── Badge de extensión ───────────────────────────────────────── */
-.dg-ext-badge {
-  display: inline-flex; align-items: center; justify-content: center;
-  min-width: 38px; height: 22px; border-radius: 4px;
-  font-size: .65rem; font-weight: 800; letter-spacing: .04em; flex-shrink: 0;
-}
-.ext-pdf   { background:#fee2e2; color:#991b1b; }
-.ext-doc   { background:#dbeafe; color:#1e40af; }
-.ext-xls   { background:#dcfce7; color:#166534; }
-.ext-img   { background:#f3e8ff; color:#6b21a8; }
-.ext-other { background:hsl(var(--muted)/.4); color:hsl(var(--muted-foreground)); }
-
-/* ── Aviso global (Administrador) ────────────────────────────── */
-.dg-global-notice {
-  display: flex; align-items: center; gap: .5rem;
-  background: #eff6ff; border: 1px solid #bfdbfe;
-  border-radius: var(--radius); padding: .65rem .875rem;
-  font-size: .8rem; color: #1d4ed8;
+/* Ajuste Icono Lucide */
+.doc-icon-badge lucide-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* ── Dropzone ─────────────────────────────────────────────────── */
-.dg-dropzone {
-  border: 2px dashed hsl(var(--border)); border-radius: var(--radius);
-  padding: 2rem 1rem; display: flex; flex-direction: column;
-  align-items: center; gap: .5rem; cursor: pointer; text-align: center;
-  transition: border-color .15s, background .15s;
-  background: hsl(var(--muted)/.12);
+/* Estilos por extensión (Colores Soft) */
+.ext-pdf { background-color: #fef2f2; color: #dc2626; border-color: #fee2e2; }
+.ext-doc, .ext-docx { background-color: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+.ext-xls, .ext-xlsx { background-color: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
+.ext-img, .ext-png, .ext-jpg, .ext-jpeg { background-color: #faf5ff; color: #7c3aed; border-color: #f3e8ff; }
+.ext-other { background-color: #f8fafc; color: #64748b; border-color: #f1f5f9; }
+
+/* Interacción */
+tr:hover .doc-icon-badge {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-.dg-dropzone:hover      { border-color: hsl(var(--primary)/.5); background: hsl(var(--primary)/.04); }
-.dg-dropzone--drag      { border-color: hsl(var(--primary));    background: hsl(var(--primary)/.08); }
-.dg-dropzone--filled    { border-color: #86efac; background: #f0fdf4; }
 
-.dg-dz-icon     { color: hsl(var(--muted-foreground)); }
-.dg-dz-icon--ok { color: #15803d; }
-.dg-dz-hint     { font-size: .82rem; color: hsl(var(--muted-foreground)); margin: 0; }
-.dg-dz-filename { font-size: .875rem; font-weight: 600; color: #15803d; margin: 0; }
-.dg-dz-size     { font-size: .75rem; color: hsl(var(--muted-foreground)); margin: 0; }
-.dg-dz-current  { font-size: .72rem; color: hsl(var(--muted-foreground)); margin: 0; }
+.doc-nombre { font-weight: 600; color: hsl(var(--foreground)); margin: 0; word-break: break-word; }
+.doc-codigo { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin: 0.25rem 0 0; }
 
-/* ── Formulario del modal ─────────────────────────────────────── */
-.dg-form { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
+/* ────────────────────────────────────────────────────────────────────────── */
+/* BADGES DE ALCANCE (Global, Facultad, Carrera) */
+/* ────────────────────────────────────────────────────────────────────────── */
 
-/* ── Spinner ──────────────────────────────────────────────────── */
-@keyframes dg-spin { to { transform: rotate(360deg); } }
-.spin { animation: dg-spin .75s linear infinite; display: inline-flex; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-blue { background: #dbeafe; color: #1e40af; }
+.badge-amber { background: #fef3c7; color: #b45309; }
+.badge-green { background: #dcfce7; color: #15803d; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* MODAL Y FORMULARIO */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 999; animation: fade-in 0.2s ease-out; }
+.modal-box { background: hsl(var(--card)); border-radius: 12px; max-height: 90vh; width: 90%; max-width: 600px; overflow-y: auto; box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2); animation: modal-slide-in 0.25s ease-out; }
+.modal-box--lg { max-width: 700px; }
+
+.modal-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 1.5rem; border-bottom: 1px solid hsl(var(--border)); }
+.modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+.modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; padding: 1.5rem; border-top: 1px solid hsl(var(--border)); }
+
+.input-field { padding: 0.75rem 1rem; border: 1px solid hsl(var(--border)); border-radius: 6px; background: hsl(var(--background)); font-size: 0.875rem; width: 100%; transition: border-color 0.12s; }
+.input-field:focus { outline: none; border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1); }
+
+/* Radio Buttons */
+.radio-group { display: flex; flex-direction: column; gap: 0.75rem; }
+.radio-option { display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; padding: 0.75rem 1rem; border-radius: 6px; border: 1px solid hsl(var(--border)); }
+.radio-option:has(input:checked) { background: hsl(var(--primary) / 0.08); border-color: hsl(var(--primary) / 0.5); }
+
+/* Dropzone */
+.dropzone { border: 2px dashed hsl(var(--border)); border-radius: 8px; padding: 2rem 1.5rem; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; cursor: pointer; background: hsl(var(--muted) / 0.1); transition: all 0.12s; }
+.dropzone:hover { border-color: hsl(var(--primary) / 0.5); background: hsl(var(--primary) / 0.05); }
+.dropzone--filled { border-color: #86efac; background: #f0fdf4; }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/* BOTONES Y RESPONSIVE */
+/* ────────────────────────────────────────────────────────────────────────── */
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; transition: all 0.12s; }
+.btn-primary { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
+.btn-danger { background: #dc2626 !important; color: white !important; }
+.btn-icon { width: 32px; height: 32px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.12s; color: hsl(var(--muted-foreground)); background: transparent; border: none; }
+.btn-icon:hover { background: hsl(var(--muted) / 0.5); color: hsl(var(--foreground)); }
+
+@keyframes doc-spin { to { transform: rotate(360deg); } }
+.doc-spin { animation: doc-spin 0.75s linear infinite; }
+
+@media (max-width: 768px) {
+  .doc-header { flex-direction: column; align-items: flex-start; }
+  .doc-table { font-size: 0.8rem; }
+  .doc-table th, .doc-table td { padding: 0.75rem 0.5rem; }
+  .doc-icon-badge { min-width: 60px; padding: 4px 6px; font-size: 9px; }
+}

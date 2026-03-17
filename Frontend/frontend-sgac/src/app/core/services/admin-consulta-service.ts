@@ -40,10 +40,9 @@ export interface AdminConsultaDTO {
 
 @Injectable({ providedIn: 'root' })
 export class AdminConsultaService {
-    private http = inject(HttpClient);
-    private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-
-    obtenerEstadisticas(): Observable<AdminConsultaDTO> {
-        return this.http.get<AdminConsultaDTO>(`${this.baseUrl}/admin/consulta/estadisticas`);
-    }
+  private http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
+  obtenerEstadisticas(): Observable<AdminConsultaDTO> {
+      return this.http.get<AdminConsultaDTO>(`${this.baseUrl}/admin/consulta/estadisticas`);
+  }
 }

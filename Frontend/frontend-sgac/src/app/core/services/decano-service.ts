@@ -12,7 +12,7 @@ import { PostulacionResponseDTO } from '../dto/postulacion';
 export class DecanoService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private readonly API_DECANOS = `${this.baseUrl}/decanos`;
   private readonly API_CONVOCATORIAS = `${this.baseUrl}/convocatorias`;
   private readonly API_POSTULACIONES = `${this.baseUrl}/postulaciones`;

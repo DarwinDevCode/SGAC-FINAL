@@ -10,8 +10,7 @@ import {catchError} from 'rxjs/operators';
 })
 export class ComisionService {
   private http = inject(HttpClient);
-
-  private readonly base = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly base = environment.apiUrl;
   private readonly API  = `${this.base}/comisiones`;
 
   generarAutomatico(): Observable<GenerarComisionesResponse> {

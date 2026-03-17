@@ -8,8 +8,7 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class AsignaturaService{
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-
+  private readonly baseUrl = environment.apiUrl;
   private readonly API = `${this.baseUrl}/admin/catalogos`
   private http = inject(HttpClient);
 

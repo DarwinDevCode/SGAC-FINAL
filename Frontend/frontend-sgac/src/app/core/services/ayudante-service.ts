@@ -13,10 +13,10 @@ import {
     providedIn: 'root'
 })
 export class AyudanteService {
-    private http = inject(HttpClient);
+  private http = inject(HttpClient);
 
-    private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-    private readonly API_AYUDANTES = `${this.baseUrl}/ayudantes`;
+  private readonly baseUrl = environment.apiUrl;
+  private readonly API_AYUDANTES = `${this.baseUrl}/ayudantes`;
 
     obtenerAyudantePorUsuario(idUsuario: number): Observable<AyudanteCatedraResponseDTO> {
         return this.http.get<AyudanteCatedraResponseDTO>(`${this.API_AYUDANTES}/usuario/${idUsuario}`);

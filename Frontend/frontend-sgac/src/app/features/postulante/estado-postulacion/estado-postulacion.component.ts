@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { LucideAngularModule, LUCIDE_ICONS, LucideIconProvider, Loader2, FolderOpen, FileText, ClipboardCheck, Award, Users, Flag, Paperclip, Eye, Upload, AlertTriangle, Calendar, Clock, CheckCircle, XCircle, AlertCircle, Timer } from 'lucide-angular';
 import { Subscription, interval } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { AuthService } from '../../../core/services/auth-service';
 import {
     DetallePostulacionResponseDTO,

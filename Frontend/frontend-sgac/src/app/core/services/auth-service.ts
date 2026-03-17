@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { UsuarioDTO } from '../dto/usuario';
 
 export interface LoginRequest {
   usuario: string;
@@ -47,7 +46,7 @@ export class AuthService {
   private http   = inject(HttpClient);
   private router = inject(Router);
 
-  private readonly baseUrl   = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl   = environment.apiUrl;
   private readonly API_AUTH  = `${this.baseUrl}/auth`;
 
   private readonly TOKEN_KEY   = 'token';

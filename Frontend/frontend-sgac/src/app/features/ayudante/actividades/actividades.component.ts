@@ -6,7 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subscription, switchMap, catchError, of } from 'rxjs';
 import { AyudanteService } from '../../../core/services/ayudante-service';
 import { AuthService } from '../../../core/services/auth-service';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { HttpClient } from '@angular/common/http';
 import {
   AyudantiaResponseDTO,

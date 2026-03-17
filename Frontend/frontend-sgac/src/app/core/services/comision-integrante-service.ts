@@ -9,8 +9,9 @@ import { UsuarioComisionRequestDTO } from '../dto/usuario-comision-request';
     providedIn: 'root',
 })
 export class ComisionIntegranteService {
-    private http = inject(HttpClient);
-    private readonly API = `${(environment as any).apiUrl || 'http://localhost:8080/api'}/comisiones/integrantes`;
+  private http = inject(HttpClient);
+  private readonly baseUrl = environment.apiUrl;
+  private readonly API = `${this.baseUrl}/comisiones/integrantes`;
 
     asignar(dto: UsuarioComisionRequestDTO): Observable<UsuarioComisionDTO> {
         return this.http.post<UsuarioComisionDTO>(this.API, dto);

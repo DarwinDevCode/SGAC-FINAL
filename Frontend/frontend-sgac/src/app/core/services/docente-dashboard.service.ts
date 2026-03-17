@@ -7,7 +7,7 @@ import { DocenteDashboardDTO } from '../models/dashboard/docente-dashboard.model
 @Injectable({ providedIn: 'root' })
 export class DocenteDashboardService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
 
   getResumen() {
     return this.http

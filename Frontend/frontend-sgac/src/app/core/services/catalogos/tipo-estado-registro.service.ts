@@ -8,8 +8,8 @@ import { TipoEstadoRegistroRequest, TipoEstadoRegistroResponse } from '../../mod
 @Injectable({ providedIn: 'root' })
 export class TipoEstadoRegistroService {
 
-  private readonly env = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private baseUrl = `${this.env}/admin/catalogos-maestros/estados-registro`;
+  private readonly env = environment.apiUrl;
+  private readonly baseUrl = `${this.env}/admin/catalogos-maestros/estados-registro`;
 
   constructor(private http: HttpClient) {}
 

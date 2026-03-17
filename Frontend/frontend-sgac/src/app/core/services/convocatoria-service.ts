@@ -28,8 +28,8 @@ import {
 export class ConvocatoriaService {
 
   private readonly http    = inject(HttpClient);
-  private readonly base    = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private readonly apiUrl  = `${this.base}/convocatorias`;
+  private readonly baseUrl = environment.apiUrl;
+  private readonly apiUrl  = `${this.baseUrl}/convocatorias`;
 
   // ══════════════════════════════════════════════════════════════════
   // LECTURA (endpoints heredados)
@@ -109,28 +109,28 @@ export class ConvocatoriaService {
   // ══════════════════════════════════════════════════════════════════
 
   getPeriodoActivo(): Observable<PeriodoAcademicoDTO> {
-    return this.http.get<PeriodoAcademicoDTO>(`${this.base}/periodos-academicos/activo`)
+    return this.http.get<PeriodoAcademicoDTO>(`${this.baseUrl}/periodos-academicos/activo`)
       .pipe(catchError(this.handleError));
   }
 
   getAsignaturas(): Observable<AsignaturaDTO[]> {
-    return this.http.get<AsignaturaDTO[]>(`${this.base}/admin/catalogos/asignaturas`)
+    return this.http.get<AsignaturaDTO[]>(`${this.baseUrl}/admin/catalogos/asignaturas`)
       .pipe(catchError(this.handleError));
   }
 
   getDocentes(): Observable<DocenteDTO[]> {
-    return this.http.get<DocenteDTO[]>(`${this.base}/recursos/docentes`)
+    return this.http.get<DocenteDTO[]>(`${this.baseUrl}/recursos/docentes`)
       .pipe(catchError(this.handleError));
   }
 
   getDocentesCarrera(): Observable<DocenteComboDTO[]> {
-    return this.http.get<DocenteComboDTO[]>(`${this.base}/coordinador/docentes-seleccionables`)
+    return this.http.get<DocenteComboDTO[]>(`${this.baseUrl}/coordinador/docentes-seleccionables`)
       .pipe(catchError(this.handleError));
   }
 
   getAsignaturasPorDocente(idDocente: number): Observable<AsignaturaComboDTO[]> {
     return this.http.get<AsignaturaComboDTO[]>(
-      `${this.base}/coordinador/docentes/${idDocente}/asignaturas`
+      `${this.baseUrl}/coordinador/docentes/${idDocente}/asignaturas`
     ).pipe(catchError(this.handleError));
   }
 
@@ -146,25 +146,25 @@ export class ConvocatoriaService {
 
   getMisConvocatoriasElegibles(): Observable<ConvocatoriasEstudianteWrapperDTO> {
     return this.http.get<ConvocatoriasEstudianteWrapperDTO>(
-      `${this.base}/estudiante/convocatorias`
+      `${this.baseUrl}/estudiante/convocatorias`
     ).pipe(catchError(this.handleError));
   }
 
   getConvocatoriasElegiblesPorUsuario(idUsuario: number): Observable<ConvocatoriaEstudianteDTO[]> {
     return this.http.get<ConvocatoriaEstudianteDTO[]>(
-      `${this.base}/estudiante/convocatorias/listar/${idUsuario}`
+      `${this.baseUrl}/estudiante/convocatorias/listar/${idUsuario}`
     ).pipe(catchError(this.handleError));
   }
 
   validarContextoEstudiante(idUsuario: number): Observable<ValidacionContextoEstudianteDTO> {
     return this.http.get<ValidacionContextoEstudianteDTO>(
-      `${this.base}/estudiante/convocatorias/validar-contexto/${idUsuario}`
+      `${this.baseUrl}/estudiante/convocatorias/validar-contexto/${idUsuario}`
     ).pipe(catchError(this.handleError));
   }
 
   validarElegibilidadAcademica(idEstudiante: number): Observable<ValidacionElegibilidadAcademicaDTO> {
     return this.http.get<ValidacionElegibilidadAcademicaDTO>(
-      `${this.base}/estudiante/convocatorias/validar-elegibilidad/${idEstudiante}`
+      `${this.baseUrl}/estudiante/convocatorias/validar-elegibilidad/${idEstudiante}`
     ).pipe(catchError(this.handleError));
   }
 

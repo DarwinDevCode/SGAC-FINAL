@@ -8,8 +8,8 @@ import { TipoFaseRequest, TipoFaseResponse } from '../../models/catalogos/TipoFa
 @Injectable({ providedIn: 'root' })
 export class TipoFaseService {
 
-  private readonly env = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private baseUrl = `${this.env}/admin/catalogos-maestros/tipos-fase`;
+  private readonly env = environment.apiUrl;
+  private readonly baseUrl = `${this.env}/admin/catalogos-maestros/tipos-fase`;
 
   constructor(private http: HttpClient) {}
 

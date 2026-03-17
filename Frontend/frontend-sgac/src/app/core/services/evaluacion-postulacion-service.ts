@@ -13,22 +13,14 @@ import {
   AsignarComisionRequest
 } from '../dto/evaluacion-postulacion';
 
-/**
- * Servicio para la evaluación de postulaciones por parte del coordinador
- */
 @Injectable({
   providedIn: 'root'
 })
 export class EvaluacionPostulacionService {
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-
-  private apiUrl = `${this.baseUrl}/coordinador/evaluacion`;
-
+  private readonly baseUrl = environment.apiUrl;
+  private readonly apiUrl = `${this.baseUrl}/coordinador/evaluacion`;
   constructor(private http: HttpClient) { }
 
-  /**
-   * Lista todas las postulaciones de la carrera del coordinador
-   */
   listarPostulaciones(idUsuario: number): Observable<PostulacionListadoCoordinador[]> {
     return this.http.get<PostulacionListadoCoordinador[]>(
       `${this.apiUrl}/postulaciones/${idUsuario}`

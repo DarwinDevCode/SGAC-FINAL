@@ -10,7 +10,7 @@ import { AuthService } from '../../../core/services/auth-service';
 import { SesionService } from '../../../core/services/sesion-service';
 import { CatalogosService } from '../../../core/services/catalogos-service';
 import { AyudanteService } from '../../../core/services/ayudante-service';
-import { PostulanteService } from '../../../core/services/postulante-service';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 
 import { SesionResponseDTO } from '../../../core/dto/sesion-response-dto';
 import { EvidenciaResponseDTO } from '../../../core/dto/evidencia-response-dto';

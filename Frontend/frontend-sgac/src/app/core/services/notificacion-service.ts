@@ -12,7 +12,7 @@ import SockJS from 'sockjs-client';
 export class NotificacionService {
   private http = inject(HttpClient);
 
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   private readonly apiUrl = `${this.baseUrl}/notificaciones`;
 
   private client: Client | null = null;

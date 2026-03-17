@@ -9,7 +9,8 @@ import {catchError} from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class FinalizarSeleccionService {
   private http = inject(HttpClient);
-  private base = `${(environment as any).apiUrl ?? 'http://localhost:8080/api'}/convocatorias`;
+  private readonly baseUrl = environment.apiUrl;
+  private readonly base = `${this.baseUrl}/convocatorias`;
   private authService = inject(AuthService);
 
   private headers(): HttpHeaders {

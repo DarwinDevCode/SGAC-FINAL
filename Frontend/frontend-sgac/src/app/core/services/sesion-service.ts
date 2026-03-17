@@ -16,12 +16,8 @@ import { SesionResponseDTO } from '../dto/sesion-response-dto';
   providedIn: 'root'
 })
 export class SesionService {
-
-
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
-
+  private readonly baseUrl = environment.apiUrl;
   private readonly URL = `${this.baseUrl}/sesiones`;
-
   constructor(private http: HttpClient) {}
 
   listarSesiones(

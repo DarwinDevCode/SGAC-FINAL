@@ -7,8 +7,8 @@ import { PrivilegioRequest, PrivilegioResponse } from '../../models/catalogos/Pr
 
 @Injectable({ providedIn: 'root' })
 export class PrivilegioService {
-  private readonly env = (environment as any).apiUrl || 'http://localhost:8080/api';
-  private baseUrl = `${this.env}/admin/catalogos-maestros/privilegios`;
+  private readonly env   = environment.apiUrl;
+  private readonly baseUrl = `${this.env}/admin/catalogos-maestros/privilegios`;
 
   constructor(private http: HttpClient) {}
 

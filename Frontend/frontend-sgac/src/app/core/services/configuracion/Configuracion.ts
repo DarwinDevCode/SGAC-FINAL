@@ -14,8 +14,7 @@ import {CronogramaActivoResponse, PeriodoInfo, FaseInfo} from '../../models/conf
   providedIn: 'root'
 })
 export class ConfiguracionService {
-
-  private readonly baseUrl = (environment as any).apiUrl || 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiUrl;
   constructor(private http: HttpClient) {}
 
   abrirPeriodo(data: PeriodoAcademicoRequest): Observable<StandardResponse<number>> {
