@@ -12,6 +12,33 @@ public interface IEvaluacionOposicionRepository
 
     @Query(value = """
         SELECT CAST(
+            postulacion.fn_consultar_mi_turno(:pIdUsuario, :pIdConvocatoria)
+        AS text)
+        """, nativeQuery = true)
+    String consultarMiTurno(
+            @Param("pIdUsuario")      Integer pIdUsuario,
+            @Param("pIdConvocatoria") Integer pIdConvocatoria
+    );
+
+    @Query(value = """
+        SELECT row_to_json(t) FROM (
+            SELECT
+                COALESCE(co.max_puntaje_material,   10.0) AS "maxPuntajeMaterial",
+                COALESCE(co.max_puntaje_exposicion,  4.0) AS "maxPuntajeExposicion",
+                COALESCE(co.max_puntaje_respuestas,  6.0) AS "maxPuntajeRespuestas",
+                COALESCE(co.minutos_exposicion,       20)  AS "minutosExposicion",
+                COALESCE(co.minutos_preguntas,        10)  AS "minutosPreguntas",
+                COALESCE(co.minutos_transicion,        5)  AS "minutosTransicion"
+            FROM convocatoria.convocatoria c
+            LEFT JOIN postulacion.configuracion_oposicion co
+                   ON co.id_convocatoria = c.id_convocatoria
+            WHERE c.id_convocatoria = :pIdConvocatoria
+        ) t
+        """, nativeQuery = true)
+    String obtenerConfiguracion(@Param("pIdConvocatoria") Integer pIdConvocatoria);
+
+    @Query(value = """
+        SELECT CAST(
             postulacion.fn_gestionar_banco_temas(
                 :pIdConvocatoria,
                 :pAccion,
@@ -84,4 +111,18 @@ public interface IEvaluacionOposicionRepository
     String consultarCronograma(
             @Param("pIdConvocatoria") Integer pIdConvocatoria
     );
+
+    @Query(value = """
+        SELECT CAST(
+            postulacion.fn_obtener_mi_turno(
+                :pIdConvocatoria,
+                :pIdUsuario
+            ) AS text
+        )
+        """, nativeQuery = true)
+    String obtenerMiTurno(
+            @Param("pIdConvocatoria") Integer pIdConvocatoria,
+            @Param("pIdUsuario")      Integer pIdUsuario
+    );
+
 }

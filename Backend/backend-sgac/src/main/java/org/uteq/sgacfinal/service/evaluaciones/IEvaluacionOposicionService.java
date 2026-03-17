@@ -12,4 +12,5 @@ public interface IEvaluacionOposicionService {
     JsonNode registrarPuntajeJurado(PuntajeJuradoRequest request);
     JsonNode cambiarEstadoEvaluacion(CambiarEstadoEvaluacionRequest request);
     JsonNode consultarCronograma(Integer idConvocatoria);
+    JsonNode obtenerMiTurno(Integer idConvocatoria, Integer idUsuario);
 }

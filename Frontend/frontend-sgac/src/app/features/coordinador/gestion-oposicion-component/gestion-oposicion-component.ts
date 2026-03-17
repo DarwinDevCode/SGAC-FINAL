@@ -1,11 +1,12 @@
+// src/app/features/coordinador/gestion-oposicion-component/gestion-oposicion-component.ts
 import {
   Component, OnInit, OnDestroy, inject
 } from '@angular/core';
 import { CommonModule }          from '@angular/common';
 import { FormsModule }           from '@angular/forms';
 import { LucideAngularModule }   from 'lucide-angular';
+import {ActivatedRoute, Router} from '@angular/router';   // ← FIX: necesario para leer el ID de la URL
 
-import { AuthService }                   from '../../../core/services/auth-service';
 import { EvaluacionOposicionService }    from '../../../core/services/evaluaciones/evaluacion-oposicion-service';
 import {
   TurnoOposicion,
@@ -23,81 +24,147 @@ type TabCoord = 'temas' | 'cronograma';
   styleUrls: ['./gestion-oposicion-component.css']
 })
 export class GestionOposicionComponent implements OnInit, OnDestroy {
-  private authSrv = inject(AuthService);
+  // ActivatedRoute permite leer los parámetros de la URL de forma reactiva.
+  // La ruta configurada es /coordinador/oposicion/:idConvocatoria, por lo que
+  // el parámetro se llama 'idConvocatoria'.
+  private route   = inject(ActivatedRoute);
   private svc     = inject(EvaluacionOposicionService);
+  private router = inject(Router);
+
+
 
   loading     = false;
   loadingMsg  = '';
   toastMsg    = '';
-  toastTipo   = 'ok'; // 'ok' | 'err' | 'warn'
+  toastTipo   = 'ok';
   private toastTimer: any;
 
-  idConvocatoria = 1;
+  // ── FIX: el ID de convocatoria siempre viene de la URL ────────────
+  // Se inicializa en 0; ngOnInit lo sobreescribe con el valor real.
+  // Si el componente se usa sin parámetro de ruta (improbable pero posible),
+  // los métodos de carga detectarán id = 0 y el backend retornará error controlado.
+  idConvocatoria = 0;
   tabActiva: TabCoord = 'temas';
 
-  temas:          TemaOposicion[] = [];
-  nuevoTema       = '';
-  totalAptos      = 0;
-  listoParaSorteo = false;
+  temas:           TemaOposicion[] = [];
+  nuevoTema        = '';
+  totalAptos       = 0;
+  listoParaSorteo  = false;
 
-  cronograma: TurnoOposicion[] = [];
-  turnoActivo: TurnoOposicion | null = null;
-
-  mostrarModalSorteo  = false;
-  sorteando           = false;
-  sorteoFecha         = '';
-  sorteoHora          = '';
-  sorteoLugar         = '';
+  cronograma:        TurnoOposicion[] = [];
+  turnoActivo:       TurnoOposicion | null = null;
+  mostrarModalSorteo = false;
+  sorteando          = false;
+  sorteoFecha        = '';
+  sorteoHora         = '';
+  sorteoLugar        = '';
   cronogramaGenerado: TurnoOposicion[] = [];
 
-  mostrarModalConfirm   = false;
-  confirmMsg            = '';
+  mostrarModalConfirm = false;
+  confirmMsg          = '';
   confirmAccion: (() => void) | null = null;
 
-  ngOnInit(): void { this.cargarTemas(); }
-  ngOnDestroy(): void { clearTimeout(this.toastTimer); }
+  // ── Ciclo de vida ─────────────────────────────────────────────────
+
+  /*
+  ngOnInit(): void {
+    // Leemos el parámetro de la URL sincrónicamente (snapshot es suficiente
+    // porque el ID no cambia durante la vida del componente).
+    const paramId = this.route.snapshot.paramMap.get('idConvocatoria');
+    this.idConvocatoria = paramId ? Number(paramId) : 0;
+    this.cargarTemas();
+
+    console.log("ID DE LA CONVOCATORIA: " +  this.idConvocatoria)
+  }
+   */
+
+  ngOnInit(): void {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('idConvocatoria');
+
+      if (!id || id === '0') {
+        console.error("Acceso denegado: No se proporcionó un ID de convocatoria válido.");
+        this.toast("Por favor, selecciona una convocatoria de la lista.", "warn");
+        this.router.navigate(['/coordinador/convocatorias']);
+        return;
+      }
+
+      this.idConvocatoria = Number(id);
+      console.log("=== GESTIONANDO CONVOCATORIA ID:", this.idConvocatoria, "===");
+      this.cargarTemas();
+    });
+
+    this.cargarTemas();
+    this.cargaTemasOposicion();
+  }
+
+
+  ngOnDestroy(): void {
+    clearTimeout(this.toastTimer);
+  }
+
+  // ── Navegación entre pestañas ─────────────────────────────────────
 
   cambiarTab(tab: TabCoord): void {
     this.tabActiva = tab;
-    if (tab === 'cronograma') this.cargarCronograma();
-    else                      this.cargarTemas();
+    tab === 'cronograma' ? this.cargarCronograma() : this.cargarTemas();
   }
 
-  // ══════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════
   // BANCO DE TEMAS
-  // ══════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════
 
   cargarTemas(): void {
-    this.loading    = true;
-    this.loadingMsg = 'Cargando temas...';
+    this.loading = true; this.loadingMsg = 'Cargando temas...';
     this.svc.listarTemas(this.idConvocatoria).subscribe({
       next: res => {
-        this.loading       = false;
-        this.temas         = res.temas ?? [];
-        this.totalAptos    = res.totalAptos ?? 0;
-        this.listoParaSorteo = res.listoParaSorteo ?? false;
+        console.log("TEMAS DE OPOSICION:  " + res.temas);
+
+
+        this.loading         = false;
+        this.temas           = res.temas ?? [];
+        this.totalAptos      = res.totalAptos       ?? 0;
+        this.listoParaSorteo = res.listoParaSorteo  ?? false;
       },
       error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
     });
+
+    console.log(this.temas);
   }
+
+
+  cargaTemasOposicion(){
+    console.log("ID DE LA CONVOCATORIA PARA EL TEMA: " + this.idConvocatoria);
+    this.svc.listarTemas(this.idConvocatoria).subscribe({
+      next: opo => {
+        this.temas = opo.temas?? [];
+        console.log("Temas de oposición: " + this.temas);
+      }
+    })
+  }
+
+
 
   agregarTema(): void {
     const txt = this.nuevoTema.trim();
     if (!txt) return;
-    this.loading    = true;
-    this.loadingMsg = 'Guardando tema...';
+    this.loading = true; this.loadingMsg = 'Guardando tema...';
+
+    console.log("ID DE LA CONVOCATORIA: " +  this.idConvocatoria)
+
     this.svc.registrarTemas(this.idConvocatoria, [{ descripcionTema: txt }]).subscribe({
       next: res => {
-        this.loading       = false;
-        this.nuevoTema     = '';
-        this.temas         = res.temas ?? this.temas;
-        this.totalAptos    = res.totalAptos    ?? this.totalAptos;
+        this.loading         = false;
+        this.nuevoTema       = '';
+        this.totalAptos      = res.totalAptos      ?? this.totalAptos;
         this.listoParaSorteo = res.listoParaSorteo ?? false;
         this.toast(res.mensaje ?? 'Tema agregado.', 'ok');
         this.cargarTemas();
       },
       error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
     });
+
+    this.cargarTemas();
   }
 
   confirmarLimpiar(): void {
@@ -110,27 +177,19 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
   private limpiarBanco(): void {
     this.loading = true;
     this.svc.limpiarBanco(this.idConvocatoria).subscribe({
-      next: res => {
-        this.loading = false;
-        this.toast(res.mensaje ?? 'Banco limpiado.', 'ok');
-        this.cargarTemas();
-      },
+      next: res => { this.loading = false; this.toast(res.mensaje ?? 'Banco limpiado.', 'ok'); this.cargarTemas(); },
       error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
     });
   }
 
-  // ══════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════
   // CRONOGRAMA Y SORTEO
-  // ══════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════════════
 
   cargarCronograma(): void {
-    this.loading    = true;
-    this.loadingMsg = 'Cargando cronograma...';
+    this.loading = true; this.loadingMsg = 'Cargando cronograma...';
     this.svc.obtenerCronograma(this.idConvocatoria).subscribe({
-      next: res => {
-        this.loading    = false;
-        this.cronograma = res.cronograma ?? [];
-      },
+      next: res => { this.loading = false; this.cronograma = res.cronograma ?? []; },
       error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
     });
   }
@@ -145,8 +204,7 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
 
   ejecutarSorteo(): void {
     if (!this.sorteoFecha || !this.sorteoHora || !this.sorteoLugar) {
-      this.toast('Completa todos los campos del sorteo.', 'warn');
-      return;
+      this.toast('Completa todos los campos del sorteo.', 'warn'); return;
     }
     this.sorteando = true;
     this.svc.ejecutarSorteo({
@@ -169,29 +227,22 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
     if (!this.sorteando) this.mostrarModalSorteo = false;
   }
 
-  // ── Acciones sobre turnos ─────────────────────────────────
   iniciarTurno(turno: TurnoOposicion): void {
-    this.confirmar(
-      `¿Iniciar la evaluación de ${turno.nombres} ${turno.apellidos}?`,
-      () => {
-        this.svc.iniciarEvaluacion(turno.idEvaluacionOposicion).subscribe({
-          next: res => { this.toast(res.mensaje ?? 'Evaluación iniciada.', 'ok'); this.cargarCronograma(); },
-          error: (err: Error) => this.toast(err.message, 'err')
-        });
-      }
-    );
+    this.confirmar(`¿Iniciar la evaluación de ${turno.nombres} ${turno.apellidos}?`, () => {
+      this.svc.iniciarEvaluacion(turno.idEvaluacionOposicion).subscribe({
+        next: res => { this.toast(res.mensaje ?? 'Evaluación iniciada.', 'ok'); this.cargarCronograma(); },
+        error: (err: Error) => this.toast(err.message, 'err')
+      });
+    });
   }
 
   marcarNoPresento(turno: TurnoOposicion): void {
-    this.confirmar(
-      `¿Marcar a ${turno.nombres} ${turno.apellidos} como No Presentó?`,
-      () => {
-        this.svc.marcarNoPresento(turno.idEvaluacionOposicion).subscribe({
-          next: res => { this.toast(res.mensaje ?? 'Marcado.', 'ok'); this.cargarCronograma(); },
-          error: (err: Error) => this.toast(err.message, 'err')
-        });
-      }
-    );
+    this.confirmar(`¿Marcar a ${turno.nombres} ${turno.apellidos} como No Presentó?`, () => {
+      this.svc.marcarNoPresento(turno.idEvaluacionOposicion).subscribe({
+        next: res => { this.toast(res.mensaje ?? 'Marcado.', 'ok'); this.cargarCronograma(); },
+        error: (err: Error) => this.toast(err.message, 'err')
+      });
+    });
   }
 
   finalizarTurno(turno: TurnoOposicion): void {
@@ -199,35 +250,26 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
       `¿Finalizar y cerrar el acta de ${turno.nombres} ${turno.apellidos}? Esta acción es irreversible.`,
       () => {
         this.svc.finalizarEvaluacion(turno.idEvaluacionOposicion).subscribe({
-          next: res => {
-            this.toast(`Acta cerrada. Nota final: ${res.puntajeFinal}`, 'ok');
-            this.cargarCronograma();
-          },
+          next: res => { this.toast(`Acta cerrada. Nota final: ${res.puntajeFinal}`, 'ok'); this.cargarCronograma(); },
           error: (err: Error) => this.toast(err.message, 'err')
         });
       }
     );
   }
 
-  // ══════════════════════════════════════════════════════════
-  // HELPERS DE UI
-  // ══════════════════════════════════════════════════════════
+  // ── Helpers de UI ─────────────────────────────────────────────────
 
   badgeEstado(estado: string): string {
     const m: Record<string, string> = {
-      PROGRAMADA:   'badge-blue',
-      EN_CURSO:     'badge-amber',
-      FINALIZADA:   'badge-green',
-      NO_PRESENTO:  'badge-red'
+      PROGRAMADA: 'badge-blue', EN_CURSO: 'badge-amber',
+      FINALIZADA: 'badge-green', NO_PRESENTO: 'badge-red'
     };
     return m[estado] ?? 'badge-gray';
   }
 
-  formatHora(h: string | undefined): string {
-    return h ?? '—';
-  }
+  formatHora(h?: string): string  { return h ?? '—'; }
 
-  formatFecha(f: string | undefined): string {
+  formatFecha(f?: string): string {
     if (!f) return '—';
     const [y, m, d] = f.split('-');
     return `${d}/${m}/${y}`;
@@ -237,7 +279,6 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
     return Math.max(0, this.totalAptos - this.temas.length);
   }
 
-  // ── Modal de confirmación ─────────────────────────────────
   private confirmar(msg: string, accion: () => void): void {
     this.confirmMsg    = msg;
     this.confirmAccion = accion;
@@ -254,7 +295,6 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
     this.confirmAccion = null;
   }
 
-  // ── Toast ─────────────────────────────────────────────────
   private toast(msg: string, tipo: 'ok' | 'err' | 'warn'): void {
     clearTimeout(this.toastTimer);
     this.toastMsg  = msg;

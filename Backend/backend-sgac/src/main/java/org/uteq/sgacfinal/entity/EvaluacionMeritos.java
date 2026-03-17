@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -38,4 +39,13 @@ public class EvaluacionMeritos {
 
     @Column(name = "fecha_evaluacion")
     private LocalDate fechaEvaluacion;
+
+    @ColumnDefault("(((nota_asignatura + nota_semestres) + nota_eventos) + nota_experiencia)")
+    @Column(name = "nota_total_meritos", precision = 5, scale = 2)
+    private BigDecimal notaTotalMeritos;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipo_estado_evaluacion")
+    private TipoEstadoEvaluacion idTipoEstadoEvaluacion;
+
 }

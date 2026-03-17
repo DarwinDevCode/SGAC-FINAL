@@ -100,12 +100,10 @@ export class PostulanteService {
 
     // --- Documentos adjuntos (Ítems 2 y 8) ---
 
-    /** Lista los documentos adjuntos de una postulación */
     listarDocumentosPostulacion(idPostulacion: number): Observable<RequisitoAdjuntoResponseDTO[]> {
         return this.http.get<RequisitoAdjuntoResponseDTO[]>(`${API_REQUISITOS}/postulacion/${idPostulacion}`);
     }
 
-    /** URL de visualización/descarga de un documento (inline) */
     urlVisualizarDocumento(idRequisito: number): string {
         return `${API_REQUISITOS}/descargar/${idRequisito}`;
     }
@@ -116,27 +114,10 @@ export class PostulanteService {
         return this.http.put<RequisitoAdjuntoResponseDTO>(`${API_REQUISITOS}/reemplazar/${idAdjunto}`, formData);
     }
 
-    // --- Detalle de Postulación Activa ---
-
-    /**
-     * Obtiene el detalle completo de la postulación activa del estudiante.
-     * @param idUsuario ID del usuario estudiante
-     */
     obtenerMiPostulacionActiva(idUsuario: number): Observable<DetallePostulacionResponseDTO> {
         return this.http.get<DetallePostulacionResponseDTO>(`${API_POSTULACIONES}/mi-postulacion/${idUsuario}`);
     }
 
-    /**
-     * Subsana un documento observado con validación de fechas y notificación al coordinador.
-     * Solo permite reemplazo si:
-     * 1. El documento está en estado OBSERVADO
-     * 2. Estamos dentro del periodo de subsanación (etapa de revisión)
-     *
-     * @param idUsuario ID del usuario estudiante
-     * @param idRequisitoAdjunto ID del documento a subsanar
-     * @param archivo Nuevo archivo
-     * @returns Resultado de la operación con estado y mensaje
-     */
     subsanarDocumentoObservado(idUsuario: number, idRequisitoAdjunto: number, archivo: File): Observable<SubsanacionDocumentoResponseDTO> {
         const formData = new FormData();
         formData.append('archivo', archivo);

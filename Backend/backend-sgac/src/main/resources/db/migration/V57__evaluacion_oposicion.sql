@@ -26,7 +26,6 @@ BEGIN
                );
     END IF;
 
-    -- ── LISTAR ────────────────────────────────────────────────
     IF p_accion = 'LISTAR' THEN
         RETURN jsonb_build_object(
                 'exito', true,
@@ -103,7 +102,7 @@ BEGIN
                         ON tep.id_tipo_estado_postulacion = po.id_tipo_estado_postulacion
         WHERE po.id_convocatoria = p_id_convocatoria
           AND po.activo = TRUE
-          AND tep.codigo = 'APTO';
+          AND tep.codigo = 'APROBADA';
 
         RETURN jsonb_build_object(
                 'exito',          true,
@@ -166,12 +165,12 @@ BEGIN
                     ON tep.id_tipo_estado_postulacion = po.id_tipo_estado_postulacion
     WHERE po.id_convocatoria = p_id_convocatoria
       AND po.activo = TRUE
-      AND tep.codigo = 'APTO';
+      AND tep.codigo = 'APROBADA';
 
     IF v_total_aptos = 0 THEN
         RETURN jsonb_build_object(
                 'exito', false,
-                'mensaje', 'No hay postulantes con estado APTO en esta convocatoria.'
+                'mensaje', 'No hay postulantes con estado APROBADA en esta convocatoria.'
                );
     END IF;
 
@@ -191,7 +190,6 @@ BEGIN
                );
     END IF;
 
-    -- ── Verificar que no haya evaluaciones ya iniciadas ───────
     IF EXISTS (
         SELECT 1
         FROM  postulacion.evaluacion_oposicion eo
@@ -262,7 +260,7 @@ BEGIN
                              ON tep.id_tipo_estado_postulacion = po.id_tipo_estado_postulacion
              WHERE po.id_convocatoria = p_id_convocatoria
                AND po.activo = TRUE
-               AND tep.codigo = 'APTO'
+               AND tep.codigo = 'APROBADA'
          ) ps
              JOIN (
         -- Temas en orden aleatorio, numerados desde 1 (solo se usan los primeros P)

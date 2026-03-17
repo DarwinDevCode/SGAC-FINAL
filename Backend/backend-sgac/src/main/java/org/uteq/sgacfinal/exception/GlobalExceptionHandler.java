@@ -121,5 +121,15 @@ public class GlobalExceptionHandler {
                 "message",   errores
         ));
     }
+
+    @ExceptionHandler(OposicionBusinessException.class)
+    public ResponseEntity<Map<String, Object>> handleOposicion(OposicionBusinessException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of(
+                "timestamp", Instant.now().toString(),
+                "status",    422,
+                "error",     "Validación de oposición",
+                "message",   ex.getMessage()
+        ));
+    }
 }
 

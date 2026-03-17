@@ -68,7 +68,7 @@ export class SidebarComponent {
       { label: 'Cronograma', icon: 'CalendarDays', route: '/cronograma' },
       { label: 'Gestionar Convocatorias', icon: 'FileText', route: '/coordinador/convocatorias' },
       { label: 'Tribunal', icon: 'Gavel', route: '/comision' },
-      { label: 'Gestionar Oposición', icon: 'ScrollText', route: '/coordinador/oposicion' },
+      { label: 'Gestionar Oposición', icon: 'ScrollText', route: '/coordinador/convocatorias' },
       { label: 'Sala de Evaluación', icon: 'MicVocal', route: '/comision/sala' },
       { label: 'Validar Postulantes', icon: 'CheckSquare', route: '/coordinador/validaciones' },
       { label: 'Seguimiento Mensual', icon: 'BarChart3', route: '/coordinador/seguimiento' },

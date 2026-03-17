@@ -94,6 +94,12 @@
             <a [routerLink]="['/coordinador/postulantes', c.idConvocatoria]" class="cv-link">
               Ver postulantes →
             </a>
+            <a [routerLink]="['/coordinador/oposicion', c.idConvocatoria]"
+               class="cv-btn-oposicion"
+               title="Gestionar Banco de Temas y Sorteo">
+              <lucide-icon name="Gavel" size="14"></lucide-icon>
+              Oposición
+            </a>
           </div>
         </div>
       }

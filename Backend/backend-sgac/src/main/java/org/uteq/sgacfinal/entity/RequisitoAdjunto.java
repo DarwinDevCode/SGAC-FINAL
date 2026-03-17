@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
@@ -43,4 +44,8 @@ public class RequisitoAdjunto {
 
     @Column(name = "observacion", columnDefinition = "TEXT")
     private String observacion;
+
+    @Column(name = "fecha_observacion")
+    private Instant fechaObservacion;
+
 }

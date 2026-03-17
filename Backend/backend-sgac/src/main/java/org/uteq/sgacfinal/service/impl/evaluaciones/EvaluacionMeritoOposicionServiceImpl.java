@@ -13,7 +13,6 @@ import org.uteq.sgacfinal.dto.Request.evaluaciones.SorteoOposicionRequest;
 import org.uteq.sgacfinal.exception.ComisionException;
 import org.uteq.sgacfinal.repository.evaluaciones.IEvaluacionOposicionRepository;
 import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionOposicionService;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicionService {
+
     private final IEvaluacionOposicionRepository repo;
     private final ObjectMapper objectMapper;
 
@@ -36,14 +36,9 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
                         .collect(Collectors.toList());
                 temasJson = objectMapper.writeValueAsString(lista);
             }
-
             String raw = repo.gestionarBancoTemas(
-                    request.getIdConvocatoria(),
-                    request.getAccion(),
-                    temasJson
-            );
+                    request.getIdConvocatoria(), request.getAccion(), temasJson);
             return evaluar(raw, "gestionarBancoTemas");
-
         } catch (ComisionException e) {
             throw e;
         } catch (Exception e) {
@@ -57,11 +52,8 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
     public JsonNode ejecutarSorteo(SorteoOposicionRequest request) {
         try {
             String raw = repo.ejecutarSorteo(
-                    request.getIdConvocatoria(),
-                    request.getFecha(),
-                    request.getHoraInicio(),
-                    request.getLugar()
-            );
+                    request.getIdConvocatoria(), request.getFecha(),
+                    request.getHoraInicio(), request.getLugar());
             return evaluar(raw, "ejecutarSorteo");
         } catch (ComisionException e) {
             throw e;
@@ -81,8 +73,7 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
                     request.getPuntajeMaterial().toPlainString(),
                     request.getPuntajeExposicion().toPlainString(),
                     request.getPuntajeRespuestas().toPlainString(),
-                    request.isFinalizar()
-            );
+                    request.isFinalizar());
             return evaluar(raw, "registrarPuntajeJurado");
         } catch (ComisionException e) {
             throw e;
@@ -97,9 +88,7 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
     public JsonNode cambiarEstadoEvaluacion(CambiarEstadoEvaluacionRequest request) {
         try {
             String raw = repo.cambiarEstadoEvaluacion(
-                    request.getIdEvaluacionOposicion(),
-                    request.getAccion()
-            );
+                    request.getIdEvaluacionOposicion(), request.getAccion());
             return evaluar(raw, "cambiarEstadoEvaluacion");
         } catch (ComisionException e) {
             throw e;
@@ -123,26 +112,40 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
         }
     }
 
+
+    @Override
+    @Transactional(readOnly = true)
+    public JsonNode obtenerMiTurno(Integer idConvocatoria, Integer idUsuario) {
+        try {
+            String raw = repo.obtenerMiTurno(idConvocatoria, idUsuario);
+            return evaluar(raw, "obtenerMiTurno");
+        } catch (ComisionException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("[EvaluacionOposicion] obtenerMiTurno", e);
+            throw new ComisionException("Error al obtener turno del postulante: " + e.getMessage());
+        }
+    }
+
+
     private JsonNode evaluar(String raw, String contexto) {
         try {
             JsonNode node = objectMapper.readTree(raw);
-            if (node.isArray() && node.size() > 0) {
+            if (node.isArray() && !node.isEmpty()) {
                 JsonNode first = node.get(0);
                 if (first.isObject()) {
                     node = first.fields().next().getValue();
                 }
             }
-
             if (!node.path("exito").asBoolean(true)) {
                 String msg = node.path("mensaje").asText("Error en " + contexto);
                 throw new ComisionException(msg);
             }
             return node;
-
         } catch (ComisionException e) {
             throw e;
         } catch (Exception e) {
-            log.error("[EvaluacionOposicion] Error al parsear respuesta de {}: {}", contexto, raw);
+            log.error("[EvaluacionOposicion] Error parseando respuesta de {}: {}", contexto, raw);
             throw new ComisionException("Respuesta inesperada del servidor.");
         }
     }

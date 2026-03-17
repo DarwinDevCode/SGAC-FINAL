@@ -106,7 +106,6 @@ export const routes: Routes = [
       { path: 'coordinador/convocatorias', component: CoordinadorConvocatoriasComponent },
       { path: 'coordinador/postulantes/:idConvocatoria', component: CoordinadorPostulantes },
       { path: 'coordinador/validaciones', component: ValidacionesComponent },
-      { path: 'coordinador/oposicion', component: GestionOposicionComponent },
       { path: 'coordinador/oposicion/:idConvocatoria', component: GestionOposicionComponent },
       { path: 'coordinador/seguimiento', component: SeguimientoComponent },
       { path: 'coordinador/resoluciones', component: ResolucionesComponent },

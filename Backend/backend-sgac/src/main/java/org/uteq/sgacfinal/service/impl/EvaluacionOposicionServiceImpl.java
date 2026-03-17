@@ -106,7 +106,6 @@ public class EvaluacionOposicionServiceImpl implements IEvaluacionOposicionServi
                 .horaInicio(entidad.getHoraInicio())
                 .horaFin(entidad.getHoraFin())
                 .lugar(entidad.getLugar())
-                .estado(entidad.getEstado())
                 .build();
     }
 

@@ -96,7 +96,17 @@ import {
   MessageSquare,
   Sheet,
   UserCheck,
-  Gavel, TriangleAlert, UsersRound, CircleX, CircleCheckBig, CalendarX, ClipboardPen
+  Gavel,
+  TriangleAlert,
+  UsersRound,
+  CircleX,
+  CircleCheckBig,
+  CalendarX,
+  ClipboardPen,
+  ScrollText,
+  MicVocal,
+  BookOpenText,
+  Shuffle
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -175,7 +185,11 @@ export const appConfig: ApplicationConfig = {
         CircleX,
         CircleCheckBig,
         CalendarX,
-        ClipboardPen
+        ClipboardPen,
+        ScrollText,
+        MicVocal,
+        BookOpenText,
+        Shuffle
 
       })
     )
