@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.service.documentos.impl;
+package org.uteq.sgacfinal.service.impl.documentos;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
