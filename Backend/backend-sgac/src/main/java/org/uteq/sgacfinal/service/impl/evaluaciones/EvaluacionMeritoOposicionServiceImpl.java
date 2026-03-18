@@ -38,6 +38,10 @@ public class EvaluacionMeritoOposicionServiceImpl implements IEvaluacionOposicio
             }
             String raw = repo.gestionarBancoTemas(
                     request.getIdConvocatoria(), request.getAccion(), temasJson);
+
+            log.info("\n\n\n\n\n\nRaw JSON : {}", raw);
+
+
             return evaluar(raw, "gestionarBancoTemas");
         } catch (ComisionException e) {
             throw e;

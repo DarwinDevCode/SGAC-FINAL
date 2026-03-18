@@ -1,8 +1,10 @@
 package org.uteq.sgacfinal.controller.evaluaciones;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -18,27 +20,47 @@ import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionOposicionService;
 @RequiredArgsConstructor
 public class EvaluacionMeritoOposicionController {
     private final IEvaluacionOposicionService service;
+    private final ObjectMapper objectMapper;
+
+    private ResponseEntity<String> json(JsonNode node) {
+        try {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(objectMapper.writeValueAsString(node));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":\"Error al serializar la respuesta\"}");
+        }
+    }
 
     @PostMapping("/temas")
-    public ResponseEntity<JsonNode> gestionarTemas(
+    public ResponseEntity<String> gestionarTemas(
             @Valid @RequestBody BancoTemasRequest request) {
-        return ResponseEntity.ok(service.gestionarBancoTemas(request));
+        return json(service.gestionarBancoTemas(request));
     }
 
     @PostMapping("/sorteo")
-    public ResponseEntity<JsonNode> ejecutarSorteo(
+    public ResponseEntity<String> ejecutarSorteo(
             @Valid @RequestBody SorteoOposicionRequest request) {
-        return ResponseEntity.ok(service.ejecutarSorteo(request));
+        return json(service.ejecutarSorteo(request));
     }
 
     @PatchMapping("/estado")
-    public ResponseEntity<JsonNode> cambiarEstado(
+    public ResponseEntity<String> cambiarEstado(
             @Valid @RequestBody CambiarEstadoEvaluacionRequest request) {
-        return ResponseEntity.ok(service.cambiarEstadoEvaluacion(request));
+        return json(service.cambiarEstadoEvaluacion(request));
+    }
+
+
+    @GetMapping("/cronograma/{idConvocatoria}")
+    public ResponseEntity<String> obtenerCronograma(
+            @PathVariable Integer idConvocatoria) {
+        return json(service.consultarCronograma(idConvocatoria));
     }
 
     @PostMapping("/puntaje")
-    public ResponseEntity<JsonNode> registrarPuntaje(
+    public ResponseEntity<String> registrarPuntaje(
             @Valid @RequestBody PuntajeJuradoRequest request,
             Authentication authentication) {
 
@@ -46,13 +68,7 @@ public class EvaluacionMeritoOposicionController {
                 authentication.getPrincipal() instanceof UsuarioPrincipal principal) {
             request.setIdUsuario(principal.getIdUsuario());
         }
-        return ResponseEntity.ok(service.registrarPuntajeJurado(request));
-    }
-
-    @GetMapping("/cronograma/{idConvocatoria}")
-    public ResponseEntity<JsonNode> obtenerCronograma(
-            @PathVariable Integer idConvocatoria) {
-        return ResponseEntity.ok(service.consultarCronograma(idConvocatoria));
+        return json(service.registrarPuntajeJurado(request));
     }
 
     @GetMapping("/mi-turno/{idConvocatoria}")

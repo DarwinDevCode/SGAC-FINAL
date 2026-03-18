@@ -1,12 +1,8 @@
-CREATE OR REPLACE FUNCTION postulacion.fn_gestionar_banco_temas(
-    p_id_convocatoria INTEGER,
-    p_accion          TEXT,
-    p_temas_json      JSONB DEFAULT '[]'::jsonb
-)
-    RETURNS JSONB
-    LANGUAGE plpgsql
-    SECURITY DEFINER
-AS $$
+create function fn_gestionar_banco_temas(p_id_convocatoria integer, p_accion text, p_temas_json jsonb DEFAULT '[]'::jsonb) returns jsonb
+    security definer
+    language plpgsql
+as
+$$
 DECLARE
     v_tema          JSONB;
     v_contador      INTEGER := 0;
@@ -27,9 +23,22 @@ BEGIN
     END IF;
 
     IF p_accion = 'LISTAR' THEN
+        SELECT COUNT(*) INTO v_total_aptos
+        FROM  postulacion.postulacion po
+                  JOIN  postulacion.tipo_estado_postulacion tep
+                        ON tep.id_tipo_estado_postulacion = po.id_tipo_estado_postulacion
+        WHERE po.id_convocatoria = p_id_convocatoria
+          AND po.activo = TRUE
+          AND tep.codigo = 'APROBADA';
+
+        SELECT COUNT(*) INTO v_total_temas
+        FROM postulacion.banco_temas
+        WHERE id_convocatoria = p_id_convocatoria
+          AND activo = TRUE;
+
         RETURN jsonb_build_object(
-                'exito', true,
-                'temas', COALESCE(
+                'exito',           true,
+                'temas',           COALESCE(
                         (SELECT jsonb_agg(jsonb_build_object(
                                                   'idTema',          bt.id_tema,
                                                   'descripcionTema', bt.descripcion_tema,
@@ -39,7 +48,10 @@ BEGIN
                          WHERE bt.id_convocatoria = p_id_convocatoria
                            AND bt.activo = TRUE),
                         '[]'::jsonb
-                         )
+                                   ),
+                'totalTemas',      v_total_temas,
+                'totalAptos',      v_total_aptos,
+                'listoParaSorteo', v_total_temas >= v_total_aptos AND v_total_aptos > 0
                );
     END IF;
 
@@ -119,6 +131,9 @@ EXCEPTION WHEN OTHERS THEN
     RETURN jsonb_build_object('exito', false, 'mensaje', '[ERROR] ' || SQLERRM);
 END;
 $$;
+
+alter function fn_gestionar_banco_temas(integer, text, jsonb) owner to administrador_consultas;
+
 
 
 -- ────────────────────────────────────────────────────────────

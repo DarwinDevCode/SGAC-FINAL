@@ -88,14 +88,10 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
         this.router.navigate(['/coordinador/convocatorias']);
         return;
       }
-
       this.idConvocatoria = Number(id);
       console.log("=== GESTIONANDO CONVOCATORIA ID:", this.idConvocatoria, "===");
       this.cargarTemas();
     });
-
-    this.cargarTemas();
-    this.cargaTemasOposicion();
   }
 
 
@@ -110,48 +106,33 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
     tab === 'cronograma' ? this.cargarCronograma() : this.cargarTemas();
   }
 
-  // ══════════════════════════════════════════════════════════════════
-  // BANCO DE TEMAS
-  // ══════════════════════════════════════════════════════════════════
-
   cargarTemas(): void {
-    this.loading = true; this.loadingMsg = 'Cargando temas...';
+    this.loading    = true;
+    this.loadingMsg = 'Cargando temas...';
+
     this.svc.listarTemas(this.idConvocatoria).subscribe({
       next: res => {
-        console.log("TEMAS DE OPOSICION:  " + res.temas);
+        console.log("Listo para sorteo:  ", res.listoParaSorteo);
+
 
 
         this.loading         = false;
         this.temas           = res.temas ?? [];
-        this.totalAptos      = res.totalAptos       ?? 0;
-        this.listoParaSorteo = res.listoParaSorteo  ?? false;
+        this.totalAptos      = res.totalAptos      ?? 0;
+        this.listoParaSorteo = res.listoParaSorteo ?? false;
       },
-      error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
-    });
-
-    console.log(this.temas);
-  }
-
-
-  cargaTemasOposicion(){
-    console.log("ID DE LA CONVOCATORIA PARA EL TEMA: " + this.idConvocatoria);
-    this.svc.listarTemas(this.idConvocatoria).subscribe({
-      next: opo => {
-        this.temas = opo.temas?? [];
-        console.log("Temas de oposición: " + this.temas);
+      error: (err) => {
+        console.error('=== ERROR COMPLETO ===', err);
+        this.loading = false;
+        this.toast(err.message, 'err');
       }
-    })
+    });
   }
-
-
 
   agregarTema(): void {
     const txt = this.nuevoTema.trim();
     if (!txt) return;
     this.loading = true; this.loadingMsg = 'Guardando tema...';
-
-    console.log("ID DE LA CONVOCATORIA: " +  this.idConvocatoria)
-
     this.svc.registrarTemas(this.idConvocatoria, [{ descripcionTema: txt }]).subscribe({
       next: res => {
         this.loading         = false;
@@ -163,8 +144,6 @@ export class GestionOposicionComponent implements OnInit, OnDestroy {
       },
       error: (err: Error) => { this.loading = false; this.toast(err.message, 'err'); }
     });
-
-    this.cargarTemas();
   }
 
   confirmarLimpiar(): void {

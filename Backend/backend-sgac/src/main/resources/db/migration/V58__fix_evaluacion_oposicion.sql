@@ -188,7 +188,7 @@ BEGIN
         RETURN jsonb_build_object(
                 'exito',    true,
                 'mensaje',  'Evaluación iniciada. El tribunal puede comenzar a calificar.',
-                'horaReal', to_char(CURRENT_TIME, 'HH24:MI:SS')
+                'horaReal', to_char(LOCALTIME, 'HH24:MI:SS')
                );
     END IF;
 
@@ -260,7 +260,7 @@ BEGIN
                 'exito',        true,
                 'mensaje',      'Evaluación finalizada y bloqueada.',
                 'puntajeFinal', COALESCE(v_puntaje_total, 0),
-                'horaFin',      to_char(CURRENT_TIME, 'HH24:MI:SS')
+                'horaFin',      to_char(LOCALTIME, 'HH24:MI:SS')
                );
     END IF;
 

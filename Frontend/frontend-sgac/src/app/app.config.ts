@@ -106,7 +106,7 @@ import {
   ScrollText,
   MicVocal,
   BookOpenText,
-  Shuffle
+  Shuffle, PartyPopper, Play, UserX
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -189,7 +189,10 @@ export const appConfig: ApplicationConfig = {
         ScrollText,
         MicVocal,
         BookOpenText,
-        Shuffle
+        Shuffle,
+        PartyPopper,
+        Play,
+        UserX
 
       })
     )

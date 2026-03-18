@@ -18,8 +18,6 @@ export class EvaluacionOposicionService {
   listarTemas(idConvocatoria: number): Observable<OposicionResponse> {
     return this.http.post<OposicionResponse>(`${this.API}/temas`,
       { idConvocatoria, accion: 'LISTAR' }
-
-
     ).pipe(catchError(this.handleError));
   }
 
