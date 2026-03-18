@@ -98,10 +98,12 @@ export class SesionesComponent implements OnInit {
       }
     });
 
-    this.obtenerContextoAyudantia();
+    //this.obtenerContextoAyudantia();
     this.cargarSesiones();
   }
 
+
+/*
   private obtenerContextoAyudantia() {
     if (!this.idAyudante) return;
     this.ayudanteService.obtenerAyudantePorUsuario(this.idAyudante).pipe(
@@ -114,6 +116,8 @@ export class SesionesComponent implements OnInit {
       this.idAyudantiaReal = ayud?.idAyudantia ?? null;
     });
   }
+
+ */
 
   irAAsistencia(s: SesionResponseDTO) {
     if (!this.idAyudantiaReal) {
@@ -140,18 +144,15 @@ export class SesionesComponent implements OnInit {
     this.formError = '';
     this.isSubmitting = true;
 
-    // SOLUCIÓN AL ERROR TS2322: Aseguramos que idTipoEvidencia nunca sea undefined
     const evidencias: EvidenciaRequest[] = this.selectedFiles.map((file, i) => {
       const evCtrl = this.evidenciasFA.at(i);
       return {
-        // Usamos el operador de aserción no nula o un fallback
         idTipoEvidencia: evCtrl.controls.idTipoEvidencia.value ?? 1,
         nombreArchivo: evCtrl.controls.nombreArchivo.value ?? file.name,
       };
     });
 
     const request: RegistrarSesionRequest = {
-      idAyudantia: this.idAyudantiaReal || 0,
       descripcionActividad: this.form.controls.descripcionActividad.value,
       temaTratado: this.form.controls.temaTratado.value,
       fecha: this.form.controls.fecha.value,

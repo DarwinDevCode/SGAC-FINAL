@@ -1,146 +1,101 @@
-<!-- ============================================================ -->
-<!-- CRONOGRAMA ACTIVO — Modo lectura                            -->
-<!-- ============================================================ -->
-
-<!-- ── ESTADO: Cargando ─────────────────────────────────────── -->
-@if (cargando) {
-  <div class="ca-loading">
-    <lucide-icon name="Loader" size="32" class="spin"></lucide-icon>
-    <p>Cargando cronograma…</p>
-  </div>
-}
-
-<!-- ── ESTADO: Sin periodo activo / Error ───────────────────── -->
-@if (!cargando && error) {
-  <div class="ca-empty-state">
-    <div class="ca-empty-icon">
-      <lucide-icon name="CalendarOff" size="40"></lucide-icon>
-    </div>
-    <h3>Sin periodo activo</h3>
-    <p>{{ error }}</p>
-    <button class="btn-ghost" (click)="cargar()">
-      <lucide-icon name="RefreshCw" size="15"></lucide-icon>
-      Reintentar
-    </button>
-  </div>
-}
-
 <!-- ── ESTADO: Datos listos ─────────────────────────────────── -->
 @if (!cargando && !error && periodo) {
   <div class="ca-root">
 
-    <!-- ═══════════════════════════════════════════════════════
-         CABECERA: nombre del periodo + barra de progreso
-         ═══════════════════════════════════════════════════════ -->
-    <div class="ca-header-card">
-      <div class="ca-header-top">
-        <div class="ca-header-left">
-          <span class="ca-badge-proceso">EN PROCESO</span>
-          <h2 class="ca-titulo">{{ periodo.nombre }}</h2>
-          <p class="ca-fechas">
-            <lucide-icon name="Calendar" size="13"></lucide-icon>
+    <!-- CABECERA DEL PERIODO (bandeja gris ya definida en tu CSS) -->
+    <header class="ca-card ca-header">
+      <div class="ca-header-body">
+        <div class="ca-header-meta">
+          <h1 class="ca-periodo-nombre">{{ periodo.nombre }}</h1>
+          <p class="ca-periodo-fechas">
+            <lucide-icon name="Calendar" size="12"></lucide-icon>
             {{ fmtLong(periodo.fechaInicio) }}
-            <span class="ca-arrow">→</span>
+            <span class="ca-sep">—</span>
             {{ fmtLong(periodo.fechaFin) }}
           </p>
         </div>
-        <div class="ca-progress-ring-wrap">
-          <svg class="ca-ring" viewBox="0 0 64 64">
-            <circle class="ca-ring-bg"   cx="32" cy="32" r="26"></circle>
-            <circle class="ca-ring-fill" cx="32" cy="32" r="26"
-                    [style.stroke-dashoffset]="163.4 - (163.4 * periodo.porcentajeAvance / 100)">
-            </circle>
+
+        <!-- Anillo de progreso (verde) -->
+        <div class="ca-ring-wrap" aria-hidden="true">
+          <svg class="ca-ring-svg" viewBox="0 0 72 72" fill="none">
+            <circle class="ca-ring-track" cx="36" cy="36" r="29"></circle>
+            <circle class="ca-ring-prog"  cx="36" cy="36" r="29"
+                    [style.stroke-dashoffset]="182.2 - (182.2 * periodo.porcentajeAvance / 100)"></circle>
           </svg>
-          <div class="ca-ring-label">
+          <div class="ca-ring-inner">
             <span class="ca-ring-pct">{{ periodo.porcentajeAvance | number:'1.0-0' }}%</span>
-            <span class="ca-ring-sub">avance</span>
+            <span class="ca-ring-lbl">avance</span>
           </div>
         </div>
       </div>
-      <div class="ca-progress-bar-wrap">
-        <div class="ca-progress-bar">
-          <div class="ca-progress-fill" [style.width.%]="periodo.porcentajeAvance"></div>
-        </div>
-        <div class="ca-progress-labels">
-          <span>Inicio: {{ fmt(periodo.fechaInicio) }}</span>
-          <span>{{ periodo.diasTranscurridos }} / {{ periodo.diasTotales }} días</span>
-          <span>Cierre: {{ fmt(periodo.fechaFin) }}</span>
-        </div>
+
+      <!-- Barra de progreso lineal + metadatos -->
+      <div class="ca-prog-track" role="progressbar"
+           [attr.aria-valuenow]="periodo.porcentajeAvance"
+           aria-valuemin="0" aria-valuemax="100">
+        <div class="ca-prog-fill" [style.width.%]="periodo.porcentajeAvance"></div>
       </div>
-    </div>
+      <div class="ca-prog-meta">
+        <span>{{ fmt(periodo.fechaInicio) }}</span>
+        <span class="ca-prog-counter">{{ periodo.diasTranscurridos }} / {{ periodo.diasTotales }} días</span>
+        <span>{{ fmt(periodo.fechaFin) }}</span>
+      </div>
+    </header>
 
-
-    <!-- ═══════════════════════════════════════════════════════
-         TARJETA: Fase actual
-         ═══════════════════════════════════════════════════════ -->
+    <!-- FASE ACTUAL (bandeja gris aplicada dentro en tu CSS) -->
     @if (faseActual) {
-      <div class="ca-fase-actual-card"
-           [style.border-left-color]="getFaseColor(indiceFaseActual)">
-        <div class="ca-fa-dot" [style.background]="getFaseColor(indiceFaseActual)"></div>
-        <div class="ca-fa-info">
-          <div class="ca-fa-label">Fase en curso</div>
+      <div class="ca-card ca-fase-actual" [style.--fase-color]="getFaseColor(indiceFaseActual)">
+        <div class="ca-fa-indicator"></div>
+        <div class="ca-fa-content background-card">
+          <div class="ca-fa-eyebrow">Fase en curso</div>
           <div class="ca-fa-nombre">{{ faseActual.nombre }}</div>
           @if (faseActual.descripcion) {
             <div class="ca-fa-desc">{{ faseActual.descripcion }}</div>
           }
         </div>
-        <div class="ca-fa-fechas">
-          <div class="ca-fa-date-block">
-            <span class="ca-fa-date-label">Inicio</span>
+        <div class="ca-fa-dates background-card">
+          <div class="ca-fa-date">
+            <span class="ca-fa-date-lbl">Inicio</span>
             <span class="ca-fa-date-val">{{ fmt(faseActual.fechaInicio) }}</span>
           </div>
-          <lucide-icon name="ArrowRight" size="14" style="color:#94a3b8; margin-top:12px;"></lucide-icon>
-          <div class="ca-fa-date-block">
-            <span class="ca-fa-date-label">Fin</span>
+          <lucide-icon name="ArrowRight" size="12" class="ca-fa-arrow"></lucide-icon>
+          <div class="ca-fa-date">
+            <span class="ca-fa-date-lbl">Fin</span>
             <span class="ca-fa-date-val">{{ fmt(faseActual.fechaFin) }}</span>
           </div>
-          <div class="ca-fa-date-block ca-fa-dias">
-            <span class="ca-fa-date-label">Duración</span>
+          <div class="ca-fa-date ca-fa-date--dur">
+            <span class="ca-fa-date-lbl">Duración</span>
             <span class="ca-fa-date-val">{{ faseActual.duracionDias }} días</span>
           </div>
         </div>
       </div>
     }
 
-
-    <!-- ═══════════════════════════════════════════════════════
-         GANTT — solo lectura
-         Columnas fijas: # y FASE (solo identificación).
-         Las columnas INICIO / FIN / DÍAS se eliminaron para
-         dar más espacio visual al gráfico; esa información
-         se muestra en la tabla de detalle inferior.
-         La línea roja "Hoy" solo muestra su etiqueta UNA VEZ
-         en la cabecera (primera fila de datos).
-         ═══════════════════════════════════════════════════════ -->
-    <div class="ca-section">
-      <div class="ca-section-title">
-        <lucide-icon name="BarChart2" size="16"></lucide-icon>
-        Línea de tiempo
+    <!-- GANTT — Línea de tiempo -->
+    <section class="ca-card ca-section">
+      <div class="ca-section-header">
+        <lucide-icon name="BarChart2" size="14"></lucide-icon>
+        <span>Línea de tiempo</span>
       </div>
 
-      <div class="ca-gantt-scroll">
-        <table class="ca-unified-table">
+      <div class="ca-gantt-scroll use-row-tray">
+        <table class="ca-gantt-table">
           <colgroup>
-            <!-- Solo 2 columnas fijas: número y nombre de fase -->
-            <col class="cau-col-num">
-            <col class="cau-col-fase">
-            <!-- Gantt ocupa el resto -->
-            <col class="cau-col-gantt">
+            <col class="cg-col-num">
+            <col class="cg-col-fase">
+            <col class="cg-col-gantt">
           </colgroup>
 
-          <!-- Cabecera -->
-          <thead>
-          <tr>
-            <th class="cau-th cau-sticky-num">#</th>
-            <th class="cau-th cau-sticky-fase cau-separator">FASE</th>
-            <th class="cau-th cau-gantt-th">
-              <div class="cau-gantt-header">
+          <thead class="cg-thead">
+          <tr >
+            <th class="cg-th cg-sticky-num use-row-tray">#</th>
+            <th class="cg-th cg-sticky-fase cg-divider use-row-tray">Fase</th>
+            <th class="cg-th cg-th-gantt">
+              <div class="cg-gantt-header">
                 @for (col of ganttColumns; track col.leftPct) {
-                  <div class="cau-gantt-col-hdr"
-                       [style.left.%]="col.leftPct"
-                       [style.width.%]="col.widthPct">
-                    <span class="cgh-label">{{ col.label }}</span>
-                    <span class="cgh-sub">{{ col.subLabel }}</span>
+                  <div class="cg-col-hdr" [style.left.%]="col.leftPct" [style.width.%]="col.widthPct">
+                    <span class="cg-col-hdr-label">{{ col.label }}</span>
+                    <span class="cg-col-hdr-sub">{{ col.subLabel }}</span>
                   </div>
                 }
               </div>
@@ -148,125 +103,92 @@
           </tr>
           </thead>
 
-          <!-- Cuerpo -->
           <tbody>
             @for (fase of fases; track fase.idTipoFase; let i = $index) {
-              <tr [class.cau-row-actual]="fase.esActual">
-
-                <!-- # + punto de color -->
-                <td class="cau-td cau-sticky-num">
-                  <div class="cau-orden-cell">
-                    <span class="cau-orden-dot" [style.background]="getFaseColor(i)"></span>
-                    <span class="cau-orden-num">{{ fase.orden }}</span>
+              <tr class="cg-row" [class.cg-row--actual]="fase.esActual">
+                <td class="cg-td cg-sticky-num">
+                  <div class="cg-num-cell">
+                    <span class="cg-dot" [style.background]="getFaseColor(i)"></span>
+                    <span class="cg-num">{{ fase.orden }}</span>
                   </div>
                 </td>
-
-                <!-- Nombre de fase + badge HOY -->
-                <td class="cau-td cau-sticky-fase cau-separator">
-                  <div class="cau-fase-nombre-wrap">
-                    <span class="cau-fase-nombre"
-                          [class.cau-fase-actual-label]="fase.esActual">
+                <td class="cg-td cg-sticky-fase cg-divider">
+                  <div class="cg-fase-nombre-wrap">
+                    <span class="cg-fase-nombre" [class.cg-fase-nombre--actual]="fase.esActual">
                       {{ fase.nombre }}
                     </span>
-                    @if (fase.esActual) {
-                      <span class="cau-badge-actual">HOY</span>
-                    }
+                    @if (fase.esActual) { <span class="cg-badge-now">HOY</span> }
                   </div>
                 </td>
-
-                <!-- Gantt -->
-                <td class="cau-td cau-gantt-td">
-
-                  <!-- Líneas de cuadrícula -->
+                <td class="cg-td cg-td-gantt">
                   @for (col of ganttColumns; track col.leftPct) {
-                    <div class="cau-vline" [style.left.%]="col.leftPct"></div>
+                    <div class="cg-vline" [style.left.%]="col.leftPct"></div>
                   }
-
-                  <!-- Línea "Hoy":
-                       · La línea roja se dibuja en todas las filas (continua).
-                       · El punto rojo superior y la etiqueta "Hoy" solo se
-                         muestran en la PRIMERA fila (i === 0) para no saturar.  -->
                   @if (hoyCursoPct !== null) {
-                    <div class="cau-hoy-line" [style.left.%]="hoyCursoPct">
+                    <div class="cg-today-line" [style.left.%]="hoyCursoPct">
                       @if (i === 0) {
-                        <div class="cau-hoy-dot"></div>
-                        <div class="cau-hoy-label">Hoy</div>
+                        <div class="cg-today-dot"></div>
                       }
                     </div>
                   }
-
-                  <!-- Barra de la fase -->
                   @if (getFaseBarStyle(fase); as bar) {
-                    <div class="cau-bar-wrap"
-                         [style.left]="bar.left"
-                         [style.width]="bar.width">
-                      <div class="cau-bar"
-                           [class.cau-bar-actual]="fase.esActual"
-                           [style.background]="getFaseColor(i)"
+                    <div class="cg-bar-positioner" [style.left]="bar.left" [style.width]="bar.width">
+                      <div class="cg-bar" [class.cg-bar--actual]="fase.esActual"
+                           [style.--bar-color]="getFaseColor(i)"
                            [title]="fase.nombre + ' · ' + fmt(fase.fechaInicio) + ' – ' + fmt(fase.fechaFin)">
-                        <span class="cau-bar-text">{{ fase.nombre }}</span>
+                        <span class="cg-bar-text">{{ fase.nombre }}</span>
                       </div>
                     </div>
                   }
-
                 </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
+    </section>
 
-    </div><!-- /ca-section (gantt) -->
-
-
-    <!-- ═══════════════════════════════════════════════════════
-         TABLA DE DETALLE — todas las columnas (fechas + días)
-         ═══════════════════════════════════════════════════════ -->
-    <div class="ca-section">
-      <div class="ca-section-title">
-        <lucide-icon name="List" size="16"></lucide-icon>
-        Detalle de fases
+    <!-- DETALLE DE FASES -->
+    <section class="ca-card ca-section">
+      <div class="ca-section-header">
+        <lucide-icon name="AlignLeft" size="14"></lucide-icon>
+        <span>Detalle de fases</span>
       </div>
-      <div class="ca-detail-table-wrap">
+
+      <!-- 🔽 ACTIVADO EL MODO use-row-tray TAMBIÉN AQUÍ -->
+      <div class="ca-detail-scroll use-row-tray">
         <table class="ca-detail-table">
           <thead>
           <tr>
-            <th style="width:40px;">#</th>
-            <th style="width:190px;">Fase</th>
-            <th style="width:110px;">Inicio</th>
-            <th style="width:110px;">Fin</th>
-            <th style="width:70px; text-align:center;">Días</th>
+            <th style="width: 36px;"></th>
+            <th style="width: 188px;">Fase</th>
+            <th style="width: 108px;">Inicio</th>
+            <th style="width: 108px;">Fin</th>
+            <th style="width: 64px; text-align: center;">Días</th>
             <th>Descripción</th>
-            <th style="width:110px; text-align:center;">Estado</th>
+            <th style="width: 108px; text-align: center;">Estado</th>
           </tr>
           </thead>
           <tbody>
             @for (fase of fases; track fase.idTipoFase; let i = $index) {
-              <tr [class.ca-dt-row-actual]="fase.esActual">
+              <tr class="ca-dt-row" [class.ca-dt-row--actual]="fase.esActual">
+                <td><span class="cg-dot" [style.background]="getFaseColor(i)"></span></td>
                 <td>
-                  <span class="cau-orden-dot" [style.background]="getFaseColor(i)"
-                        style="display:inline-block;"></span>
-                </td>
-                <td>
-                  <span class="ca-dt-nombre" [class.ca-dt-nombre-actual]="fase.esActual">
-                    {{ fase.nombre }}
-                  </span>
+                  <span class="ca-dt-nombre" [class.ca-dt-nombre--actual]="fase.esActual">{{ fase.nombre }}</span>
                 </td>
                 <td class="ca-dt-fecha">{{ fmt(fase.fechaInicio) }}</td>
                 <td class="ca-dt-fecha">{{ fmt(fase.fechaFin) }}</td>
-                <td style="text-align:center;">
-                  <span class="cau-dias-badge" [class.cau-dias-actual]="fase.esActual">
-                    {{ fase.duracionDias }}
-                  </span>
+                <td class="ca-dt-dias">
+                  <span [class.ca-dt-dias--actual]="fase.esActual">{{ fase.duracionDias }}</span>
                 </td>
                 <td class="ca-dt-desc">{{ fase.descripcion || '—' }}</td>
-                <td style="text-align:center;">
+                <td class="ca-dt-estado" style="text-align:center;">
                   @if (fase.esActual) {
-                    <span class="ca-pill-actual">En curso</span>
+                    <span class="ca-pill ca-pill--active">En curso</span>
                   } @else if (isFasePasada(fase)) {
-                    <span class="ca-pill-pasada">Finalizada</span>
+                    <span class="ca-pill ca-pill--past">Finalizada</span>
                   } @else {
-                    <span class="ca-pill-pendiente">Próxima</span>
+                    <span class="ca-pill ca-pill--next">Próxima</span>
                   }
                 </td>
               </tr>
@@ -274,14 +196,14 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
 
     <!-- Pie -->
-    <div class="ca-footer">
-      <lucide-icon name="RefreshCw" size="13"></lucide-icon>
-      <span>Se actualiza automáticamente cada 5 minutos</span>
-      <button class="btn-ghost-sm" (click)="cargar()">Actualizar ahora</button>
-    </div>
+    <footer class="ca-footer">
+      <lucide-icon name="RefreshCw" size="11"></lucide-icon>
+      <span>Actualización automática cada 5 minutos</span>
+      <button class="ca-btn-ghost ca-btn-ghost--sm" (click)="cargar()">Actualizar ahora</button>
+    </footer>
 
-  </div><!-- /ca-root -->
+  </div>
 }

@@ -109,7 +109,7 @@ import {
   Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX, SearchX,
   Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
   Tag, LayoutGrid, Landmark, Square, FileSpreadsheet, Files, Globe, CloudUpload, FileCheck, FolderX, Image,
-  File, HardDrive
+  File, HardDrive, CalendarCheck, ListOrdered, CloudCheck, Table2, AlignLeft, LoaderCircle
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -226,7 +226,13 @@ export const appConfig: ApplicationConfig = {
         FolderX,
         Image,
         File,
-        HardDrive
+        HardDrive,
+        CalendarCheck,
+        ListOrdered,
+        CloudCheck,
+        Table2,
+        AlignLeft,
+        LoaderCircle
       })
     )
   ]

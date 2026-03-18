@@ -134,7 +134,7 @@ export class PostulanteService {
 
     return this.http
       .get<RespuestaOperacion<TribunalEvaluacionResponse>>(
-        `${this.baseUrl}/tribunal/${idUsuario}`
+        `${this.API_POSTULACIONES}/tribunal/${idUsuario}`
       )
       .pipe(
         map(resp => this.validarRespuesta(resp)),

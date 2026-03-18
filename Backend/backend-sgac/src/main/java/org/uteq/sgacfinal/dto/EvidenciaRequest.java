@@ -16,7 +16,6 @@ public class EvidenciaRequest {
     @NotNull(message = "El tipo de evidencia es obligatorio")
     private Integer idTipoEvidencia;
 
-    @NotBlank(message = "El nombre del archivo es obligatorio")
     @Size(max = 150)
     private String nombreArchivo;
 

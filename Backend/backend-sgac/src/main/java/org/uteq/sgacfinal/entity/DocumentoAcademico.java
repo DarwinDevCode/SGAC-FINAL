@@ -63,4 +63,12 @@ public class DocumentoAcademico {
     @Column(name = "activo")
     private Boolean activo;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_facultad")
+    private Facultad idFacultad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_carrera")
+    private Carrera idCarrera;
+
 }

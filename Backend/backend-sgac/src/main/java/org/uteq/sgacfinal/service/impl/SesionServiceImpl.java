@@ -16,7 +16,6 @@ import org.uteq.sgacfinal.repository.AyudantiaRepository;
 import org.uteq.sgacfinal.repository.EvidenciaRegistroActividadRepository;
 import org.uteq.sgacfinal.repository.ProgresoRepository;
 import org.uteq.sgacfinal.repository.RegistroActividadRepository;
-import org.uteq.sgacfinal.service.IUploadService;
 import org.uteq.sgacfinal.service.SesionService;
 import org.uteq.sgacfinal.service.cloudinary.CloudinaryUploadServiceImpl;
 
@@ -143,7 +142,6 @@ public class SesionServiceImpl implements SesionService {
             throw new IllegalArgumentException("La cantidad de metadatos de evidencias y archivos físicos no coincide.");
         }
 
-        // 2) Subida a Cloudinary
         for (int i = 0; i < archivos.size(); i++) {
             MultipartFile file = archivos.get(i);
             Map<String, Object> subida = uploadService.upload(file);
@@ -152,7 +150,7 @@ public class SesionServiceImpl implements SesionService {
             evidencia.setRutaArchivo((String) subida.get("url"));
             evidencia.setMimeType((String) subida.getOrDefault("mimeType", ""));
 
-            Object sizeObj = subida.get("tamanioBytes");
+            Object sizeObj = subida.get("pesoBytes");
             if (sizeObj instanceof Number n) {
                 evidencia.setTamanioBytes(n.intValue());
             } else if (sizeObj != null) {

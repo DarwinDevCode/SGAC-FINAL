@@ -25,7 +25,7 @@ public class CloudinaryUploadServiceImpl {
         String baseName = originalName.contains(".")
                 ? originalName.substring(0, originalName.lastIndexOf("."))
                 : originalName;
-        String publicId = baseName.replaceAll("[^a-zA-Z0-0]", "_") + "-" + UUID.randomUUID().toString().substring(0, 8);
+        String publicId = baseName.replaceAll("[^a-zA-Z0-9]", "_") + "-" + UUID.randomUUID().toString().substring(0, 8);
 
         try {
             Map<?, ?> result = cloudinary.uploader().upload(

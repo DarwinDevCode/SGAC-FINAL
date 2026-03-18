@@ -15,9 +15,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class RegistrarSesionRequest {
-    @NotNull(message = "El id de la ayudantía es obligatorio")
-    private Integer idAyudantia;
-
     @NotBlank(message = "La descripción es obligatoria")
     private String descripcionActividad;
 

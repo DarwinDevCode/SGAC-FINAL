@@ -7,6 +7,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,5 +58,15 @@ public class RegistroActividad {
 
     @Column(name = "fecha_observacion")
     private LocalDate fechaObservacion;
+
+    @Column(name = "hora_inicio")
+    private LocalTime horaInicio;
+
+    @Column(name = "hora_fin")
+    private LocalTime horaFin;
+
+    @Size(max = 255)
+    @Column(name = "lugar")
+    private String lugar;
 
 }

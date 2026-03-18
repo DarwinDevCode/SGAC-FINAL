@@ -1,287 +1,324 @@
-/* =========================================================
-   CRONOGRAMA ACTIVO — Estilos
-   ========================================================= */
+/* =============================================================
+   CRONOGRAMA ACTIVO — CSS LIMPIO (encabezados más oscuros + ring verde)
+   ============================================================= */
 
-@keyframes spin { from { transform:rotate(0); } to { transform:rotate(360deg); } }
-.spin { animation: spin 1s linear infinite; display: inline-flex; }
+/* ── Tokens locales ─────────────────────────────────────────── */
+:root {
+  --ca-bg:           #f8fafc;
+  --ca-surface:      #ffffff;
 
-/* ── Estado: cargando ────────────────────────────────────── */
-.ca-loading {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 1rem;
-  padding: 5rem 2rem; color: #64748b; font-size: 0.9rem;
-}
+  /* Bandeja de secciones (cuerpo/área de datos) */
+  --ca-bg-gantt:     #f1f3f5;
 
-/* ── Estado: vacío / error ───────────────────────────────── */
-.ca-empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; gap: 0.75rem;
-  padding: 5rem 2rem; text-align: center;
-}
-.ca-empty-icon {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: #f1f5f9; display: flex; align-items: center;
-  justify-content: center; color: #94a3b8; margin-bottom: 0.5rem;
-}
-.ca-empty-state h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0; }
-.ca-empty-state p  { color: #64748b; font-size: 0.9rem; max-width: 360px; margin: 0; }
+  /* ENCABEZADOS: más oscuros que la bandeja */
+  /* Puedes afinar el tono: #b0b8c2 (más oscuro) ↔ #c7ced6 (menos) */
+  --ca-bg-thead:     #c7ced6;
 
-/* ── Raíz ────────────────────────────────────────────────── */
-.ca-root { display: flex; flex-direction: column; gap: 1.25rem; padding: 1rem; }
+  --ca-bg-row-hover: #f7fafc;
+  --ca-bg-row-active:#ecfdf5;
 
-/* ── Tarjeta cabecera ────────────────────────────────────── */
-.ca-header-card {
-  background: white; border: 1px solid #e2e8f0; border-radius: 12px;
-  padding: 1.5rem; box-shadow: 0 1px 4px rgba(0,0,0,.05);
-}
-.ca-header-top {
-  display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.25rem;
-}
-.ca-header-left { display: flex; flex-direction: column; gap: 0.4rem; }
-.ca-badge-proceso {
-  display: inline-block; padding: .2rem .7rem; border-radius: 999px;
-  background: #dcfce7; color: #15803d;
-  font-size: .72rem; font-weight: 700; letter-spacing: .05em; width: fit-content;
-}
-.ca-titulo  { font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0; }
-.ca-fechas  { display: flex; align-items: center; gap: .4rem; font-size: .83rem; color: #64748b; margin: 0; }
-.ca-arrow   { color: #94a3b8; margin: 0 2px; }
+  --ca-border:       #e2e8f0;
+  --ca-border-light: #f1f5f9;
 
-/* Anillo SVG */
-.ca-progress-ring-wrap { position: relative; width: 80px; height: 80px; flex-shrink: 0; }
-.ca-ring { width: 80px; height: 80px; transform: rotate(-90deg); }
-.ca-ring-bg   { fill: none; stroke: #e2e8f0; stroke-width: 5; }
-.ca-ring-fill {
-  fill: none; stroke: #15803d; stroke-width: 5; stroke-linecap: round;
-  stroke-dasharray: 163.4; transition: stroke-dashoffset .8s ease;
-}
-.ca-ring-label {
-  position: absolute; inset: 0; display: flex;
-  flex-direction: column; align-items: center; justify-content: center;
-}
-.ca-ring-pct { font-size: 1rem; font-weight: 800; color: #15803d; line-height: 1; }
-.ca-ring-sub { font-size: .58rem; color: #64748b; text-transform: uppercase; letter-spacing:.04em; }
+  --ca-text-1: #1f2937;  /* títulos  */
+  --ca-text-2: #374151;  /* cuerpo   */
+  --ca-text-3: #64748b;  /* secund.  */
+  --ca-text-4: #94a3b8;  /* meta     */
 
-/* Barra lineal */
-.ca-progress-bar-wrap  { display: flex; flex-direction: column; gap: .4rem; }
-.ca-progress-bar       { height: 8px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
-.ca-progress-fill      { height: 100%; background: linear-gradient(90deg,#22c55e,#15803d); border-radius: 999px; transition: width .8s ease; }
-.ca-progress-labels    { display: flex; justify-content: space-between; font-size: .74rem; color: #94a3b8; }
+  /* Acento VERDE para ring y barra lineal */
+  --ca-accent:       #059669;
+  --ca-accent-mid:   #10b981;
+  --ca-accent-light: #ecfdf5;
+  --ca-accent-text:  #065f46;
 
-/* ── Tarjeta fase actual ─────────────────────────────────── */
-.ca-fase-actual-card {
-  background: white; border: 1px solid #e2e8f0; border-left: 4px solid #15803d;
-  border-radius: 10px; padding: 1.1rem 1.25rem;
-  display: flex; align-items: flex-start; gap: 1rem; flex-wrap: wrap;
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
-}
-.ca-fa-dot     { width: 12px; height: 12px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-.ca-fa-info    { flex: 1; min-width: 160px; }
-.ca-fa-label   { font-size:.72rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:.05em; margin-bottom:.25rem; }
-.ca-fa-nombre  { font-size:1rem; font-weight:700; color:#0f172a; margin-bottom:.25rem; }
-.ca-fa-desc    { font-size:.82rem; color:#64748b; line-height:1.4; }
-.ca-fa-fechas  { display:flex; align-items:center; gap:.75rem; flex-wrap:wrap; }
-.ca-fa-date-block { display:flex; flex-direction:column; align-items:center; }
-.ca-fa-date-label { font-size:.68rem; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
-.ca-fa-date-val   { font-size:.92rem; font-weight:700; color:#1e293b; }
-.ca-fa-dias       { margin-left:.5rem; }
+  --ca-today-color:  #e11d48;
 
-/* ── Secciones ───────────────────────────────────────────── */
-.ca-section {
-  background: white; border: 1px solid #e2e8f0; border-radius: 12px;
-  overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.05);
-}
-.ca-section-title {
-  display: flex; align-items: center; gap: .5rem;
-  padding: .75rem 1.25rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0;
-  font-size: .78rem; font-weight: 700; color: #475569;
-  text-transform: uppercase; letter-spacing: .05em;
+  --ca-radius-sm: 5px;
+  --ca-radius-md: 8px;
+  --ca-radius-lg: 12px;
+
+  --ca-transition: all .2s ease;
 }
 
-/* =========================================================
-   GANTT UNIFICADO
-   Solo 2 columnas fijas (# y FASE). El Gantt expande al máximo.
-   ========================================================= */
-.ca-gantt-scroll { overflow-x: auto; overflow-y: visible; }
-
-.ca-unified-table {
-  width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 520px;
+/* ── Motion ─────────────────────────────────────────────────── */
+@keyframes ca-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .ca-ring-prog, .ca-prog-fill, .cg-bar, .ca-btn-ghost,
+  .cg-td, .ca-detail-table tbody td { transition: none !important; animation: none !important; }
 }
 
-/* ── Anchos de columnas ──────────────────────────────────── */
-.cau-col-num   { width: 46px; }
-.cau-col-fase  { width: 200px; }   /* más ancho al ganar el espacio de 3 cols */
-.cau-col-gantt { width: auto; }    /* se lleva todo el espacio restante       */
-
-/* ── Celdas de cabecera ──────────────────────────────────── */
-.cau-th {
-  background: #f1f5f9;
-  font-size: .68rem; font-weight: 700; letter-spacing: .05em;
-  text-transform: uppercase; color: #64748b;
-  padding: .6rem .75rem;
-  border-bottom: 2px solid #e2e8f0;
-  position: sticky; top: 0; z-index: 10;
-  white-space: nowrap;
+/* =============================================================
+   ESTADOS VACÍOS
+   ============================================================= */
+.ca-state-screen {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:.625rem; padding:6rem 2rem; text-align:center;
 }
-
-/* ── Celdas de datos ─────────────────────────────────────── */
-.cau-td {
-  padding: .55rem .75rem;
-  border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle;
-  background: white;
+.ca-state-icon {
+  width:48px; height:48px; border-radius:50%;
+  background:var(--ca-surface); border:1px solid var(--ca-border);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--ca-text-4); margin-bottom:.25rem; box-shadow:0 1px 4px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.03);
 }
-.cau-row-actual .cau-td { background: #f0fdf4 !important; }
+.ca-state-icon.ca-state-icon--spin lucide-icon { animation: ca-spin 1.2s linear infinite; display:inline-flex; }
+.ca-state-title { font-size:.9375rem; font-weight:500; color:var(--ca-text-1); margin:0; letter-spacing:-.01em; }
+.ca-state-label,.ca-state-body { font-size:.8125rem; font-weight:300; color:var(--ca-text-3); max-width:320px; line-height:1.6; margin:0; }
 
-/* ── Sticky columns ──────────────────────────────────────── */
-.cau-sticky-num  { position: sticky; left: 0;     z-index: 5; }
-.cau-sticky-fase { position: sticky; left: 46px;  z-index: 5; }
-
-/* Separador entre columnas fijas y el Gantt */
-.cau-separator {
-  box-shadow: 3px 0 6px -2px rgba(0,0,0,.10);
+/* =============================================================
+   ÁTOMOS
+   ============================================================= */
+.ca-btn-ghost{
+  display:inline-flex; align-items:center; gap:.375rem;
+  padding:.4375rem .875rem; border:1px solid var(--ca-border);
+  border-radius:var(--ca-radius-sm); background:transparent;
+  color:var(--ca-text-3); font-size:.8125rem; font-weight:400; cursor:pointer;
+  transition:var(--ca-transition);
 }
+.ca-btn-ghost:hover{ background:var(--ca-bg-row-hover); color:var(--ca-text-2); border-color:#cbd5e1; }
+.ca-btn-ghost:active{ background:var(--ca-bg-thead); }
+.ca-btn-ghost--sm{ padding:.3125rem .6875rem; font-size:.75rem; }
 
-/* ── Celda de orden ──────────────────────────────────────── */
-.cau-orden-cell { display: flex; align-items: center; gap: 5px; }
-.cau-orden-dot  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.cau-orden-num  { font-size: .78rem; font-weight: 700; color: #64748b; }
-
-/* ── Nombre de fase ──────────────────────────────────────── */
-.cau-fase-nombre-wrap { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
-.cau-fase-nombre      { font-size: .85rem; font-weight: 500; color: #1e293b; }
-.cau-fase-actual-label{ color: #15803d; font-weight: 700; }
-.cau-badge-actual {
-  font-size: .62rem; font-weight: 800; letter-spacing: .06em;
-  background: #dcfce7; color: #15803d;
-  border-radius: 999px; padding: .1rem .45rem; flex-shrink: 0;
+.ca-chip{
+  display:inline-flex; align-items:center; gap:.3rem; padding:.1875rem .625rem;
+  border-radius:999px; font-size:.6875rem; font-weight:500; letter-spacing:.04em; text-transform:uppercase;
 }
+.ca-chip--active{ background:var(--ca-accent-light); color:var(--ca-accent-text); position:relative; }
+.ca-chip--active::before{ content:""; width:5px; height:5px; border-radius:50%; background:var(--ca-accent); display:inline-block; }
 
-/* ── Columna Gantt ───────────────────────────────────────── */
-.cau-gantt-th {
-  position: relative; overflow: hidden;
-  padding: 0 !important; height: 36px;
+.ca-pill{
+  display:inline-block; padding:.175rem .5625rem; border-radius:999px;
+  font-size:.6875rem; font-weight:400; letter-spacing:.02em;
 }
-.cau-gantt-header { position: relative; width: 100%; height: 100%; }
-.cau-gantt-col-hdr {
-  position: absolute; top: 0; height: 100%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  border-right: 1px dashed #d1d5db;
-  overflow: hidden; white-space: nowrap;
-}
-.cgh-label { font-size: .67rem; font-weight: 700; color: #475569; }
-.cgh-sub   { font-size: .58rem; color: #94a3b8; }
+.ca-pill--active{ background:var(--ca-accent-light); color:var(--ca-accent-text); font-weight:500; }
+.ca-pill--past  { background:transparent; color:var(--ca-text-4); border:1px solid var(--ca-border); }
+.ca-pill--next  { background:#eff6ff; color:#3b82f6; }
 
-.cau-gantt-td {
-  position: relative; height: 40px;
-  padding: 0 !important; overflow: visible;
-}
-.cau-row-actual .cau-gantt-td { background: #f0fdf4 !important; }
-
-/* Líneas verticales de cuadrícula */
-.cau-vline {
-  position: absolute; top: 0; bottom: 0;
-  width: 1px; background: #e8edf2; pointer-events: none;
+/* =============================================================
+   CONTENEDOR / CARD
+   ============================================================= */
+.ca-root { display:flex; flex-direction:column; gap:.875rem; padding:1.25rem; background:var(--ca-bg); min-height:100%; }
+.ca-card {
+  background:var(--ca-surface); border-radius:var(--ca-radius-lg);
+  border:1px solid var(--ca-border-light); overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.03);
 }
 
-/* ── Barra de la fase ────────────────────────────────────── */
-.cau-bar-wrap { position: absolute; top: 6px; bottom: 6px; min-width: 4px; }
-.cau-bar {
-  position: absolute; inset: 0;
-  border-radius: 5px;
-  display: flex; align-items: center;
-  padding: 0 7px; overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,.1);
-  cursor: default;
-  transition: filter .12s;
+/* =============================================================
+   CABECERA DEL PERIODO (bandeja gris)
+   ============================================================= */
+.ca-header { padding:1.5rem 1.75rem; background:var(--ca-bg-gantt); }
+.ca-header-body {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:1.5rem; flex-wrap:wrap; margin-bottom:1.25rem;
 }
-.cau-bar:hover        { filter: brightness(1.08); }
-.cau-bar-actual       { box-shadow: 0 0 0 2px white, 0 0 0 3.5px currentColor; }
-.cau-bar-text {
-  font-size: .62rem; font-weight: 700;
-  color: rgba(255,255,255,.92);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  text-shadow: 0 1px 2px rgba(0,0,0,.18);
+.ca-header-meta { display:flex; flex-direction:column; gap:.4375rem; }
+.ca-periodo-nombre { font-size:1.3125rem; font-weight:500; color:var(--ca-text-1); margin:0; letter-spacing:-.02em; line-height:1.25; }
+.ca-periodo-fechas { display:flex; align-items:center; gap:.375rem; font-size:.8125rem; font-weight:300; color:var(--ca-text-3); margin:0; font-variant-numeric:tabular-nums; }
+.ca-sep{ color:var(--ca-text-4); }
+
+/* =============================================================
+   RING (Aro de progreso) — EN VERDE
+   ============================================================= */
+.ca-ring-wrap{ position:relative; width:72px; height:72px; flex-shrink:0; }
+.ca-ring-svg{ width:72px; height:72px; transform:rotate(-90deg); }
+.ca-ring-svg circle { vector-effect: non-scaling-stroke; }
+.ca-ring-track{
+  fill:none; stroke:#e2e8f0 !important; /* gris claro del track */
+  stroke-width:3.5;
+}
+.ca-ring-prog{
+  fill:none;
+  stroke: var(--ca-accent, #059669) !important; /* VERDE forzado */
+  stroke-width:3.5;
+  stroke-linecap:round;
+  stroke-dasharray:182.2; /* 2πr con r=29 */
+  transition:stroke-dashoffset .9s cubic-bezier(.4,0,.2,1);
+}
+.ca-ring-inner{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+.ca-ring-pct  { font-size:.9375rem; font-weight:500; color:var(--ca-accent-text); font-variant-numeric:tabular-nums; }
+.ca-ring-lbl  { font-size:.5625rem; font-weight:300; color:var(--ca-text-4); text-transform:uppercase; letter-spacing:.07em; margin-top:3px; }
+
+/* =============================================================
+   Barra lineal + meta
+   ============================================================= */
+.ca-prog-track{ height:3px; background:var(--ca-border); border-radius:999px; overflow:hidden; margin-bottom:.5rem; }
+.ca-prog-fill { height:100%; background:linear-gradient(90deg,var(--ca-accent-mid),var(--ca-accent)); border-radius:999px; transition:width .9s cubic-bezier(.4,0,.2,1); }
+.ca-prog-meta { display:flex; justify-content:space-between; font-size:.6875rem; font-weight:300; color:var(--ca-text-4); font-variant-numeric:tabular-nums; }
+.ca-prog-counter { color:var(--ca-text-3); font-weight:400; }
+
+/* =============================================================
+   FASE ACTUAL (card con borde dinámico)
+   ============================================================= */
+.ca-fase-actual{
+  display:flex; align-items:stretch; padding:0;
+  border-left:3px solid var(--fase-color, var(--ca-accent));
+  background:var(--ca-bg-gantt);
+}
+.ca-fa-content{ flex:1; padding:1.125rem 1.5rem; border-right:1px solid var(--ca-border-light); }
+.ca-fa-eyebrow{ font-size:.6875rem; font-weight:400; letter-spacing:.08em; text-transform:uppercase; color:var(--ca-text-4); margin-bottom:.3rem; }
+.ca-fa-nombre { font-size:.9375rem; font-weight:500; color:var(--ca-text-1); margin-bottom:.25rem; }
+.ca-fa-desc   { font-size:.8125rem; font-weight:300; color:var(--ca-text-3); line-height:1.55; }
+.ca-fa-dates  { display:flex; align-items:center; gap:.875rem; padding:1.125rem 1.5rem; flex-wrap:wrap; }
+.ca-fa-arrow  { color:var(--ca-text-4); margin-top:10px; }
+.ca-fa-date   { display:flex; flex-direction:column; gap:3px; }
+.ca-fa-date--dur{ margin-left:.375rem; padding-left:.875rem; border-left:1px solid var(--ca-border); }
+.ca-fa-date-lbl{ font-size:.625rem; font-weight:300; color:var(--ca-text-4); text-transform:uppercase; letter-spacing:.06em; }
+.ca-fa-date-val{ font-size:.875rem; font-weight:500; color:var(--ca-text-1); font-variant-numeric:tabular-nums; }
+
+/* =============================================================
+   SECCIONES (Gantt y Detalle)
+   ============================================================= */
+.ca-section{ background:var(--ca-bg-gantt); }
+.ca-section-header{
+  display:flex; align-items:center; gap:.4375rem; padding:.75rem 1.25rem;
+  border-bottom:1px solid var(--ca-border);
+  font-size:.6875rem; font-weight:600; letter-spacing:.07em; text-transform:uppercase;
+  color:#4b5563; background:var(--ca-bg-thead);
 }
 
-/* ── Línea "Hoy" ─────────────────────────────────────────── */
-/* La línea roja recorre todas las filas de arriba a abajo.
-   El punto y la etiqueta "Hoy" se muestran UNA SOLA VEZ
-   (en la primera fila, controlado por i===0 en la plantilla). */
-.cau-hoy-line {
-  position: absolute; top: 0; bottom: 0;
-  width: 2px; background: #dc2626;
-  z-index: 8; pointer-events: none;
+/* =============================================================
+   GANTT — Línea de tiempo
+   ============================================================= */
+.ca-gantt-scroll{ overflow-x:auto; overflow-y:visible; background:var(--ca-bg-gantt); }
+.ca-gantt-table{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:500px; }
+
+/* Anchos */
+.cg-col-num{ width:44px; } .cg-col-fase{ width:196px; } .cg-col-gantt{ width:auto; }
+
+/* THEAD (encabezados gris oscuro SIEMPRE) */
+.cg-th{
+  background:var(--ca-bg-thead) !important; color:#4b5563 !important; font-weight:600 !important;
+  font-size:.625rem; letter-spacing:.07em; text-transform:uppercase;
+  padding:.625rem .75rem; border-bottom:1px solid var(--ca-border);
+  position:sticky; top:0; z-index:10; white-space:nowrap; text-align:left;
 }
-.cau-hoy-dot {
-  position: absolute; top: -4px; left: 50%;
-  transform: translateX(-50%);
-  width: 8px; height: 8px;
-  border-radius: 50%; background: #dc2626;
+/* Cabecera gráfica: overlay para cubrir bajo labels absolutos */
+.cg-th-gantt{ position:relative; overflow:hidden; padding:0 !important; height:36px; background:transparent !important; }
+.cg-th-gantt::before{ content:""; position:absolute; inset:0; background:var(--ca-bg-thead); z-index:0; }
+.cg-gantt-header,.cg-col-hdr,.cg-col-hdr-label,.cg-col-hdr-sub{ position:relative; z-index:1; }
+.cg-gantt-header{ position:relative; width:100%; height:100%; }
+.cg-col-hdr{
+  position:absolute; top:0; height:100%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; border-right:1px dashed var(--ca-border);
+  overflow:hidden; white-space:nowrap;
 }
-.cau-hoy-label {
-  position: absolute;
-  /* Encima de la cabecera: sale hacia arriba de la primera fila */
-  top: -22px;
-  left: 50%; transform: translateX(-50%);
-  background: #dc2626; color: white;
-  font-size: .62rem; font-weight: 800; letter-spacing: .05em;
-  padding: 2px 6px; border-radius: 4px; white-space: nowrap;
-  /* Sombra para que se lea sobre el fondo claro de la cabecera */
-  box-shadow: 0 1px 4px rgba(220,38,38,.35);
+.cg-col-hdr-label{ font-size:.625rem; font-weight:600; color:#4b5563; }
+.cg-col-hdr-sub  { font-size:.5625rem; font-weight:500; color:#6b7280; }
+
+/* TBODY (registros) — blanco por defecto */
+.cg-td{
+  padding:.6875rem .75rem; border-bottom:1px solid var(--ca-border-light);
+  vertical-align:middle; background:#ffffff; transition:background .2s ease;
+}
+.cg-row:not(.cg-row--actual):hover .cg-td{ background:var(--ca-bg-row-hover); }
+.cg-row--actual .cg-td{ background:var(--ca-bg-row-active) !important; }
+
+/* Sticky y separador
+   🔴 THEAD sticky (esquina superior izquierda) también OSCURO */
+thead .cg-sticky-num,
+thead .cg-sticky-fase { position: sticky; left: 0; z-index: 11; background: var(--ca-bg-thead) !important; }
+thead .cg-sticky-fase { left: 44px; }
+
+/* TBODY sticky (datos): blanco, o gris si activas .use-row-tray */
+tbody .cg-sticky-num,
+tbody .cg-sticky-fase { position: sticky; left: 0; z-index: 5; background:#fff; }
+tbody .cg-sticky-fase { left: 44px; }
+
+.cg-divider{ box-shadow:2px 0 8px -4px rgba(0,0,0,.07); }
+
+/* Celdas de identificación */
+.cg-num-cell{ display:flex; align-items:center; gap:6px; }
+.cg-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.cg-num{ font-size:.75rem; font-weight:300; color:var(--ca-text-4); font-variant-numeric:tabular-nums; }
+.cg-fase-nombre-wrap{ display:flex; align-items:center; gap:.375rem; flex-wrap:wrap; }
+.cg-fase-nombre{ font-size:.8125rem; font-weight:400; color:var(--ca-text-2); }
+.cg-fase-nombre--actual{ color:var(--ca-accent-text); font-weight:500; }
+.cg-badge-now{
+  font-size:.5625rem; font-weight:500; letter-spacing:.06em;
+  background:var(--ca-accent-light); color:var(--ca-accent-text);
+  border-radius:999px; padding:.1rem .4375rem; text-transform:uppercase;
 }
 
-/* Badge días */
-.cau-dias-badge  { font-size: .8rem; font-weight: 700; color: #64748b; }
-.cau-dias-actual { color: #15803d; }
+/* Área gráfica (tbody) */
+.cg-td-gantt{ position:relative; height:40px; padding:0 !important; overflow:visible; background:var(--ca-bg-gantt) !important; }
+.cg-row--actual .cg-td-gantt{ background: color-mix(in srgb, var(--ca-bg-row-active) 70%, var(--ca-bg-gantt)) !important; }
+.cg-vline{ position:absolute; top:0; bottom:0; width:1px; background:var(--ca-border-light); pointer-events:none; }
 
-/* =========================================================
-   TABLA DE DETALLE
-   ========================================================= */
-.ca-detail-table-wrap { overflow-x: auto; }
-.ca-detail-table {
-  width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 600px;
+/* Línea "Hoy" */
+.cg-today-line{ position:absolute; top:0; bottom:0; width:1.5px; background:var(--ca-today-color); z-index:8; pointer-events:none; }
+.cg-today-dot{ position:absolute; top:-3px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:var(--ca-today-color); }
+.cg-today-label{
+  position:absolute; top:-21px; left:50%; transform:translateX(-50%);
+  background:var(--ca-today-color); color:#fff; font-size:.5625rem; font-weight:500; letter-spacing:.05em;
+  padding:2px 5px; border-radius:3px; white-space:nowrap; box-shadow:0 1px 4px rgba(225,29,72,.25);
 }
-.ca-detail-table th {
-  background: #f8fafc;
-  font-size: .7rem; text-transform: uppercase; letter-spacing: .04em;
-  font-weight: 700; color: #64748b;
-  padding: .6rem .75rem; border-bottom: 2px solid #e2e8f0; text-align: left;
-}
-.ca-detail-table td {
-  padding: .6rem .75rem; border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle; font-size: .87rem; color: #334155;
-}
-.ca-dt-row-actual td   { background: #f0fdf4 !important; }
-.ca-dt-nombre          { font-weight: 250; color: #1e293b; }
-.ca-dt-nombre-actual   { color: #15803d; }
-.ca-dt-fecha           { font-size: .83rem; color: #475569; white-space: nowrap; }
-.ca-dt-desc            { font-size: .82rem; color: #64748b; }
 
-/* Pills de estado */
-.ca-pill-actual    { background:#dcfce7; color:#15803d; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:700; }
-.ca-pill-pasada    { background:#f1f5f9; color:#64748b; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:600; }
-.ca-pill-pendiente { background:#e0f2fe; color:#0369a1; padding:.2rem .65rem; border-radius:999px; font-size:.72rem; font-weight:600; }
+/* Barras */
+.cg-bar-positioner{ position:absolute; top:8px; bottom:8px; min-width:4px; }
+.cg-bar{
+  position:absolute; inset:0; border-radius:4px; display:flex; align-items:center; padding:0 7px;
+  overflow:hidden; background:var(--bar-color); opacity:.82; cursor:default;
+  transition:opacity .2s ease, transform .2s ease; box-shadow:0 1px 3px rgba(0,0,0,.08);
+}
+.cg-bar:hover{ opacity:1; transform:scaleY(1.06); }
+.cg-bar--actual{ opacity:1; box-shadow:0 0 0 2px var(--ca-surface), 0 0 0 3px var(--bar-color); }
+.cg-bar-text{ font-size:.5625rem; font-weight:500; color:rgba(255,255,255,.95); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:.025em; text-shadow:0 1px 2px rgba(0,0,0,.15); }
 
-/* ── Pie ─────────────────────────────────────────────────── */
-.ca-footer {
-  display: flex; align-items: center; gap: .5rem;
-  font-size: .78rem; color: #94a3b8; padding: .25rem 0;
-}
-.btn-ghost-sm {
-  margin-left: auto; padding: .35rem .8rem;
-  border: 1px solid #e2e8f0; border-radius: 6px;
-  background: white; color: #64748b; font-size: .78rem;
-  cursor: pointer; display: inline-flex; align-items: center; gap: .35rem;
-  transition: all .15s;
-}
-.btn-ghost-sm:hover { background: #f8fafc; color: #1e293b; }
+/* =============================================================
+   DETALLE DE FASES
+   ============================================================= */
+.ca-detail-scroll{ overflow-x:auto; background:var(--ca-bg-gantt); }
+.ca-detail-table{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:600px; }
 
-.btn-ghost {
-  padding: .5rem 1rem; border: 1px solid #e2e8f0; border-radius: 6px;
-  background: transparent; color: #64748b; font-size: .875rem;
-  cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
-  font-weight: 500; transition: all .15s;
+/* Encabezados (gris oscuro SIEMPRE) */
+.ca-detail-table thead th{
+  background:var(--ca-bg-thead) !important; color:#4b5563 !important; font-weight:600 !important;
+  font-size:.625rem; letter-spacing:.07em; text-transform:uppercase;
+  padding:.6875rem .875rem; border-bottom:1px solid var(--ca-border); text-align:left; white-space:nowrap;
 }
-.btn-ghost:hover { background: #f1f5f9; color: #475569; }
+
+/* Registros */
+.ca-detail-table tbody td{
+  padding:.75rem .875rem; border-bottom:1px solid var(--ca-border-light);
+  vertical-align:middle; font-size:.8125rem; font-weight:400; color:var(--ca-text-2);
+  background:#ffffff; transition:background .2s ease;
+}
+.ca-dt-row:not(.ca-dt-row--actual):hover td{ background:var(--ca-bg-row-hover); }
+.ca-dt-row--actual td{ background:var(--ca-bg-row-active) !important; }
+
+.ca-dt-nombre{ font-weight:400; color:var(--ca-text-2); }
+.ca-dt-nombre--actual{ color:var(--ca-accent-text); font-weight:500; }
+.ca-dt-fecha{ font-size:.8125rem; font-weight:300; color:var(--ca-text-3); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.ca-dt-dias{ text-align:center; font-variant-numeric:tabular-nums; font-size:.8125rem; font-weight:300; color:var(--ca-text-3); }
+.ca-dt-dias--actual{ color:var(--ca-accent-text); font-weight:500; }
+.ca-dt-desc{ font-size:.75rem; font-weight:300; color:var(--ca-text-4); line-height:1.5; }
+.ca-dt-estado{ text-align:center; }
+
+/* =============================================================
+   PIE
+   ============================================================= */
+.ca-footer{
+  display:flex; align-items:center; gap:.4375rem;
+  font-size:.75rem; font-weight:300; color:var(--ca-text-4); padding:.125rem 0;
+}
+
+/* =============================================================
+   UTILIDADES
+   ============================================================= */
+.background-card{ background:var(--ca-bg-gantt); }
+
+/* ---- Modo: filas en gris (#f1f3f5) — opt‑in con .use-row-tray ---- */
+.ca-section .use-row-tray tbody .cg-td,
+.ca-section .use-row-tray .ca-detail-table tbody td { background:#f1f3f5 !important; }
+
+.ca-section .use-row-tray tbody .cg-row:not(.cg-row--actual) .cg-td:hover,
+.ca-section .use-row-tray .ca-detail-table tbody .ca-dt-row:not(.ca-dt-row--actual) td:hover { background:#eef2f4 !important; }
+
+.ca-section .use-row-tray tbody .cg-row--actual .cg-td,
+.ca-section .use-row-tray .ca-detail-table tbody .ca-dt-row--actual td {
+  background: color-mix(in srgb, #ecfdf5 70%, #f1f3f5) !important;
+}
+
+/* Sticky en modo filas grises (SOLO tbody) */
+.ca-section .use-row-tray tbody .cg-sticky-num,
+.ca-section .use-row-tray tbody .cg-sticky-fase { background:#f1f3f5 !important; }

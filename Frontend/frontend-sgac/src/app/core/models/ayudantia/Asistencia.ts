@@ -19,14 +19,18 @@ export interface FilaPreview {
   paralelo:       string;
   errores:        string[];
   valida:         boolean;
+  yaExiste:       boolean;
 }
 
 export interface PreviewResponse {
-  exito:        boolean;
-  tieneErrores: boolean;
-  totalFilas:   number;
-  filas:        FilaPreview[];
-  mensaje:      string;
+  exito:             boolean;
+  tieneErrores:      boolean;
+  totalFilas:        number;
+  nuevos:            number;
+  duplicadosBD:      number;
+  duplicadosArchivo: number;
+  filas:             FilaPreview[];
+  mensaje:           string;
 }
 
 export interface CargaMasivaResponse {
@@ -51,4 +55,24 @@ export interface GuardarAsistenciaResponse {
   mensaje:   string;
   presentes: number;
   total:     number;
+}
+
+export interface SesionMatriz {
+  id:    number;
+  fecha: string;
+  tema:  string;
+  horas: number;
+}
+
+export interface EstudianteMatriz {
+  idParticipante: number;
+  nombre:         string;
+  curso:          string;
+  paralelo:       string;
+  asistencias:    Record<string, boolean | null>;
+}
+
+export interface MatrizAsistencia {
+  sesiones:    SesionMatriz[];
+  estudiantes: EstudianteMatriz[];
 }

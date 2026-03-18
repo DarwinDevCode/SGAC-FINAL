@@ -1,78 +1,95 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../../core/services/auth-service';
-import { ComisionService } from '../../../core/services/convocatorias/comision-service';
-import { MiembroComision, ComisionEstudiante } from '../../../core/models/convocatoria/comision';
+import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
+import { TribunalEvaluacionResponse } from '../../../core/models/postulaciones/postulacion';
 
 @Component({
-  selector: 'app-mi-comision-estudiante',
+  selector: 'app-comision-seleccion',
   standalone: true,
   imports: [CommonModule, LucideAngularModule],
   templateUrl: './comision-seleccion.html',
   styleUrls: ['./comision-seleccion.css']
 })
+export class ComisionSeleccion implements OnInit, OnDestroy {
+  private authService      = inject(AuthService);
+  private postulanteService = inject(PostulanteService);
+  private subs             = new Subscription();
 
-export class ComisionSeleccion implements OnInit {
-  private authSrv    = inject(AuthService);
-  private comisionSrv = inject(ComisionService);
-
-  loading    = true;
-  errorMsg   = '';
-  comisiones: ComisionEstudiante[] = [];
-
-  formatFecha(f: string | null | undefined): string {
-    if (!f) return '—';
-    const [y, m, d] = f.split('-');
-    return `${d}/${m}/${y}`;
-  }
-
-  iconForCargo(cargo: string): string {
-    const map: Record<string, string> = {
-      DECANO:      'shield-check',
-      COORDINADOR: 'badge-check',
-      DOCENTE:     'book-open'
-    };
-    return map[cargo?.toUpperCase()] ?? 'user';
-  }
-
-  labelForCargo(cargo: string): string {
-    const map: Record<string, string> = {
-      DECANO:      'Decano de Facultad',
-      COORDINADOR: 'Coordinador de Carrera',
-      DOCENTE:     'Docente Especialista'
-    };
-    return map[cargo?.toUpperCase()] ?? cargo;
-  }
+  isLoading    = true;
+  errorMessage = '';
+  datosTribunal: TribunalEvaluacionResponse | null = null;
 
   ngOnInit(): void {
-    const user = this.authSrv.getUser();
+    this.cargarDatos();
+  }
+
+  cargarDatos(){
+    const user = this.authService.getUser();
     if (!user) {
-      this.errorMsg = 'No hay sesión activa.';
-      this.loading  = false;
+      this.isLoading    = false;
+      this.errorMessage = 'No hay sesión activa.';
       return;
     }
 
-    this.comisionSrv.obtenerDetalle(user.idUsuario, 'ESTUDIANTE').subscribe({
-      next: res => {
-        this.loading = false;
-        if (!res.exito) {
-          this.errorMsg = res.mensaje ?? 'No se encontró comisión asignada.';
-          return;
+    this.subs.add(
+      this.postulanteService.obtenerTribunalEvaluacion(user.idUsuario).subscribe({
+        next: (datos) => {
+          this.datosTribunal = datos;
+          this.isLoading     = false;
+        },
+        error: (err: Error) => {
+          this.errorMessage = err.message;
+          this.isLoading    = false;
         }
-        this.comisiones = res.comisiones ?? [];
-      },
-      error: (err: Error) => {
-        this.loading  = false;
-        this.errorMsg = err.message;
-      }
-    });
+      })
+    );
   }
 
-  ordenadosMiembros(miembros: MiembroComision[]): MiembroComision[] {
-    const orden = ['DECANO', 'COORDINADOR', 'DOCENTE'];
-    return [...miembros].sort(
-      (a, b) => orden.indexOf(a.cargo?.toUpperCase()) - orden.indexOf(b.cargo?.toUpperCase())
-    );
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  formatearFecha(fecha: string): string {
+    if (!fecha) return '—';
+    try {
+      return new Date(fecha + 'T00:00:00').toLocaleDateString('es-EC', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      });
+    } catch {
+      return fecha;
+    }
+  }
+
+  formatearHora(hora: string): string {
+    if (!hora) return '—';
+    const [h, m] = hora.split(':');
+    const hNum   = parseInt(h, 10);
+    const ampm   = hNum >= 12 ? 'PM' : 'AM';
+    const h12    = hNum % 12 || 12;
+    return `${h12}:${m} ${ampm}`;
+  }
+
+  rolColor(rol: string): string {
+    const r = rol?.toLowerCase() ?? '';
+    if (r.includes('presid')) return 'rol-presidente';
+    if (r.includes('vocal'))  return 'rol-vocal';
+    if (r.includes('secret')) return 'rol-secretario';
+    return 'rol-default';
+  }
+
+  rolIcon(rol: string): string {
+    const r = rol?.toLowerCase() ?? '';
+    if (r.includes('presid')) return 'shield-check';
+    if (r.includes('vocal'))  return 'user-check';
+    if (r.includes('secret')) return 'clipboard';
+    return 'user';
+  }
+
+  iniciales(nombre: string): string {
+    if (!nombre) return '?';
+    return nombre.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase();
   }
 }

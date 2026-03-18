@@ -1,0 +1,251 @@
+<!-- matriz-asistencia.component.html -->
+<div class="gestion-container mz-wrapper ui-stack-lg">
+
+  <!-- Top bar (acciones) -->
+  <div class="mz-top-bar">
+    <div class="ui-inline-actions">
+      <button class="btn btn-ghost ui-btn-ghost"
+              (click)="cargarMatriz()" [disabled]="cargando()">
+        <lucide-icon [name]="cargando() ? 'loader' : 'refresh-cw'" size="15"
+                     [class.spin]="cargando()"></lucide-icon>
+        <span>Actualizar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Encabezado -->
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title ui-h2">Matriz de Asistencia</h2>
+      <p class="subtitle">Vista general de participación por sesión</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <ng-container *ngIf="cargando()">
+    <div class="mz-skeleton-stats">
+      <div class="mz-skeleton-stat" *ngFor="let _ of [1,2,3,4]"></div>
+    </div>
+    <div class="mz-skeleton-table">
+      <div class="mz-skeleton-header"></div>
+      <div class="mz-skeleton-row" *ngFor="let _ of [1,2,3,4,5,6]"></div>
+    </div>
+  </ng-container>
+
+  <!-- Error -->
+  <div *ngIf="!cargando() && errorMsg()" class="alert-banner error ui-alert">
+    <div class="ui-alert-content">
+      <lucide-icon name="circle-x" size="18"></lucide-icon>
+      <span class="ui-alert-text">{{ errorMsg() }}</span>
+    </div>
+    <button class="btn btn-ghost ui-btn-ghost" (click)="cargarMatriz()">Reintentar</button>
+  </div>
+
+  <!-- Vacíos -->
+  <div *ngIf="!cargando() && !errorMsg() && totalSesiones() === 0" class="info-message ui-empty">
+    <lucide-icon name="clipboard-x" size="48"></lucide-icon>
+    <p class="font-medium">Sin sesiones registradas</p>
+    <p class="text-sm text-muted-foreground">Registra sesiones de actividad para visualizar la matriz.</p>
+    <button class="btn btn-primary ui-btn-soft" (click)="irASesiones()">
+      <lucide-icon name="plus" size="15"></lucide-icon> Ir a sesiones
+    </button>
+  </div>
+
+  <div *ngIf="!cargando() && !errorMsg() && totalSesiones() > 0 && totalEstudiantes() === 0"
+       class="info-message ui-empty">
+    <lucide-icon name="users-x" size="48"></lucide-icon>
+    <p class="font-medium">Sin participantes en el padrón</p>
+    <p class="text-sm text-muted-foreground">Carga primero la lista de estudiantes para ver la matriz.</p>
+    <button class="btn btn-primary ui-btn-soft" (click)="volver()">
+      <lucide-icon name="user-plus" size="15"></lucide-icon> Cargar padrón
+    </button>
+  </div>
+
+  <!-- Contenido principal -->
+  <ng-container *ngIf="!cargando() && !errorMsg() && totalSesiones() > 0 && totalEstudiantes() > 0">
+
+    <!-- Estadísticas (alineado a stats-grid del global) -->
+    <div class="mz-stats-bar stats-grid cols-3">
+      <div class="stat-card ui-card">
+        <div class="stat-icon green">
+          <lucide-icon name="users" size="18"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ totalEstudiantes() }}</div>
+          <div class="stat-label">Estudiantes</div>
+        </div>
+      </div>
+
+      <div class="stat-card ui-card">
+        <div class="stat-icon green">
+          <lucide-icon name="calendar-days" size="18"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ totalSesiones() }}</div>
+          <div class="stat-label">Sesiones</div>
+        </div>
+      </div>
+
+      <div class="stat-card ui-card stat-card--pct">
+        <div class="stat-icon green">
+          <lucide-icon name="trending-up" size="18"></lucide-icon>
+        </div>
+        <div class="flex flex-col flex-1">
+          <div class="stat-value">{{ porcentajeGlobal() }}%</div>
+          <div class="stat-label">Asistencia global</div>
+          <div class="progress-track" style="margin-top:.5rem;">
+            <div class="progress-fill"
+                 [style.width.%]="porcentajeGlobal()"
+                 [ngClass]="colorBarra(porcentajeGlobal())"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Buscador (reutiliza tarjeta global) -->
+    <div class="search-card">
+      <div class="mz-search-bar">
+        <div class="search-wrapper w-full" style="max-width: 520px;">
+          <lucide-icon name="search" size="15" class="search-icon"></lucide-icon>
+          <input
+            class="input-field search-input"
+            type="text"
+            placeholder="Filtrar por nombre o curso…"
+            [ngModel]="textoBusqueda()"
+            (ngModelChange)="textoBusqueda.set($event)" />
+          <button *ngIf="textoBusqueda()"
+                  class="btn-icon ui-icon-clear"
+                  (click)="textoBusqueda.set('')"
+                  title="Limpiar">
+            <lucide-icon name="x" size="13"></lucide-icon>
+          </button>
+        </div>
+
+        <span class="text-sm text-muted-foreground">
+          {{ estudiantesFiltrados().length }} / {{ totalEstudiantes() }} estudiante(s)
+        </span>
+      </div>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="mz-leyenda ui-legend">
+      <div class="mz-leyenda-item">
+        <div class="mz-celda-presente mz-muestra"><lucide-icon name="check" size="11"></lucide-icon></div>
+        <span>Presente</span>
+      </div>
+      <div class="mz-leyenda-item">
+        <div class="mz-celda-ausente mz-muestra"><lucide-icon name="x" size="11"></lucide-icon></div>
+        <span>Ausente</span>
+      </div>
+      <div class="mz-leyenda-item">
+        <div class="mz-celda-no-reg mz-muestra"><span class="mz-dash">—</span></div>
+        <span>No registrado en esa sesión</span>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-card mz-table-card">
+      <div class="mz-scroll-container">
+        <table class="mz-table">
+          <thead>
+          <tr class="mz-head-row">
+            <th class="mz-th-nombre mz-sticky-col mz-th">
+              <div class="mz-th-content">
+                <lucide-icon name="user" size="13"></lucide-icon>
+                <span>Estudiante</span>
+              </div>
+            </th>
+
+            <th *ngFor="let ses of sesiones(); trackBy: trackBySesion"
+                class="mz-th mz-th-sesion"
+                [title]="ses.tema">
+              <div class="mz-th-sesion-content">
+                <span class="mz-sesion-fecha">{{ formatearFecha(ses.fecha) }}</span>
+                <span class="mz-sesion-tema">{{ abreviarTema(ses.tema) }}</span>
+                <span class="mz-sesion-pct-mini"
+                      [ngClass]="colorBarra(porcentajeSesion(ses.id))">
+                  {{ porcentajeSesion(ses.id) }}%
+                </span>
+              </div>
+            </th>
+
+            <th class="mz-th mz-th-resumen">
+              <div class="mz-th-content">
+                <lucide-icon name="bar-chart-2" size="13"></lucide-icon>
+                <span>Asistencia</span>
+              </div>
+            </th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <ng-container *ngIf="estudiantesFiltrados().length > 0; else sinResultados">
+            <tr *ngFor="let est of estudiantesFiltrados(); trackBy: trackByEstudiante"
+                class="mz-row">
+              <td class="mz-td-nombre mz-sticky-col mz-td">
+                <div class="mz-nombre-cell">
+                  <span class="mz-nombre">{{ est.nombre }}</span>
+                  <span *ngIf="est.curso" class="mz-curso text-muted-foreground">
+                    {{ est.curso }}{{ est.paralelo ? ' · ' + est.paralelo : '' }}
+                  </span>
+                </div>
+              </td>
+
+              <td *ngFor="let ses of sesiones(); trackBy: trackBySesion"
+                  class="mz-td mz-td-celda"
+                  [ngClass]="{
+                    'mz-celda-presente':   estadoCelda(est, ses.id) === 'presente',
+                    'mz-celda-ausente':    estadoCelda(est, ses.id) === 'ausente',
+                    'mz-celda-no-reg':     estadoCelda(est, ses.id) === 'noRegistrado'
+                  }"
+                  [title]="estadoCelda(est, ses.id) === 'presente'  ? 'Presente en ' + formatearFecha(ses.fecha)
+                          : estadoCelda(est, ses.id) === 'ausente'   ? 'Ausente en '  + formatearFecha(ses.fecha)
+                          : 'No registrado en esa sesión'">
+
+                <ng-container *ngIf="estadoCelda(est, ses.id) === 'presente'">
+                  <lucide-icon name="check" size="13" class="mz-icon-check"></lucide-icon>
+                </ng-container>
+
+                <ng-container *ngIf="estadoCelda(est, ses.id) === 'ausente'">
+                  <lucide-icon name="x" size="13" class="mz-icon-x"></lucide-icon>
+                </ng-container>
+
+                <ng-container *ngIf="estadoCelda(est, ses.id) === 'noRegistrado'">
+                  <span class="mz-dash">—</span>
+                </ng-container>
+              </td>
+
+              <td class="mz-td mz-td-resumen">
+                <div class="mz-resumen-cell">
+                  <span class="mz-resumen-pct"
+                        [ngClass]="colorBarra(porcentajeEstudiante(est))">
+                    {{ porcentajeEstudiante(est) }}%
+                  </span>
+                  <div class="progress-track mz-mini-barra">
+                    <div class="progress-fill mz-mini-barra-fill"
+                         [style.width.%]="porcentajeEstudiante(est)"
+                         [ngClass]="colorBarra(porcentajeEstudiante(est))"></div>
+                  </div>
+                  <span class="mz-resumen-ratio text-muted-foreground">
+                    {{ sesionesPresente(est) }}/{{ sesionesRegistradas(est) }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <ng-template #sinResultados>
+            <tr>
+              <td [attr.colspan]="sesiones().length + 2" class="mz-empty-search">
+                <lucide-icon name="search-x" size="24"></lucide-icon>
+                <span>Sin resultados para "{{ textoBusqueda() }}"</span>
+              </td>
+            </tr>
+          </ng-template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div><!-- matriz-asistencia.component.html -->

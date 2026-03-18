@@ -43,7 +43,7 @@ public class EmailService {
 
             helper.setFrom(fromAddress, SYSTEM_NAME);
             helper.setTo(destinatario);
-            helper.setSubject("🎓 Bienvenido al SGAC — Credenciales de acceso");
+            helper.setSubject("Bienvenido al SGAC — Credenciales de acceso");
             helper.setText(buildHtmlTemplate(nombreCompleto, username, passwordTemporal, roles), true);
 
             mailSender.send(message);
@@ -61,7 +61,7 @@ public class EmailService {
             List<String> roles) {
 
         String rolesHtml = roles.stream()
-                .map(r -> "<li style='padding:4px 0;'>✔️ " + formatRolName(r) + "</li>")
+                .map(r -> "<li style='padding:4px 0;'>✔ " + formatRolName(r) + "</li>")
                 .reduce("", String::concat);
 
         return """
@@ -180,6 +180,157 @@ public class EmailService {
     }
 
     @Async
+    public void enviarNotificacionNuevaSesion(
+            String destinatario,
+            String nombreDocente,
+            String nombreAyudante,
+            String asignatura,
+            String fechaSesion,
+            String horasRegistradas,
+            String temasTratados) {
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromAddress, SYSTEM_NAME);
+            helper.setTo(destinatario);
+            helper.setSubject("SGAC - Registro de nueva sesión de ayudantía");
+            helper.setText(buildNuevaSesionTemplate(nombreDocente, nombreAyudante, asignatura, fechaSesion, horasRegistradas, temasTratados), true);
+
+            mailSender.send(message);
+            log.info("[EmailService] Notificación de nueva sesión enviada a: {}", destinatario);
+
+        } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+            log.error("[EmailService] Error al enviar notificación de sesión a {}: {}", destinatario, e.getMessage());
+        }
+    }
+
+    private String buildNuevaSesionTemplate(
+            String nombreDocente,
+            String nombreAyudante,
+            String asignatura,
+            String fechaSesion,
+            String horasRegistradas,
+            String temasTratados) {
+
+        return """
+        <!DOCTYPE html>
+        <html lang="es">
+        <head>
+          <meta charset="UTF-8"/>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        </head>
+        <body style="margin:0;padding:0;background:#f9fafb;font-family:'Segoe UI',Arial,sans-serif;">
+
+          <table width="100%%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:32px 16px;">
+            <tr><td align="center">
+
+              <table width="600" cellpadding="0" cellspacing="0"
+                     style="background:#ffffff;border-radius:12px;
+                            box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);overflow:hidden;max-width:600px;border:1px solid #e5e7eb;">
+
+                <tr>
+                  <td style="background:%s; padding:40px;text-align:center;">
+                    <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;letter-spacing:-1px;">
+                      SGAC
+                    </h1>
+                    <p style="margin:8px 0 0;color:#dcfce7;font-size:14px;font-weight:500;">
+                      Universidad Técnica Estatal de Quevedo
+                    </p>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="padding:40px;">
+
+                    <p style="margin:0 0 8px;font-size:20px;font-weight:700;color:%s;">
+                      Estimado/a %s,
+                    </p>
+                    <p style="margin:0 0 28px;font-size:15px;color:#4b5563;line-height:1.6;">
+                      Le informamos que el ayudante de cátedra <strong>%s</strong> ha registrado una nueva sesión para la asignatura de <strong>%s</strong>.
+                    </p>
+
+                    <p style="margin:0 0 10px;font-size:14px;font-weight:700;color:%s;">
+                      Detalles de la sesión:
+                    </p>
+
+                    <table width="100%%" cellpadding="0" cellspacing="0"
+                           style="background:%s;border:1px solid #bbf7d0;
+                                  border-radius:12px;margin-bottom:28px;">
+                      <tr>
+                        <td style="padding:24px;">
+                          <table width="100%%">
+                            <tr>
+                              <td width="30%%" style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;border-bottom:1px solid #dcfce7;">
+                                Fecha:
+                              </td>
+                              <td style="padding:8px 0;font-size:14px;color:#374151;border-bottom:1px solid #dcfce7;">
+                                %s
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;border-bottom:1px solid #dcfce7;">
+                                Horas registradas:
+                              </td>
+                              <td style="padding:8px 0;font-size:14px;color:#374151;border-bottom:1px solid #dcfce7;">
+                                %s
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;">
+                                Temas tratados:
+                              </td>
+                              <td style="padding:8px 0;font-size:14px;color:#374151;">
+                                %s
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="text-align:center;margin-bottom:10px;">
+                      <a href="%s"
+                         style="display:inline-block;background:%s;
+                                color:#ffffff;text-decoration:none;padding:12px 32px;
+                                border-radius:8px;font-size:14px;font-weight:700;
+                                box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+                        Revisar en el Sistema
+                      </a>
+                    </div>
+
+                  </td>
+                </tr>
+
+                <tr>
+                  <td style="background:#f9fafb;padding:24px;border-top:1px solid #f3f4f6;text-align:center;">
+                    <p style="margin:0;font-size:11px;color:#9ca3af;text-transform:uppercase;letter-spacing:1px;">
+                      © 2025 UTEQ — UNIDAD DE TECNOLOGÍAS DE INFORMACIÓN
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+            </td></tr>
+          </table>
+
+        </body>
+        </html>
+        """.formatted(
+                GREEN_GRADIENT,
+                GREEN_PRIMARY, nombreDocente,
+                nombreAyudante, asignatura,
+                GREEN_PRIMARY,
+                GREEN_LIGHT,
+                fechaSesion,
+                horasRegistradas,
+                temasTratados,
+                SYSTEM_URL, GREEN_PRIMARY
+        );
+    }
+
+    @Async
     public void enviarActualizacionCarga(
             String destinatario,
             String nombreDocente,
@@ -192,7 +343,7 @@ public class EmailService {
 
             helper.setFrom(fromAddress, SYSTEM_NAME);
             helper.setTo(destinatario);
-            helper.setSubject("📚 SGAC — Actualización de Carga Académica");
+            helper.setSubject("SGAC — Actualización de Carga Académica");
             helper.setText(buildCargaTemplate(nombreDocente, asignaturasActuales, asignaturasRevocadas), true);
 
             mailSender.send(message);

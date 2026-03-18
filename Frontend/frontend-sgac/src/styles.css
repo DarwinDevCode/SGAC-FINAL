@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600&display=swap');
+
 :root {
   --background: 210 29% 97%;
   --foreground: 0 0% 13%;
@@ -27,11 +29,16 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Roboto', system-ui, sans-serif;
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   overflow-x: hidden;
 }
+
+.roboto-300 { font-weight: 300; }
+.roboto-400 { font-weight: 400; }
+.roboto-500 { font-weight: 500; }
+.roboto-600 { font-weight: 600; }
 
 /* Utilidades mínimas */
 .flex {

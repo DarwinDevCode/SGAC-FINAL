@@ -76,10 +76,6 @@ public class SesionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    /**
-     * Módulo "Mis Sesiones" para AYUDANTE_CATEDRA.
-     * Lista todas las sesiones/actividades registradas por el ayudante (idUsuario).
-     */
     @GetMapping("/mis-sesiones")
     @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
     public ResponseEntity<List<SesionResponseDTO>> listarMisSesiones(@RequestParam Integer idAyudante) {

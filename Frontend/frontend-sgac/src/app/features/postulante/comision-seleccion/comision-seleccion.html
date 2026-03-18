@@ -1,81 +1,172 @@
-<!-- src/app/features/estudiante/mi-comision/mi-comision-estudiante.html -->
-<div class="mce-wrapper">
+<div class="gestion-container">
 
-  <!-- ── Header ───────────────────────────────────────────── -->
-  <div class="mce-header">
-    <div class="mce-header-icon">
-      <lucide-icon name="users" size="22"></lucide-icon>
-    </div>
-    <div>
-      <h1 class="mce-title">Mi Comisión de Selección</h1>
-      <p class="mce-subtitle">Miembros asignados para evaluar tu postulación</p>
+  <!-- ── PAGE HEADER ─────────────────────────────────────────── -->
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title">Mi Tribunal Evaluador</h2>
+      <p class="subtitle">Información de tu evaluación de oposición y comisión calificadora.</p>
     </div>
   </div>
 
-  <!-- ── Loader ────────────────────────────────────────────── -->
-  <div *ngIf="loading" class="mce-state-box">
-    <lucide-icon name="loader" size="28" class="mce-spin mce-icon-muted"></lucide-icon>
-    <p class="mce-state-text">Cargando tu comisión...</p>
-  </div>
-
-  <!-- ── Error ─────────────────────────────────────────────── -->
-  <div *ngIf="!loading && errorMsg" class="mce-state-box mce-error-box">
-    <lucide-icon name="triangle-alert" size="28" class="mce-icon-warn"></lucide-icon>
-    <p class="mce-state-text">{{ errorMsg }}</p>
-  </div>
-
-  <!-- ── Sin comisiones ────────────────────────────────────── -->
-  <div *ngIf="!loading && !errorMsg && comisiones.length === 0" class="mce-state-box">
-    <lucide-icon name="inbox" size="36" class="mce-icon-muted"></lucide-icon>
-    <p class="mce-state-text">Aún no tienes una comisión asignada.</p>
-    <p class="mce-state-hint">La comisión se conformará una vez que inicie el proceso de evaluación.</p>
-  </div>
-
-  <!-- ── Lista de comisiones ────────────────────────────────── -->
-  <div *ngIf="!loading && !errorMsg && comisiones.length > 0" class="mce-list">
-
-    <div *ngFor="let com of comisiones" class="mce-card">
-
-      <!-- Cabecera tarjeta -->
-      <div class="mce-card-header">
-        <div class="mce-card-header-left">
-          <lucide-icon name="book-marked" size="18"></lucide-icon>
-          <span class="mce-asignatura">{{ com.nombreAsignatura }}</span>
+  <!-- ── SKELETON LOADER ────────────────────────────────────── -->
+  @if (isLoading) {
+    <div class="cs-skeleton-wrap">
+      <div class="cs-skeleton-header shimmer"></div>
+      <div class="cs-skeleton-body">
+        <div class="cs-skeleton-card shimmer"></div>
+        <div class="cs-skeleton-side">
+          <div class="cs-skeleton-member shimmer"></div>
+          <div class="cs-skeleton-member shimmer"></div>
+          <div class="cs-skeleton-member shimmer"></div>
         </div>
-        <span class="mce-badge-fecha">
-          <lucide-icon name="calendar-days" size="13"></lucide-icon>
-          Conformada el {{ formatFecha(com.fechaConformacion) }}
-        </span>
+      </div>
+    </div>
+  }
+  @else if (errorMessage || !datosTribunal) {
+    <div class="cs-empty-card">
+      <div class="cs-empty-icon-wrap">
+        <lucide-icon name="users" size="28"></lucide-icon>
+      </div>
+      <h3 class="cs-empty-title">Sin tribunal asignado</h3>
+      <p class="cs-empty-msg">
+        {{ errorMessage || 'Aún no tienes un tribunal calificador asignado. Vuelve a consultar una vez que el coordinador conforme las comisiones.' }}
+      </p>
+    </div>
+  }
+  @else {
+    <div class="cs-layout">
+
+      <!-- Comisión Banner -->
+      <div class="cs-commission-banner">
+        <div class="cs-commission-icon">
+          <lucide-icon name="landmark" size="20"></lucide-icon>
+        </div>
+        <div>
+          <span class="cs-commission-label">Comisión asignada</span>
+          <h3 class="cs-commission-name">{{ datosTribunal.comision }}</h3>
+        </div>
       </div>
 
-      <p class="mce-comision-nombre">{{ com.nombreComision }}</p>
+      <div class="cs-grid">
 
-      <!-- Grid de miembros -->
-      <div class="mce-members-grid">
-        <div
-          *ngFor="let m of ordenadosMiembros(com.miembros)"
-          class="mce-member-card"
-          [class.mce-member-decano]="m.cargo === 'DECANO'"
-          [class.mce-member-coord]="m.cargo === 'COORDINADOR'"
-          [class.mce-member-docente]="m.cargo === 'DOCENTE'"
-        >
-          <div class="mce-member-top">
-            <div class="mce-member-avatar">
-              <lucide-icon [name]="iconForCargo(m.cargo)" size="20"></lucide-icon>
+        <!-- ── COLUMNA IZQUIERDA: Detalles de la evaluación ── -->
+        <section class="cs-card cs-eval-card">
+
+          <div class="cs-card-head">
+            <div class="cs-card-head-icon">
+              <lucide-icon name="calendar-check" size="18"></lucide-icon>
             </div>
-            <span class="mce-member-role-badge">{{ labelForCargo(m.cargo) }}</span>
+            <div>
+              <h4 class="cs-card-title">Detalles de la Evaluación</h4>
+              <p class="cs-card-subtitle">Información logística de tu prueba de oposición</p>
+            </div>
           </div>
 
-          <p class="mce-member-name">{{ m.nombres }} {{ m.apellidos }}</p>
+          <div class="cs-divider"></div>
 
-          <a [href]="'mailto:' + m.correo" class="mce-member-mail">
-            <lucide-icon name="mail" size="13"></lucide-icon>
-            {{ m.correo }}
-          </a>
-        </div>
+          <!-- Tema -->
+          <div class="cs-detail-tema">
+            <div class="cs-detail-tema-label">
+              <lucide-icon name="book-open" size="14"></lucide-icon>
+              <span>Tema de Exposición</span>
+            </div>
+            <p class="cs-detail-tema-text">{{ datosTribunal.evaluacion.temaExposicion }}</p>
+          </div>
+
+          <!-- Grid de datos -->
+          <div class="cs-detail-grid">
+
+            <div class="cs-detail-item">
+              <div class="cs-detail-icon-wrap cs-icon-blue">
+                <lucide-icon name="calendar" size="15"></lucide-icon>
+              </div>
+              <div>
+                <span class="cs-detail-label">Fecha</span>
+                <span class="cs-detail-value">{{ formatearFecha(datosTribunal.evaluacion.fechaEvaluacion) }}</span>
+              </div>
+            </div>
+
+            <div class="cs-detail-item">
+              <div class="cs-detail-icon-wrap cs-icon-violet">
+                <lucide-icon name="map-pin" size="15"></lucide-icon>
+              </div>
+              <div>
+                <span class="cs-detail-label">Lugar</span>
+                <span class="cs-detail-value">{{ datosTribunal.evaluacion.lugar }}</span>
+              </div>
+            </div>
+
+            <div class="cs-detail-item">
+              <div class="cs-detail-icon-wrap cs-icon-amber">
+                <lucide-icon name="clock" size="15"></lucide-icon>
+              </div>
+              <div>
+                <span class="cs-detail-label">Horario</span>
+                <span class="cs-detail-value">
+                  {{ formatearHora(datosTribunal.evaluacion.horaInicio) }}
+                  <span class="cs-hora-sep">→</span>
+                  {{ formatearHora(datosTribunal.evaluacion.horaFin) }}
+                </span>
+              </div>
+            </div>
+
+            <div class="cs-detail-item">
+              <div class="cs-detail-icon-wrap cs-icon-green">
+                <lucide-icon name="list-ordered" size="15"></lucide-icon>
+              </div>
+              <div>
+                <span class="cs-detail-label">Orden de exposición</span>
+                <span class="cs-detail-value">
+                  Turno #{{ datosTribunal.evaluacion.ordenExposicion }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Aviso -->
+          <div class="cs-aviso">
+            <lucide-icon name="info" size="13"></lucide-icon>
+            <p>El tema fue asignado mediante sorteo. Prepara el material de apoyo y llega 15 minutos antes.</p>
+          </div>
+
+        </section>
+
+        <!-- ── COLUMNA DERECHA: Miembros del tribunal ──────── -->
+        <section class="cs-card cs-members-card">
+
+          <div class="cs-card-head">
+            <div class="cs-card-head-icon">
+              <lucide-icon name="users" size="18"></lucide-icon>
+            </div>
+            <div>
+              <h4 class="cs-card-title">Tribunal Calificador</h4>
+            </div>
+          </div>
+
+          <div class="cs-divider"></div>
+
+          <div class="cs-members-list">
+            @for (miembro of datosTribunal.miembros; track miembro.nombre) {
+              <div class="cs-member-item">
+                <div class="cs-member-avatar" [ngClass]="rolColor(miembro.rol)">
+                  {{ iniciales(miembro.nombre) }}
+                </div>
+                <div class="cs-member-info">
+                  <span class="cs-member-name">{{ miembro.nombre }}</span>
+                  <div class="cs-member-rol-wrap">
+                    <lucide-icon [name]="rolIcon(miembro.rol)" size="12"></lucide-icon>
+                    <span class="cs-member-rol" [ngClass]="rolColor(miembro.rol)">{{ miembro.rol }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+        </section>
+
       </div>
-
     </div>
-  </div>
+  }
 
 </div>

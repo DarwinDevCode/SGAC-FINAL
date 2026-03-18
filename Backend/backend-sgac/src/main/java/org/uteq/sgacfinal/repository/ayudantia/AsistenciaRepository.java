@@ -52,6 +52,14 @@ public class AsistenciaRepository {
         );
     }
 
+    public String obtenerMatrizAsistencia(Integer idAyudantia) {
+        return jdbcTemplate.queryForObject(
+                "SELECT ayudantia.fn_obtener_matriz_asistencia(?::integer)",
+                String.class,
+                idAyudantia
+        );
+    }
+
     public Integer obtenerIdAyudantiaPorUsuario(Integer idUsuario) {
         return jdbcTemplate.queryForObject(
                 "SELECT ayudantia.fn_obtener_id_ayudantia_por_usuario(?::integer)",

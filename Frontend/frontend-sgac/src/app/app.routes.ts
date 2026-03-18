@@ -3,9 +3,6 @@ import { selectorRolGuard } from './core/guards/selector-rol-guard-guard';
 import { salaEvaluacionGuard } from './features/evaluacionOposicion/sala-evaluacion-guard-guard';
 import { coordinadorGuard } from './features/coordinador/auth';
 
-// NOTA: Hemos eliminado todos los imports de componentes de la parte superior.
-// Solo se quedan Guards y Tipos de Angular.
-
 export const routes: Routes = [
   {
     path: 'login',
@@ -19,12 +16,10 @@ export const routes: Routes = [
 
   {
     path: '',
-    // El Layout se puede quedar estático para evitar parpadeos,
-    // pero todos sus hijos DEBEN ser lazy.
     loadComponent: () => import('./layouts/main-layout/main-layout').then(m => m.MainLayoutComponent),
     children: [
 
-      // ── Global (Incluyendo el Visor pesado) ───────────────────────────
+      // ── Global ───────────────────────────────────────────────────────
       {
         path: 'notificaciones',
         loadComponent: () => import('./features/notificaciones/notificaciones-page.component').then(m => m.NotificacionesPageComponent)
@@ -51,7 +46,6 @@ export const routes: Routes = [
         path: 'resultados-evaluacion',
         loadComponent: () => import('./features/General/ranking-resultados-component/ranking-resultados-component').then(m => m.RankingResultadosComponent)
       },
-      // AQUÍ ESTÁ EL CAMBIO CLAVE PARA TU RENDIMIENTO:
       {
         path: 'documentos-visor',
         loadComponent: () => import('./features/General/documento-visor-component/documento-visor-component').then(m => m.DocumentoVisorComponent)
@@ -61,7 +55,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/General/documento-gestion-component/documento-gestion-component').then(m => m.DocumentoGestionComponent)
       },
 
-      // ── Admin ───────────────────────────────────────────────
+      // ── Admin ────────────────────────────────────────────────────────
       {
         path: 'admin/dashboard',
         loadComponent: () => import('./features/admin/dashboard/dashboard').then(m => m.DashboardComponent)
@@ -87,7 +81,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/gestion-periodos/gestion-periodos.component').then(m => m.GestionPeriodosComponent)
       },
 
-      // ── Postulante / Estudiante ─────────────────────────────
+      // ── Postulante / Estudiante ──────────────────────────────────────
       {
         path: 'postulante/dashboard',
         loadComponent: () => import('./features/postulante/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -113,7 +107,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/postulante/comision-seleccion/comision-seleccion').then(m => m.ComisionSeleccion)
       },
 
-      // ── Decano ──────────────────────────────────────────────
+      // ── Decano ───────────────────────────────────────────────────────
       {
         path: 'decano/dashboard',
         loadComponent: () => import('./features/decano/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -135,7 +129,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/decano/auditoria/auditoria').then(m => m.AuditoriaComponent)
       },
 
-      // ── Coordinador ─────────────────────────────────────────
+      // ── Coordinador ──────────────────────────────────────────────────
       {
         path: 'coordinador/dashboard',
         loadComponent: () => import('./features/coordinador/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -154,12 +148,12 @@ export const routes: Routes = [
       },
       {
         path: 'coordinador/evaluacion-meritos',
-        canActivate:[coordinadorGuard],
+        canActivate: [coordinadorGuard],
         loadComponent: () => import('./features/coordinador/selector-meritos-component/selector-meritos-component').then(m => m.SelectorMeritosComponent)
       },
       {
         path: 'coordinador/evaluacion-meritos/:idPostulacion',
-        canActivate:[coordinadorGuard],
+        canActivate: [coordinadorGuard],
         loadComponent: () => import('./features/coordinador/evaluacion-meritos-component/evaluacion-meritos-component').then(m => m.EvaluacionMeritosComponent)
       },
       {
@@ -191,7 +185,8 @@ export const routes: Routes = [
         loadComponent: () => import('./features/postulante/notificaciones/notificaciones.component').then(m => m.NotificacionesComponent)
       },
 
-      // ── Ayudante ────────────────────────────────────────────
+      // ── Ayudante ──────────────────────────────────────────────────
+
       {
         path: 'ayudante/dashboard',
         loadComponent: () => import('./features/ayudante/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -205,11 +200,15 @@ export const routes: Routes = [
         loadComponent: () => import('./features/ayudante/asistencia-dinamica-component/asistencia-dinamica-component').then(m => m.AsistenciaDinamicaComponent)
       },
       {
+        path: 'ayudante/asistencia/matriz',
+        loadComponent: () => import('../app/features/ayudante/matriz-asistencia-component/matriz-asistencia-component').then(m => m.MatrizAsistenciaComponent)
+      },
+      {
         path: 'ayudante/sesiones',
         loadComponent: () => import('./features/ayudante/sesiones/sesiones').then(m => m.SesionesComponent)
       },
 
-      // ── Docente ────────────────────────────────────────────
+      // ── Docente ──────────────────────────────────────────────────────
       {
         path: 'docente/dashboard',
         loadComponent: () => import('./features/docente/dashboard/docente-dashboard.component').then(m => m.DocenteDashboardComponent)
