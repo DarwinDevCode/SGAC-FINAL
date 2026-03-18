@@ -20,11 +20,14 @@ public class AiReportServiceImpl implements AiReportService {
 
     private static final Logger log = LoggerFactory.getLogger(AiReportServiceImpl.class);
 
-    @Value("${gemini.api.key:}")
-    private String geminiApiKey;
+    @Value("${groq.api.key:}")
+    private String groqApiKey;
 
-    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent}")
-    private String geminiApiUrl;
+    @Value("${groq.api.url:https://api.groq.com/openai/v1/chat/completions}")
+    private String groqApiUrl;
+
+    @Value("${groq.model:llama-3.1-70b-versatile}")
+    private String groqModel;
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -36,56 +39,67 @@ public class AiReportServiceImpl implements AiReportService {
 
     @Override
     public String generateBorradorInforme(String payloadSesiones) {
-        if (geminiApiKey == null || geminiApiKey.isEmpty()) {
-            log.warn("GEMINI_API_KEY no configurada. Retornando texto mock.");
+        log.info("Iniciando generación de borrador con Groq. Key presente: {}", (groqApiKey != null && !groqApiKey.isEmpty()));
+        if (groqApiKey == null || groqApiKey.isEmpty()) {
+            log.warn("GROQ_API_KEY no configurada. Retornando texto mock.");
             return generarMockInforme(payloadSesiones);
         }
 
         try {
-            String url = geminiApiUrl + "?key=" + geminiApiKey;
-
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(groqApiKey);
 
-            String prompt = "Actúa como un asistente académico profesional. Genera un INFORME MENSUAL DE ACTIVIDADES DE AYUDANTÍA DE CÁTEDRA. " +
-                    "Usa un lenguaje formal, técnico y detallado. " +
-                    "Estructura el informe en HTML (usando h1, h2, p, ul, li, strong, table, tr, td). " +
-                    "El informe debe incluir: \n" +
-                    "1. Un título profesional.\n" +
-                    "2. Introducción descriptiva del periodo.\n" +
-                    "3. Un Cuadro Resumen de actividades basado en estos datos (formatea los datos como una tabla HTML): \n" + payloadSesiones + "\n" +
-                    "4. Conclusiones y recomendaciones basadas en las horas y temas tratados.\n\n" +
-                    "IMPORTANTE: No incluyas etiquetas <html>, <head> ni <body>. Solo el contenido interno. " +
-                    "No uses bloques de código (```html). Entrega directamente el código HTML.";
+            String prompt = "Actúa como un Rector o Decano universitario experto en GESTIÓN DE CALIDAD ACADÉMICA. " +
+                    "Tu misión es redactar un INFORME DE GESTIÓN MENSUAL DE AYUDANTÍA DE CÁTEDRA de nivel superior.\n\n" +
+                    "### DIRECTRICES DE ALTA CALIDAD:\n" +
+                    "1. **Dominio Lingüístico**: Usa un léxico sofisticado y técnico (ej. 'Paradigma pedagógico', 'Sinergia educativa', 'Mitigación de brechas de aprendizaje').\n" +
+                    "2. **Elaboración Narrativa**: NO resumas. EXPANDE. Si los datos dicen 'Tutoría de Matrices', redacta: 'Se lideró una sesión de fortalecimiento cognitivo enfocada en el álgebra matricial, permitiendo a los estudiantes internalizar estructuras de datos complejas aplicadas a la ingeniería'.\n" +
+                    "3. **Análisis Crítico**: Incluye párrafos de reflexión sobre cómo estas actividades impactan en los indicadores de rendimiento estudiantil.\n" +
+                    "4. **Estética Ejecutiva**: Entrega código HTML con estilos CSS inline sofisticados (bordes redondeados, tipografía elegante, espaciado generoso, colores institucionales #0d47a1).\n\n" +
+                    "### ESTRUCTURA DEL DOCUMENTO:\n" +
+                    "- **Título**: 'INFORME EJECUTIVO DE DESEMPEÑO DOCENTE Y ASISTENCIA ACADÉMICA'.\n" +
+                    "- **Contextualización**: Un análisis profundo del entorno educativo del mes.\n" +
+                    "- **Matriz de Intervenciones**: Una TABLA HTML impecable con columnas: 'Cronología', 'Eje Temático/Intervención', 'Carga Horaria', 'Resultado/Logro Alcanzado'.\n" +
+                    "- **Evaluación de Competencias**: Un apartado detallando las competencias desarrolladas por los estudiantes.\n" +
+                    "- **Recomendaciones Estratégicas**: Sugerencias para el próximo ciclo basadas en lo observado.\n\n" +
+                    "### INSUMOS (SESIONES):\n" +
+                    payloadSesiones + "\n\n" +
+                    "### RESTRICCIONES TÉCNICAS:\n" +
+                    "- Entrega SOLO el HTML del contenedor principal (sin <html>, <head> o <body>).\n" +
+                    "- NADA de bloques de código markdown.\n" +
+                    "- Idioma: ESPAÑOL FORMAL DE ESPAÑA/AMÉRICA LATINA (Nivel C2).";
 
             Map<String, Object> requestBody = new HashMap<>();
-            Map<String, Object> contentList = new HashMap<>();
-            Map<String, Object> partsList = new HashMap<>();
-            
-            partsList.put("text", prompt);
-            contentList.put("parts", List.of(partsList));
-            requestBody.put("contents", List.of(contentList));
+            requestBody.put("model", groqModel);
+            requestBody.put("messages", List.of(
+                    Map.of("role", "system", "content", "Eres una IA de élite especializada en redacción administrativa y académica universitaria de alto nivel."),
+                    Map.of("role", "user", "content", prompt)
+            ));
+            requestBody.put("temperature", 0.6); // Un poco más bajo para mayor coherencia formal
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
-            Map response = restTemplate.postForObject(url, entity, Map.class);
+            log.info("Enviando petición a Groq URL: {}", groqApiUrl);
+            Map<String, Object> response = restTemplate.postForObject(groqApiUrl, entity, Map.class);
+            log.info("Respuesta recibida de Groq: {}", (response != null));
             
-            if (response != null && response.containsKey("candidates")) {
-                List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
-                if (!candidates.isEmpty()) {
-                    Map<String, Object> contentMap = (Map<String, Object>) candidates.get(0).get("content");
-                    if (contentMap != null && contentMap.containsKey("parts")) {
-                        List<Map<String, Object>> textParts = (List<Map<String, Object>>) contentMap.get("parts");
-                        if (!textParts.isEmpty()) {
-                            return (String) textParts.get(0).get("text");
+            if (response != null && response.containsKey("choices")) {
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) response.get("choices");
+                if (!choices.isEmpty()) {
+                    Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
+                    if (message != null && message.containsKey("content")) {
+                        String result = (String) message.get("content");
+                        if (result != null && !result.isBlank()) {
+                            return result;
                         }
                     }
                 }
             }
-
+            
+            log.error("La API de Groq respondió pero no se pudo extraer el contenido.");
             return generarMockInforme(payloadSesiones);
         } catch (Exception e) {
-            log.error("Error al generar borrador con Gemini AI: {}", e.getMessage(), e);
+            log.error("Error crítico al interactuar con Groq AI: {}", e.getMessage(), e);
             return generarMockInforme(payloadSesiones);
         }
     }
@@ -93,7 +107,7 @@ public class AiReportServiceImpl implements AiReportService {
     private String generarMockInforme(String payload) {
         StringBuilder sb = new StringBuilder();
         sb.append("<div style='font-family: Arial, sans-serif; color: #333;'>");
-        sb.append("<h1 style='color: #2c3e50;'>Informe de Ayudantía (Borrador de Respaldo)</h1>");
+        sb.append("<h1 style='color: #2c3e50;'>[DEBUG - NUEVA VERSIÓN] Informe de Ayudantía (Respaldo)</h1>");
         sb.append("<p>Este es un borrador generado automáticamente basado en las sesiones registradas.</p>");
         sb.append("<h2 style='color: #2980b9;'>1. Resumen de Actividades</h2>");
         sb.append("<table border='1' style='width:100%; border-collapse: collapse; margin-top: 10px;'>");
