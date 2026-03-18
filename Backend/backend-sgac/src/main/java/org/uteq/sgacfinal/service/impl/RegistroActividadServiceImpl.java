@@ -45,7 +45,6 @@ public class RegistroActividadServiceImpl implements IRegistroActividadService {
                         request.getTemaTratado() != null ? request.getTemaTratado() : "Sin tema"
                 );
             } catch (Exception e) {
-                // No bloqueamos el registro por falla en la alerta
             }
         }
 
