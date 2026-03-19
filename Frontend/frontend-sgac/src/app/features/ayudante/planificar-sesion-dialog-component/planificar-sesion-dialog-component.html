@@ -1,0 +1,53 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="dialog-header-content">
+      <lucide-icon name="calendar-plus" size="20" class="dialog-icon"></lucide-icon>
+      <div><h2 class="dialog-title">Planificar Nueva Sesión</h2><p class="dialog-subtitle">Crea una nueva sesión de ayudantía</p></div>
+    </div>
+    <button class="btn-close" (click)="cerrar()" title="Cerrar"><lucide-icon name="x" size="18"></lucide-icon></button>
+  </div>
+  <div class="dialog-divider"></div>
+  <div class="dialog-body">
+    <div class="dialog-hint"><lucide-icon name="info" size="16"></lucide-icon><span><strong>Límite semanal:</strong> 20 horas</span></div>
+    <form [formGroup]="form" class="dialog-form">
+      <div class="form-group full-width">
+        <label for="fecha" class="form-label">Fecha de la sesión *</label>
+        <input id="fecha" type="date" class="form-input" formControlName="fecha" [min]="hoy" [class.form-input-error]="form.get('fecha')?.invalid && form.get('fecha')?.touched" />
+        <span *ngIf="obtenerErrorCampo('fecha')" class="form-error">{{ obtenerErrorCampo('fecha') }}</span>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="horaInicio" class="form-label">Hora de inicio *</label>
+          <input id="horaInicio" type="time" class="form-input" formControlName="horaInicio" (change)="form.updateValueAndValidity()" [class.form-input-error]="form.get('horaInicio')?.invalid && form.get('horaInicio')?.touched" />
+          <span *ngIf="obtenerErrorCampo('horaInicio')" class="form-error">{{ obtenerErrorCampo('horaInicio') }}</span>
+        </div>
+        <div class="form-group">
+          <label for="horaFin" class="form-label">Hora de fin *</label>
+          <input id="horaFin" type="time" class="form-input" formControlName="horaFin" (change)="form.updateValueAndValidity()" [class.form-input-error]="form.get('horaFin')?.invalid && form.get('horaFin')?.touched" />
+          <span *ngIf="obtenerErrorCampo('horaFin')" class="form-error">{{ obtenerErrorCampo('horaFin') }}</span>
+        </div>
+        <div class="form-group form-group-duracion">
+          <label class="form-label">Duración</label>
+          <div class="duracion-display"><lucide-icon name="hourglass" size="14"></lucide-icon><span>{{ calcularDuracion() }}</span></div>
+        </div>
+      </div>
+      <div *ngIf="obtenerErrorFormulario()" class="form-error-general"><lucide-icon name="alert-circle" size="14"></lucide-icon><span>{{ obtenerErrorFormulario() }}</span></div>
+      <div class="form-group full-width">
+        <label for="lugar" class="form-label">Lugar *</label>
+        <input id="lugar" type="text" class="form-input" formControlName="lugar" placeholder="Ej: Aula 204, Laboratorio 3, Virtual, etc." [class.form-input-error]="form.get('lugar')?.invalid && form.get('lugar')?.touched" />
+        <span *ngIf="obtenerErrorCampo('lugar')" class="form-error">{{ obtenerErrorCampo('lugar') }}</span>
+      </div>
+      <div class="form-group full-width">
+        <label for="tema" class="form-label">Tema de la sesión *</label>
+        <textarea id="tema" class="form-textarea" formControlName="tema" placeholder="Describe brevemente el tema a tratar en esta sesión…" rows="3" [class.form-input-error]="form.get('tema')?.invalid && form.get('tema')?.touched"></textarea>
+        <div class="form-hint"><span>{{ form.get('tema')?.value?.length || 0 }} caracteres</span></div>
+        <span *ngIf="obtenerErrorCampo('tema')" class="form-error">{{ obtenerErrorCampo('tema') }}</span>
+      </div>
+    </form>
+    <div *ngIf="errorMsg()" class="dialog-error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ errorMsg() }}</span></div>
+  </div>
+  <div class="dialog-footer">
+    <button class="btn btn-ghost" (click)="cerrar()" [disabled]="enviando()">Cancelar</button>
+    <button class="btn btn-primary" (click)="enviar()" [disabled]="form.invalid || enviando()"><lucide-icon *ngIf="!enviando()" name="check" size="16"></lucide-icon><lucide-icon *ngIf="enviando()" name="loader" size="16" class="spin"></lucide-icon><span>{{ enviando() ? 'Creando...' : 'Planificar sesión' }}</span></button>
+  </div>
+</div>

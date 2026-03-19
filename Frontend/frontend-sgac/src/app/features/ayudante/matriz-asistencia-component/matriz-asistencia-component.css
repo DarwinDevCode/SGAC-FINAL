@@ -1,14 +1,3 @@
-/* matriz-asistencia.component.css
-   Refactor visual minimalista (Apple/Stripe-like)
-   - Mantiene clases originales (mz-*) y agrega utilidades (ui-*)
-   - No altera la lógica Angular
-   - Usa variables globales (styles.css) para consistencia
-*/
-
-/* ─────────────────────────────────────────────────────────────────── */
-/* BASE / UTILIDADES                                                   */
-/* ─────────────────────────────────────────────────────────────────── */
-
 :host {
   --muted-fg: #64748b;                /* gris neutro para textos secundarios */
   --radius-sm: 8px;

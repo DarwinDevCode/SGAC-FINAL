@@ -2,12 +2,16 @@ package org.uteq.sgacfinal.repository.ayudantia;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
-import org.uteq.sgacfinal.dto.request.ayudantia.ParticipanteIdResponseDTO;
+import org.uteq.sgacfinal.dto.response.ayudantia.ParticipanteIdResponseDTO;
 import org.uteq.sgacfinal.dto.request.ayudantia.ParticipanteRequestDTO;
 import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
 import org.uteq.sgacfinal.util.DatabaseService;
+
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor

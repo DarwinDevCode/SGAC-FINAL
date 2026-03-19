@@ -373,89 +373,118 @@
   @if (isModalCompletarOpen && sesionACompletar) {
     <div class="modal-overlay" (click)="cerrarModalCompletar()">
       <div class="modal" style="width:min(780px,100%);" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
-
-        <div class="modal-header" style="padding: 0.75rem 1.25rem;">
+        <div class="modal-header">
           <div class="title-container">
-            <h3 class="title" style="font-size:1.05rem;">Completar sesión</h3>
-            <p class="subtitle" style="font-size: 0.75rem; margin-top: 0.1rem;">
+            <h3 class="title" style="font-size:1.1rem;">Completar sesión</h3>
+            <p class="subtitle">
               {{ sesionACompletar.fecha | date:'dd/MM/yyyy' }} · {{ sesionACompletar.temaTratado }}
             </p>
           </div>
-          <button class="btn-icon" style="width: 32px; height: 32px;" type="button" (click)="cerrarModalCompletar()" [disabled]="isCompleting">
-            <lucide-icon name="x" size="16"></lucide-icon>
+          <button class="btn-icon" type="button" (click)="cerrarModalCompletar()" [disabled]="isCompleting">
+            <lucide-icon name="x" size="18"></lucide-icon>
           </button>
         </div>
 
         <form [formGroup]="formCompletar" (ngSubmit)="submitCompletar()">
-          <div class="modal-scroll" style="padding: 1rem 1.25rem;">
-
-            <div class="field description-field">
-              <label class="field-label" style="font-size: 0.75rem; margin-bottom: 0.2rem;">Descripción de la actividad realizada *</label>
-              <textarea class="field-input"
-                        style="min-height: 160px; resize: vertical;"
-                        rows="6"
-                        formControlName="descripcionActividad"
-                        placeholder="Describe detalladamente lo que realizaste en esta sesión..."></textarea>
-            </div>
-
-            <div class="divider" style="margin: 0.7rem 0;"></div>
-
-            <div class="field">
-              <label class="field-label" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: flex; justify-content: space-between;">
-                Asistencia de estudiantes
-                <span class="text-xs text-muted-foreground font-normal">Clic para marcar</span>
-              </label>
-
-              <div class="table-card" style="margin-top: 0.25rem;">
-                <table class="data-table">
-                  <thead>
-                  <tr>
-                    <th style="width:52px;text-align:center;">Asistió</th>
-                    <th>Nombre</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                    @for (a of asistenciasCompletar; track a.idParticipanteAyudantia) {
-                      <tr (click)="toggleAsistenciaCompletar(a.idParticipanteAyudantia, !a.asistio)"
-                          style="cursor:pointer"
-                          [class.row-active]="a.asistio">
-                        <td style="text-align:center;">
-                          <input type="checkbox" [checked]="a.asistio" (click)="$event.stopPropagation()"
-                                 (change)="toggleAsistenciaCompletar(a.idParticipanteAyudantia, $any($event.target).checked)" />
-                        </td>
-                        <td style="font-size: 0.82rem; padding: 0.45rem 0.75rem;">{{ a.nombreCompleto }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
+          <div class="modal-scroll">
+            @if (completarError) {
+              <div class="inline-error">
+                <lucide-icon name="alert-triangle" size="16"></lucide-icon>
+                <span>{{ completarError }}</span>
               </div>
+            }
+
+            <!-- Descripción -->
+            <div class="field">
+              <label class="field-label">Descripción de la actividad realizada *</label>
+              <textarea class="field-input" rows="3" formControlName="descripcionActividad"
+                        placeholder="Describe brevemente lo que realizaste en esta sesión..."></textarea>
             </div>
 
-            <div class="divider" style="margin: 0.7rem 0;"></div>
+            <div class="divider"></div>
 
+            <!-- Asistencias -->
             <div class="field">
-              <label class="field-label" style="font-size: 0.75rem; margin-bottom: 0.2rem;">Evidencias *</label>
-              <div class="dropzone" style="padding: 0.5rem;">
-                <input class="dropzone-input" type="file" multiple (change)="onArchivosCompletar($any($event.target).files)" />
-                <div class="dropzone-content" style="padding: 0.5rem;">
-                  <lucide-icon name="upload" size="16"></lucide-icon>
-                  <span class="text-sm">Adjuntar fotos o documentos</span>
+              <label class="field-label">Asistencia</label>
+              @if (cargandoAsistencias) {
+                <div class="info-message" style="padding:.75rem;">
+                  <lucide-icon name="loader" size="18" class="animate-spin"></lucide-icon>
+                  <span class="text-sm">Cargando lista de asistencia…</span>
+                </div>
+              } @else if (asistenciasCompletar.length === 0) {
+                <div class="callout warn">
+                  <div class="callout-title">
+                    <lucide-icon name="users" size="15"></lucide-icon>
+                    <span>Sin padrón cargado</span>
+                  </div>
+                  <div class="callout-body">
+                    Aún no hay participantes registrados. Ve al módulo de
+                    <button type="button" style="text-decoration:underline;font-weight:600;"
+                            (click)="cerrarModalCompletar(); irAAsistencia()">
+                      Asistencia
+                    </button>
+                    para cargar el padrón antes de completar esta sesión.
+                  </div>
+                </div>
+              } @else {
+                <div class="table-card" style="margin-top:.35rem;">
+                  <table class="data-table">
+                    <thead>
+                    <tr>
+                      <th style="width:52px;text-align:center;">Asistió</th>
+                      <th>Nombre</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                      @for (a of asistenciasCompletar; track a.idParticipanteAyudantia) {
+                        <tr style="cursor:pointer;"
+                            (click)="toggleAsistenciaCompletar(a.idParticipanteAyudantia, !a.asistio)">
+                          <td style="text-align:center;">
+                            <input type="checkbox" [checked]="a.asistio"
+                                   (change)="toggleAsistenciaCompletar(a.idParticipanteAyudantia, $any($event.target).checked)"
+                                   (click)="$event.stopPropagation()" />
+                          </td>
+                          <td>{{ a.nombreCompleto }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Evidencias -->
+            <div class="field">
+              <label class="field-label">Evidencias * (al menos 1 archivo)</label>
+
+              <div class="dropzone">
+                <input class="dropzone-input" type="file" multiple
+                       (change)="onArchivosCompletar($any($event.target).files)"
+                       [disabled]="isCompleting" />
+                <div class="dropzone-content">
+                  <lucide-icon name="upload" size="18"></lucide-icon>
+                  <div>
+                    <div class="font-medium">Arrastra fotos, PDF u hojas de firmas</div>
+                    <div class="text-xs text-muted-foreground">Formatos: .jpg, .pdf, .docx</div>
+                  </div>
                 </div>
               </div>
 
               @if (archivosCompletar.length > 0) {
-                <div class="files-list" style="margin-top: 0.75rem; display: grid; gap: 0.5rem;">
+                <div class="files-list">
                   @for (f of archivosCompletar; track $index) {
-                    <div class="file-item" style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: hsl(var(--muted)/.3); border-radius: var(--radius); border: 1px solid hsl(var(--border));">
-                      <div style="display: flex; align-items: center; gap: 0.6rem; min-width: 0;">
-                        <lucide-icon name="paperclip" size="14"></lucide-icon>
-                        <div style="min-width: 0;">
-                          <div style="font-size: 0.8rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">{{ f.name }}</div>
-                          <div style="font-size: 0.7rem; color: hsl(var(--muted-foreground));">{{ (f.size / 1024) | number:'1.0-0' }} KB</div>
+                    <div class="file-item">
+                      <div class="file-left">
+                        <lucide-icon name="paperclip" size="15"></lucide-icon>
+                        <div class="file-meta">
+                          <div class="file-name">{{ f.name }}</div>
+                          <div class="text-xs text-muted-foreground">{{ (f.size / 1024) | number:'1.0-0' }} KB</div>
                         </div>
                       </div>
-                      <button class="btn-icon" style="width: 28px; height: 28px; color: hsl(var(--destructive));" type="button" (click)="quitarArchivoCompletar($index)">
-                        <lucide-icon name="trash-2" size="14"></lucide-icon>
+                      <button class="btn-icon" type="button" (click)="quitarArchivoCompletar($index)">
+                        <lucide-icon name="trash-2" size="15"></lucide-icon>
                       </button>
                     </div>
                   }
@@ -464,13 +493,16 @@
             </div>
           </div>
 
-          <div class="modal-footer sticky-footer" style="padding: 0.75rem 1.25rem;">
+          <div class="modal-footer sticky-footer">
             <button class="action-btn secondary" type="button" (click)="cerrarModalCompletar()" [disabled]="isCompleting">
               Cancelar
             </button>
-            <button class="action-btn" type="submit" [disabled]="!puedeSubmitCompletar || isCompleting">
-              @if (isCompleting) { <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon> }
-              {{ isCompleting ? 'Enviando...' : 'Enviar a revisión' }}
+            <button class="action-btn" type="submit" [disabled]="!puedeSubmitCompletar">
+              @if (isCompleting) {
+                <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon> Enviando...
+              } @else {
+                <lucide-icon name="send" size="16"></lucide-icon> Enviar a revisión
+              }
             </button>
           </div>
         </form>

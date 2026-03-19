@@ -4,22 +4,19 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 import {
-
+  RespuestaOperacion,
+  ParticipanteRequestDTO,
   ParticipanteIdResponseDTO,
+  PlanificarSesionRequestDTO,
   PlanificacionResponseDTO,
   AsistenciaSesionActualResponseDTO,
+  MarcadoAsistenciaRequestDTO,
   BorradorSesionResponseDTO,
   EvidenciaIdResponseDTO,
-  FinalizarSesionResponseDTO
-} from '../../models/ayudantia/sesiones';
-
-import {
-  ParticipanteRequestDTO,
-  PlanificarSesionRequestDTO,
-  MarcadoAsistenciaRequestDTO, FinalizarSesionRequestDTO,
-} from '../../models/ayudantia/asistencia';
-
-import { RespuestaOperacion} from '../../models/general/respuesta-operacion';
+  FinalizarSesionRequestDTO,
+  FinalizarSesionResponseDTO,
+  ParticipantePadronDTO
+} from '../../models/general/respuesta-operacion';
 
 @Injectable({
   providedIn: 'root'
@@ -98,6 +95,12 @@ export class AyudantiaService {
     return this.http.post<RespuestaOperacion<FinalizarSesionResponseDTO>>(
       `${this.URL_CIERRE}/finalizar`,
       request
+    );
+  }
+
+  obtenerPadron(): Observable<RespuestaOperacion<ParticipantePadronDTO[]>> {
+    return this.http.get<RespuestaOperacion<ParticipantePadronDTO[]>>(
+      this.URL_PARTICIPANTES
     );
   }
 }

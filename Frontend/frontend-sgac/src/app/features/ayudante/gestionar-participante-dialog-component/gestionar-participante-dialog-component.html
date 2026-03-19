@@ -1,0 +1,61 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <div class="dialog-header-content">
+      <lucide-icon [name]="esEdicion() ? 'user-cog' : 'user-plus'" size="20" class="dialog-icon"></lucide-icon>
+      <div>
+        <h2 class="dialog-title">{{ esEdicion() ? 'Editar Estudiante' : 'Nuevo Estudiante' }}</h2>
+        <p class="dialog-subtitle">{{ esEdicion() ? 'Modifica los datos del alumno' : 'Añade un alumno a tu padrón' }}</p>
+      </div>
+    </div>
+    <button class="btn-close" (click)="cerrar()" title="Cerrar">
+      <lucide-icon name="x" size="18"></lucide-icon>
+    </button>
+  </div>
+
+  <div class="dialog-divider"></div>
+
+  <div class="dialog-body">
+    <form [formGroup]="form" class="dialog-form">
+
+      <div class="form-group full-width">
+        <label for="nombre" class="form-label">Nombre Completo *</label>
+        <input id="nombre" type="text" class="input-field" formControlName="nombre"
+               placeholder="Ej: Juan Pérez"
+               [class.form-input-error]="form.get('nombre')?.invalid && form.get('nombre')?.touched" />
+        <span *ngIf="obtenerErrorCampo('nombre')" class="form-error text-destructive text-xs">{{ obtenerErrorCampo('nombre') }}</span>
+      </div>
+
+      <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label for="curso" class="form-label">Curso *</label>
+          <input id="curso" type="text" class="input-field" formControlName="curso"
+                 placeholder="Ej: Software 4"
+                 [class.form-input-error]="form.get('curso')?.invalid && form.get('curso')?.touched" />
+          <span *ngIf="obtenerErrorCampo('curso')" class="form-error text-destructive text-xs">{{ obtenerErrorCampo('curso') }}</span>
+        </div>
+
+        <div class="form-group">
+          <label for="paralelo" class="form-label">Paralelo</label>
+          <input id="paralelo" type="text" class="input-field" formControlName="paralelo" placeholder="Ej: A" />
+        </div>
+      </div>
+
+    </form>
+
+    <div *ngIf="errorMsg()" class="ui-alert error" style="margin-top: 1rem;">
+      <div class="ui-alert-content">
+        <lucide-icon name="alert-circle" size="16"></lucide-icon>
+        <span class="text-sm font-medium">{{ errorMsg() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-footer form-footer">
+    <button class="btn btn-ghost" (click)="cerrar()" [disabled]="enviando()">Cancelar</button>
+    <button class="btn btn-primary" (click)="enviar()" [disabled]="form.invalid || enviando()">
+      <lucide-icon *ngIf="!enviando()" name="save" size="16"></lucide-icon>
+      <lucide-icon *ngIf="enviando()" name="loader" size="16" class="spin"></lucide-icon>
+      <span>{{ enviando() ? 'Guardando...' : 'Guardar' }}</span>
+    </button>
+  </div>
+</div>
