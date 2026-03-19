@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service.catalogo;
 
-import org.uteq.sgacfinal.dto.Request.TipoEstadoRequisitoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoRequisitoResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoEstadoRequisitoRequestDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.TipoEstadoRequisitoResponseDTO;
 
 import java.util.List;
 

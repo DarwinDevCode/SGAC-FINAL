@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.DictaminarPostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluarDocumentoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.DictaminarPostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluarDocumentoRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 
 import java.util.List;
 

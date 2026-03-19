@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.CertificadoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.CertificadoResponseDTO;
+import org.uteq.sgacfinal.dto.request.CertificadoRequestDTO;
+import org.uteq.sgacfinal.dto.response.CertificadoResponseDTO;
 import java.util.List;
 
 public interface ICertificadoService {

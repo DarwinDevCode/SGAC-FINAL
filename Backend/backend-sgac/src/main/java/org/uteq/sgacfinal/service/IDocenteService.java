@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.DocenteRequestDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteResponseDTO;
+import org.uteq.sgacfinal.dto.request.DocenteRequestDTO;
+import org.uteq.sgacfinal.dto.response.DocenteResponseDTO;
 import java.util.List;
 
 public interface IDocenteService {

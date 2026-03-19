@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Response.convocatorias.FinalizarSeleccionResponseDTO;
+import org.uteq.sgacfinal.dto.response.convocatorias.FinalizarSeleccionResponseDTO;
 import org.uteq.sgacfinal.exception.OposicionBusinessException;
 import org.uteq.sgacfinal.repository.convocatorias.IFinalizarSeleccionRepository;
 

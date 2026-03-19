@@ -1,10 +1,10 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.CoordinadorRequestDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorResponseDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
+import org.uteq.sgacfinal.dto.request.CoordinadorRequestDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorResponseDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorEstadisticasDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorPostulanteReporteDTO;
 import java.util.List;
 
 public interface ICoordinadorService {

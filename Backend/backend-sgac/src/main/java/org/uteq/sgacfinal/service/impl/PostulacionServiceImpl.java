@@ -8,9 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.uteq.sgacfinal.dto.Request.NotificationRequest;
-import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.NotificationRequest;
+import org.uteq.sgacfinal.dto.request.PostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.entity.Estudiante;
 import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.repository.EstudianteRepository;
@@ -20,7 +20,6 @@ import org.uteq.sgacfinal.service.IPostulacionService;
 
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

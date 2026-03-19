@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Repository;
-import org.uteq.sgacfinal.dto.Response.RespuestaOperacionDTO;
-import org.uteq.sgacfinal.dto.Response.convocatorias.TribunalEvaluacionResponseDTO;
+import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
+import org.uteq.sgacfinal.dto.response.convocatorias.TribunalEvaluacionResponseDTO;
 import org.uteq.sgacfinal.util.DatabaseService;
 
 @Repository

@@ -5,13 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
+import org.uteq.sgacfinal.dto.request.DecanoRequestDTO;
+import org.uteq.sgacfinal.dto.response.DecanoResponseDTO;
 import org.uteq.sgacfinal.service.IDecanoService;
 
-import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
+import org.uteq.sgacfinal.dto.response.DecanoEstadisticasDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.response.LogAuditoriaDTO;
 import java.util.List;
 
 @RestController

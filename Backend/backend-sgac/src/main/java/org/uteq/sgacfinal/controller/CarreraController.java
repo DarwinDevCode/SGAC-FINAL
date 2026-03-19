@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.CarreraRequestDTO;
-import org.uteq.sgacfinal.dto.Response.CarreraResponseDTO;
+import org.uteq.sgacfinal.dto.request.CarreraRequestDTO;
+import org.uteq.sgacfinal.dto.response.CarreraResponseDTO;
 import org.uteq.sgacfinal.service.ICarreraService;
 
 import java.util.List;

@@ -3,25 +3,21 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
+import org.uteq.sgacfinal.dto.request.DecanoRequestDTO;
+import org.uteq.sgacfinal.dto.response.DecanoResponseDTO;
 import org.uteq.sgacfinal.entity.Decano;
-import org.uteq.sgacfinal.entity.Convocatoria;
-import org.uteq.sgacfinal.entity.Postulacion;
-import org.uteq.sgacfinal.entity.Coordinador;
 import org.uteq.sgacfinal.entity.LogAuditoria;
 import org.uteq.sgacfinal.repository.DecanoRepository;
 import org.uteq.sgacfinal.repository.IConvocatoriaRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.repository.LogAuditoriaRepository;
 import org.uteq.sgacfinal.service.IDecanoService;
-import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
+import org.uteq.sgacfinal.dto.response.DecanoEstadisticasDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.response.LogAuditoriaDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service

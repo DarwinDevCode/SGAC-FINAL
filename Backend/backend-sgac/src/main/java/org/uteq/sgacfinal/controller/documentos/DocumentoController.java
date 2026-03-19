@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.uteq.sgacfinal.dto.Request.documentos.DocumentoUpdateRequestDTO;
-import org.uteq.sgacfinal.dto.Response.RespuestaOperacionDTO;
-import org.uteq.sgacfinal.dto.Response.documentos.*;
+import org.uteq.sgacfinal.dto.request.documentos.DocumentoUpdateRequestDTO;
+import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
+import org.uteq.sgacfinal.dto.response.documentos.*;
 import org.uteq.sgacfinal.service.documentos.DocumentoService;
 
 import java.util.List;

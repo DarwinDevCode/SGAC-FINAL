@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.GuardarMeritosRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.GuardarMeritosRequest;
 import org.uteq.sgacfinal.exception.BadRequestException;
 import org.uteq.sgacfinal.repository.evaluaciones.IEvaluacionMeritosRepository;
 import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionMeritosService;

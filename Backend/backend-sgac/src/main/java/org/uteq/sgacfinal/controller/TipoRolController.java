@@ -5,9 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.TipoRolRequestDTO;
-import org.uteq.sgacfinal.dto.Response.RolResumenResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoRolRequestDTO;
+import org.uteq.sgacfinal.dto.response.RolResumenResponseDTO;
+import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.service.ITipoRolService;
 
 import java.util.List;

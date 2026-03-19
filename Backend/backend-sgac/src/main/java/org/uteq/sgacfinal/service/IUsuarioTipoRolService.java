@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.UsuarioTipoRolRequestDTO;
-import org.uteq.sgacfinal.dto.Response.UsuarioTipoRolResponseDTO;
+import org.uteq.sgacfinal.dto.request.UsuarioTipoRolRequestDTO;
+import org.uteq.sgacfinal.dto.response.UsuarioTipoRolResponseDTO;
 import java.util.List;
 
 public interface IUsuarioTipoRolService {

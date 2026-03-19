@@ -3,7 +3,7 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Response.DocenteDashboardDTO;
+import org.uteq.sgacfinal.dto.response.DocenteDashboardDTO;
 import org.uteq.sgacfinal.entity.Docente;
 import org.uteq.sgacfinal.repository.DocenteDashboardRepository;
 import org.uteq.sgacfinal.repository.DocenteRepository;

@@ -1,8 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.EstudianteRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EstudianteResponseDTO;
-import java.util.List;
+import org.uteq.sgacfinal.dto.request.EstudianteRequestDTO;
+import org.uteq.sgacfinal.dto.response.EstudianteResponseDTO;
 
 public interface IEstudianteService {
 

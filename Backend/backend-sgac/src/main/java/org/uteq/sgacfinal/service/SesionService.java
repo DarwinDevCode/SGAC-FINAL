@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import org.uteq.sgacfinal.dto.Request.RegistrarSesionRequest;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.RegistrarSesionRequest;
+import org.uteq.sgacfinal.dto.response.*;
 
 import java.time.LocalDate;
 import java.util.List;

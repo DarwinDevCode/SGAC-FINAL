@@ -3,7 +3,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.uteq.sgacfinal.dto.Response.SesionDTO;
+import org.uteq.sgacfinal.dto.response.SesionDTO;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;

@@ -3,8 +3,8 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Response.AyudantiaDetalleResponseDTO;
-import org.uteq.sgacfinal.dto.Response.RegistroActividadDetalleDTO;
+import org.uteq.sgacfinal.dto.response.AyudantiaDetalleResponseDTO;
+import org.uteq.sgacfinal.dto.response.RegistroActividadDetalleDTO;
 import org.uteq.sgacfinal.service.IAyudantiaService;
 
 import java.util.List;

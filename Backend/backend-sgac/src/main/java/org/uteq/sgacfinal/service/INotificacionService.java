@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.NotificationRequest;
-import org.uteq.sgacfinal.dto.Response.NotificacionResponseDTO;
+import org.uteq.sgacfinal.dto.request.NotificationRequest;
+import org.uteq.sgacfinal.dto.response.NotificacionResponseDTO;
 
 import java.util.List;
 

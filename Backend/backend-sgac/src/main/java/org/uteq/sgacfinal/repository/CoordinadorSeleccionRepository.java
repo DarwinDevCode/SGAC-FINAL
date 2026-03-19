@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.uteq.sgacfinal.dto.Response.AsignaturaSelectableDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteSelectableDTO;
+import org.uteq.sgacfinal.dto.response.AsignaturaSelectableDTO;
+import org.uteq.sgacfinal.dto.response.DocenteSelectableDTO;
 import org.uteq.sgacfinal.entity.Docente;
 
 import java.util.List;
@@ -21,7 +21,7 @@ public interface CoordinadorSeleccionRepository extends JpaRepository<Docente, I
      * - y esa asignatura debe pertenecer a la carrera del coordinador
      */
     @Query("""
-        SELECT DISTINCT new org.uteq.sgacfinal.dto.Response.DocenteSelectableDTO(
+        SELECT DISTINCT new org.uteq.sgacfinal.dto.response.DocenteSelectableDTO(
             d.idDocente,
             CONCAT(u.nombres, ' ', u.apellidos)
         )
@@ -43,7 +43,7 @@ public interface CoordinadorSeleccionRepository extends JpaRepository<Docente, I
      * Filtros: asignatura.activo = true y docente_asignatura.activo = true.
      */
     @Query("""
-        SELECT DISTINCT new org.uteq.sgacfinal.dto.Response.AsignaturaSelectableDTO(
+        SELECT DISTINCT new org.uteq.sgacfinal.dto.response.AsignaturaSelectableDTO(
             a.idAsignatura,
             a.nombreAsignatura
         )

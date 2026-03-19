@@ -6,9 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.controller.resultados.RankingController;
-import org.uteq.sgacfinal.dto.Response.convocatorias.FinalizarSeleccionResponseDTO;
-import org.uteq.sgacfinal.security.UsuarioPrincipal;
+import org.uteq.sgacfinal.dto.response.convocatorias.FinalizarSeleccionResponseDTO;
 import org.uteq.sgacfinal.service.impl.convocatorias.FinalizarSeleccionService;
 import org.uteq.sgacfinal.util.ExtraerAuth;
 

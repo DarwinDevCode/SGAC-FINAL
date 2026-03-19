@@ -5,10 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaEstudianteResponseDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriasEstudianteWrapperDTO;
-import org.uteq.sgacfinal.dto.Response.ValidacionContextoEstudianteDTO;
-import org.uteq.sgacfinal.dto.Response.ValidacionElegibilidadAcademicaDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaEstudianteResponseDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriasEstudianteWrapperDTO;
+import org.uteq.sgacfinal.dto.response.ValidacionContextoEstudianteDTO;
+import org.uteq.sgacfinal.dto.response.ValidacionElegibilidadAcademicaDTO;
 import org.uteq.sgacfinal.service.IConvocatoriaEstudianteService;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.CarreraRequestDTO;
-import org.uteq.sgacfinal.dto.Response.CarreraResponseDTO;
+import org.uteq.sgacfinal.dto.request.CarreraRequestDTO;
+import org.uteq.sgacfinal.dto.response.CarreraResponseDTO;
 import java.util.List;
 
 public interface ICarreraService {

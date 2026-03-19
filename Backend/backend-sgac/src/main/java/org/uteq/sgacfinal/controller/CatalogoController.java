@@ -5,17 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.AsignaturaRequestDTO;
-import org.uteq.sgacfinal.dto.Request.CarreraRequestDTO;
-import org.uteq.sgacfinal.dto.Request.FacultadRequestDTO;
-import org.uteq.sgacfinal.dto.Request.PeriodoAcademicoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.AsignaturaRequestDTO;
+import org.uteq.sgacfinal.dto.request.CarreraRequestDTO;
+import org.uteq.sgacfinal.dto.request.FacultadRequestDTO;
+import org.uteq.sgacfinal.dto.request.PeriodoAcademicoRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.service.*;
-import org.uteq.sgacfinal.dto.Request.TipoEstadoEvidenciaAyudantiaRequestDTO;
-import org.uteq.sgacfinal.dto.Request.TipoEstadoRequisitoRequestDTO;
-import org.uteq.sgacfinal.dto.Request.TipoRequisitoPostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.TipoRolRequestDTO;
-import org.uteq.sgacfinal.dto.Request.TipoSancionAyudanteCatedraRequestDTO;
+import org.uteq.sgacfinal.dto.request.TipoEstadoRequisitoRequestDTO;
+import org.uteq.sgacfinal.dto.request.TipoRequisitoPostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.request.TipoRolRequestDTO;
+import org.uteq.sgacfinal.dto.request.TipoSancionAyudanteCatedraRequestDTO;
 
 import java.util.List;
 

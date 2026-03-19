@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.UsuarioComisionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.UsuarioComisionResponseDTO;
+import org.uteq.sgacfinal.dto.request.UsuarioComisionRequestDTO;
+import org.uteq.sgacfinal.dto.response.UsuarioComisionResponseDTO;
 import org.uteq.sgacfinal.service.IUsuarioComisionService;
 
 import java.util.List;

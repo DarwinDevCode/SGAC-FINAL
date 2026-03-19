@@ -3,14 +3,13 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.TipoSancionAyudanteCatedraRequestDTO;
-import org.uteq.sgacfinal.dto.Response.TipoSancionAyudanteCatedraResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoSancionAyudanteCatedraRequestDTO;
+import org.uteq.sgacfinal.dto.response.TipoSancionAyudanteCatedraResponseDTO;
 import org.uteq.sgacfinal.entity.TipoSancionAyudanteCatedra;
 import org.uteq.sgacfinal.repository.ITipoSancionAyudanteCatedraRepository;
 import org.uteq.sgacfinal.service.ITipoSancionAyudanteCatedraService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

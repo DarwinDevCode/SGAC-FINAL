@@ -50,14 +50,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
     forkJoin({
       progreso: this.sesionService.progresoGeneral(this.ID_USUARIO_MOCK),
       semanal:  this.sesionService.controlSemanal(this.ID_USUARIO_MOCK),
-      sesiones: this.sesionService.listarSesiones(this.ID_USUARIO_MOCK)
+      sesiones: this.sesionService.listarMisSesionesPrincipales(this.ID_USUARIO_MOCK)
     })
       .pipe(takeUntil(this.destroy$), finalize(() => this.cargando = false))
       .subscribe({
         next: ({ progreso, semanal, sesiones }) => {
           this.progreso        = progreso;
           this.controlSemanal  = semanal;
-          this.ultimasSesiones = sesiones.slice(0, 5); // top 5
+          //this.ultimasSesiones = sesiones.slice(0, 5); // top 5
         },
         error: (err: HttpErrorResponse) => {
           console.log(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar');

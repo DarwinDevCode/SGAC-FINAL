@@ -3,9 +3,9 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.AsignarComisionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluacionOposicionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EvaluacionOposicionResponseDTO;
+import org.uteq.sgacfinal.dto.request.AsignarComisionRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluacionOposicionRequestDTO;
+import org.uteq.sgacfinal.dto.response.EvaluacionOposicionResponseDTO;
 import org.uteq.sgacfinal.entity.EvaluacionOposicion;
 import org.uteq.sgacfinal.entity.UsuarioComision;
 import org.uteq.sgacfinal.entity.Postulacion;
@@ -15,10 +15,9 @@ import org.uteq.sgacfinal.repository.UsuarioComisionRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.IEvaluacionOposicionService;
 import org.uteq.sgacfinal.service.INotificacionService;
-import org.uteq.sgacfinal.dto.Request.NotificationRequest;
+import org.uteq.sgacfinal.dto.request.NotificationRequest;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.util.List;
 import java.util.stream.Collectors;
 

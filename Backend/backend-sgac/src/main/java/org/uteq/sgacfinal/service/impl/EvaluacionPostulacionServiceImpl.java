@@ -7,15 +7,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.DictaminarPostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluarDocumentoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.DictaminarPostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluarDocumentoRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.entity.RequisitoAdjunto;
 import org.uteq.sgacfinal.repository.EvaluacionPostulacionRepository;
 import org.uteq.sgacfinal.repository.RequisitoAdjuntoRepository;
 import org.uteq.sgacfinal.service.IEvaluacionPostulacionService;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

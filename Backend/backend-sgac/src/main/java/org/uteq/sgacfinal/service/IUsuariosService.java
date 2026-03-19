@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.*;
-import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
-import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
+import org.uteq.sgacfinal.dto.request.*;
+import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
+import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
-import org.uteq.sgacfinal.dto.Request.NotificationRequest;
+import org.uteq.sgacfinal.dto.request.NotificationRequest;
 import org.uteq.sgacfinal.entity.Convocatoria;
 import org.uteq.sgacfinal.repository.DecanoNotificacionRepository;
 import org.uteq.sgacfinal.repository.IConvocatoriaRepository;

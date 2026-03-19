@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.FacultadRequestDTO;
-import org.uteq.sgacfinal.dto.Response.FacultadResponseDTO;
+import org.uteq.sgacfinal.dto.request.FacultadRequestDTO;
+import org.uteq.sgacfinal.dto.response.FacultadResponseDTO;
 import java.util.List;
 
 public interface IFacultadService {

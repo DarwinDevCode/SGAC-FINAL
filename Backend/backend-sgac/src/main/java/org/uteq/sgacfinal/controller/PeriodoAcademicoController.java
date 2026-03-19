@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.PeriodoAcademicoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.PeriodoAcademicoResponseDTO;
+import org.uteq.sgacfinal.dto.request.PeriodoAcademicoRequestDTO;
+import org.uteq.sgacfinal.dto.response.PeriodoAcademicoResponseDTO;
 import org.uteq.sgacfinal.service.IPeriodoAcademicoService;
 
 import java.util.List;

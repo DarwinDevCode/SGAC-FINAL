@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.TipoEstadoEvidenciaAyudantiaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoEvidenciaAyudantiaResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoEstadoEvidenciaAyudantiaRequestDTO;
+import org.uteq.sgacfinal.dto.response.TipoEstadoEvidenciaAyudantiaResponseDTO;
 import java.util.List;
 
 public interface ITipoEstadoEvidenciaAyudantiaService {

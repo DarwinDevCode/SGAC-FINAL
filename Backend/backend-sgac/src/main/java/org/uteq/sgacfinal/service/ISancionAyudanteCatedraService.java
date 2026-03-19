@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.SancionAyudanteCatedraRequestDTO;
-import org.uteq.sgacfinal.dto.Response.SancionAyudanteCatedraResponseDTO;
+import org.uteq.sgacfinal.dto.request.SancionAyudanteCatedraRequestDTO;
+import org.uteq.sgacfinal.dto.response.SancionAyudanteCatedraResponseDTO;
 import java.util.List;
 
 public interface ISancionAyudanteCatedraService {

@@ -1,9 +1,9 @@
 package org.uteq.sgacfinal.service.configuracion;
 
-import org.uteq.sgacfinal.dto.Request.configuracion.AjusteCronogramaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.CronogramaActivoResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.PeriodoFaseResponseDTO;
+import org.uteq.sgacfinal.dto.request.configuracion.AjusteCronogramaRequestDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.CronogramaActivoResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.PeriodoFaseResponseDTO;
 
 import java.util.List;
 

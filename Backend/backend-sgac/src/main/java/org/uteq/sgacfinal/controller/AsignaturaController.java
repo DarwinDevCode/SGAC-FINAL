@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.AsignaturaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.AsignaturaResponseDTO;
+import org.uteq.sgacfinal.dto.request.AsignaturaRequestDTO;
+import org.uteq.sgacfinal.dto.response.AsignaturaResponseDTO;
 import org.uteq.sgacfinal.service.IAsignaturaService;
 
 import java.util.List;

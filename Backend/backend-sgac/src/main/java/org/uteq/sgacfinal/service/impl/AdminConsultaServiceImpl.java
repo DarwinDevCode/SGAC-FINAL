@@ -3,7 +3,7 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Response.AdminConsultaDTO;
+import org.uteq.sgacfinal.dto.response.AdminConsultaDTO;
 import org.uteq.sgacfinal.entity.Convocatoria;
 import org.uteq.sgacfinal.entity.LogAuditoria;
 import org.uteq.sgacfinal.entity.Postulacion;
@@ -15,8 +15,6 @@ import org.uteq.sgacfinal.repository.LogAuditoriaRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.IAdminConsultaService;
 
-import java.time.LocalDate;
-import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 

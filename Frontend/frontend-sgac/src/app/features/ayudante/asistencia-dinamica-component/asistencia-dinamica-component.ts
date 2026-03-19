@@ -6,14 +6,14 @@ import { Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subject, takeUntil, finalize } from 'rxjs';
 
-import { AsistenciaService } from '../../../core/services/ayudantia/asistencia-service';
+import { AsistenciaService } from '../../../core/services/asistencia-service';
 import {
   ContextoAsistencia,
   Participante,
   FilaPreview,
   DetalleAsistencia,
   PreviewResponse,
-} from '../../../core/models/ayudantia/Asistencia';
+} from '../../../core/models/Asistencia';
 
 type VistaEstado = 'cargando' | 'vacio' | 'preview' | 'activo' | 'error';
 

@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.SincronizarCargaRequest;
-import org.uteq.sgacfinal.dto.Response.AsignaturaJerarquiaDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteActivoDTO;
-import org.uteq.sgacfinal.dto.Response.SincronizarCargaResponseDTO;
+import org.uteq.sgacfinal.dto.request.SincronizarCargaRequest;
+import org.uteq.sgacfinal.dto.response.AsignaturaJerarquiaDTO;
+import org.uteq.sgacfinal.dto.response.DocenteActivoDTO;
+import org.uteq.sgacfinal.dto.response.SincronizarCargaResponseDTO;
 import org.uteq.sgacfinal.service.impl.CargaAcademicaService;
 
 import java.util.List;

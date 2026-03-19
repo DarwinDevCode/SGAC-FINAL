@@ -7,12 +7,12 @@ import { FormsModule }  from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subject, takeUntil, finalize } from 'rxjs';
 
-import { AsistenciaService } from '../../../core/services/ayudantia/asistencia-service';
+import { AsistenciaService } from '../../../core/services/asistencia-service';
 import {
   MatrizAsistencia,
   SesionMatriz,
   EstudianteMatriz,
-} from '../../../core/models/ayudantia/Asistencia';
+} from '../../../core/models/Asistencia';
 
 @Component({
   selector: 'app-matriz-asistencia',

@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.TipoRequisitoPostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.TipoRequisitoPostulacionResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoRequisitoPostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.response.TipoRequisitoPostulacionResponseDTO;
 import java.util.List;
 
 public interface ITipoRequisitoPostulacionService {

@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service.configuracion;
 
-import org.uteq.sgacfinal.dto.Request.configuracion.PeriodoAcademicoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.request.configuracion.PeriodoAcademicoRequestDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
 
 public interface IPeriodoAcademicoService {
     StandardResponseDTO<Integer> abrirPeriodo(PeriodoAcademicoRequestDTO request);

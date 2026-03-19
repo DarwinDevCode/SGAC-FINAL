@@ -10,12 +10,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.BancoTemasRequest;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.CambiarEstadoEvaluacionRequest;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.PuntajeJuradoRequest;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.SorteoOposicionRequest;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.evaluaciones.ConvocatoriaOposicionDTO;
+import org.uteq.sgacfinal.dto.request.evaluaciones.BancoTemasRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.CambiarEstadoEvaluacionRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.PuntajeJuradoRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.SorteoOposicionRequest;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.evaluaciones.ConvocatoriaOposicionDTO;
 import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.evaluaciones.IEvaluacionOposicionService;
 

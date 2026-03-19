@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.uteq.sgacfinal.dto.Response.configuracion.CronogramaActivoResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.CronogramaActivoResponseDTO;
 import org.uteq.sgacfinal.service.ICronogramaActivoService;
 
 @RestController

@@ -3,23 +3,18 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.CoordinadorRequestDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorResponseDTO;
-import org.uteq.sgacfinal.entity.Coordinador;
-import org.uteq.sgacfinal.entity.Convocatoria;
-import org.uteq.sgacfinal.entity.Postulacion;
+import org.uteq.sgacfinal.dto.request.CoordinadorRequestDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorResponseDTO;
 import org.uteq.sgacfinal.repository.CoordinadorRepository;
 import org.uteq.sgacfinal.repository.IConvocatoriaRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
 import org.uteq.sgacfinal.service.ICoordinadorService;
-import org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorEstadisticasDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorPostulanteReporteDTO;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Comparator;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

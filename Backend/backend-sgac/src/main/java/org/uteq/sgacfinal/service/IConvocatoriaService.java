@@ -1,13 +1,12 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.ConvocatoriaRequestDTO;
-import org.uteq.sgacfinal.dto.Request.configuracion.ConvocatoriaActualizarRequestDTO;
-import org.uteq.sgacfinal.dto.Request.configuracion.ConvocatoriaCrearRequestDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaDetalleDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.ConvocatoriaNativaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.VerificarFaseResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.VerificarPostulantesResponseDTO;
+import org.uteq.sgacfinal.dto.request.ConvocatoriaRequestDTO;
+import org.uteq.sgacfinal.dto.request.configuracion.ConvocatoriaActualizarRequestDTO;
+import org.uteq.sgacfinal.dto.request.configuracion.ConvocatoriaCrearRequestDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.ConvocatoriaNativaResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.VerificarFaseResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.VerificarPostulantesResponseDTO;
 
 import java.util.List;
 

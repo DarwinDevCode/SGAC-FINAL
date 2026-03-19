@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.FacultadRequestDTO;
-import org.uteq.sgacfinal.dto.Response.FacultadResponseDTO;
+import org.uteq.sgacfinal.dto.request.FacultadRequestDTO;
+import org.uteq.sgacfinal.dto.response.FacultadResponseDTO;
 import org.uteq.sgacfinal.service.IFacultadService;
 
 import java.util.List;
