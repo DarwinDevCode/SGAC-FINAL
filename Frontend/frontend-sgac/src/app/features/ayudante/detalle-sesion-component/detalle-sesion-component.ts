@@ -13,6 +13,20 @@ import { MarcadoAsistenciaRequestDTO, FinalizarSesionRequestDTO } from '../../..
 
 type PestanaActiva = 'asistencia' | 'borrador' | 'evidencias';
 
+// --- NUEVO: DICCIONARIO DE TIPOS DE EVIDENCIA ---
+const TIPOS_EVIDENCIA = [
+  { id: 20, extension: '.pdf' },
+  { id: 21, extension: '.jpg' },
+  { id: 21, extension: '.jpeg' }, // Añadimos jpeg mapeado al mismo ID de foto
+  { id: 22, extension: '.docx' },
+  { id: 22, extension: '.doc' },  // Añadimos doc antiguo
+  { id: 23, extension: '.png' },
+  { id: 24, extension: '.xlsx' },
+  { id: 24, extension: '.xls' },  // Añadimos xls antiguo
+  { id: 25, extension: '.pptx' },
+  { id: 25, extension: '.ppt' }   // Añadimos ppt antiguo
+];
+
 @Component({
   selector: 'app-detalle-sesion',
   standalone: true,
@@ -131,7 +145,6 @@ export class DetalleSesionComponent implements OnInit, OnDestroy {
     this.asistenciaEnvio.set(true);
     const request: MarcadoAsistenciaRequestDTO = { idDetalle: estudiante.idDetalle, asistio };
 
-    // Actualización optimista
     this.actualizarAsistenciaLocal(estudiante.idDetalle, asistio);
 
     this.ayudantiaService.marcarAsistencia(request)
@@ -175,14 +188,28 @@ export class DetalleSesionComponent implements OnInit, OnDestroy {
       });
   }
 
+  // --- NUEVO: MÉTODO PARA OBTENER EL ID SEGÚN LA EXTENSIÓN ---
+  private obtenerIdTipoEvidencia(nombreArchivo: string): number {
+    const extensionStr = nombreArchivo.substring(nombreArchivo.lastIndexOf('.')).toLowerCase();
+    const tipoEncontrado = TIPOS_EVIDENCIA.find(t => t.extension === extensionStr);
+
+    // Si no lo encuentra en el diccionario, usamos 20 (PDF) por defecto o lanzas un error
+    return tipoEncontrado ? tipoEncontrado.id : 20;
+  }
+
+  // --- MODIFICADO: SUBIR ARCHIVO AHORA USA EL ID DINÁMICO ---
   subirArchivo(evento: Event): void {
     const input = evento.target as HTMLInputElement;
     const archivo = input.files?.[0];
     if (!archivo) return;
+
     this.subirArchivoError.set(null);
     this.subiendeArchivo.set(true);
 
-    this.ayudantiaService.cargarEvidencia(this.idRegistro, 1, archivo)
+    // Identificamos el ID dinámicamente según la extensión
+    const idTipoEvidenciaDinámico = this.obtenerIdTipoEvidencia(archivo.name);
+
+    this.ayudantiaService.cargarEvidencia(this.idRegistro, idTipoEvidenciaDinámico, archivo)
       .pipe(takeUntil(this.destroy$), finalize(() => this.subiendeArchivo.set(false)))
       .subscribe({
         next: (res) => {

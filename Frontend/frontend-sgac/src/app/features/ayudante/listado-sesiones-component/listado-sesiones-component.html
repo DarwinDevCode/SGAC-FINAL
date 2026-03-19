@@ -144,7 +144,7 @@
     <div class="offcanvas-body">
       <div class="info-banner ui-alert-content readonly-banner" style="margin-bottom: 1.5rem;">
         <lucide-icon name="lock" size="18"></lucide-icon>
-        <span>Sesión bloqueada por estado: <strong>{{ detalleSesionRO()?.nombreEstado || 'En Revisión' }}</strong></span>
+        <span>Sesión bloqueada por estado: <strong>{{ obtenerEstadoLabel(detalleSesionRO()?.detalle?.codigoEstado || 'PENDIENTE') }}</strong></span>
       </div>
 
       <div *ngIf="cargandoDetalle()" style="text-align: center; padding: 2rem;">
@@ -152,32 +152,38 @@
         <p>Cargando información...</p>
       </div>
 
-      <div *ngIf="!cargandoDetalle() && detalleSesionRO() as detalle">
+      <!-- Aquí leemos el BorradorSesionResponseDTO mapeado -->
+      <div *ngIf="!cargandoDetalle() && detalleSesionRO() as borrador">
+
         <div style="margin-bottom: 1.5rem;">
           <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">Tema Tratado</h4>
-          <p style="color: #4b5563; font-size: 0.875rem; background: #f9fafb; padding: 1rem; border-radius: 8px;">{{ detalle.temaTratado }}</p>
+          <p style="color: #4b5563; font-size: 0.875rem; background: #f9fafb; padding: 1rem; border-radius: 8px;">
+            {{ borrador.detalle.tema }}
+          </p>
         </div>
 
         <div style="margin-bottom: 1.5rem;">
           <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">Descripción de la Actividad</h4>
-          <p style="color: #4b5563; font-size: 0.875rem; background: #f9fafb; padding: 1rem; border-radius: 8px; white-space: pre-line;">{{ detalle.descripcionActividad || 'Sin descripción registrada.' }}</p>
-        </div>
-
-        <div *ngIf="detalle.observacionDocente" style="margin-bottom: 1.5rem;">
-          <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #b91c1c;">Observación del Docente</h4>
-          <p style="color: #991b1b; font-size: 0.875rem; background: #fef2f2; padding: 1rem; border-radius: 8px; border-left: 4px solid #f87171;">{{ detalle.observacionDocente }}</p>
+          <p style="color: #4b5563; font-size: 0.875rem; background: #f9fafb; padding: 1rem; border-radius: 8px; white-space: pre-line;">
+            {{ borrador.detalle.descripcionActual || 'Sin descripción registrada por el ayudante.' }}
+          </p>
         </div>
 
         <div>
           <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">Evidencias Adjuntas</h4>
-          <div *ngIf="!detalle.evidencias?.length" style="color: #6b7280; font-size: 0.875rem;">No se adjuntaron evidencias.</div>
+          <div *ngIf="!borrador.evidencias?.length" style="color: #6b7280; font-size: 0.875rem;">
+            No se adjuntaron evidencias.
+          </div>
           <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-            <div *ngFor="let ev of detalle.evidencias" style="display: flex; align-items: center; gap: 0.75rem; background: #ffffff; border: 1px solid #e5e7eb; padding: 0.75rem; border-radius: 8px;">
+            <div *ngFor="let ev of borrador.evidencias" style="display: flex; align-items: center; gap: 0.75rem; background: #ffffff; border: 1px solid #e5e7eb; padding: 0.75rem; border-radius: 8px;">
               <lucide-icon name="file" size="18" style="color: #9ca3af;"></lucide-icon>
-              <a [href]="ev.rutaArchivo" target="_blank" style="font-size: 0.875rem; color: #2563eb; text-decoration: none; font-weight: 500;">{{ ev.nombreArchivo }}</a>
+              <a [href]="ev.rutaArchivo" target="_blank" style="font-size: 0.875rem; color: #2563eb; text-decoration: none; font-weight: 500;">
+                {{ ev.nombreArchivo }}
+              </a>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>

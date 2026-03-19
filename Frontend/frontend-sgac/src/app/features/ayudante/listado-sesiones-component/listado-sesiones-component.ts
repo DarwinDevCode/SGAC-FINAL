@@ -8,8 +8,11 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subject, takeUntil, finalize } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+
 import { SesionService } from '../../../core/services/sesion-service';
+import { AyudantiaService } from '../../../core/services/ayudantia/ayudantia-service'; // <-- Añadido
 import { SesionResponseDTO } from '../../../core/models/Sesiones';
+import { BorradorSesionResponseDTO } from '../../../core/models/general/respuesta-operacion'; // <-- DTO unificado
 import { PlanificarSesionDialogComponent } from '../planificar-sesion-dialog-component/planificar-sesion-dialog-component';
 
 @Component({
@@ -23,6 +26,7 @@ export class ListadoSesionesComponent implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private sesionService = inject(SesionService);
+  private ayudantiaService = inject(AyudantiaService); // <-- Inyectamos para usar obtenerBorrador()
   private dialog = inject(MatDialog);
   private destroy$ = new Subject<void>();
 
@@ -36,7 +40,7 @@ export class ListadoSesionesComponent implements OnInit, OnDestroy {
   offcanvasAbierto = signal(false);
   sesionSeleccionadaId = signal<number | null>(null);
   cargandoDetalle = signal(false);
-  detalleSesionRO = signal<SesionResponseDTO | null>(null); // RO = Read Only
+  detalleSesionRO = signal<BorradorSesionResponseDTO | null>(null); // RO = Read Only usando el DTO correcto
 
   // Computed
   sesioneFiltradas = computed(() => {
@@ -111,11 +115,16 @@ export class ListadoSesionesComponent implements OnInit, OnDestroy {
   cargarDetalleSoloLectura(idRegistro: number): void {
     this.cargandoDetalle.set(true);
     this.detalleSesionRO.set(null);
-    // Nota: El 0 es representativo si el backend toma el ID del token JWT
-    this.sesionService.obtenerDetalleMiSesion(0, idRegistro)
+
+    // CAMBIO APLICADO: Ahora llamamos al endpoint de borrador real
+    this.ayudantiaService.obtenerBorrador(idRegistro)
       .pipe(takeUntil(this.destroy$), finalize(() => this.cargandoDetalle.set(false)))
       .subscribe({
-        next: (data) => this.detalleSesionRO.set(data),
+        next: (res) => {
+          if (res.valido && res.datos) {
+            this.detalleSesionRO.set(res.datos);
+          }
+        },
         error: (err: HttpErrorResponse) => console.error('Error cargando detalle', err)
       });
   }
