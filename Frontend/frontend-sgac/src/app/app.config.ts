@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-//import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 
 import {
@@ -109,7 +109,8 @@ import {
   Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX, SearchX,
   Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
   Tag, LayoutGrid, Landmark, Square, FileSpreadsheet, Files, Globe, CloudUpload, FileCheck, FolderX, Image,
-  File, HardDrive, CalendarCheck, ListOrdered, CloudCheck, Table2, AlignLeft, LoaderCircle, ClipboardX
+  File, HardDrive, CalendarCheck, ListOrdered, CloudCheck, Table2, AlignLeft, LoaderCircle, ClipboardX,
+  FolderTree, PieChart, FileDown, Filter, DatabaseBackup
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -120,6 +121,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    provideCharts(withDefaultRegisterables()),
     importProvidersFrom(
       LucideAngularModule.pick({
         AlertCircle,
@@ -233,7 +235,12 @@ export const appConfig: ApplicationConfig = {
         Table2,
         AlignLeft,
         LoaderCircle,
-        ClipboardX
+        ClipboardX,
+        FolderTree,
+        PieChart,
+        FileDown,
+        Filter,
+        DatabaseBackup
       })
     )
   ]

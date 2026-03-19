@@ -62,4 +62,8 @@ public interface IConvocatoriaRepository extends JpaRepository<Convocatoria, Int
     @Query(value = "SELECT convocatoria.fn_desactivar_convocatoria(:pId)",
             nativeQuery = true)
     String desactivarConvocatoria(@Param("pId") Integer pId);
+
+    @Query("SELECT c FROM Convocatoria c WHERE c.asignatura.carrera.facultad.idFacultad = :idFacultad " +
+           "AND c.periodoAcademico.activo = true")
+    List<Convocatoria> findByFacultad(@Param("idFacultad") Integer idFacultad);
 }

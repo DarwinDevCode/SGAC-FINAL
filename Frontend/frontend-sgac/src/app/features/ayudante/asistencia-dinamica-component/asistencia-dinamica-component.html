@@ -2,14 +2,10 @@
 <div class="gestion-container ad-wrapper">
 
   <!-- Toast -->
-  <div *ngIf="toast()" class="ad-toast"
-       [class.ad-toast-ok]="toast()?.tipo === 'ok'"
-       [class.ad-toast-err]="toast()?.tipo === 'err'"
-       [class.ad-toast-warn]="toast()?.tipo === 'warn'">
-    <lucide-icon
-      [name]="toast()?.tipo === 'ok' ? 'circle-check-big'
-             : toast()?.tipo === 'warn' ? 'triangle-alert' : 'circle-x'"
-      size="15"></lucide-icon>
+  <div *ngIf="toast()" class="ad-toast" [class.ad-toast-ok]="toast()?.tipo === 'ok'"
+    [class.ad-toast-err]="toast()?.tipo === 'err'" [class.ad-toast-warn]="toast()?.tipo === 'warn'">
+    <lucide-icon [name]="toast()?.tipo === 'ok' ? 'circle-check-big'
+             : toast()?.tipo === 'warn' ? 'triangle-alert' : 'circle-x'" size="15"></lucide-icon>
     <span>{{ toast()?.texto }}</span>
   </div>
 
@@ -67,13 +63,9 @@
       </div>
 
       <!-- Dropzone -->
-      <div class="ad-dropzone"
-           [class.ad-dropzone-over]="dragOver()"
-           [class.ad-dropzone-processing]="procesandoExcel()"
-           (dragover)="onDragOver($event)"
-           (dragleave)="onDragLeave()"
-           (drop)="onDrop($event)"
-           (click)="!procesandoExcel() && fileInput.click()">
+      <div class="ad-dropzone" [class.ad-dropzone-over]="dragOver()" [class.ad-dropzone-processing]="procesandoExcel()"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
+        (click)="!procesandoExcel() && fileInput.click()">
 
         <input #fileInput type="file" accept=".xlsx" hidden (change)="onFileInput($event)" />
 
@@ -97,12 +89,8 @@
         <div class="ad-divider">
           <span>¿No tienes el formato correcto?</span>
         </div>
-        <button class="btn ad-btn-plantilla"
-                (click)="descargarPlantilla()"
-                [disabled]="descargandoPlantilla()">
-          <lucide-icon
-            [name]="descargandoPlantilla() ? 'loader' : 'download'"
-            size="15"
+        <button class="btn ad-btn-plantilla" (click)="descargarPlantilla()" [disabled]="descargandoPlantilla()">
+          <lucide-icon [name]="descargandoPlantilla() ? 'loader' : 'download'" size="15"
             [class.spin]="descargandoPlantilla()"></lucide-icon>
           {{ descargandoPlantilla() ? 'Descargando...' : 'Descargar plantilla Excel' }}
         </button>
@@ -130,15 +118,16 @@
 
           <div class="ad-preview-stats">
             <span class="badge green">{{ previewData()!.totalFilas }} fila(s)</span>
-            <span *ngIf="(previewData()!.nuevos ?? 0) > 0" class="badge green">
+            <span *ngIf="previewData()!.nuevos > 0" class="badge green">
               <lucide-icon name="user-plus" size="11"></lucide-icon>
               {{ previewData()!.nuevos }} nuevo(s)
             </span>
-            <span *ngIf="(previewData()!.duplicadosBD ?? 0) > 0" class="badge amber">
+            <span *ngIf="previewData()!.duplicadosBD > 0" class="badge amber">
               <lucide-icon name="user-check" size="11"></lucide-icon>
               {{ previewData()!.duplicadosBD }} ya registrado(s)
             </span>
-            <span *ngIf="filasConError() > 0" class="badge" style="background:#fef2f2;border-color:#fecaca;color:#dc2626;">
+            <span *ngIf="filasConError() > 0" class="badge"
+              style="background:#fef2f2;border-color:#fecaca;color:#dc2626;">
               <lucide-icon name="triangle-alert" size="11"></lucide-icon>
               {{ filasConError() }} con error
             </span>
@@ -149,13 +138,13 @@
           <lucide-icon name="triangle-alert" size="16"></lucide-icon>
           <span>El archivo tiene errores. Corrígelos o sube otro archivo.</span>
         </div>
-        <div *ngIf="!previewData()!.tieneErrores && (previewData()!.nuevos ?? 0) === 0"
-             class="alert-banner warning ad-preview-banner">
+        <div *ngIf="!previewData()!.tieneErrores && previewData()!.nuevos === 0"
+          class="alert-banner warning ad-preview-banner">
           <lucide-icon name="info" size="16"></lucide-icon>
           <span>Todos los estudiantes del archivo ya están registrados. No hay nada nuevo que importar.</span>
         </div>
-        <div *ngIf="!previewData()!.tieneErrores && (previewData()!.nuevos ?? 0) > 0"
-             class="alert-banner success ad-preview-banner">
+        <div *ngIf="!previewData()!.tieneErrores && previewData()!.nuevos > 0"
+          class="alert-banner success ad-preview-banner">
           <lucide-icon name="circle-check-big" size="16"></lucide-icon>
           <span>{{ previewData()!.mensaje }}</span>
         </div>
@@ -165,46 +154,45 @@
       <div class="table-card ad-preview-table-wrap">
         <table class="data-table">
           <thead>
-          <tr>
-            <th style="width: 48px;">#</th>
-            <th>Nombre Completo</th>
-            <th>Curso</th>
-            <th>Paralelo</th>
-            <th style="width: 120px; text-align:center;">Estado</th>
-          </tr>
+            <tr>
+              <th style="width: 48px;">#</th>
+              <th>Nombre Completo</th>
+              <th>Curso</th>
+              <th>Paralelo</th>
+              <th style="width: 120px; text-align:center;">Estado</th>
+            </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let fila of previewData()!.filas; trackBy: trackByFila"
-              [class.ad-row-error]="!fila.valida"
+            <tr *ngFor="let fila of previewData()!.filas; trackBy: trackByFila" [class.ad-row-error]="!fila.valida"
               [class.ad-row-existente]="fila.yaExiste && fila.valida">
-            <td class="td-muted">{{ fila.fila }}</td>
-            <td>
-              <span [class.ad-cell-error]="!fila.valida && !fila.nombreCompleto">
-                {{ fila.nombreCompleto || '—' }}
-              </span>
-            </td>
-            <td>{{ fila.curso    || '—' }}</td>
-            <td>{{ fila.paralelo || '—' }}</td>
-            <td style="text-align:center;">
-              <!-- Prioridad: error > yaExiste > nuevo -->
-              <ng-container *ngIf="!fila.valida">
-                <div class="ad-errores-tip">
-                  <lucide-icon name="circle-x" size="16" class="ad-icon-err"></lucide-icon>
-                  <div class="ad-errores-tooltip">
-                    <p *ngFor="let e of fila.errores">• {{ e }}</p>
+              <td class="td-muted">{{ fila.fila }}</td>
+              <td>
+                <span [class.ad-cell-error]="!fila.valida && !fila.nombreCompleto">
+                  {{ fila.nombreCompleto || '—' }}
+                </span>
+              </td>
+              <td>{{ fila.curso || '—' }}</td>
+              <td>{{ fila.paralelo || '—' }}</td>
+              <td style="text-align:center;">
+                <!-- Prioridad: error > yaExiste > nuevo -->
+                <ng-container *ngIf="!fila.valida">
+                  <div class="ad-errores-tip">
+                    <lucide-icon name="circle-x" size="16" class="ad-icon-err"></lucide-icon>
+                    <div class="ad-errores-tooltip">
+                      <p *ngFor="let e of fila.errores">• {{ e }}</p>
+                    </div>
                   </div>
-                </div>
-              </ng-container>
+                </ng-container>
 
-              <ng-container *ngIf="fila.valida && fila.yaExiste">
-                <span class="ad-badge-existente">Ya existe</span>
-              </ng-container>
+                <ng-container *ngIf="fila.valida && fila.yaExiste">
+                  <span class="ad-badge-existente">Ya existe</span>
+                </ng-container>
 
-              <ng-container *ngIf="fila.valida && !fila.yaExiste">
-                <span class="ad-badge-nuevo">Nuevo</span>
-              </ng-container>
-            </td>
-          </tr>
+                <ng-container *ngIf="fila.valida && !fila.yaExiste">
+                  <span class="ad-badge-nuevo">Nuevo</span>
+                </ng-container>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -215,12 +203,8 @@
           <lucide-icon name="arrow-left" size="14"></lucide-icon>
           <span>Subir otro archivo</span>
         </button>
-        <button class="btn btn-primary"
-                [disabled]="!previewValido() || confirmando()"
-                (click)="confirmarCargaMasiva()">
-          <lucide-icon
-            [name]="confirmando() ? 'loader' : 'user-plus'"
-            size="15"
+        <button class="btn btn-primary" [disabled]="!previewValido() || confirmando()" (click)="confirmarCargaMasiva()">
+          <lucide-icon [name]="confirmando() ? 'loader' : 'user-plus'" size="15"
             [class.spin]="confirmando()"></lucide-icon>
           {{ confirmando()
           ? 'Guardando...'
@@ -278,40 +262,34 @@
     <div class="table-card">
       <table class="data-table">
         <thead>
-        <tr>
-          <th style="width: 52px; text-align:center;">Asistió</th>
-          <th>Nombre Completo</th>
-          <th>Curso</th>
-          <th>Paralelo</th>
-        </tr>
+          <tr>
+            <th style="width: 52px; text-align:center;">Asistió</th>
+            <th>Nombre Completo</th>
+            <th>Curso</th>
+            <th>Paralelo</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let d of detalleAsistencia(); trackBy: trackById"
-            [class.ad-row-presente]="d.asistio"
-            [class.ad-row-ausente]="!d.asistio"
-            (click)="toggleAsistencia(d.idParticipante, !d.asistio)"
+          <tr *ngFor="let d of detalleAsistencia(); trackBy: trackById" [class.ad-row-presente]="d.asistio"
+            [class.ad-row-ausente]="!d.asistio" (click)="toggleAsistencia(d.idParticipante, !d.asistio)"
             style="cursor: pointer;">
-          <td style="text-align:center;">
-            <div class="ad-checkbox" [class.ad-checked]="d.asistio">
-              <lucide-icon *ngIf="d.asistio" name="check" size="12"></lucide-icon>
-            </div>
-          </td>
-          <td><span class="ad-nombre">{{ d.nombreCompleto }}</span></td>
-          <td class="td-muted">{{ d.curso    || '—' }}</td>
-          <td class="td-muted">{{ d.paralelo || '—' }}</td>
-        </tr>
+            <td style="text-align:center;">
+              <div class="ad-checkbox" [class.ad-checked]="d.asistio">
+                <lucide-icon *ngIf="d.asistio" name="check" size="12"></lucide-icon>
+              </div>
+            </td>
+            <td><span class="ad-nombre">{{ d.nombreCompleto }}</span></td>
+            <td class="td-muted">{{ d.curso || '—' }}</td>
+            <td class="td-muted">{{ d.paralelo || '—' }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
 
     <!-- Guardar -->
     <div class="ad-list-actions">
-      <button class="btn btn-primary"
-              (click)="guardarAsistencia()"
-              [disabled]="guardandoAsist()">
-        <lucide-icon
-          [name]="guardandoAsist() ? 'loader' : 'save'"
-          size="15"
+      <button class="btn btn-primary" (click)="guardarAsistencia()" [disabled]="guardandoAsist()">
+        <lucide-icon [name]="guardandoAsist() ? 'loader' : 'save'" size="15"
           [class.spin]="guardandoAsist()"></lucide-icon>
         <span>{{ guardandoAsist() ? 'Guardando...' : 'Guardar asistencia' }}</span>
       </button>

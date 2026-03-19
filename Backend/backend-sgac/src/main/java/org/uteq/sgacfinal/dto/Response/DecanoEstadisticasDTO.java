@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -16,10 +17,13 @@ public class DecanoEstadisticasDTO {
     private long convocatoriasActivas;
     private long convocatoriasInactivas;
     private long totalPostulantes;
-    private long postulantesAprobados;
-    private long postulantesRechazados;
+    private long postulantesSeleccionados;
+    private long postulantesNoSeleccionados;
     private long postulantesEnEvaluacion;
-    private List<ActividadCoordinadorDTO> actividadPorCoordinador;
+    private long postulantesPendientes;
+
+    @Builder.Default
+    private List<ActividadCoordinadorDTO> actividadPorCoordinador = new ArrayList<>();
 
     @Data
     @Builder

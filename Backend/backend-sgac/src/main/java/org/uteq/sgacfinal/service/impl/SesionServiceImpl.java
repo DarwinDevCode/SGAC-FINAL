@@ -188,26 +188,26 @@ public class SesionServiceImpl implements SesionService {
 
     private SesionListadoResponse mapearSesionListado(Object[] fila) {
         return SesionListadoResponse.builder()
-                .idRegistro((Integer)     fila[0])
+                .idRegistro(toInteger(fila[0]))
                 .fecha(toLocalDate(       fila[1]))
                 .temaTratado((String)     fila[2])
                 .descripcion((String)     fila[3])
-                .numeroAsistentes((Integer) fila[4])
+                .numeroAsistentes(toInteger(fila[4]))
                 .horasDedicadas(toBigDecimal(fila[5]))
                 .estado((String)          fila[6])
-                .totalEvidencias((Long)   fila[7])
-                .tieneObservacion((Boolean) fila[8])
+                .totalEvidencias(toLong(fila[7]))
+                .tieneObservacion(toBoolean(fila[8]))
                 .build();
     }
 
     private SesionDetalleResponse mapearSesionDetalle(
             Object[] fila, List<EvidenciaResponse> evidencias) {
         return SesionDetalleResponse.builder()
-                .idRegistro((Integer)       fila[0])
+                .idRegistro(toInteger(    fila[0]))
                 .fecha(toLocalDate(         fila[1]))
                 .temaTratado((String)       fila[2])
                 .descripcion((String)       fila[3])
-                .numeroAsistentes((Integer) fila[4])
+                .numeroAsistentes(toInteger(fila[4]))
                 .horasDedicadas(toBigDecimal(fila[5]))
                 .estado((String)            fila[6])
                 .nombreAsignatura((String)  fila[7])
@@ -219,11 +219,11 @@ public class SesionServiceImpl implements SesionService {
 
     private EvidenciaResponse mapearEvidencia(Object[] fila) {
         return EvidenciaResponse.builder()
-                .idEvidencia((Integer)      fila[0])
+                .idEvidencia(toInteger(     fila[0]))
                 .nombreArchivo((String)     fila[1])
                 .rutaArchivo((String)       fila[2])
                 .mimeType((String)          fila[3])
-                .tamanioBytes((Integer)     fila[4])
+                .tamanioBytes(toInteger(    fila[4]))
                 .tipoEvidencia((String)     fila[5])
                 .estadoEvidencia((String)   fila[6])
                 .fechaSubida(toLocalDate(   fila[7]))
@@ -262,7 +262,33 @@ public class SesionServiceImpl implements SesionService {
     private LocalDate toLocalDate(Object valor) {
         if (valor == null) return null;
         if (valor instanceof java.sql.Date d) return d.toLocalDate();
-        return LocalDate.parse(valor.toString());
+        if (valor instanceof java.sql.Timestamp t) return t.toLocalDateTime().toLocalDate();
+        if (valor instanceof java.time.LocalDateTime ldt) return ldt.toLocalDate();
+        if (valor instanceof LocalDate ld) return ld;
+        
+        String s = valor.toString().trim();
+        if (s.contains(" ")) {
+            s = s.substring(0, s.indexOf(" "));
+        }
+        return LocalDate.parse(s);
+    }
+
+    private Long toLong(Object valor) {
+        if (valor == null) return 0L;
+        if (valor instanceof Number n) return n.longValue();
+        return Long.parseLong(valor.toString());
+    }
+
+    private Integer toInteger(Object valor) {
+        if (valor == null) return 0;
+        if (valor instanceof Number n) return n.intValue();
+        return Integer.parseInt(valor.toString());
+    }
+
+    private Boolean toBoolean(Object valor) {
+        if (valor == null) return false;
+        if (valor instanceof Boolean b) return b;
+        return Boolean.parseBoolean(valor.toString());
     }
 
     private BigDecimal toBigDecimal(Object valor) {

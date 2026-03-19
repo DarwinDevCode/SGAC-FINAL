@@ -1,4 +1,6 @@
-<div class="gestion-container">
+<div class="dc-dashboard">
+
+    <!-- ── HEADER ── -->
     <div class="section-header">
         <div class="title-container">
             <h2 class="title">Decanato</h2>
@@ -15,90 +17,158 @@
         <p style="margin-top:.75rem">Cargando panel...</p>
     </div>
     } @else if (errorMensaje) {
-    <div class="error-state" style="padding:3rem 1rem">
+    <div class="dc-error-state">
         <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
         <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
     </div>
     } @else {
 
-    <!-- Stats -->
-    <div class="stats-grid cols-3">
-        <div class="stat-card">
-            <div class="stat-icon amber"><lucide-icon name="file-text" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas?.totalConvocatorias || 0 }}</div>
-                <div class="stat-label">Convocatorias Totales</div>
+    @if (estadisticas) {
+
+    <!-- ── KPI GRID ── -->
+    <div class="dc-kpi-grid">
+
+        <div class="dc-kpi-card">
+            <div class="dc-kpi-icon amber">
+                <lucide-icon name="file-text" size="20"></lucide-icon>
+            </div>
+            <div class="dc-kpi-body">
+                <div class="dc-kpi-value">{{ estadisticas.totalConvocatorias }}</div>
+                <div class="dc-kpi-label">Convocatorias Totales</div>
+            </div>
+            <div class="dc-kpi-sub">
+                <span class="dc-pill green">{{ estadisticas.convocatoriasActivas }} activas</span>
+                <span class="dc-pill slate">{{ estadisticas.convocatoriasInactivas }} cerradas</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas?.totalPostulantes || 0 }}</div>
-                <div class="stat-label">Postulantes Totales</div>
+
+        <div class="dc-kpi-card">
+            <div class="dc-kpi-icon indigo">
+                <lucide-icon name="users" size="20"></lucide-icon>
+            </div>
+            <div class="dc-kpi-body">
+                <div class="dc-kpi-value">{{ estadisticas.totalPostulantes }}</div>
+                <div class="dc-kpi-label">Postulantes Totales</div>
+            </div>
+            <div class="dc-kpi-sub">
+                <span class="dc-pill amber">{{ estadisticas.postulantesPendientes }} pendientes</span>
+                <span class="dc-pill cyan">{{ estadisticas.postulantesEnEvaluacion }} evaluación</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><lucide-icon name="file-signature" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas?.postulantesEnEvaluacion || 0 }}</div>
-                <div class="stat-label">En Evaluación / Comisiones</div>
+
+        <div class="dc-kpi-card">
+            <div class="dc-kpi-icon emerald">
+                <lucide-icon name="award" size="20"></lucide-icon>
+            </div>
+            <div class="dc-kpi-body">
+                <div class="dc-kpi-value">{{ tasaSeleccion }}%</div>
+                <div class="dc-kpi-label">Tasa de Selección</div>
+            </div>
+            <div class="dc-kpi-sub">
+                <span class="dc-pill green">{{ estadisticas.postulantesSeleccionados }} selec.</span>
+                <span class="dc-pill rose">{{ estadisticas.postulantesNoSeleccionados }} no selec.</span>
             </div>
         </div>
+
     </div>
 
-    <!-- Charts -->
-    @if (estadisticas && estadisticas.actividadPorCoordinador.length > 0) {
-    <div class="charts-wrapper">
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3>Actividad por Coordinador</h3>
-                <p>Volumen de convocatorias gestionadas</p>
+    <!-- ── GRÁFICOS ── -->
+    <div class="dc-charts-grid">
+
+        <!-- Chart 1: Horizontal Bar — Actividad por coordinador -->
+        <div class="dc-chart-card dc-chart-wide">
+            <div class="dc-chart-header">
+                <h3>Postulantes por Coordinador</h3>
+                <p>Actividad del periodo académico actual</p>
             </div>
-            <div class="chart-container">
-                <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
-                </canvas>
-            </div>
-        </div>
-        <div class="chart-card doughnut-card">
-            <div class="chart-header">
-                <h3>Resumen Convocatorias</h3>
-                <p>Activas vs Inactivas</p>
-            </div>
-            <div class="chart-container">
-                <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions"
-                    [type]="doughnutChartType">
-                </canvas>
+            <div class="dc-chart-body">
+                @if (estadisticas.actividadPorCoordinador.length > 0) {
+                <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar"></canvas>
+                } @else {
+                <div class="dc-chart-empty">
+                    <lucide-icon name="bar-chart-2" size="32"></lucide-icon>
+                    <p>Sin actividad registrada</p>
+                </div>
+                }
             </div>
         </div>
+
+        <!-- Chart 2: Doughnut — Estado convocatorias -->
+        <div class="dc-chart-card">
+            <div class="dc-chart-header">
+                <h3>Estado Convocatorias</h3>
+                <p>Activas vs Cerradas</p>
+            </div>
+            <div class="dc-chart-body dc-chart-centered">
+                @if (estadisticas.totalConvocatorias > 0) {
+                <canvas baseChart [data]="doughnutConvocatoriasData" [options]="doughnutConvocatoriasOptions"
+                    type="doughnut"></canvas>
+                } @else {
+                <div class="dc-chart-empty">
+                    <lucide-icon name="pie-chart" size="32"></lucide-icon>
+                    <p>Sin convocatorias</p>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Chart 3: Doughnut — Estado postulantes -->
+        <div class="dc-chart-card">
+            <div class="dc-chart-header">
+                <h3>Estado Postulantes</h3>
+                <p>Distribución de postulaciones</p>
+            </div>
+            <div class="dc-chart-body dc-chart-centered">
+                @if (estadisticas.totalPostulantes > 0) {
+                <canvas baseChart [data]="doughnutPostulantesData" [options]="doughnutPostulantesOptions"
+                    type="doughnut"></canvas>
+                } @else {
+                <div class="dc-chart-empty">
+                    <lucide-icon name="pie-chart" size="32"></lucide-icon>
+                    <p>Sin postulantes</p>
+                </div>
+                }
+            </div>
+        </div>
+
     </div>
     }
 
-    <!-- Quick Actions -->
-    <p class="subtitle"
-        style="font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
-        Acceso Rápido</p>
-    <div class="actions-grid cols-3">
-        <a routerLink="/decano/convocatorias" class="action-card amber">
-            <div class="action-icon amber"><lucide-icon name="file-text" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Convocatorias</div>
-                <div class="action-desc">Ver convocatorias activas</div>
+    <!-- ── QUICK ACTIONS ── -->
+    <p class="dc-section-label">Acceso Rápido</p>
+    <div class="dc-doc-shortcut-grid">
+        <button class="dc-doc-shortcut" (click)="irA('/decano/convocatorias')">
+            <div class="dc-doc-sc-icon amber">
+                <lucide-icon name="file-text" size="22"></lucide-icon>
             </div>
-        </a>
-        <a routerLink="/decano/comisiones" class="action-card blue">
-            <div class="action-icon blue"><lucide-icon name="users" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Designar Comisiones</div>
-                <div class="action-desc">Asignar comisiones de selección</div>
+            <span class="dc-doc-sc-label">Convocatorias</span>
+            <span class="dc-doc-sc-sub">Gestión de periodos</span>
+        </button>
+
+        <button class="dc-doc-shortcut" (click)="irA('/decano/comisiones')">
+            <div class="dc-doc-sc-icon indigo">
+                <lucide-icon name="users-round" size="22"></lucide-icon>
             </div>
-        </a>
-        <a routerLink="/decano/reportes" class="action-card green">
-            <div class="action-icon green"><lucide-icon name="bar-chart-3" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Auditoría y Reportes</div>
-                <div class="action-desc">Reportes del periodo académico</div>
+            <span class="dc-doc-sc-label">Comisiones</span>
+            <span class="dc-doc-sc-sub">Selección de personal</span>
+        </button>
+
+        <button class="dc-doc-shortcut" (click)="irA('/decano/auditoria')">
+            <div class="dc-doc-sc-icon emerald">
+                <lucide-icon name="shield-check" size="22"></lucide-icon>
             </div>
-        </a>
+            <span class="dc-doc-sc-label">Auditoría</span>
+            <span class="dc-doc-sc-sub">Registro de actividad</span>
+        </button>
+
+        <button class="dc-doc-shortcut" (click)="irA('/decano/reportes')">
+            <div class="dc-doc-sc-icon blue">
+                <lucide-icon name="bar-chart-3" size="22"></lucide-icon>
+            </div>
+            <span class="dc-doc-sc-label">Reportes</span>
+            <span class="dc-doc-sc-sub">Estadísticas institucionales</span>
+        </button>
     </div>
+
     }
 </div>

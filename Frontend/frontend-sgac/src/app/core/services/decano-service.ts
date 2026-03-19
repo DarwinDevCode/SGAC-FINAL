@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { DecanoResponseDTO, DecanoEstadisticasDTO, ConvocatoriaReporteDTO, LogAuditoriaDTO } from '../dto/decano';
+import { DecanoResponseDTO, DecanoEstadisticasDTO, ConvocatoriaReporteDTO, LogAuditoriaDTO, CoordinadorPostulanteReporteDTO } from '../dto/decano';
 import { ConvocatoriaDTO } from '../dto/convocatoria';
 import { PostulacionResponseDTO } from '../dto/postulacion';
 
@@ -36,6 +36,10 @@ export class DecanoService {
 
   obtenerReporteAuditoria(idFacultad: number): Observable<LogAuditoriaDTO[]> {
     return this.http.get<LogAuditoriaDTO[]>(`${this.API_DECANOS}/facultad/${idFacultad}/auditoria`);
+  }
+
+  obtenerReportePostulantes(idFacultad: number): Observable<CoordinadorPostulanteReporteDTO[]> {
+    return this.http.get<CoordinadorPostulanteReporteDTO[]>(`${this.API_DECANOS}/facultad/${idFacultad}/reportes/postulantes`);
   }
 
   // --- Convocatorias API ---

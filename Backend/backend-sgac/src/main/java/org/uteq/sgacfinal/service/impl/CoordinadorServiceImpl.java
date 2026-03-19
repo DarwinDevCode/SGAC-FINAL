@@ -17,8 +17,9 @@ import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -73,73 +74,79 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
     @Override
     @Transactional(readOnly = true)
     public CoordinadorResponseDTO buscarPorId(Integer id) {
-        /*
-        Coordinador coordinador = coordinadorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Coordinador no encontrado con ID: " + id));
-        return mapearADTO(coordinador);
-
-         */
         return new CoordinadorResponseDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public CoordinadorResponseDTO buscarPorUsuario(Integer idUsuario) {
-        /*
-        Coordinador coordinador = coordinadorRepository.findByUsuario_IdUsuarioAndActivoTrue(idUsuario)
-                .orElseThrow(() -> new RuntimeException("No existe coordinador activo para el usuario ID: " + idUsuario));
-        return mapearADTO(coordinador);
-        */
         return new CoordinadorResponseDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorResponseDTO> listarTodos() {
-        /*
-        return coordinadorRepository.findAll().stream()
-                .map(this::mapearADTO)
-                .collect(Collectors.toList());
-
-         */
         return new ArrayList<>();
     }
-
-//    @Override
-//    @Transactional(readOnly = true)
-//    public List<CoordinadorResponseDTO> listarActivosPorCarrera(Integer idCarrera) {
-//        return coordinadorRepository.findByCarrera_IdCarreraAndActivoTrue(idCarrera).stream()
-//                .map(this::mapearADTO)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     @Transactional(readOnly = true)
     public CoordinadorEstadisticasDTO obtenerEstadisticasPropias(Integer idUsuario) {
-        /*
-        List<Convocatoria> convocatorias = convocatoriaRepository.findByCoordinadorPropio(idUsuario);
+        // Obtener todas las postulaciones de las convocatorias de este coordinador
+        List<Postulacion> postulaciones = postulacionRepository.findByCoordinadorPropioActivo(idUsuario);
 
-        long totalConvocatorias = convocatorias.size();
-        long activas = convocatorias.stream().filter(c -> Boolean.TRUE.equals(c.getActivo())).count();
+        // Métricas de postulantes por estado (códigos reales de la BD)
+        long totalPostulantes = postulaciones.size();
+        // "aprobados" en el sistema = SELECCIONADO
+        long aprobados = postulaciones.stream()
+                .filter(p -> p.getTipoEstadoPostulacion() != null
+                        && "SELECCIONADO".equalsIgnoreCase(p.getTipoEstadoPostulacion().getCodigo()))
+                .count();
+        // "rechazados" en el sistema = NO_SELECCIONADO
+        long rechazados = postulaciones.stream()
+                .filter(p -> p.getTipoEstadoPostulacion() != null
+                        && "NO_SELECCIONADO".equalsIgnoreCase(p.getTipoEstadoPostulacion().getCodigo()))
+                .count();
+        // "en evaluación" = EN_EVALUACION + ASIGNADO + ELEGIBLE
+        long enEvaluacion = postulaciones.stream()
+                .filter(p -> p.getTipoEstadoPostulacion() != null
+                        && ("EN_EVALUACION".equalsIgnoreCase(p.getTipoEstadoPostulacion().getCodigo())
+                             || "ASIGNADO".equalsIgnoreCase(p.getTipoEstadoPostulacion().getCodigo())
+                             || "ELEGIBLE".equalsIgnoreCase(p.getTipoEstadoPostulacion().getCodigo())))
+                .count();
+        // "pendientes" = PENDIENTE (recién postulado, sin revisión)
+        long pendientes = postulaciones.stream()
+                .filter(p -> p.getTipoEstadoPostulacion() != null
+                        && "PENDIENTE".equalsIgnoreCase(p.getTipoEstadoPostulacion().getCodigo()))
+                .count();
+
+        // Agrupar postulaciones por convocatoria para métricas de convocatorias
+        Map<Convocatoria, Long> porConvocatoria = postulaciones.stream()
+                .collect(Collectors.groupingBy(Postulacion::getConvocatoria, Collectors.counting()));
+
+        // Obtener las convocatorias únicas de las postulaciones
+        List<Convocatoria> convocatoriasConPostulantes = new ArrayList<>(porConvocatoria.keySet());
+
+        // Convocatorias propias (las de las postulaciones) + las activas del coordinador
+        // Para el total y activas/inactivas, usamos convocatorias del coordinador directamente si existe la query;
+        // si no, usamos las inferidas de las postulaciones
+        long totalConvocatorias = convocatoriasConPostulantes.size();
+        long activas = convocatoriasConPostulantes.stream()
+                .filter(c -> Boolean.TRUE.equals(c.getActivo()))
+                .count();
         long inactivas = totalConvocatorias - activas;
 
-        List<Postulacion> todasLasPostulaciones = convocatorias.stream()
-                .flatMap(c -> c.getPostulaciones().stream())
-                .collect(Collectors.toList());
-
-        long totalPostulantes = todasLasPostulaciones.size();
-        long aprobados = todasLasPostulaciones.stream().filter(p -> "APROBADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-        long rechazados = todasLasPostulaciones.stream().filter(p -> "RECHAZADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-        long enEvaluacion = todasLasPostulaciones.stream().filter(p -> "EN_EVALUACION".equalsIgnoreCase(p.getEstadoPostulacion()) || "ASIGNADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-
-        List<CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO> topConvocatorias = convocatorias.stream()
-                .filter(c -> c.getPostulaciones() != null && !c.getPostulaciones().isEmpty())
-                .map(c -> new CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO(
-                        c.getAsignatura().getNombreAsignatura(),
-                        (long) c.getPostulaciones().size()
-                ))
-                .sorted(Comparator.comparing(CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO::getCantidadPostulantes).reversed())
+        // Top 5 convocatorias por cantidad de postulantes
+        List<CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO> topConvocatorias = porConvocatoria.entrySet()
+                .stream()
+                .sorted(Map.Entry.<Convocatoria, Long>comparingByValue().reversed())
                 .limit(5)
+                .map(e -> {
+                    String titulo = e.getKey().getAsignatura() != null
+                            ? e.getKey().getAsignatura().getNombreAsignatura()
+                            : "Sin título";
+                    return new CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO(titulo, e.getValue());
+                })
                 .collect(Collectors.toList());
 
         return CoordinadorEstadisticasDTO.builder()
@@ -150,69 +157,20 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
                 .postulantesAprobados(aprobados)
                 .postulantesRechazados(rechazados)
                 .postulantesEnEvaluacion(enEvaluacion)
+                .postulantesPendientes(pendientes)
                 .postulantesPorConvocatoria(topConvocatorias)
                 .build();
-
-        */
-        return new CoordinadorEstadisticasDTO();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorConvocatoriaReporteDTO> reporteConvocatoriasPropias(Integer idUsuario) {
-
-        /*
-        List<Convocatoria> convocatorias = convocatoriaRepository.findByCoordinadorPropio(idUsuario);
-
-        return convocatorias.stream().map(c -> CoordinadorConvocatoriaReporteDTO.builder()
-                .idConvocatoria(c.getIdConvocatoria())
-                .nombreAsignatura(c.getAsignatura().getNombreAsignatura())
-                .nombreCarrera(c.getAsignatura().getCarrera().getNombreCarrera())
-                .nombrePeriodo(c.getPeriodoAcademico().getNombrePeriodo())
-                .fechaInicio(c.getFechaPublicacion())
-                .fechaFin(c.getFechaCierre())
-                .cuposAprobados(c.getCuposDisponibles())
-                .estado(Boolean.TRUE.equals(c.getActivo()) ? "ACTIVO" : "INACTIVO")
-                .numeroPostulantes((long) (c.getPostulaciones() != null ? c.getPostulaciones().size() : 0))
-                .build()
-        ).collect(Collectors.toList());
-         */
         return new ArrayList<>();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorPostulanteReporteDTO> reportePostulantesPropios(Integer idUsuario) {
-        /*
-        List<Postulacion> postulaciones = postulacionRepository.findByCoordinadorPropioActivo(idUsuario);
-
-        return postulaciones.stream().map(p -> CoordinadorPostulanteReporteDTO.builder()
-                .idPostulacion(p.getIdPostulacion())
-                .nombreEstudiante(p.getEstudiante().getUsuario().getNombres() + " " + p.getEstudiante().getUsuario().getApellidos())
-                .cedula(p.getEstudiante().getUsuario().getCedula())
-                .nombreAsignatura(p.getConvocatoria().getAsignatura().getNombreAsignatura())
-                .nombrePeriodo(p.getConvocatoria().getPeriodoAcademico().getNombrePeriodo())
-                .fechaPostulacion(p.getFechaPostulacion())
-                .estadoEvaluacion(p.getEstadoPostulacion())
-                .build()
-        ).collect(Collectors.toList());
-    }
-
-    private CoordinadorResponseDTO mapearADTO(Coordinador entidad) {
-        String nombreUsuario = entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos();
-        return CoordinadorResponseDTO.builder()
-                .idCoordinador(entidad.getIdCoordinador())
-                .idUsuario(entidad.getUsuario().getIdUsuario())
-                .nombreCompletoUsuario(nombreUsuario)
-                .cedula(entidad.getUsuario().getCedula())
-                .idCarrera(entidad.getCarrera().getIdCarrera())
-                .nombreCarrera(entidad.getCarrera().getNombreCarrera())
-                .fechaInicio(entidad.getFechaInicio())
-                .fechaFin(entidad.getFechaFin())
-                .activo(entidad.getActivo())
-                .build();
-    }
-    */
         return new ArrayList<>();
     }
 }

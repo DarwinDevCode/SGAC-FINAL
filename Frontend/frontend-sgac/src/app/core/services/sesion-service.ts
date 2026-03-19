@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import {SesionListado} from '../dto/sesion-listado';
-import {SesionDetalle} from '../dto/sesion-detalle';
-import {Evidencia} from '../dto/evidencia';
-import {ProgresoGeneral} from '../dto/progreso-general';
-import {ControlSemanal} from '../dto/control-semanal';
-import {RegistrarSesionResponse} from '../dto/registrar-sesion-response';
-import {RegistrarSesionRequest} from '../dto/registrar-sesion-request';
-import {FiltrosSesionRequest} from '../dto/filtros-sesion-request';
+import { SesionListado } from '../dto/sesion-listado';
+import { SesionDetalle } from '../dto/sesion-detalle';
+import { Evidencia } from '../dto/evidencia';
+import { ProgresoGeneral } from '../dto/progreso-general';
+import { ControlSemanal } from '../dto/control-semanal';
+import { RegistrarSesionResponse } from '../dto/registrar-sesion-response';
+import { RegistrarSesionRequest } from '../dto/registrar-sesion-request';
+import { FiltrosSesionRequest } from '../dto/filtros-sesion-request';
 import { SesionResponseDTO } from '../dto/sesion-response-dto';
 
 @Injectable({
@@ -17,8 +17,8 @@ import { SesionResponseDTO } from '../dto/sesion-response-dto';
 })
 export class SesionService {
   private readonly baseUrl = environment.apiUrl;
-  private readonly URL = `${this.baseUrl}/sesiones`;
-  constructor(private http: HttpClient) {}
+  private readonly URL = `${this.baseUrl}/postulante/sesiones`;
+  constructor(private http: HttpClient) { }
 
   listarSesiones(
     idUsuario: number,
@@ -27,10 +27,10 @@ export class SesionService {
 
     let params = new HttpParams().set('idUsuario', idUsuario);
 
-    if (filtros?.fechaDesde)  params = params.set('fechaDesde',  filtros.fechaDesde);
-    if (filtros?.fechaHasta)  params = params.set('fechaHasta',  filtros.fechaHasta);
-    if (filtros?.estado)      params = params.set('estado',      filtros.estado);
-    if (filtros?.idPeriodo)   params = params.set('idPeriodo',   filtros.idPeriodo);
+    if (filtros?.fechaDesde) params = params.set('fechaDesde', filtros.fechaDesde);
+    if (filtros?.fechaHasta) params = params.set('fechaHasta', filtros.fechaHasta);
+    if (filtros?.estado) params = params.set('estado', filtros.estado);
+    if (filtros?.idPeriodo) params = params.set('idPeriodo', filtros.idPeriodo);
 
     return this.http.get<SesionListado[]>(this.URL, { params });
   }

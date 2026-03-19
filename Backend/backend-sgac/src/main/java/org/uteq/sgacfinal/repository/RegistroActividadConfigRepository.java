@@ -62,7 +62,11 @@ public interface RegistroActividadConfigRepository extends JpaRepository<Registr
 
     @Query(value = """
         SELECT * FROM ayudantia.fn_listar_sesiones(
-            :idUsuario, :fechaDesde, :fechaHasta, :estado, :idPeriodo
+            :idUsuario, 
+            CAST(:fechaDesde AS DATE), 
+            CAST(:fechaHasta AS DATE), 
+            CAST(:estado AS VARCHAR), 
+            CAST(:idPeriodo AS INTEGER)
         )
         """, nativeQuery = true)
     List<Object[]> listarSesiones(

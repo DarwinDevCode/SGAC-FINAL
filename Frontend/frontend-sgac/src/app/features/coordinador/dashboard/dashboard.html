@@ -1,5 +1,6 @@
-<div class="gestion-container">
+<div class="coord-dashboard">
 
+    <!-- ── HEADER ── -->
     <div class="section-header">
         <div class="title-container">
             <h2 class="title">Gestión de Carrera</h2>
@@ -10,93 +11,130 @@
         <span class="badge green">COORDINADOR</span>
     </div>
 
+    <!-- ── LOADING / ERROR ── -->
     @if (loading) {
     <div class="info-message">
         <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
         <p style="margin-top:.75rem">Cargando panel...</p>
     </div>
     } @else if (errorMensaje) {
-    <div class="error-state">
-        <lucide-icon name="alert-circle" size="48"></lucide-icon>
+    <div class="cd-error-state">
+        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
         <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
     </div>
     } @else {
 
-    <!-- Stats con KPIs reales -->
     @if (estadisticas) {
-    <!-- Primera Fila: KPIs -->
-    <div class="stats-grid cols-3" style="margin-bottom: 2rem;">
-        <div class="stat-card">
-            <div class="stat-icon green"><lucide-icon name="file-text" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas.totalConvocatoriasPropias }}</div>
-                <div class="stat-label">Convocatorias T.</div>
+
+    <!-- ── FILA 1: KPIs superiores ── -->
+    <div class="cd-kpi-grid">
+        <div class="cd-kpi-card">
+            <div class="cd-kpi-icon indigo">
+                <lucide-icon name="file-text" size="20"></lucide-icon>
+            </div>
+            <div class="cd-kpi-body">
+                <div class="cd-kpi-value">{{ estadisticas.totalConvocatoriasPropias }}</div>
+                <div class="cd-kpi-label">Convocatorias Totales</div>
+            </div>
+            <div class="cd-kpi-sub">
+                <span class="cd-pill green">{{ estadisticas.convocatoriasActivas }} activas</span>
+                <span class="cd-pill slate">{{ estadisticas.convocatoriasInactivas }} cerradas</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas.totalPostulantesRecibidos }}</div>
-                <div class="stat-label">Postulantes T.</div>
+
+        <div class="cd-kpi-card">
+            <div class="cd-kpi-icon blue">
+                <lucide-icon name="users" size="20"></lucide-icon>
+            </div>
+            <div class="cd-kpi-body">
+                <div class="cd-kpi-value">{{ estadisticas.totalPostulantesRecibidos }}</div>
+                <div class="cd-kpi-label">Postulantes Totales</div>
+            </div>
+            <div class="cd-kpi-sub">
+                <span class="cd-pill amber">{{ estadisticas.postulantesPendientes }} pendientes</span>
+                <span class="cd-pill cyan">{{ estadisticas.postulantesEnEvaluacion }} evaluación</span>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon amber"><lucide-icon name="clock" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas.postulantesEnEvaluacion }}</div>
-                <div class="stat-label">En Evaluación</div>
+
+        <div class="cd-kpi-card">
+            <div class="cd-kpi-icon emerald">
+                <lucide-icon name="award" size="20"></lucide-icon>
+            </div>
+            <div class="cd-kpi-body">
+                <div class="cd-kpi-value">{{ tasaAprobacion }}%</div>
+                <div class="cd-kpi-label">Tasa de Selección</div>
+            </div>
+            <div class="cd-kpi-sub">
+                <span class="cd-pill green">{{ estadisticas.postulantesAprobados }} selec.</span>
+                <span class="cd-pill rose">{{ estadisticas.postulantesRechazados }} no selec.</span>
             </div>
         </div>
     </div>
 
-    <!-- Segunda Fila: Gráficos -->
-    <div class="charts-wrapper"
-        style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem;">
+    <!-- ── GRÁFICOS ── -->
+    <div class="cd-charts-grid">
 
-        <!-- Bar Chart: Top Convocatorias -->
-        <div class="chart-card">
-            <div class="chart-header">
-                <h3>Postulantes por Convocatoria Activa (Top 5)</h3>
+        <!-- Chart 1: Horizontal Bar — Top convocatorias -->
+        <div class="cd-chart-card cd-chart-wide">
+            <div class="cd-chart-header">
+                <h3>Top Convocatorias por Postulantes</h3>
+                <p>Las convocatorias con mayor demanda</p>
             </div>
-            <div class="chart-body" style="height: 300px; position: relative;">
+            <div class="cd-chart-body">
                 @if (estadisticas.postulantesPorConvocatoria.length > 0) {
-                <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar">
-                </canvas>
+                <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar"></canvas>
                 } @else {
-                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b">
-                    No hay datos de postulantes
+                <div class="cd-chart-empty">
+                    <lucide-icon name="bar-chart-2" size="32"></lucide-icon>
+                    <p>No hay datos de postulantes</p>
                 </div>
                 }
             </div>
         </div>
 
-        <!-- Doughnut Chart: Estado Convocatorias -->
-        <div class="chart-card">
-            <div class="chart-header">
+        <!-- Chart 2: Doughnut — Convocatorias -->
+        <div class="cd-chart-card">
+            <div class="cd-chart-header">
                 <h3>Estado Convocatorias</h3>
+                <p>Activas vs Cerradas</p>
             </div>
-            <div class="chart-body"
-                style="height: 300px; position: relative; display: flex; justify-content: center; align-items: center;">
-                <div style="width: 100%; height: 100%; padding-bottom: 1rem;">
-                    @if (estadisticas.totalConvocatoriasPropias > 0) {
-                    <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" type="doughnut">
-                    </canvas>
-                    } @else {
-                    <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#64748b">
-                        Sin convocatorias
-                    </div>
-                    }
+            <div class="cd-chart-body cd-chart-centered">
+                @if (estadisticas.totalConvocatoriasPropias > 0) {
+                <canvas baseChart [data]="doughnutConvocatoriasData" [options]="doughnutConvocatoriasOptions"
+                    type="doughnut"></canvas>
+                } @else {
+                <div class="cd-chart-empty">
+                    <lucide-icon name="pie-chart" size="32"></lucide-icon>
+                    <p>Sin convocatorias</p>
                 </div>
+                }
+            </div>
+        </div>
+
+        <!-- Chart 3: Doughnut — Postulantes -->
+        <div class="cd-chart-card">
+            <div class="cd-chart-header">
+                <h3>Estado Postulantes</h3>
+                <p>Distribución de postulaciones</p>
+            </div>
+            <div class="cd-chart-body cd-chart-centered">
+                @if (estadisticas.totalPostulantesRecibidos > 0) {
+                <canvas baseChart [data]="doughnutPostulantesData" [options]="doughnutPostulantesOptions"
+                    type="doughnut"></canvas>
+                } @else {
+                <div class="cd-chart-empty">
+                    <lucide-icon name="pie-chart" size="32"></lucide-icon>
+                    <p>Sin postulantes</p>
+                </div>
+                }
             </div>
         </div>
 
     </div>
     }
 
-    <!-- Quick Actions -->
-    <p class="subtitle"
-        style="font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
-        Acceso Rápido</p>
+    <!-- ── ACCIONES RÁPIDAS ── -->
+    <p class="cd-section-label">Acceso Rápido</p>
     <div class="actions-grid cols-4">
         <a routerLink="/coordinador/convocatorias" class="action-card green">
             <div class="action-icon green"><lucide-icon name="file-text" size="20"></lucide-icon></div>
@@ -128,7 +166,7 @@
         </a>
     </div>
 
-    <!-- P10: Panel notificaciones masivas -->
+    <!-- ── NOTIFICACIÓN MASIVA ── -->
     <div class="notif-masiva-card">
         <div class="notif-masiva-header">
             <lucide-icon name="megaphone" size="18"></lucide-icon>
@@ -154,4 +192,5 @@
         }
     </div>
     }
+
 </div>

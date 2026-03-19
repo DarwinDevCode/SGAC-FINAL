@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
 import { AuthService } from '../../../core/services/auth-service';
+import { PostulacionResponseDTO } from '../../../core/dto/postulacion';
 
 @Component({
     selector: 'app-postulante-dashboard',
@@ -20,6 +21,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     totalConvocatorias = 0;
     totalPostulaciones = 0;
+    ultimasPostulaciones: PostulacionResponseDTO[] = [];
     loading = true;
     idEstudianteBase = 0;
 
@@ -54,6 +56,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.postulanteService.misPostulaciones(this.idEstudianteBase).subscribe({
                 next: (postulaciones) => {
                     this.totalPostulaciones = postulaciones?.length || 0;
+                    this.ultimasPostulaciones = (postulaciones || []).slice(0, 5);
                     this.checkLoading();
                 },
                 error: () => this.checkLoading()

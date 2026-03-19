@@ -5,6 +5,7 @@ import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
 import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
 import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
+import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
 import java.util.List;
 
 public interface IDecanoService {
@@ -24,6 +25,8 @@ public interface IDecanoService {
     DecanoEstadisticasDTO obtenerEstadisticasPorFacultad(Integer idFacultad);
 
     List<ConvocatoriaReporteDTO> reporteConvocatoriasPorFacultad(Integer idFacultad);
+
+    List<CoordinadorPostulanteReporteDTO> reportePostulantesPorFacultad(Integer idFacultad);
 
     List<LogAuditoriaDTO> reporteAuditoriaPorFacultad(Integer idFacultad);
 }

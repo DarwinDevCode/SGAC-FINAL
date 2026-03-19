@@ -1,56 +1,51 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { DocenteDashboardDTO } from '../../../core/models/dashboard/docente-dashboard.model';
 import { DocenteDashboardService } from '../../../core/services/docente-dashboard.service';
+import { DocenteDashboardDTO, DocenteDashboardUltimaActividadDTO } from '../../../core/models/dashboard/docente-dashboard.model';
 
 @Component({
-  selector: 'app-docente-dashboard',
-  standalone: true,
-  imports: [CommonModule, LucideAngularModule, DatePipe],
-  templateUrl: './docente-dashboard.component.html',
-  styleUrl: './docente-dashboard.component.css'
+    selector: 'app-docente-dashboard',
+    standalone: true,
+    imports: [CommonModule, LucideAngularModule, RouterModule],
+    templateUrl: './docente-dashboard.component.html',
+    styleUrl: './docente-dashboard.component.css'
 })
 export class DocenteDashboardComponent implements OnInit {
-  private readonly dashboardService = inject(DocenteDashboardService);
-  private readonly router = inject(Router);
+    private dashboardService = inject(DocenteDashboardService);
+    private router = inject(Router);
 
-  resumen: DocenteDashboardDTO | null = null;
-  loading = true;
-  error: string | null = null;
+    dashboard: DocenteDashboardDTO | null = null;
+    loading = true;
+    error = '';
 
-  ngOnInit(): void {
-    this.loading = true;
-    this.error = null;
+    ngOnInit(): void {
+        this.dashboardService.getResumen().subscribe({
+            next: (d) => { this.dashboard = d; this.loading = false; },
+            error: (err) => { this.error = err.message || 'Error al cargar el panel.'; this.loading = false; }
+        });
+    }
 
-    this.dashboardService.getResumen().subscribe({
-      next: (data) => {
-        this.resumen = data;
-        this.loading = false;
-      },
-      error: (e: Error) => {
-        this.error = e.message || 'Error inesperado.';
-        this.loading = false;
-      }
-    });
-  }
+    irA(ruta: string): void {
+        this.router.navigate([ruta]);
+    }
 
-  revisarActividad(idRegistro: number): void {
-    // Ajusta destino a la pantalla de revisión real si ya existe.
-    this.router.navigate(['/docente/validar-informes'], { queryParams: { idRegistro } });
-  }
+    getEstadoClass(fecha: string): string {
+        const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / 86400000);
+        if (dias <= 1) return 'act-recent';
+        if (dias <= 5) return 'act-normal';
+        return 'act-old';
+    }
 
-  nuevaConvocatoria(): void {
-    this.router.navigate(['/docente/convocatorias/nueva']);
-  }
+    getEstadoLabel(fecha: string): string {
+        const dias = Math.floor((Date.now() - new Date(fecha).getTime()) / 86400000);
+        if (dias === 0) return 'Hoy';
+        if (dias === 1) return 'Ayer';
+        return `Hace ${dias} días`;
+    }
 
-  evaluarPostulantes(): void {
-    this.router.navigate(['/docente/mis-ayudantes']);
-  }
-
-  reportes(): void {
-    this.router.navigate(['/docente/reportes']);
-  }
+    formatFecha(fecha: string): string {
+        return new Date(fecha).toLocaleDateString('es-EC', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
 }
-

@@ -1,7 +1,7 @@
 <div class="gestion-container">
     <div class="section-header">
         <div class="title-container">
-            <h2 class="title">Dashboard Postulante</h2>
+            <h2 class="title">Mi Dashboard</h2>
             <p class="subtitle">Bienvenido a tu panel de control de selección de ayudantías.</p>
         </div>
     </div>
@@ -9,33 +9,78 @@
     @if (loading) {
     <div class="loading-state">Cargando información del panel...</div>
     } @else {
-    <div class="dashboard-grid">
-        <!-- Tarjeta Convocatorias -->
-        <div class="stat-card">
-            <div class="stat-icon calls-icon">
-                <lucide-icon name="briefcase" size="24"></lucide-icon>
+    <div class="bottom-grid">
+        <div class="quick-access" style="margin-bottom: 2rem;">
+            <h3 class="section-subtitle">Accesos rápidos</h3>
+            <div class="dc-doc-shortcut-grid">
+                <button class="dc-doc-shortcut" routerLink="/postulante/convocatorias">
+                    <div class="dc-doc-sc-icon blue">
+                        <lucide-icon name="briefcase" size="22"></lucide-icon>
+                    </div>
+                    <span class="dc-doc-sc-label">Convocatorias</span>
+                    <span class="dc-doc-sc-sub">Plazas abiertas: {{ totalConvocatorias }}</span>
+                </button>
+
+                <button class="dc-doc-shortcut" routerLink="/postulante/mis-postulaciones">
+                    <div class="dc-doc-sc-icon emerald">
+                        <lucide-icon name="file-text" size="22"></lucide-icon>
+                    </div>
+                    <span class="dc-doc-sc-label">Mis Postulaciones</span>
+                    <span class="dc-doc-sc-sub">Aplicaciones activas: {{ totalPostulaciones }}</span>
+                </button>
+
+                <button class="dc-doc-shortcut" routerLink="/postulante/comision">
+                    <div class="dc-doc-sc-icon amber">
+                        <lucide-icon name="users" size="22"></lucide-icon>
+                    </div>
+                    <span class="dc-doc-sc-label">Sala de Evaluación</span>
+                    <span class="dc-doc-sc-sub">Prueba y Entrevista</span>
+                </button>
+
+                <button class="dc-doc-shortcut" routerLink="/resultados-evaluacion">
+                    <div class="dc-doc-sc-icon violet">
+                        <lucide-icon name="award" size="22"></lucide-icon>
+                    </div>
+                    <span class="dc-doc-sc-label">Resultados</span>
+                    <span class="dc-doc-sc-sub">Ranking general</span>
+                </button>
             </div>
-            <div class="stat-info">
-                <h3 class="stat-title">Convocatorias Abiertas</h3>
-                <p class="stat-value">{{ totalConvocatorias }}</p>
-            </div>
-            <a routerLink="/postulante/convocatorias" class="stat-link">
-                Ver Plazas <lucide-icon name="arrow-right" size="16"></lucide-icon>
-            </a>
         </div>
 
-        <!-- Tarjeta Mis Postulaciones -->
-        <div class="stat-card">
-            <div class="stat-icon apps-icon">
-                <lucide-icon name="file-text" size="24"></lucide-icon>
+        <div class="ultimas-actividades">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3 class="section-subtitle" style="margin: 0;">Postulaciones recientes</h3>
+                <a routerLink="/postulante/mis-postulaciones"
+                    style="font-size: 0.85rem; color: hsl(var(--primary)); text-decoration: none; display: flex; align-items: center; gap: 0.25rem;">
+                    Ver todas <lucide-icon name="arrow-right" size="14"></lucide-icon>
+                </a>
             </div>
-            <div class="stat-info">
-                <h3 class="stat-title">Mis Postulaciones Activas</h3>
-                <p class="stat-value">{{ totalPostulaciones }}</p>
+
+            @if (ultimasPostulaciones.length === 0) {
+            <div
+                style="text-align: center; padding: 2rem; background: hsl(var(--muted)); border-radius: 12px; font-size: 0.9rem; color: hsl(var(--muted-foreground));">
+                Aún no tienes postulaciones registradas en el periodo actual.
             </div>
-            <a routerLink="/postulante/mis-postulaciones" class="stat-link">
-                Revisar Estado <lucide-icon name="arrow-right" size="16"></lucide-icon>
-            </a>
+            } @else {
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                @for (pos of ultimasPostulaciones; track pos.idPostulacion) {
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 1rem; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 12px; transition: transform 0.2s; cursor: pointer;"
+                    routerLink="/postulante/mis-postulaciones">
+                    <div>
+                        <div style="font-weight: 600; font-size: 0.95rem; color: hsl(var(--foreground));">{{
+                            pos.asignaturaConvocatoria }}</div>
+                        <div style="font-size: 0.8rem; color: hsl(var(--muted-foreground)); margin-top: 0.25rem;">
+                            Postulado el: {{ pos.fechaPostulacion }}</div>
+                    </div>
+                    <div style="padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.75rem; font-weight: 600;"
+                        [style.backgroundColor]="pos.estadoPostulacion === 'APROBADO' ? '#dcfce7' : (pos.estadoPostulacion === 'PENDIENTE' ? '#fef08a' : '#f1f5f9')"
+                        [style.color]="pos.estadoPostulacion === 'APROBADO' ? '#166534' : (pos.estadoPostulacion === 'PENDIENTE' ? '#854d0e' : '#475569')">
+                        {{ pos.estadoPostulacion }}
+                    </div>
+                </div>
+                }
+            </div>
+            }
         </div>
     </div>
     }

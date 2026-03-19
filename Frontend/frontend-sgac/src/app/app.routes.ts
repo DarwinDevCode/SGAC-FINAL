@@ -126,6 +126,10 @@ export const routes: Routes = [
       },
       {
         path: 'decano/reportes',
+        loadComponent: () => import('./features/decano/reportes/reportes').then(m => m.ReportesComponent)
+      },
+      {
+        path: 'decano/auditoria',
         loadComponent: () => import('./features/decano/auditoria/auditoria').then(m => m.AuditoriaComponent)
       },
 

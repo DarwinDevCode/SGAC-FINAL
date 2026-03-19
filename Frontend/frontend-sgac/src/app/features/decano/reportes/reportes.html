@@ -1,15 +1,15 @@
 <div class="reportes-container">
     <div class="r-header">
         <div class="r-titles">
-            <h2>Centro de Reportes</h2>
-            <p>Genera desgloses detallados en PDF o Excel según tus necesidades operativas.</p>
+            <h2>Centro de Reportes Institucional</h2>
+            <p>Monitorea y descarga estadísticas de toda la facultad desde un solo lugar.</p>
         </div>
     </div>
 
     @if (loading) {
     <div class="loading-state">
         <lucide-icon name="loader-2" class="spin-icon" size="32"></lucide-icon>
-        <p>Recopilando datos estadísticos...</p>
+        <p>Compilando informes de facultad...</p>
     </div>
     } @else if (errorMensaje) {
     <div class="error-state">
@@ -22,22 +22,22 @@
 
         <!-- Side Navigation -->
         <aside class="r-sidebar">
-            <h4>Tipos de Reporte</h4>
+            <h4>Reportes de Gestión</h4>
             <nav class="r-nav">
                 <button [class.active]="activeReport === 'CONVOCATORIAS_GENERAL'"
                     (click)="setReport('CONVOCATORIAS_GENERAL')">
-                    <lucide-icon name="briefcase" size="18"></lucide-icon> Convocatorias General
+                    <lucide-icon name="database" size="18"></lucide-icon> Convocatorias Facultad
                 </button>
                 <button [class.active]="activeReport === 'CONVOCATORIAS_ESTADO'"
                     (click)="setReport('CONVOCATORIAS_ESTADO')">
-                    <lucide-icon name="layers" size="18"></lucide-icon> Convocatorias por Estado
+                    <lucide-icon name="filter" size="18"></lucide-icon> Agrupado por Estado
                 </button>
 
                 <div class="nav-divider"></div>
 
                 <button [class.active]="activeReport === 'POSTULANTES_GENERAL'"
                     (click)="setReport('POSTULANTES_GENERAL')">
-                    <lucide-icon name="users" size="18"></lucide-icon> Postulantes General
+                    <lucide-icon name="users" size="18"></lucide-icon> Maestro de Postulantes
                 </button>
                 <button [class.active]="activeReport === 'POSTULANTES_VERSUS'"
                     (click)="setReport('POSTULANTES_VERSUS')">
@@ -45,13 +45,13 @@
                 </button>
                 <button [class.active]="activeReport === 'POSTULANTES_DESGLOSE'"
                     (click)="setReport('POSTULANTES_DESGLOSE')">
-                    <lucide-icon name="folder-tree" size="18"></lucide-icon> Agrupado por Asignatura
+                    <lucide-icon name="folder-tree" size="18"></lucide-icon> Por Asignatura
                 </button>
 
                 <div class="nav-divider"></div>
 
                 <button [class.active]="activeReport === 'RESUMEN_EJECUTIVO'" (click)="setReport('RESUMEN_EJECUTIVO')">
-                    <lucide-icon name="pie-chart" size="18"></lucide-icon> Resumen Ejecutivo
+                    <lucide-icon name="presentation" size="18"></lucide-icon> Resumen Ejecutivo
                 </button>
             </nav>
         </aside>
@@ -63,16 +63,16 @@
                 <div class="r-search">
                     @if(activeReport !== 'RESUMEN_EJECUTIVO') {
                     <lucide-icon name="search" size="16"></lucide-icon>
-                    <input type="text" [(ngModel)]="filtroTabla" placeholder="Buscar en previsualización...">
+                    <input type="text" [(ngModel)]="filtroTabla" placeholder="Filtrar datos de facultad...">
                     }
                 </div>
                 <div class="r-actions">
                     <button class="btn-export pdf" (click)="exportar('PDF')">
-                        <lucide-icon name="file-text" size="18"></lucide-icon> Exportar PDF
+                        <lucide-icon name="file-down" size="18"></lucide-icon> Descargar PDF
                     </button>
                     @if(activeReport !== 'RESUMEN_EJECUTIVO') {
                     <button class="btn-export excel" (click)="exportar('EXCEL')">
-                        <lucide-icon name="table-2" size="18"></lucide-icon> Exportar Excel
+                        <lucide-icon name="sheet" size="18"></lucide-icon> Descargar Excel
                     </button>
                     }
                 </div>
@@ -82,21 +82,21 @@
             <div class="r-preview">
                 @if(activeReport === 'RESUMEN_EJECUTIVO') {
                 <div class="resume-preview">
-                    <h3>Previsualización del PDF</h3>
-                    <p>Este reporte genera un documento estadístico diagramado con los totales y ratios de conversión
-                        general de tu perfil.</p>
+                    <div class="faculty-badge">FACULTAD ID: {{ idFacultad }}</div>
+                    <h3>Visión General de la Facultad</h3>
+                    <p>Métricas consolidadas de todos los coordinadores y carreras bajo tu cargo.</p>
                     <div class="resume-stats">
                         <div class="rs-card">
-                            <h4>{{ estadisticas?.totalConvocatoriasPropias || 0 }}</h4>
-                            <span>Convocatorias Creadas</span>
+                            <h4>{{ estadisticas?.totalConvocatorias || 0 }}</h4>
+                            <span>Ofertas Totales</span>
                         </div>
                         <div class="rs-card">
-                            <h4>{{ estadisticas?.totalPostulantesRecibidos || 0 }}</h4>
-                            <span>Postulantes Administrados</span>
+                            <h4>{{ estadisticas?.totalPostulantes || 0 }}</h4>
+                            <span>Estudiantes Aplicantes</span>
                         </div>
                         <div class="rs-card">
-                            <h4>{{ estadisticas?.postulantesAprobados || 0 }}</h4>
-                            <span>Postulantes Aprobados</span>
+                            <h4>{{ estadisticas?.postulantesSeleccionados || 0 }}</h4>
+                            <span>Total Seleccionados</span>
                         </div>
                     </div>
                 </div>
@@ -107,17 +107,17 @@
                             @if(activeReport.startsWith('CONVOCATORIAS')) {
                             <tr>
                                 <th>Asignatura</th>
-                                <th>Periodo</th>
-                                <th>Cupos</th>
+                                <th>Carrera</th>
+                                <th>Coordinador</th>
                                 <th>Postulantes</th>
                                 <th>Estado</th>
                             </tr>
                             } @else {
                             <tr>
-                                <th>Cédula</th>
                                 <th>Estudiante</th>
+                                <th>Cédula</th>
                                 <th>Asignatura</th>
-                                <th>Estado</th>
+                                <th>Evaluación</th>
                             </tr>
                             }
                         </thead>
@@ -126,8 +126,8 @@
                             @if(activeReport.startsWith('CONVOCATORIAS')) {
                             <tr>
                                 <td class="font-medium">{{ item.nombreAsignatura }}</td>
-                                <td>{{ item.nombrePeriodo }}</td>
-                                <td>{{ item.cuposAprobados }}</td>
+                                <td>{{ item.nombreCarrera }}</td>
+                                <td>{{ item.nombreCoordinador }}</td>
                                 <td>{{ item.numeroPostulantes }}</td>
                                 <td>
                                     <span class="badge" [ngClass]="item.estado.toLowerCase()">{{ item.estado }}</span>
@@ -135,8 +135,8 @@
                             </tr>
                             } @else {
                             <tr>
-                                <td>{{ item.cedula }}</td>
                                 <td class="font-medium">{{ item.nombreEstudiante }}</td>
+                                <td>{{ item.cedula }}</td>
                                 <td>{{ item.nombreAsignatura }}</td>
                                 <td>
                                     <span class="badge" [ngClass]="item.estadoEvaluacion.toLowerCase()">{{
@@ -146,8 +146,8 @@
                             }
                             } @empty {
                             <tr>
-                                <td colspan="5" class="empty-message">No hay datos que coincidan para mostrar en
-                                    previsualización.</td>
+                                <td colspan="5" class="empty-message">No se encontraron registros para la
+                                    previsualización filtrada.</td>
                             </tr>
                             }
                         </tbody>

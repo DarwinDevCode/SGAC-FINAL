@@ -36,22 +36,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
   enviandoMasivo = false;
   respuestaMasiva = '';
 
-  public doughnutChartOptions: ChartOptions<'doughnut'> = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { position: 'bottom' } }
-  };
-  public doughnutChartType = 'doughnut' as const;
-  public doughnutChartData: ChartData<'doughnut'> = { labels: [], datasets: [] };
-
+  // ── Gráfico 1: Barras horizontales — Top convocatorias por postulantes ──
   public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x} postulantes` } }
+    },
+    scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
   };
   public barChartType = 'bar' as const;
   public barChartData: ChartData<'bar'> = { labels: [], datasets: [] };
+
+  // ── Gráfico 2: Doughnut — Estado de Convocatorias ──
+  public doughnutConvocatoriasOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } }
+    },
+    cutout: '70%'
+  };
+  public doughnutConvocatoriasType = 'doughnut' as const;
+  public doughnutConvocatoriasData: ChartData<'doughnut'> = { labels: [], datasets: [] };
+
+  // ── Gráfico 3: Doughnut — Estados de Postulantes ──
+  public doughnutPostulantesOptions: ChartOptions<'doughnut'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { font: { size: 11 } } }
+    },
+    cutout: '70%'
+  };
+  public doughnutPostulantesType = 'doughnut' as const;
+  public doughnutPostulantesData: ChartData<'doughnut'> = { labels: [], datasets: [] };
 
   ngOnInit(): void {
     this.cargarDatosDashboard();
@@ -79,7 +100,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.subs.add(
             this.coordinadorService.obtenerEstadisticasPropias(user.idUsuario).subscribe({
               next: (stats: CoordinadorEstadisticasDTO) => {
-                // --- NORMALIZACIÓN DE DATOS (Blinda el HTML contra nulos) ---
                 this.estadisticas = {
                   ...stats,
                   totalConvocatoriasPropias: stats.totalConvocatoriasPropias ?? 0,
@@ -89,6 +109,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                   postulantesAprobados: stats.postulantesAprobados ?? 0,
                   postulantesRechazados: stats.postulantesRechazados ?? 0,
                   postulantesEnEvaluacion: stats.postulantesEnEvaluacion ?? 0,
+                  postulantesPendientes: stats.postulantesPendientes ?? 0,
                   postulantesPorConvocatoria: stats.postulantesPorConvocatoria ?? []
                 };
 
@@ -113,31 +134,59 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private configurarGraficos(stats: CoordinadorEstadisticasDTO) {
-    // Al estar normalizado arriba, ya no hay riesgo de null aquí
-    const listaPostulantes = stats.postulantesPorConvocatoria;
+    const lista = stats.postulantesPorConvocatoria || [];
 
-    const labelsBarras = listaPostulantes.map(p => p.tituloConvocatoria || 'Sin Título');
-    const dataBarras = listaPostulantes.map(p => p.cantidadPostulantes || 0);
-
+    // Gráfico 1: Horizontal bar — Top convocatorias
     this.barChartData = {
-      labels: labelsBarras,
+      labels: lista.map(p => {
+        const title = p.tituloConvocatoria || 'Sin Título';
+        return title.length > 25 ? title.substring(0, 25) + '…' : title;
+      }),
       datasets: [{
-        data: dataBarras,
+        data: lista.map(p => p.cantidadPostulantes || 0),
         label: 'Postulantes',
-        backgroundColor: '#3b82f6',
-        borderRadius: 4,
-        hoverBackgroundColor: '#2563eb'
+        backgroundColor: [
+          '#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b'
+        ],
+        borderRadius: 6,
+        hoverBackgroundColor: '#4f46e5'
       }]
     };
 
-    this.doughnutChartData = {
-      labels: ['Activas', 'Inactivas'],
+    // Gráfico 2: Doughnut — Convocatorias activas vs inactivas
+    this.doughnutConvocatoriasData = {
+      labels: ['Activas', 'Cerradas'],
       datasets: [{
         data: [stats.convocatoriasActivas, stats.convocatoriasInactivas],
-        backgroundColor: ['#10b981', '#ef4444'],
-        hoverBackgroundColor: ['#059669', '#dc2626']
+        backgroundColor: ['#10b981', '#94a3b8'],
+        hoverBackgroundColor: ['#059669', '#64748b'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
       }]
     };
+
+    // Gráfico 3: Doughnut — Estado postulantes
+    this.doughnutPostulantesData = {
+      labels: ['Seleccionados', 'No Selec.', 'En Evaluación', 'Pendientes'],
+      datasets: [{
+        data: [
+          stats.postulantesAprobados,
+          stats.postulantesRechazados,
+          stats.postulantesEnEvaluacion,
+          stats.postulantesPendientes
+        ],
+        backgroundColor: ['#10b981', '#ef4444', '#f59e0b', '#6366f1'],
+        hoverBackgroundColor: ['#059669', '#dc2626', '#d97706', '#4f46e5'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    };
+  }
+
+  /** Tasa de selección = SELECCIONADOS / total */
+  get tasaAprobacion(): number {
+    if (!this.estadisticas || this.estadisticas.totalPostulantesRecibidos === 0) return 0;
+    return Math.round((this.estadisticas.postulantesAprobados / this.estadisticas.totalPostulantesRecibidos) * 100);
   }
 
   enviarNotifMasiva() {

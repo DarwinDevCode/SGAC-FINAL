@@ -23,6 +23,7 @@ export interface CoordinadorEstadisticasDTO {
     postulantesAprobados: number;
     postulantesRechazados: number;
     postulantesEnEvaluacion: number;
+    postulantesPendientes: number;
     postulantesPorConvocatoria: PostulantesPorConvocatoriaDTO[];
 }
 

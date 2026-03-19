@@ -19,9 +19,10 @@ export interface DecanoEstadisticasDTO {
     convocatoriasActivas: number;
     convocatoriasInactivas: number;
     totalPostulantes: number;
-    postulantesAprobados: number;
-    postulantesRechazados: number;
+    postulantesSeleccionados: number;
+    postulantesNoSeleccionados: number;
     postulantesEnEvaluacion: number;
+    postulantesPendientes: number;
     actividadPorCoordinador: ActividadCoordinadorDTO[];
 }
 
@@ -42,4 +43,14 @@ export interface LogAuditoriaDTO {
     accion: string;
     tablaAfectada: string;
     fechaHora: string; // LocalDateTime devuelto como string
+}
+
+export interface CoordinadorPostulanteReporteDTO {
+    idPostulacion: number;
+    nombreEstudiante: string;
+    cedula: string;
+    nombreAsignatura: string;
+    nombrePeriodo: string;
+    fechaPostulacion: string;
+    estadoEvaluacion: string;
 }

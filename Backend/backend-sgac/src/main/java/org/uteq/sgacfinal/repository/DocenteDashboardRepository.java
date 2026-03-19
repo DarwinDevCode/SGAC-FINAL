@@ -21,7 +21,14 @@ public interface DocenteDashboardRepository extends JpaRepository<Convocatoria, 
     @Query(value = "SELECT COUNT(*) FROM convocatoria.convocatoria c WHERE c.id_docente = :idDocente AND c.activo = true AND c.estado = 'ABIERTA'", nativeQuery = true)
     Integer countConvocatoriasActivas(@Param("idDocente") Integer idDocente);
 
-    @Query(value = "SELECT COUNT(*) FROM postulacion.postulacion p JOIN convocatoria.convocatoria c ON c.id_convocatoria = p.id_convocatoria WHERE c.id_docente = :idDocente AND p.activo = true AND p.estado_postulacion = 'PENDIENTE'", nativeQuery = true)
+    @Query(value = """
+            SELECT COUNT(*) FROM postulacion.postulacion p
+            JOIN convocatoria.convocatoria c ON c.id_convocatoria = p.id_convocatoria
+            JOIN postulacion.tipo_estado_postulacion tep ON tep.id_tipo_estado_postulacion = p.id_tipo_estado_postulacion
+            WHERE c.id_docente = :idDocente
+              AND p.activo = true
+              AND tep.codigo = 'PENDIENTE'
+            """, nativeQuery = true)
     Integer countPostulacionesPendientes(@Param("idDocente") Integer idDocente);
 
     /** Cuenta ayudantías asignadas (en curso/activas) de convocatorias del docente. */
