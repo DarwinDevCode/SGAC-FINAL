@@ -1,0 +1,144 @@
+<!-- selector-meritos-component.html -->
+<div class="sm-wrapper">
+
+  <!-- ══ HEADER ═══════════════════════════════════════════════ -->
+  <div class="sm-header">
+    <div class="sm-icon-box">
+      <lucide-icon name="star" size="22"></lucide-icon>
+    </div>
+    <div style="flex:1">
+      <h1 class="sm-title">Evaluación de Méritos</h1>
+      <p class="sm-subtitle">Califica a los postulantes aptos en tus carreras — Puntaje máximo: 20 pts</p>
+    </div>
+    <button *ngIf="!loading" class="sm-btn-reload" (click)="cargar()" title="Actualizar lista">
+      <lucide-icon name="refresh-cw" size="15"></lucide-icon>
+    </button>
+  </div>
+
+  <!-- ══ BANNER FASE INACTIVA ══════════════════════════════════ -->
+  <div *ngIf="!loading && !faseActiva && postulaciones.length > 0" class="sm-banner-fase">
+    <lucide-icon name="triangle-alert" size="18"></lucide-icon>
+    <span>El período de calificación de méritos (<strong>EVALUACION_MER_OPO</strong>) no está activo.
+      Puedes consultar las evaluaciones existentes, pero no podrás crear ni modificar registros.</span>
+  </div>
+
+  <!-- ══ LOADER ════════════════════════════════════════════════ -->
+  <div *ngIf="loading" class="sm-state-box">
+    <lucide-icon name="loader" size="28" class="sm-spin sm-muted"></lucide-icon>
+    <p class="sm-state-text">Cargando postulantes...</p>
+  </div>
+
+  <!-- ══ ERROR ═════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && error" class="sm-state-box sm-state-err">
+    <lucide-icon name="circle-x" size="28" style="color:#dc2626"></lucide-icon>
+    <p class="sm-state-text">{{ error }}</p>
+    <button class="sm-btn-reload" (click)="cargar()">
+      <lucide-icon name="refresh-cw" size="14"></lucide-icon> Reintentar
+    </button>
+  </div>
+
+  <!-- ══ CONTENIDO ═════════════════════════════════════════════ -->
+  <ng-container *ngIf="!loading && !error">
+
+    <!-- Estadísticas rápidas -->
+    <div class="sm-stats">
+      <div class="sm-stat sm-stat-total">
+        <lucide-icon name="users" size="16"></lucide-icon>
+        <div><span class="sm-stat-num">{{ postulaciones.length }}</span><span class="sm-stat-lbl">Total</span></div>
+      </div>
+      <div class="sm-stat sm-stat-pend">
+        <lucide-icon name="clock" size="16"></lucide-icon>
+        <div><span class="sm-stat-num">{{ totalPendientes }}</span><span class="sm-stat-lbl">Pendientes</span></div>
+      </div>
+      <div class="sm-stat sm-stat-bor">
+        <lucide-icon name="pencil" size="16"></lucide-icon>
+        <div><span class="sm-stat-num">{{ totalCalificados - totalFinalizados }}</span><span class="sm-stat-lbl">Borradores</span></div>
+      </div>
+      <div class="sm-stat sm-stat-fin">
+        <lucide-icon name="shield-check" size="16"></lucide-icon>
+        <div><span class="sm-stat-num">{{ totalFinalizados }}</span><span class="sm-stat-lbl">Finalizadas</span></div>
+      </div>
+    </div>
+
+    <!-- Buscador -->
+    <div class="sm-search-wrap">
+      <lucide-icon name="search" size="15" class="sm-search-icon"></lucide-icon>
+      <input class="sm-search-input" type="text" placeholder="Buscar por nombre, asignatura o matrícula..."
+             [(ngModel)]="busqueda" (ngModelChange)="aplicarFiltro()" />
+      <button *ngIf="busqueda" class="sm-search-clear" (click)="busqueda=''; aplicarFiltro()">
+        <lucide-icon name="x" size="13"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Estado vacío -->
+    <div *ngIf="filtradas.length === 0" class="sm-state-box">
+      <lucide-icon name="inbox" size="32" class="sm-muted"></lucide-icon>
+      <p class="sm-state-text">
+        {{ busqueda ? 'No hay resultados para la búsqueda.' : 'No tienes postulantes para evaluar en este período.' }}
+      </p>
+    </div>
+
+    <!-- Tabla de postulantes -->
+    <div *ngIf="filtradas.length > 0" class="sm-table-wrap">
+      <table class="sm-table">
+        <thead>
+        <tr>
+          <th>Postulante</th>
+          <th>Asignatura</th>
+          <th>Carrera</th>
+          <th class="sm-th-num">Nota Total</th>
+          <th>Estado</th>
+          <th class="sm-th-cta"></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of filtradas" (click)="seleccionar(item)" class="sm-tr-clickable">
+
+          <!-- Postulante -->
+          <td>
+            <div class="sm-td-post">
+              <div class="sm-avatar">{{ iniciales(item.nombres, item.apellidos) }}</div>
+              <div>
+                <p class="sm-nombre">{{ item.nombres }} {{ item.apellidos }}</p>
+                <p class="sm-mat">{{ item.matricula }} · Sem. {{ item.semestreEstudiante }}</p>
+              </div>
+            </div>
+          </td>
+
+          <!-- Asignatura -->
+          <td class="sm-td-asig">
+            {{ item.nombreAsignatura }}
+            <span class="sm-sem-asig">Sem. {{ item.semestreAsignatura }}</span>
+          </td>
+
+          <!-- Carrera -->
+          <td class="sm-td-carr">{{ item.nombreCarrera }}</td>
+
+          <!-- Nota -->
+          <td class="sm-td-nota">
+              <span *ngIf="item.notaTotal != null" [class.sm-nota-fin]="item.estadoEvaluacion === 'FINALIZADA'">
+                {{ item.notaTotal | number:'1.2-2' }}
+              </span>
+            <span *ngIf="item.notaTotal == null" class="sm-nota-none">—</span>
+          </td>
+
+          <!-- Estado badge -->
+          <td>
+              <span class="sm-badge" [ngClass]="claseEstado(item)">
+                <lucide-icon [name]="iconoEstado(item)" size="12"></lucide-icon>
+                {{ labelEstado(item) }}
+              </span>
+          </td>
+
+          <!-- CTA -->
+          <td class="sm-th-cta">
+            <lucide-icon name="chevron-right" size="16" class="sm-muted"></lucide-icon>
+          </td>
+
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+</div>

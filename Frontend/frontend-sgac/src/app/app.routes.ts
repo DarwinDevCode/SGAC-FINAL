@@ -53,6 +53,11 @@ import { SalaEvaluacionComponent } from './features/evaluacionOposicion/sala-eva
 import {CargaAcademicaComponent} from './features/admin/carga-academica/carga-academica';
 import { salaEvaluacionGuard } from './features/evaluacionOposicion/sala-evaluacion-guard-guard';
 import {RankingResultadosComponent} from './features/General/ranking-resultados-component/ranking-resultados-component';
+import {SelectorMeritosComponent} from './features/coordinador/selector-meritos-component/selector-meritos-component';
+import {
+  EvaluacionMeritosComponent
+} from './features/coordinador/evaluacion-meritos-component/evaluacion-meritos-component';
+import {coordinadorGuard} from './features/coordinador/auth';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -99,6 +104,8 @@ export const routes: Routes = [
       { path: 'coordinador/convocatorias',               component: CoordinadorConvocatoriasComponent },
       { path: 'coordinador/postulantes/:idConvocatoria', component: CoordinadorPostulantes },
       { path: 'coordinador/validaciones',                component: ValidacionesComponent },
+      { path: 'coordinador/evaluacion-meritos', component: SelectorMeritosComponent, canActivate:[coordinadorGuard]},
+      { path: 'coordinador/evaluacion-meritos/:idPostulacion', component: EvaluacionMeritosComponent, canActivate:[coordinadorGuard]},
       { path: 'coordinador/oposicion',                   component: SelectorOposicionComponent },
       { path: 'coordinador/oposicion/:idConvocatoria',   component: GestionOposicionComponent },
       { path: 'coordinador/seguimiento',   component: SeguimientoComponent },

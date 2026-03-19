@@ -12,7 +12,7 @@ import org.uteq.sgacfinal.service.IEvaluacionMeritosService;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class EvaluacionMeritosServiceImpl implements IEvaluacionMeritosService {
+public class EvaluacionMeritosCopyServiceImpl implements IEvaluacionMeritosService {
 
     private final EvaluacionMeritosRepository evaluacionMeritosRepository;
 

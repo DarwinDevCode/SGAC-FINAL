@@ -1,0 +1,361 @@
+<!-- evaluacion-meritos-component.html -->
+<div class="em-wrapper">
+
+  <div *ngIf="toastMsg" class="em-toast"
+       [class.em-toast-ok]="toastTipo==='ok'"
+       [class.em-toast-err]="toastTipo==='err'"
+       [class.em-toast-warn]="toastTipo==='warn'">
+    <lucide-icon [name]="toastTipo==='ok' ? 'circle-check-big' : toastTipo==='warn' ? 'triangle-alert' : 'circle-x'" size="15"></lucide-icon>
+    <span>{{ toastMsg }}</span>
+  </div>
+
+  <div>
+    <button class="em-back-btn" (click)="volver()">
+      <lucide-icon name="arrow-left" size="15"></lucide-icon> Volver a la lista
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="em-state-box">
+    <lucide-icon name="loader" size="28" class="em-spin em-muted"></lucide-icon>
+    <p class="em-state-text">Cargando datos del postulante...</p>
+  </div>
+
+  <!-- ══ ERROR ══════════════════════════════════════════════════ -->
+  <div *ngIf="!loading && error" class="em-state-box em-state-err">
+    <lucide-icon name="circle-x" size="28" style="color:#dc2626"></lucide-icon>
+    <p class="em-state-text">{{ error }}</p>
+    <button class="em-btn-sec" (click)="volver()">Volver</button>
+  </div>
+
+  <!-- ══ CONTENIDO PRINCIPAL ════════════════════════════════════ -->
+  <ng-container *ngIf="!loading && !error && datos">
+
+    <!-- ── Banner fase inactiva ──────────────────────────────── -->
+    <div *ngIf="!faseActiva" class="em-banner">
+      <lucide-icon name="triangle-alert" size="18"></lucide-icon>
+      <span>El período de evaluación de méritos y oposición no está activo.
+        El formulario es solo de consulta.</span>
+    </div>
+
+    <!-- ── Banner evaluación finalizada ─────────────────────── -->
+    <div *ngIf="evaluacionActual?.estado === 'FINALIZADA'" class="em-banner em-banner-fin">
+      <lucide-icon name="shield-check" size="18"></lucide-icon>
+      <span>Esta evaluación ha sido <strong>finalizada</strong>. Los puntajes son inmutables y visibles en el Ranking Final.</span>
+      <button *ngIf="puedeReabrir" class="em-btn-reabrir" (click)="confirmarReabrir()">
+        <lucide-icon name="lock-open" size="14"></lucide-icon> Reabrir
+      </button>
+    </div>
+
+    <div class="em-grid">
+
+      <!-- ══ COLUMNA IZQUIERDA: datos del postulante ═══════════ -->
+      <aside class="em-aside">
+
+        <!-- Ficha del postulante -->
+        <div class="em-card">
+          <div class="em-card-header">
+            <div class="em-avatar-lg">{{ datos.nombres?.charAt(0) }}{{ datos.apellidos?.charAt(0) }}</div>
+            <div>
+              <h2 class="em-card-title">{{ datos.nombres }} {{ datos.apellidos }}</h2>
+              <p class="em-card-sub">{{ datos.correo }}</p>
+            </div>
+          </div>
+          <dl class="em-dl">
+            <dt>Matrícula</dt>     <dd>{{ datos.matricula }}</dd>
+            <dt>Semestre</dt>      <dd>{{ datos.semestreEstudiante }}°</dd>
+            <dt>Asignatura</dt>    <dd>{{ datos.nombreAsignatura }} <span class="em-sem">(Sem. {{ datos.semestreAsignatura }})</span></dd>
+            <dt>Carrera</dt>       <dd>{{ datos.nombreCarrera }}</dd>
+            <dt>Postulación</dt>   <dd>{{ datos.estadoPostulacion }}</dd>
+          </dl>
+          <div *ngIf="evaluacionActual" class="em-eval-badge-row">
+            <span class="em-badge" [ngClass]="badgeEstadoEval(evaluacionActual.estado)">
+              <lucide-icon [name]="evaluacionActual.estado === 'FINALIZADA' ? 'shield-check' : 'pencil'" size="12"></lucide-icon>
+              {{ labelEstadoEval(evaluacionActual.estado) }}
+            </span>
+            <span *ngIf="evaluacionActual.fechaEvaluacion" class="em-fecha">{{ evaluacionActual.fechaEvaluacion }}</span>
+          </div>
+        </div>
+
+        <!-- Resumen de puntaje en tiempo real -->
+        <div class="em-score-summary">
+          <h3 class="em-score-title">Puntaje en tiempo real</h3>
+          <div class="em-score-row">
+            <span class="em-score-lbl">Asignatura</span>
+            <span class="em-score-pts">{{ fmt2(ptosAsignatura) }} / 10</span>
+          </div>
+          <div class="em-barra"><div class="em-barra-fill em-barra-asig" [style.width]="rangoBarra(ptosAsignatura, 10)"></div></div>
+
+          <div class="em-score-row">
+            <span class="em-score-lbl">Semestres</span>
+            <span class="em-score-pts">{{ fmt2(ptosSemestres) }} / 4</span>
+          </div>
+          <div class="em-barra"><div class="em-barra-fill em-barra-sem" [style.width]="rangoBarra(ptosSemestres, 4)"></div></div>
+
+          <div class="em-score-row">
+            <span class="em-score-lbl">Experiencia</span>
+            <span class="em-score-pts">{{ fmt2(ptosExperiencia) }} / 4</span>
+          </div>
+          <div class="em-barra"><div class="em-barra-fill em-barra-exp" [style.width]="rangoBarra(ptosExperiencia, 4)"></div></div>
+
+          <div class="em-score-row">
+            <span class="em-score-lbl">Eventos</span>
+            <span class="em-score-pts">{{ fmt2(ptosEventos) }} / 2</span>
+          </div>
+          <div class="em-barra"><div class="em-barra-fill em-barra-ev" [style.width]="rangoBarra(ptosEventos, 2)"></div></div>
+
+          <div class="em-total-row">
+            <span class="em-total-lbl">TOTAL</span>
+            <span class="em-total-pts" [class.em-total-full]="totalActual === 20">{{ fmt2(totalActual) }} / 20</span>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ══ COLUMNA DERECHA: formulario ══════════════════════ -->
+      <main class="em-form-area">
+
+        <!-- ── A. Nota de la Asignatura (calculada) ─────────── -->
+        <section class="em-section">
+          <div class="em-section-header">
+            <div class="em-section-icon em-ic-asig"><lucide-icon name="book-open" size="16"></lucide-icon></div>
+            <div>
+              <h3 class="em-section-title">Calificación de la Asignatura</h3>
+              <p class="em-section-sub">Ingresa la nota de aprobación del estudiante en la asignatura (0–10). El sistema la convierte a puntos.</p>
+            </div>
+            <span class="em-pts-badge">Máx 10 pts</span>
+          </div>
+
+          <!-- Modo FINALIZADA: muestra el puntaje almacenado directamente -->
+          <div *ngIf="evaluacionActual?.estado === 'FINALIZADA'" class="em-field-row">
+            <div class="em-field">
+              <label class="em-label">Nota de aprobación (almacenada)</label>
+              <div class="em-stored-value">
+                <lucide-icon name="lock" size="13"></lucide-icon>
+                <span>Nota convertida: <strong>{{ fmt2(evaluacionActual!.notaAsignatura) }} pts</strong></span>
+                <span class="em-stored-hint">(nota raw original no almacenada)</span>
+              </div>
+            </div>
+            <div class="em-calc-result">
+              <span class="em-calc-label">Puntaje guardado</span>
+              <span class="em-calc-value em-c-asig">{{ fmt2(evaluacionActual!.notaAsignatura) }}</span>
+            </div>
+          </div>
+
+          <!-- Modo EDICIÓN: input normal con nota raw -->
+          <div *ngIf="evaluacionActual?.estado !== 'FINALIZADA'" class="em-field-row">
+            <div class="em-field">
+              <label class="em-label">Nota de aprobación</label>
+              <input class="em-input" type="number" min="0" max="10" step="0.01"
+                     [(ngModel)]="notaAprobacionAsignatura"
+                     placeholder="Ej: 8.75" />
+              <p *ngIf="evaluacionActual && notaAprobacionAsignatura != null" class="em-input-hint em-hint-warn">
+                <lucide-icon name="info" size="11"></lucide-icon>
+                Valor aproximado cargado desde BD. Verifica y corrige si es necesario.
+              </p>
+              <p *ngIf="!evaluacionActual || notaAprobacionAsignatura == null" class="em-input-hint">
+                Nota real de la libreta del estudiante
+              </p>
+            </div>
+            <div class="em-calc-result">
+              <span class="em-calc-label">Puntaje calculado</span>
+              <span class="em-calc-value em-c-asig">{{ fmt2(ptosAsignatura) }}</span>
+            </div>
+          </div>
+
+          <!-- Tabla de conversión -->
+          <div class="em-tabla-conv">
+            <p class="em-tc-title">Tabla de conversión:</p>
+            <div class="em-tc-grid">
+              <div class="em-tc-row" [class.em-tc-active]="(notaAprobacionAsignatura ?? 0) >= 9.50">
+                <span>9.50 – 10.00</span><span>→</span><strong>10 pts</strong>
+              </div>
+              <div class="em-tc-row" [class.em-tc-active]="(notaAprobacionAsignatura ?? 0) >= 9.00 && (notaAprobacionAsignatura ?? 0) < 9.50">
+                <span>9.00 – 9.49</span><span>→</span><strong>9 pts</strong>
+              </div>
+              <div class="em-tc-row" [class.em-tc-active]="(notaAprobacionAsignatura ?? 0) >= 8.50 && (notaAprobacionAsignatura ?? 0) < 9.00">
+                <span>8.50 – 8.99</span><span>→</span><strong>8 pts</strong>
+              </div>
+              <div class="em-tc-row" [class.em-tc-active]="(notaAprobacionAsignatura ?? 0) >= 8.00 && (notaAprobacionAsignatura ?? 0) < 8.50">
+                <span>8.00 – 8.49</span><span>→</span><strong>7 pts</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── B. Notas por Semestres (calculado) ─────────── -->
+        <section class="em-section">
+          <div class="em-section-header">
+            <div class="em-section-icon em-ic-sem"><lucide-icon name="graduation-cap" size="16"></lucide-icon></div>
+            <div>
+              <h3 class="em-section-title">Puntaje por Semestres</h3>
+              <p class="em-section-sub">Agrega la nota promedio de cada semestre cursado. El total se acumula con tope de 4.00.</p>
+            </div>
+            <span class="em-pts-badge">Máx 4 pts</span>
+          </div>
+
+          <!-- Modo FINALIZADA: muestra total almacenado (el desglose no existe en BD) -->
+          <div *ngIf="evaluacionActual?.estado === 'FINALIZADA'" class="em-stored-sem">
+            <lucide-icon name="lock" size="14"></lucide-icon>
+            <div>
+              <span class="em-stored-sem-label">Puntaje total guardado</span>
+              <span class="em-stored-sem-value em-c-sem">{{ fmt2(evaluacionActual!.notaSemestres) }} pts</span>
+            </div>
+            <span class="em-stored-hint">El desglose individual de semestres no se almacena en BD.</span>
+          </div>
+
+          <!-- Modo EDICIÓN: formulario de semestres -->
+          <ng-container *ngIf="evaluacionActual?.estado !== 'FINALIZADA'">
+
+            <!-- Agregar semestre -->
+            <div class="em-add-row">
+              <input class="em-input em-input-sm" type="number" min="0" max="10" step="0.01"
+                     [(ngModel)]="nuevaSemestreNota"
+                     placeholder="Nota del semestre (0–10)"
+                     (keydown.enter)="agregarSemestre()" />
+              <button class="em-btn-add" (click)="agregarSemestre()">
+                <lucide-icon name="plus" size="15"></lucide-icon> Agregar
+              </button>
+            </div>
+
+            <!-- Lista vacía -->
+            <div *ngIf="semestresNotas.length === 0" class="em-empty-sem">
+              <lucide-icon name="inbox" size="20" class="em-muted"></lucide-icon>
+              <span *ngIf="!evaluacionActual">Sin notas de semestres registradas.</span>
+              <span *ngIf="evaluacionActual">
+                El desglose de semestres no se almacena. Puntaje anterior:
+                <strong class="em-c-sem">{{ fmt2(evaluacionActual.notaSemestres) }} pts</strong>.
+                Re-ingresa los semestres para recalcular.
+              </span>
+            </div>
+
+            <!-- Lista con items -->
+            <div *ngIf="semestresNotas.length > 0" class="em-sem-list">
+              <div *ngFor="let n of semestresNotas; let i = index" class="em-sem-item">
+                <span class="em-sem-num">{{ i + 1 }}</span>
+                <span class="em-sem-nota">{{ n | number:'1.2-2' }}</span>
+                <span class="em-sem-arrow">→</span>
+                <span class="em-sem-pts">+{{ fmt2(ptosSemestre(n)) }} pts</span>
+                <button class="em-btn-del" (click)="eliminarSemestre(i)">
+                  <lucide-icon name="x" size="12"></lucide-icon>
+                </button>
+              </div>
+              <div class="em-sem-total-row">
+                <span>Total semestres (tope 4.00):</span>
+                <strong class="em-c-sem">{{ fmt2(ptosSemestres) }} pts</strong>
+              </div>
+            </div>
+
+          </ng-container>
+        </section>
+
+        <!-- ── C. Experiencia (manual) ────────────────────── -->
+        <section class="em-section">
+          <div class="em-section-header">
+            <div class="em-section-icon em-ic-exp"><lucide-icon name="briefcase" size="16"></lucide-icon></div>
+            <div>
+              <h3 class="em-section-title">Experiencia previa</h3>
+              <p class="em-section-sub">Puntaje otorgado tras revisar certificados de experiencia relevante (0–4).</p>
+            </div>
+            <span class="em-pts-badge">Máx 4 pts</span>
+          </div>
+          <div class="em-field-row">
+            <div class="em-field">
+              <label class="em-label">Nota de experiencia (0.00 – 4.00)</label>
+              <input class="em-input" type="number" min="0" max="4" step="0.01"
+                     [(ngModel)]="notaExperiencia"
+                     placeholder="Ej: 3.50"
+                     [disabled]="formularioBloqueado" />
+            </div>
+            <div class="em-calc-result">
+              <span class="em-calc-label">Puntaje</span>
+              <span class="em-calc-value em-c-exp">{{ fmt2(ptosExperiencia) }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── D. Eventos académicos (manual) ─────────────── -->
+        <section class="em-section">
+          <div class="em-section-header">
+            <div class="em-section-icon em-ic-ev"><lucide-icon name="award" size="16"></lucide-icon></div>
+            <div>
+              <h3 class="em-section-title">Participación en eventos</h3>
+              <p class="em-section-sub">Puntaje por participación en eventos académicos verificados (0–2).</p>
+            </div>
+            <span class="em-pts-badge">Máx 2 pts</span>
+          </div>
+          <div class="em-field-row">
+            <div class="em-field">
+              <label class="em-label">Nota de eventos (0.00 – 2.00)</label>
+              <input class="em-input" type="number" min="0" max="2" step="0.01"
+                     [(ngModel)]="notaEventos"
+                     placeholder="Ej: 1.50"
+                     [disabled]="formularioBloqueado" />
+            </div>
+            <div class="em-calc-result">
+              <span class="em-calc-label">Puntaje</span>
+              <span class="em-calc-value em-c-ev">{{ fmt2(ptosEventos) }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Acciones ───────────────────────────────────── -->
+        <div *ngIf="!formularioBloqueado" class="em-actions">
+          <button class="em-btn-sec" (click)="volver()">Cancelar</button>
+          <button class="em-btn-borrador" (click)="guardarBorrador()" [disabled]="guardando">
+            <lucide-icon [name]="guardando ? 'loader' : 'save'" size="15" [class.em-spin]="guardando"></lucide-icon>
+            {{ guardando ? 'Guardando...' : 'Guardar borrador' }}
+          </button>
+          <button class="em-btn-finalizar" (click)="confirmarFinalizar()" [disabled]="guardando">
+            <lucide-icon name="shield-check" size="15"></lucide-icon>
+            Finalizar evaluación
+          </button>
+        </div>
+
+        <div *ngIf="evaluacionActual?.estado === 'FINALIZADA' && !faseActiva" class="em-readonly-hint">
+          <lucide-icon name="lock" size="14"></lucide-icon>
+          <span>La fase de evaluación de méritos no está activa. No es posible reabrir este registro.</span>
+        </div>
+
+      </main>
+    </div><!-- /em-grid -->
+
+  </ng-container>
+
+  <!-- ══ MODAL: CONFIRMAR FINALIZAR ════════════════════════════ -->
+  <div *ngIf="mostrarModalFinalizar" class="em-overlay">
+    <div class="em-modal">
+      <lucide-icon name="shield-check" size="32" style="color:#15803d; display:block; margin:0 auto .75rem;"></lucide-icon>
+      <h3 class="em-modal-title">¿Finalizar la evaluación?</h3>
+      <p class="em-modal-msg">
+        El puntaje total de <strong>{{ fmt2(totalActual) }} / 20</strong> quedará <strong>bloqueado e inmutable</strong>
+        y se utilizará para el Ranking Final de Resultados.
+      </p>
+      <p class="em-modal-sub">Esta acción solo se puede revertir si la fase de evaluación sigue activa.</p>
+      <div class="em-modal-footer">
+        <button class="em-btn-sec" (click)="mostrarModalFinalizar = false">Cancelar</button>
+        <button class="em-btn-finalizar" (click)="ejecutarFinalizar()">
+          <lucide-icon name="shield-check" size="14"></lucide-icon> Confirmar y finalizar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: CONFIRMAR REABRIR ══════════════════════════════ -->
+  <div *ngIf="mostrarModalReabrir" class="em-overlay">
+    <div class="em-modal">
+      <lucide-icon name="lock-open" size="32" style="color:#d97706; display:block; margin:0 auto .75rem;"></lucide-icon>
+      <h3 class="em-modal-title">¿Reabrir la evaluación?</h3>
+      <p class="em-modal-msg">
+        El estado pasará de <strong>Finalizada</strong> a <strong>Borrador</strong> y podrás
+        corregir los puntajes. Deberás volver a finalizar para que sea visible en el Ranking.
+      </p>
+      <div class="em-modal-footer">
+        <button class="em-btn-sec" (click)="cancelarReabrir()">Cancelar</button>
+        <button class="em-btn-reabrir em-btn-reabrir-lg" (click)="ejecutarReabrir()">
+          <lucide-icon name="lock-open" size="14"></lucide-icon> Reabrir
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

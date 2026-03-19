@@ -67,6 +67,7 @@ export class SidebarComponent {
       { label: 'Gestionar Convocatorias',icon: 'FileText',       route: '/coordinador/convocatorias' },
       { label: 'Validar Postulantes',   icon: 'CheckSquare',     route: '/coordinador/validaciones' },
       { label: 'Tribunal',              icon: 'Gavel',           route: '/comision',      exact: true },
+      { label: 'Evaluacion de Méritos', icon: 'Star', route: '/coordinador/evaluacion-meritos'},
       { label: 'Gestionar Oposición',   icon: 'ScrollText',      route: '/coordinador/oposicion' },
       { label: 'Sala de Evaluación',    icon: 'MicVocal',        route: '/comision/sala' },
       { label: 'Ver Resultados',    icon: 'Trophy',          route: '/resultados-evaluacion' },
