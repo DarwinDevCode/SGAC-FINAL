@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.exception.BadRequestException;
 import org.uteq.sgacfinal.repository.ayudantia.AsistenciaRepository;
 import org.uteq.sgacfinal.service.ayudantia.IAsistenciaService;
-import org.uteq.sgacfinal.service.security.SecurityContextService;
+import org.uteq.sgacfinal.security.SecurityContextService;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;

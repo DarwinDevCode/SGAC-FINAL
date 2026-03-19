@@ -1,3 +1,20 @@
+-- Asegurar existencia de roles físicos antes de asignar permisos
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'role_docente') THEN
+        CREATE ROLE role_docente NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'role_decano') THEN
+        CREATE ROLE role_decano NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'role_estudiante') THEN
+        CREATE ROLE role_estudiante NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'role_coordinador') THEN
+        CREATE ROLE role_coordinador NOLOGIN;
+    END IF;
+END $$;
+
 CREATE OR REPLACE FUNCTION postulacion.fn_obtener_ranking_resultados(
     p_id_usuario INTEGER,
     p_rol        TEXT

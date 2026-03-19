@@ -231,6 +231,13 @@ EXCEPTION
 END;
 $$;
 
+-- Limpieza de duplicados antes de crear el índice único
+DELETE FROM academico.docente_asignatura da1
+USING academico.docente_asignatura da2
+WHERE da1.id_docente_asignatura < da2.id_docente_asignatura
+  AND da1.id_docente = da2.id_docente
+  AND da1.id_asignatura = da2.id_asignatura;
+
 -- Índice único requerido por el ON CONFLICT del upsert
 CREATE UNIQUE INDEX IF NOT EXISTS uq_docente_asignatura
     ON academico.docente_asignatura (id_docente, id_asignatura);
