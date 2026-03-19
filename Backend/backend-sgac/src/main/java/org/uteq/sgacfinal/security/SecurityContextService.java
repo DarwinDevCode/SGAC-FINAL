@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.service.security;
+package org.uteq.sgacfinal.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.uteq.sgacfinal.exception.AccesoDenegadoException;
 import org.uteq.sgacfinal.exception.OposicionBusinessException;
 import org.uteq.sgacfinal.repository.ayudantia.AsistenciaRepository;
-import org.uteq.sgacfinal.security.UsuarioPrincipal;
 
 @Service
 @RequiredArgsConstructor

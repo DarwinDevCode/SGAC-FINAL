@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.Request.RegistroActividadRequestDTO;
 import org.uteq.sgacfinal.dto.Response.RegistroActividadResponseDTO;
 import org.uteq.sgacfinal.entity.RegistroActividad;
-import org.uteq.sgacfinal.repository.RegistroActividadRepository;
+import org.uteq.sgacfinal.repository.RegistroActividadConfigRepository;
 import org.uteq.sgacfinal.service.IRegistroActividadService;
 
 import java.util.List;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class RegistroActividadServiceImpl implements IRegistroActividadService {
 
-    private final RegistroActividadRepository registroRepository;
+    private final RegistroActividadConfigRepository registroRepository;
 
     @Override
     public RegistroActividadResponseDTO crear(RegistroActividadRequestDTO request) {
@@ -92,7 +92,6 @@ public class RegistroActividadServiceImpl implements IRegistroActividadService {
                 .descripcionActividad(entidad.getDescripcionActividad())
                 .temaTratado(entidad.getTemaTratado())
                 .fecha(entidad.getFecha())
-                .numeroAsistentes(entidad.getNumeroAsistentes())
                 .horasDedicadas(entidad.getHorasDedicadas())
                 .estadoRevision(entidad.getIdTipoEstadoRegistro().getNombreEstado())
                 .build();

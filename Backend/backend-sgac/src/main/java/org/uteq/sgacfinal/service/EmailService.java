@@ -186,6 +186,8 @@ public class EmailService {
             String nombreAyudante,
             String asignatura,
             String fechaSesion,
+            String horaInicio,
+            String horaFin,
             String horasRegistradas,
             String temasTratados) {
 
@@ -196,7 +198,7 @@ public class EmailService {
             helper.setFrom(fromAddress, SYSTEM_NAME);
             helper.setTo(destinatario);
             helper.setSubject("SGAC - Registro de nueva sesión de ayudantía");
-            helper.setText(buildNuevaSesionTemplate(nombreDocente, nombreAyudante, asignatura, fechaSesion, horasRegistradas, temasTratados), true);
+            helper.setText(buildNuevaSesionTemplate(nombreDocente, nombreAyudante, asignatura, fechaSesion, horaInicio, horaFin, horasRegistradas, temasTratados), true);
 
             mailSender.send(message);
             log.info("[EmailService] Notificación de nueva sesión enviada a: {}", destinatario);
@@ -211,6 +213,8 @@ public class EmailService {
             String nombreAyudante,
             String asignatura,
             String fechaSesion,
+            String horaInicio,
+            String horaFin,
             String horasRegistradas,
             String temasTratados) {
 
@@ -248,7 +252,7 @@ public class EmailService {
                       Estimado/a %s,
                     </p>
                     <p style="margin:0 0 28px;font-size:15px;color:#4b5563;line-height:1.6;">
-                      Le informamos que el ayudante de cátedra <strong>%s</strong> ha registrado una nueva sesión para la asignatura de <strong>%s</strong>.
+                      Le informamos que el ayudante de cátedra <strong>%s</strong> ha planificado una nueva sesión para la asignatura de <strong>%s</strong>.
                     </p>
 
                     <p style="margin:0 0 10px;font-size:14px;font-weight:700;color:%s;">
@@ -262,7 +266,7 @@ public class EmailService {
                         <td style="padding:24px;">
                           <table width="100%%">
                             <tr>
-                              <td width="30%%" style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;border-bottom:1px solid #dcfce7;">
+                              <td width="35%%" style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;border-bottom:1px solid #dcfce7;">
                                 Fecha:
                               </td>
                               <td style="padding:8px 0;font-size:14px;color:#374151;border-bottom:1px solid #dcfce7;">
@@ -271,7 +275,15 @@ public class EmailService {
                             </tr>
                             <tr>
                               <td style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;border-bottom:1px solid #dcfce7;">
-                                Horas registradas:
+                                Horario:
+                              </td>
+                              <td style="padding:8px 0;font-size:14px;color:#374151;border-bottom:1px solid #dcfce7;">
+                                %s - %s
+                              </td>
+                            </tr>
+                            <tr>
+                              <td style="padding:8px 0;font-size:14px;color:#166534;font-weight:600;border-bottom:1px solid #dcfce7;">
+                                Horas estimadas:
                               </td>
                               <td style="padding:8px 0;font-size:14px;color:#374151;border-bottom:1px solid #dcfce7;">
                                 %s
@@ -324,6 +336,7 @@ public class EmailService {
                 GREEN_PRIMARY,
                 GREEN_LIGHT,
                 fechaSesion,
+                horaInicio, horaFin,
                 horasRegistradas,
                 temasTratados,
                 SYSTEM_URL, GREEN_PRIMARY

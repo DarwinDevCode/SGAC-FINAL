@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RegistroActividadRepository extends JpaRepository<RegistroActividad, Integer> {
+public interface RegistroActividadConfigRepository extends JpaRepository<RegistroActividad, Integer> {
 
     @Query(value = "SELECT public.sp_crear_registro_actividad(:idAyudantia, :descripcion, :tema, :fecha, :asistentes, :horas, :estado)", nativeQuery = true)
     Integer registrarActividad(@Param("idAyudantia") Integer idAyudantia,

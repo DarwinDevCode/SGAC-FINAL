@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.exception.BadRequestException;
 import org.uteq.sgacfinal.repository.ayudantia.AsistenciaRepository;
+import org.uteq.sgacfinal.security.SecurityContextService;
 import org.uteq.sgacfinal.service.ayudantia.IAsistenciaService;
-import org.uteq.sgacfinal.service.security.SecurityContextService;
 
 import java.io.ByteArrayOutputStream;
 import java.util.*;
@@ -30,7 +30,7 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
 
     @Override
     public Integer resolverIdAyudantia() {
-        return contextoSvc.obtenerIdAyudantia();
+        return repo.obtenerIdAyudantiaPorUsuario(contextoSvc.obtenerIdUsuario());
     }
 
     @Override
@@ -259,10 +259,6 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
                 + "|" + paralelo.toLowerCase(java.util.Locale.ROOT));
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // ASISTENCIA POR SESIÓN
-    // ══════════════════════════════════════════════════════════════════════
-
     @Override
     public Object inicializarAsistencia(Integer idRegistro) {
         try {
@@ -312,15 +308,6 @@ public class AsistenciaServiceImpl implements IAsistenciaService {
         }
     }
 
-    // ══════════════════════════════════════════════════════════════════════
-    // HELPERS PRIVADOS
-    // ══════════════════════════════════════════════════════════════════════
-
-    /**
-     * Deserializa un String JSON hacia un tipo Java nativo (Map o List)
-     * para que Jackson lo serialice limpiamente en la respuesta HTTP,
-     * sin exponer propiedades internas de JsonNode.
-     */
     private Object parsear(String raw) {
         try {
             if (raw == null || raw.isBlank()) return null;

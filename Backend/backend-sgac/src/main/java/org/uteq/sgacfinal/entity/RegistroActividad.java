@@ -38,14 +38,8 @@ public class RegistroActividad {
     @Column(name = "fecha")
     private LocalDate fecha;
 
-    @Column(name = "numero_asistentes")
-    private Integer numeroAsistentes;
-
     @Column(name = "horas_dedicadas", precision = 5, scale = 2)
     private BigDecimal horasDedicadas;
-
-    @OneToMany(mappedBy = "registroActividad", cascade = CascadeType.ALL)
-    private List<EvidenciaRegistroActividad> evidencias = new ArrayList<>();
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -69,4 +63,6 @@ public class RegistroActividad {
     @Column(name = "lugar")
     private String lugar;
 
+    @OneToMany(mappedBy = "registroActividad", cascade = CascadeType.ALL)
+    private List<EvidenciaRegistroActividad> evidencias = new ArrayList<>();
 }

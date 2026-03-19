@@ -1,281 +1,437 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { finalize, switchMap } from 'rxjs/operators';
-import { FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { of } from 'rxjs';
+import { finalize } from 'rxjs/operators';
+import {
+  FormBuilder, FormControl, FormGroup, FormsModule,
+  ReactiveFormsModule, Validators,
+} from '@angular/forms';
+import { Router } from '@angular/router';
 
-import { AuthService } from '../../../core/services/auth-service';
-import { SesionService } from '../../../core/services/sesion-service';
-import { CatalogosService } from '../../../core/services/catalogos-service';
-import { AyudanteService } from '../../../core/services/ayudante-service';
-import { PostulanteService } from '../../../core/services/postulaciones/postulante-service';
+import { AuthService }       from '../../../core/services/auth-service';
+import { SesionService }     from '../../../core/services/ayudantia/sesion-service';
+import { AsistenciaService } from '../../../core/services/ayudantia/asistencia-service';
+import { CatalogosService }  from '../../../core/services/catalogos-service';
 
-import { SesionResponseDTO } from '../../../core/dto/sesion-response-dto';
-import { EvidenciaResponseDTO } from '../../../core/dto/evidencia-response-dto';
-import { RegistrarSesionRequest } from '../../../core/dto/registrar-sesion-request';
-import { EvidenciaRequest } from '../../../core/dto/evidencia-request';
+import {
+  SesionResponseDTO,
+  EvidenciaResponseDTO,
+  PlanificarSesionRequest,
+  CompletarSesionRequest,
+  EvaluarSesionRequest,
+  AsistenciaItem,
+  EvidenciaMetadata,
+} from '../../../core/models/ayudantia/Sesiones';
 import { TipoEvidencia } from '../../../core/dto/tipo-evidencia';
 
 type EvidenciaForm = {
-  idTipoEvidencia: FormControl<number>;
-  nombreArchivo: FormControl<string>;
+  idTipoEvidencia:         FormControl<number>;
+  nombreArchivoReferencia: FormControl<string>;
 };
 
-type RegistrarSesionForm = {
-  descripcionActividad: FormControl<string>;
+type PlanificarForm = {
+  fecha:       FormControl<string>;
+  horaInicio:  FormControl<string>;
+  horaFin:     FormControl<string>;
+  lugar:       FormControl<string>;
   temaTratado: FormControl<string>;
-  fecha: FormControl<string>;
-  numeroAsistentes: FormControl<number>;
-  horasDedicadas: FormControl<number>;
-  evidencias: FormArray<FormGroup<EvidenciaForm>>;
 };
 
-const EXTENSIONES_SOPORTADAS: Record<string, number> = {
-  '.jpg': 21,
-  '.pdf': 20,
-  '.docx': 22
+type CompletarForm = {
+  descripcionActividad: FormControl<string>;
 };
+
+const EXTENSIONES: Record<string, number> = {
+  '.pdf':  20,
+  '.jpg':  21,
+  '.docx': 22,
+  '.png':  23,
+  '.xlsx': 24,
+  '.pptx': 25
+};
+
 @Component({
   selector: 'app-sesiones',
   standalone: true,
-  imports: [CommonModule, NgClass, LucideAngularModule, ReactiveFormsModule],
+  imports: [CommonModule, NgClass, LucideAngularModule, ReactiveFormsModule, FormsModule],
   templateUrl: './sesiones.html',
-  styleUrls: ['./sesiones.css'],
+  styleUrls:   ['./sesiones.css'],
 })
 export class SesionesComponent implements OnInit {
-  private authService = inject(AuthService);
-  private sesionService = inject(SesionService);
-  private catalogosService = inject(CatalogosService);
-  private ayudanteService = inject(AyudanteService);
-  private postulanteService = inject(PostulanteService);
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
 
-  sesiones: SesionResponseDTO[] = [];
+  private auth      = inject(AuthService);
+  private svc       = inject(SesionService);
+  private asistSvc  = inject(AsistenciaService);
+  private catalogos = inject(CatalogosService);
+  private fb        = inject(FormBuilder);
+  private router    = inject(Router);
+
+  sesiones:           SesionResponseDTO[] = [];
   sesionSeleccionada: SesionResponseDTO | null = null;
-  idAyudantiaReal: number | null = null;
+  idAyudante:         number | null = null;
+  tiposEvidencia:     TipoEvidencia[] = [];
+  hoy = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
 
-  isLoading = true;
+  isLoading       = true;
   isDetailLoading = false;
-  errorMessage = '';
+  errorMessage    = '';
 
-  isModalOpen = false;
-  isSubmitting = false;
-  formError = '';
-  selectedFiles: File[] = [];
-  readonly maxFiles = 5;
+  filtroEstado = '';
+  filtroDesde  = '';
+  filtroHasta  = '';
 
-  form: FormGroup<RegistrarSesionForm> = this.fb.group({
-    descripcionActividad: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(500)]),
+  isModalPlanificarOpen = false;
+  isPlanning  = false;
+  planError   = '';
+
+  formPlanificar: FormGroup<PlanificarForm> = this.fb.group({
+    fecha:       this.fb.nonNullable.control('', [Validators.required]),
+    horaInicio:  this.fb.nonNullable.control('', [Validators.required]),
+    horaFin:     this.fb.nonNullable.control('', [Validators.required]),
+    lugar:       this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(255)]),
     temaTratado: this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(255)]),
-    fecha: this.fb.nonNullable.control('', [Validators.required]),
-    numeroAsistentes: this.fb.nonNullable.control(0, [Validators.required, Validators.min(0)]),
-    horasDedicadas: this.fb.nonNullable.control(0, [Validators.required, Validators.min(0.1)]),
-    evidencias: this.fb.array<FormGroup<EvidenciaForm>>([]),
-  }) as FormGroup<RegistrarSesionForm>;
+  }) as FormGroup<PlanificarForm>;
 
-  private idAyudante: number | null = null;
-  tiposEvidencia: TipoEvidencia[] = [];
-  private tiposEvidenciaByExt = new Map<string, TipoEvidencia>();
+  isModalCompletarOpen = false;
+  isCompleting         = false;
+  completarError       = '';
+  sesionACompletar:    SesionResponseDTO | null = null;
+
+  asistenciasCompletar: { idParticipanteAyudantia: number; nombreCompleto: string; asistio: boolean }[] = [];
+  cargandoAsistencias  = false;
+  archivosCompletar:   File[] = [];
+
+  formCompletar: FormGroup<CompletarForm> = this.fb.group({
+    descripcionActividad: this.fb.nonNullable.control('', [
+      Validators.required,
+    ]),
+  }) as FormGroup<CompletarForm>;
+
+  evidenciasCompletarFA = this.fb.array<FormGroup<EvidenciaForm>>([]);
+
+  isModalEvaluarOpen = false;
+  isEvaluating       = false;
+  evaluarError       = '';
+  sesionAEvaluar:    SesionResponseDTO | null = null;
+
+  formEvaluar = this.fb.group({
+    codigoEstado:  this.fb.nonNullable.control('', [
+      Validators.required,
+      Validators.pattern(/^(APROBADO|RECHAZADO)$/),
+    ]),
+    observaciones: this.fb.nonNullable.control(''),
+  });
+
+  toast = signal<{ texto: string; tipo: 'ok' | 'err' | 'warn' } | null>(null);
+  private toastTimer?: ReturnType<typeof setTimeout>;
+
+  rolActual = '';
 
   ngOnInit(): void {
-    const user = this.authService.getUser();
-    if (!user) {
-      this.isLoading = false;
-      this.errorMessage = 'No se pudo identificar al usuario actual.';
-      return;
-    }
+    const user = this.auth.getUser();
+    if (!user) { this.errorMessage = 'Sesión no válida.'; this.isLoading = false; return; }
     this.idAyudante = user.idUsuario;
+    this.rolActual  = user.rolActual ?? '';
 
-    this.catalogosService.getTiposEvidencia().subscribe({
-      next: (tipos) => {
-        this.tiposEvidencia = tipos ?? [];
-        this.tiposEvidenciaByExt = new Map(
-          this.tiposEvidencia.map((t) => [String(t.extensionPermitida || '').toLowerCase(), t])
-        );
-      }
+    this.catalogos.getTiposEvidencia().subscribe({
+      next: (tipos: TipoEvidencia[]) => this.tiposEvidencia = tipos ?? [],
     });
 
-    //this.obtenerContextoAyudantia();
     this.cargarSesiones();
-  }
-
-
-/*
-  private obtenerContextoAyudantia() {
-    if (!this.idAyudante) return;
-    this.ayudanteService.obtenerAyudantePorUsuario(this.idAyudante).pipe(
-      switchMap(est => this.postulanteService.misPostulaciones(est.idUsuario)),
-      switchMap(posts => {
-        const activa = posts.find(p => p.estadoPostulacion === 'SELECCIONADO' || p.estadoPostulacion === 'ACEPTADO' || p.estadoPostulacion === 'APROBADO');
-        return activa ? this.ayudanteService.obtenerAyudantiaPorPostulacion(activa.idPostulacion) : of(null);
-      })
-    ).subscribe(ayud => {
-      this.idAyudantiaReal = ayud?.idAyudantia ?? null;
-    });
-  }
-
- */
-
-  irAAsistencia(s: SesionResponseDTO) {
-    if (!this.idAyudantiaReal) {
-      alert('No se pudo determinar el ID de la ayudantía activa.');
-      return;
-    }
-    this.router.navigate(['/ayudante/sesiones', this.idAyudantiaReal, 'asistencia', s.idRegistroActividad]);
   }
 
   cargarSesiones(): void {
     if (this.idAyudante == null) return;
-    this.isLoading = true;
+    this.isLoading    = true;
     this.errorMessage = '';
-    this.sesionService.listarMisSesiones(this.idAyudante)
-      .pipe(finalize(() => (this.isLoading = false)))
-      .subscribe({
-        next: (data) => this.sesiones = data ?? [],
-        error: () => this.errorMessage = 'No se pudieron cargar tus sesiones.'
-      });
-  }
 
-  submitRegistro(): void {
-    if (this.idAyudante == null || !this.canSubmit) return;
-    this.formError = '';
-    this.isSubmitting = true;
-
-    const evidencias: EvidenciaRequest[] = this.selectedFiles.map((file, i) => {
-      const evCtrl = this.evidenciasFA.at(i);
-      return {
-        idTipoEvidencia: evCtrl.controls.idTipoEvidencia.value ?? 1,
-        nombreArchivo: evCtrl.controls.nombreArchivo.value ?? file.name,
-      };
+    this.svc.listarMisSesiones(
+      this.idAyudante,
+      this.filtroDesde  || undefined,
+      this.filtroHasta  || undefined,
+      this.filtroEstado || undefined
+    ).pipe(finalize(() => this.isLoading = false)).subscribe({
+      next:  (data: SesionResponseDTO[]) => this.sesiones = data ?? [],
+      error: ()                          => this.errorMessage = 'No se pudieron cargar las sesiones.',
     });
-
-    const request: RegistrarSesionRequest = {
-      descripcionActividad: this.form.controls.descripcionActividad.value,
-      temaTratado: this.form.controls.temaTratado.value,
-      fecha: this.form.controls.fecha.value,
-      numeroAsistentes: this.form.controls.numeroAsistentes.value,
-      horasDedicadas: this.form.controls.horasDedicadas.value,
-      evidencias,
-    };
-
-    this.sesionService.registrarSesion(this.idAyudante, request, this.selectedFiles)
-      .pipe(finalize(() => (this.isSubmitting = false)))
-      .subscribe({
-        next: (res) => {
-          if (res?.exito) {
-            this.cerrarModalRegistro();
-            this.cargarSesiones();
-          } else {
-            this.formError = res?.mensaje || 'Error al registrar.';
-          }
-        },
-        error: () => this.formError = 'Error de conexión.'
-      });
   }
 
-  // --- Métodos de UI y Lógica Auxiliar ---
-  get evidenciasFA() { return this.form.controls.evidencias; }
-  get canSubmit() { return this.form.valid && this.selectedFiles.length > 0 && !this.isSubmitting; }
+  aplicarFiltros(): void { this.cargarSesiones(); }
+  limpiarFiltros(): void {
+    this.filtroEstado = ''; this.filtroDesde = ''; this.filtroHasta = '';
+    this.cargarSesiones();
+  }
 
-  verDetalle(idRegistroActividad: number): void {
+  verDetalle(idRegistro: number): void {
     if (this.idAyudante == null) return;
-    if (this.sesionSeleccionada?.idRegistroActividad === idRegistroActividad) {
-      this.sesionSeleccionada = null;
-      return;
+    if (this.sesionSeleccionada?.idRegistroActividad === idRegistro) {
+      this.sesionSeleccionada = null; return;
     }
     this.isDetailLoading = true;
-    const base = this.sesiones.find((s) => s.idRegistroActividad === idRegistroActividad) ?? null;
-    this.sesionService.obtenerDetalleMiSesion(this.idAyudante, idRegistroActividad)
-      .pipe(finalize(() => (this.isDetailLoading = false)))
+    const base = this.sesiones.find(s => s.idRegistroActividad === idRegistro) ?? null;
+
+    this.svc.obtenerDetalleMiSesion(this.idAyudante, idRegistro)
+      .pipe(finalize(() => this.isDetailLoading = false))
       .subscribe({
-        next: (detalle) => {
-          this.sesionSeleccionada = { ...(base as any), evidencias: detalle?.evidencias ?? [] };
-        }
+        next: (detalle: SesionResponseDTO) => this.sesionSeleccionada = {
+          ...(base as SesionResponseDTO),
+          evidencias: detalle?.evidencias ?? [],
+        },
       });
   }
 
-  onFilesSelected(fileList: FileList | null): void {
+  cerrarDetalle(): void { this.sesionSeleccionada = null; }
+
+  // ─── Modal 1: Planificar ────────────────────────────────────────────────
+
+  abrirModalPlanificar(): void {
+    this.planError = '';
+    this.formPlanificar.reset({ fecha: '', horaInicio: '', horaFin: '', lugar: '', temaTratado: '' });
+    this.isModalPlanificarOpen = true;
+  }
+
+  cerrarModalPlanificar(): void { this.isModalPlanificarOpen = false; }
+
+  submitPlanificar(): void {
+    if (this.formPlanificar.invalid || !this.idAyudante || this.isPlanning) return;
+    this.planError  = '';
+    this.isPlanning = true;
+
+    const v = this.formPlanificar.getRawValue();
+
+    if (v.horaFin <= v.horaInicio) {
+      this.planError  = 'La hora de fin debe ser posterior a la de inicio.';
+      this.isPlanning = false;
+      return;
+    }
+
+    const request: PlanificarSesionRequest = {
+      idAyudantia: this.idAyudante,
+      fecha:       v.fecha,
+      horaInicio:  v.horaInicio + ':00',
+      horaFin:     v.horaFin    + ':00',
+      lugar:       v.lugar,
+      temaTratado: v.temaTratado,
+    };
+
+    // CORRECCIÓN TS2339: planificarSesion ahora existe en el servicio actualizado.
+    this.svc.planificarSesion(request)
+      .pipe(finalize(() => this.isPlanning = false))
+      .subscribe({
+        // CORRECCIÓN TS7006: tipo explícito en el parámetro del callback
+        next:  (res: { exito: boolean; mensaje: string; idRegistroCreado: number }) => {
+          this.mostrarToast(res.mensaje ?? 'Sesión planificada. El docente fue notificado.', 'ok');
+          this.cerrarModalPlanificar();
+          this.cargarSesiones();
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.planError = err?.error?.message ?? 'Error al planificar la sesión.';
+        },
+      });
+  }
+
+  // ─── Modal 2: Completar ─────────────────────────────────────────────────
+
+  abrirModalCompletar(sesion: SesionResponseDTO): void {
+    this.sesionACompletar   = sesion;
+    this.completarError     = '';
+    this.archivosCompletar  = [];
+    this.evidenciasCompletarFA.clear();
+    this.asistenciasCompletar = [];
+    this.formCompletar.reset({ descripcionActividad: '' });
+    this.isModalCompletarOpen = true;
+
+    this.cargandoAsistencias = true;
+    this.asistSvc.consultarAsistencia()
+      .pipe(finalize(() => this.cargandoAsistencias = false))
+      .subscribe({
+        next: (lista: { idParticipante: number; nombreCompleto: string; asistio: boolean }[]) => {
+          this.asistenciasCompletar = (lista ?? []).map(d => ({
+            idParticipanteAyudantia: d.idParticipante,
+            nombreCompleto:          d.nombreCompleto,
+            asistio:                 d.asistio ?? false,
+          }));
+        },
+        error: () => { },
+      });
+  }
+
+  cerrarModalCompletar(): void { this.isModalCompletarOpen = false; this.sesionACompletar = null; }
+
+  toggleAsistenciaCompletar(idParticipante: number, valor: boolean): void {
+    this.asistenciasCompletar = this.asistenciasCompletar
+      .map(a => a.idParticipanteAyudantia === idParticipante ? { ...a, asistio: valor } : a);
+  }
+
+  onArchivosCompletar(fileList: FileList | null): void {
     if (!fileList) return;
+    this.completarError = '';
+    Array.from(fileList).forEach(file => {
+      const ext = '.' + (file.name.split('.').pop() ?? '').toLowerCase();
+      const idTipo = this.tiposEvidencia
+          .find(t => (t.extensionPermitida ?? '').toLowerCase() === ext)?.id
+        ?? EXTENSIONES[ext];
 
-    this.formError = '';
-    const incoming = Array.from(fileList);
-
-    incoming.forEach((file) => {
-      // 1. Extraer extensión
-      const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-
-      // 2. Buscar el ID (Corregido a camelCase: extensionPermitida e idTipoEvidencia)
-      let idTipo = this.tiposEvidencia.find(t =>
-        (t.extensionPermitida || '').toLowerCase() === ext
-      )?.id;
-
-      // 3. Fallback a la constante si el catálogo no ha cargado
       if (!idTipo) {
-        idTipo = EXTENSIONES_SOPORTADAS[ext];
-      }
-
-      // 4. Validación de soporte
-      if (!idTipo) {
-        this.formError = `El archivo "${file.name}" no es permitido. Solo se aceptan: ${Object.keys(EXTENSIONES_SOPORTADAS).join(', ')}`;
+        this.completarError = `El archivo "${file.name}" no está permitido.`;
         return;
       }
-
-      // 5. Agregar al formulario y a la lista de archivos
-      if (this.selectedFiles.length < this.maxFiles) {
-        this.selectedFiles.push(file);
-
-        this.evidenciasFA.push(
-          this.fb.group<EvidenciaForm>({
-            idTipoEvidencia: this.fb.nonNullable.control(idTipo, [Validators.required]),
-            nombreArchivo: this.fb.nonNullable.control(file.name, [Validators.required]),
-          }) as FormGroup<EvidenciaForm>
-        );
-      } else {
-        this.formError = `Máximo ${this.maxFiles} archivos permitidos.`;
-      }
+      this.archivosCompletar.push(file);
+      this.evidenciasCompletarFA.push(this.fb.group<EvidenciaForm>({
+        idTipoEvidencia:         this.fb.nonNullable.control(idTipo,    [Validators.required]),
+        nombreArchivoReferencia: this.fb.nonNullable.control(file.name, [Validators.required]),
+      }) as FormGroup<EvidenciaForm>);
     });
   }
 
-  /*
-  onFilesSelected(fileList: FileList | null): void {
-    if (!fileList) return;
-    Array.from(fileList).forEach((file) => {
-      this.selectedFiles.push(file);
-      this.evidenciasFA.push(this.fb.group({
-        idTipoEvidencia: [1, Validators.required],
-        nombreArchivo: [file.name, Validators.required]
-      }) as any);
-    });
+  quitarArchivoCompletar(idx: number): void {
+    this.archivosCompletar.splice(idx, 1);
+    this.evidenciasCompletarFA.removeAt(idx);
   }
 
-   */
-
-  removeFile(index: number) { this.selectedFiles.splice(index, 1); this.evidenciasFA.removeAt(index); }
-  abrirModalRegistro() { this.isModalOpen = true; this.form.controls.fecha.setValue(new Date().toISOString().split('T')[0]); }
-  cerrarModalRegistro() { this.isModalOpen = false; this.form.reset(); this.selectedFiles = []; this.evidenciasFA.clear(); }
-
-  // Helpers de Estado
-  private normalizarEstado = (v: any) => String(v ?? '').toUpperCase();
-  getEstadoSesion = (s: any) => this.normalizarEstado(s.nombreEstado ?? s.estadoRevision);
-  getEstadoEvidencia = (ev: any) => this.normalizarEstado(ev.nombreEstadoEvidencia ?? ev.estadoEvidencia);
-  statusClass(estado: string) {
-    if (estado === 'PENDIENTE') return 'status-pendiente';
-    if (estado === 'APROBADO') return 'status-aprobado';
-    if (estado === 'OBSERVADO') return 'status-observado';
-    return 'status-default';
+  get puedeSubmitCompletar(): boolean {
+    return this.formCompletar.valid && this.archivosCompletar.length > 0 && !this.isCompleting;
   }
 
-  esImagen = (ev: any) => (ev.mimeType || '').startsWith('image/');
-  iconoEvidencia = (ev: any) => (ev.mimeType?.includes('pdf') ? 'file-text' : 'image');
-  abrirEvidencia = (ev: any) => window.open(ev.rutaArchivo, '_blank');
-  cerrarDetalle = () => this.sesionSeleccionada = null;
-  tooltipObservado = () => 'Plazo de 24h para corregir';
-  puedeEditarSesion = (s: any) => this.getEstadoSesion(s) === 'OBSERVADO';
-  puedeEditarEvidencia = (ev: any) => this.getEstadoEvidencia(ev) === 'OBSERVADO';
-  trackById = (_: number, s: SesionResponseDTO) => s.idRegistroActividad;
-  editarSesion = (s: any) => console.log('Editar', s.idRegistroActividad);
-  editarEvidencia = (ev: any) => console.log('Editar ev', ev.idEvidenciaRegistroActividad);
+  submitCompletar(): void {
+    if (!this.puedeSubmitCompletar || !this.sesionACompletar) return;
+    this.completarError = '';
+    this.isCompleting   = true;
+
+    const asistencias: AsistenciaItem[] = this.asistenciasCompletar.map(a => ({
+      idParticipanteAyudantia: a.idParticipanteAyudantia,
+      asistio:                 a.asistio,
+    }));
+
+    const metadatos: EvidenciaMetadata[] = this.evidenciasCompletarFA.controls.map(fg => ({
+      idTipoEvidencia:         fg.value.idTipoEvidencia ?? 1,
+      nombreArchivoReferencia: fg.value.nombreArchivoReferencia ?? '',
+    }));
+
+    const request: CompletarSesionRequest = {
+      descripcionActividad: this.formCompletar.getRawValue().descripcionActividad,
+      asistencias,
+      metadatosEvidencias:  metadatos,
+    };
+
+    // CORRECCIÓN TS2339: completarSesion ahora existe en el servicio actualizado.
+    this.svc.completarSesion(this.sesionACompletar.idRegistroActividad, request, this.archivosCompletar)
+      .pipe(finalize(() => this.isCompleting = false))
+      .subscribe({
+        next:  (res: { exito: boolean; mensaje: string }) => {
+          this.mostrarToast(res.mensaje ?? 'Sesión enviada a revisión.', 'ok');
+          this.cerrarModalCompletar();
+          this.cargarSesiones();
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.completarError = err?.error?.message ?? 'Error al completar la sesión.';
+        },
+      });
+  }
+
+  // ─── Modal 3: Evaluar (docente) ─────────────────────────────────────────
+
+  abrirModalEvaluar(sesion: SesionResponseDTO): void {
+    this.sesionAEvaluar = sesion;
+    this.evaluarError   = '';
+    this.formEvaluar.reset({ codigoEstado: '', observaciones: '' });
+    this.isModalEvaluarOpen = true;
+  }
+
+  cerrarModalEvaluar(): void { this.isModalEvaluarOpen = false; this.sesionAEvaluar = null; }
+
+  submitEvaluar(): void {
+    if (this.formEvaluar.invalid || !this.sesionAEvaluar || this.isEvaluating) return;
+
+    const v = this.formEvaluar.getRawValue();
+    if (v.codigoEstado === 'RECHAZADO' && !v.observaciones.trim()) {
+      this.evaluarError = 'Debe indicar el motivo del rechazo.'; return;
+    }
+
+    this.evaluarError   = '';
+    this.isEvaluating   = true;
+    const request: EvaluarSesionRequest = {
+      codigoEstado:  v.codigoEstado,
+      observaciones: v.observaciones || null,
+    };
+
+    // CORRECCIÓN TS2339: evaluarSesion ahora existe en el servicio actualizado.
+    this.svc.evaluarSesion(this.sesionAEvaluar.idRegistroActividad, request)
+      .pipe(finalize(() => this.isEvaluating = false))
+      .subscribe({
+        next:  (res: { exito: boolean; mensaje: string }) => {
+          this.mostrarToast(res.mensaje ?? 'Evaluación registrada.', 'ok');
+          this.cerrarModalEvaluar();
+          this.cerrarDetalle();
+          this.cargarSesiones();
+        },
+        error: (err: { error?: { message?: string } }) => {
+          this.evaluarError = err?.error?.message ?? 'Error al evaluar la sesión.';
+        },
+      });
+  }
+
+  puedeCompletar(s: SesionResponseDTO): boolean {
+    const estado = this.codigoEstado(s);
+    return (estado === 'PLANIFICADO' || estado === 'RECHAZADO') && s.fecha <= this.hoy;
+  }
+
+  puedeEvaluar(s: SesionResponseDTO): boolean {
+    return this.codigoEstado(s) === 'PENDIENTE'
+      && ['DOCENTE', 'COORDINADOR', 'ADMINISTRADOR'].includes(this.rolActual.toUpperCase());
+  }
+
+  puedeEditarSesion(s: SesionResponseDTO): boolean {
+    return this.codigoEstado(s) === 'PLANIFICADO' && s.fecha > this.hoy;
+  }
+
+  puedeEditarEvidencia(ev: EvidenciaResponseDTO): boolean {
+    return ev.codigoEstadoEvidencia === 'OBSERVADO';
+  }
+
+  codigoEstado = (s: SesionResponseDTO): string =>
+    (s.codigoEstado ?? s.nombreEstado ?? '').toUpperCase();
+
+  statusClass(s: SesionResponseDTO): string {
+    switch (this.codigoEstado(s)) {
+      case 'PLANIFICADO': return 'status-planificado';
+      case 'PENDIENTE':   return 'status-pendiente';
+      case 'APROBADO':    return 'status-aprobado';
+      case 'RECHAZADO':   return 'status-rechazado';
+      default:            return 'status-default';
+    }
+  }
+
+  statusClassEv(ev: EvidenciaResponseDTO): string {
+    switch ((ev.codigoEstadoEvidencia ?? '').toUpperCase()) {
+      case 'APROBADO':  return 'status-aprobado';
+      case 'OBSERVADO': return 'status-observado';
+      case 'RECHAZADO': return 'status-rechazado';
+      default:          return 'status-default';
+    }
+  }
+
+  esImagen    = (ev: EvidenciaResponseDTO): boolean => (ev.mimeType ?? '').startsWith('image/');
+  iconoEv     = (ev: EvidenciaResponseDTO): string  => ev.mimeType?.includes('pdf') ? 'file-text' : 'image';
+  tooltipObs  = (): string                          => 'Plazo de 24 h para corregir';
+  horaCorta   = (t: string | null): string          => t ? t.substring(0, 5) : '—';
+  trackById   = (_: number, s: SesionResponseDTO)   => s.idRegistroActividad;
+
+  // CORRECCIÓN TS2322: window.open retorna Window | null, no void.
+  // Envolver en una función que no retorna nada resuelve el error.
+  abrirEv(ev: EvidenciaResponseDTO): void {
+    window.open(ev.rutaArchivo, '_blank');
+  }
+
+  // CORRECCIÓN TS2322: router.navigate retorna Promise<boolean>, no void.
+  // Declararla como función normal (no arrow con : void) resuelve el conflicto.
+  irAAsistencia(): void {
+    void this.router.navigate(['/ayudante/actividades/asistencia']);
+  }
+
+  private mostrarToast(texto: string, tipo: 'ok' | 'err' | 'warn'): void {
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toast.set({ texto, tipo });
+    this.toastTimer = setTimeout(() => this.toast.set(null), 4500);
+  }
 }

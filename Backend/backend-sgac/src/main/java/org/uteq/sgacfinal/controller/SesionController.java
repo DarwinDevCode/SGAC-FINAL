@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sesiones")
+@RequestMapping("/api/postulante/sesiones")
 @RequiredArgsConstructor
 public class SesionController {
     private final SesionService sesionService;

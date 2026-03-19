@@ -22,6 +22,8 @@ public class AsistenciaController {
     @GetMapping("/contexto")
     @PreAuthorize("hasAnyAuthority('AYUDANTE_CATEDRA')")
     public ResponseEntity<Map<String, Object>> obtenerContexto() {
+
+
         Map<String, Object> response = new HashMap<>();
         response.put("idAyudantia", asistenciaService.resolverIdAyudantia());
         response.put("idRegistro",  asistenciaService.resolverIdRegistro());
@@ -77,6 +79,9 @@ public class AsistenciaController {
             @RequestBody Map<String, List<Map<String, Object>>> body) {
 
         Integer idRegistro = asistenciaService.resolverIdRegistro();
+
+
+
         return ResponseEntity.ok(
                 asistenciaService.guardarAsistencias(idRegistro, body.get("asistencias")));
     }

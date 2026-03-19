@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DocenteActividadesServiceImpl implements IDocenteActividadesService {
 
-    private final RegistroActividadRepository registroRepo;
+    private final RegistroActividadConfigRepository registroRepo;
     private final EvidenciaRegistroActividadRepository evidenciaRepo;
     private final DocenteRepository docenteRepo;
     private final TipoEstadoRegistroRepository estadoRegistroRepo;
@@ -82,7 +82,6 @@ public class DocenteActividadesServiceImpl implements IDocenteActividadesService
                 .descripcionActividad(ra.getDescripcionActividad())
                 .temaTratado(ra.getTemaTratado())
                 .fecha(ra.getFecha())
-                .numeroAsistentes(ra.getNumeroAsistentes())
                 .horasDedicadas(ra.getHorasDedicadas())
                 .estadoRevision(ra.getIdTipoEstadoRegistro() != null
                         ? ra.getIdTipoEstadoRegistro().getNombreEstado() : null)

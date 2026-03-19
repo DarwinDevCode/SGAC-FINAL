@@ -1,23 +1,63 @@
 <div class="gestion-container">
+
+  <!-- ══ TOAST ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="toast()" class="ad-toast"
+       [class.ad-toast-ok]="toast()?.tipo === 'ok'"
+       [class.ad-toast-err]="toast()?.tipo === 'err'"
+       [class.ad-toast-warn]="toast()?.tipo === 'warn'">
+    <lucide-icon [name]="toast()?.tipo === 'ok' ? 'circle-check-big' : 'circle-x'" size="15"></lucide-icon>
+    <span>{{ toast()?.texto }}</span>
+  </div>
+
+  <!-- ── Encabezado ────────────────────────────────────────────────────── -->
   <div class="section-header">
     <div class="title-container">
       <h2 class="title">Mis sesiones</h2>
-      <p class="subtitle">Revisa tus sesiones registradas y sus evidencias.</p>
+      <p class="subtitle">Planifica, completa y sigue el estado de cada sesión de ayudantía.</p>
     </div>
 
     <div class="flex items-center gap-2">
-      <button class="action-btn" type="button" (click)="abrirModalRegistro()">
-        <lucide-icon name="plus" size="16"></lucide-icon>
-        Registrar actividad
+      <button class="action-btn secondary" type="button" (click)="irAAsistencia()">
+        <lucide-icon name="clipboard-list" size="16"></lucide-icon> Asistencia
       </button>
-
-      <button class="action-btn secondary" (click)="cargarSesiones()" [disabled]="isLoading" type="button">
-        <lucide-icon name="refresh-cw" size="16"></lucide-icon>
-        Actualizar
+      <button class="action-btn" type="button" (click)="abrirModalPlanificar()">
+        <lucide-icon name="plus" size="16"></lucide-icon> Planificar sesión
+      </button>
+      <button class="action-btn secondary" type="button" (click)="cargarSesiones()" [disabled]="isLoading">
+        <lucide-icon name="refresh-cw" size="16"></lucide-icon> Actualizar
       </button>
     </div>
   </div>
 
+  <!-- ── Filtros ───────────────────────────────────────────────────────── -->
+  <div class="filter-bar" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end;">
+    <div class="field" style="flex:1;min-width:140px;">
+      <label class="field-label">Desde</label>
+      <input class="field-input" type="date" [(ngModel)]="filtroDesde" />
+    </div>
+    <div class="field" style="flex:1;min-width:140px;">
+      <label class="field-label">Hasta</label>
+      <input class="field-input" type="date" [(ngModel)]="filtroHasta" />
+    </div>
+    <div class="field" style="flex:1;min-width:160px;">
+      <label class="field-label">Estado</label>
+      <select class="field-input" [(ngModel)]="filtroEstado">
+        <option value="">Todos</option>
+        <option value="PLANIFICADO">Planificado</option>
+        <option value="PENDIENTE">Pendiente revisión</option>
+        <option value="APROBADO">Aprobado</option>
+        <option value="RECHAZADO">Rechazado</option>
+      </select>
+    </div>
+    <button class="action-btn" type="button" (click)="aplicarFiltros()">
+      <lucide-icon name="search" size="15"></lucide-icon> Filtrar
+    </button>
+    <button class="action-btn secondary" type="button" (click)="limpiarFiltros()">
+      Limpiar
+    </button>
+  </div>
+
+  <!-- ── Error ─────────────────────────────────────────────────────────── -->
   @if (errorMessage) {
     <div class="alert-banner error">
       <lucide-icon name="alert-triangle" size="18"></lucide-icon>
@@ -25,32 +65,36 @@
     </div>
   }
 
+  <!-- ── Skeleton ──────────────────────────────────────────────────────── -->
   @if (isLoading) {
     <div class="table-card">
-      @for (_ of [1,2,3,4,5]; track $index) {
-        <div class="skeleton-row"></div>
-      }
+      @for (_ of [1,2,3,4,5]; track $index) { <div class="skeleton-row"></div> }
     </div>
   }
 
+  <!-- ── Vacío ─────────────────────────────────────────────────────────── -->
   @if (!isLoading && !errorMessage && sesiones.length === 0) {
     <div class="info-message">
       <lucide-icon name="calendar-x" size="48" class="text-muted-foreground"></lucide-icon>
-      <p style="margin-top: .75rem" class="font-medium">Aún no has registrado sesiones</p>
-      <p class="text-sm" style="margin-top: .25rem">
-        Cuando registres una sesión, aparecerá aquí con sus evidencias.
-      </p>
+      <p style="margin-top:.75rem" class="font-medium">Sin sesiones registradas</p>
+      <p class="text-sm" style="margin-top:.25rem">Planifica una sesión para comenzar.</p>
+      <button class="action-btn" style="margin-top:.75rem;" (click)="abrirModalPlanificar()">
+        <lucide-icon name="plus" size="15"></lucide-icon> Planificar primera sesión
+      </button>
     </div>
   }
 
+  <!-- ══ TABLA + PANEL DE DETALLE ════════════════════════════════════════ -->
   @if (!isLoading && sesiones.length > 0) {
     <div class="sesiones-layout">
+
+      <!-- Tabla de sesiones -->
       <div class="table-card">
         <table class="data-table">
           <thead>
           <tr>
             <th>Fecha</th>
-            <th>Actividad</th>
+            <th>Tema / Lugar</th>
             <th>Horas</th>
             <th>Estado</th>
             <th class="text-right">Acciones</th>
@@ -58,74 +102,62 @@
           </thead>
           <tbody>
             @for (s of sesiones; track trackById($index, s)) {
-              <tr
-                class="row-click"
-                [class.row-active]="sesionSeleccionada?.idRegistroActividad === s.idRegistroActividad"
-                (click)="verDetalle(s.idRegistroActividad)"
-              >
+              <tr class="row-click"
+                  [class.row-active]="sesionSeleccionada?.idRegistroActividad === s.idRegistroActividad"
+                  (click)="verDetalle(s.idRegistroActividad)">
+
+                <!-- Fecha + horario -->
                 <td>
                   <div class="user-info-cell">
                     <span class="full-name">{{ s.fecha | date:'dd/MM/yyyy' }}</span>
-                    <span class="user-email">{{ s.fecha | date:'EEEE' }}</span>
+                    <span class="user-email">
+                      {{ horaCorta(s.horaInicio) }} – {{ horaCorta(s.horaFin) }}
+                    </span>
                   </div>
                 </td>
 
+                <!-- Tema + lugar -->
                 <td>
-                  <div class="actividad-cell">
-                    <div class="font-medium">{{ s.temaTratado || 'Sesión' }}</div>
-                    <div class="text-xs text-muted-foreground actividad-desc">{{ s.descripcionActividad }}</div>
-                  </div>
+                  <div class="font-medium">{{ s.temaTratado || 'Sesión' }}</div>
+                  <div class="text-xs text-muted-foreground actividad-desc">{{ s.lugar }}</div>
                 </td>
 
-                <td>{{s.horasDedicadas}}</td>
+                <td>{{ s.horasDedicadas | number:'1.1-1' }} h</td>
 
+                <!-- Badge de estado -->
                 <td>
-                  @let estado = getEstadoSesion(s);
-                  <span
-                    class="badge"
-                    [ngClass]="statusClass(estado)"
-                    [attr.title]="estado === 'OBSERVADO' ? tooltipObservado() : null"
-                  >
-                    {{ estado || 'EN EVALUACIÓN' }}
+                  <span class="badge" [ngClass]="statusClass(s)">
+                    {{ s.nombreEstado || codigoEstado(s) }}
                   </span>
                 </td>
 
+                <!-- Acciones contextuales -->
                 <td class="text-right">
                   <div class="actions-right">
 
-                    <!--
-                    <button
-                      class="btn-ghost-inline primary-lite"
-                      type="button"
-                      (click)="$event.stopPropagation(); irAAsistencia(s)"
-                      title="Registrar asistencia"
-                      style="color: #4f46e5;"
-                    >
-                      <lucide-icon name="user-check" size="16"></lucide-icon>
-                      Asistencia
-                    </button>
-                    -->
-
-                    <button
-                      class="btn-ghost-inline"
-                      type="button"
-                      (click)="$event.stopPropagation(); verDetalle(s.idRegistroActividad)"
-                    >
-                      <lucide-icon name="paperclip" size="16"></lucide-icon>
-                      Ver evidencias
-                    </button>
-
-                    @if (puedeEditarSesion(s)) {
-                      <button
-                        class="btn-ghost-inline warning"
-                        type="button"
-                        (click)="$event.stopPropagation(); editarSesion(s)"
-                        title="Editar (solo disponible durante 24h)"
-                      >
-                        <lucide-icon name="pencil" size="16"></lucide-icon>
-                        Editar
+                    <!-- COMPLETAR — solo si la sesión ya pasó y está pendiente de completar -->
+                    @if (puedeCompletar(s)) {
+                      <button class="btn-ghost-inline" type="button"
+                              (click)="$event.stopPropagation(); abrirModalCompletar(s)"
+                              title="Adjuntar evidencias y enviar a revisión">
+                        <lucide-icon name="upload" size="15"></lucide-icon> Completar
                       </button>
                     }
+
+                    <!-- EVALUAR — solo para docentes con sesión PENDIENTE -->
+                    @if (puedeEvaluar(s)) {
+                      <button class="btn-ghost-inline" type="button"
+                              (click)="$event.stopPropagation(); abrirModalEvaluar(s)"
+                              title="Aprobar o rechazar la sesión">
+                        <lucide-icon name="check-square" size="15"></lucide-icon> Evaluar
+                      </button>
+                    }
+
+                    <button class="btn-ghost-inline" type="button"
+                            (click)="$event.stopPropagation(); verDetalle(s.idRegistroActividad)">
+                      <lucide-icon name="paperclip" size="15"></lucide-icon> Evidencias
+                    </button>
+
                   </div>
                 </td>
               </tr>
@@ -134,263 +166,199 @@
         </table>
       </div>
 
+      <!-- Panel de detalle lateral -->
       <div class="detail-card" [class.detail-hidden]="!sesionSeleccionada">
         @if (!sesionSeleccionada) {
-          <div class="info-message" style="padding: 1.75rem 1rem;">
+          <div class="info-message" style="padding:1.75rem 1rem;">
             <lucide-icon name="mouse-pointer-click" size="34" class="text-muted-foreground"></lucide-icon>
             <p style="margin-top:.75rem" class="text-sm">Selecciona una sesión para ver sus evidencias.</p>
           </div>
         } @else {
           <div class="detail-header">
             <div class="title-container">
-              <h3 class="title" style="font-size: 1.1rem;">Evidencias</h3>
-              <p class="subtitle" style="margin-top: .2rem;">
-                {{ sesionSeleccionada.fecha | date:'dd/MM/yyyy' }} • {{ sesionSeleccionada.temaTratado || 'Sesión' }}
+              <h3 class="title" style="font-size:1.1rem;">Detalle de sesión</h3>
+              <p class="subtitle" style="margin-top:.2rem;">
+                {{ sesionSeleccionada.fecha | date:'dd/MM/yyyy' }}
+                · {{ sesionSeleccionada.temaTratado || 'Sesión' }}
               </p>
             </div>
-
             <button class="btn-icon" type="button" (click)="cerrarDetalle()" title="Cerrar">
               <lucide-icon name="x" size="18"></lucide-icon>
             </button>
           </div>
 
-
           <div class="detail-body">
-            <!--
-            <div class="callout" style="background: #f5f3ff; border-color: #ddd6fe; margin-bottom: 1.5rem;">
-              <div class="callout-title" style="color: #5b21b6;">
-                <lucide-icon name="users" size="16"></lucide-icon>
-                <span>Control de Asistencia</span>
-              </div>
-              <div class="callout-body flex justify-between items-center" style="margin-top: 0.5rem;">
-                <span class="text-xs text-muted-foreground">Registra a los estudiantes presentes en esta sesión.</span>
-                <button class="action-btn" type="button" (click)="irAAsistencia(sesionSeleccionada)" style="padding: 0.3rem 0.6rem; font-size: 0.7rem; background: #6366f1;">
-                  Pasar lista
-                </button>
+
+            <!-- Metadatos rápidos -->
+            <div class="callout" style="margin-bottom:1rem;">
+              <div class="callout-body" style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .75rem;">
+                <span class="text-xs text-muted-foreground">Horario</span>
+                <span class="text-xs font-medium">{{ horaCorta(sesionSeleccionada.horaInicio) }} – {{ horaCorta(sesionSeleccionada.horaFin) }}</span>
+                <span class="text-xs text-muted-foreground">Lugar</span>
+                <span class="text-xs font-medium">{{ sesionSeleccionada.lugar || '—' }}</span>
+                <span class="text-xs text-muted-foreground">Horas</span>
+                <span class="text-xs font-medium">{{ sesionSeleccionada.horasDedicadas | number:'1.1-1' }} h</span>
+                <span class="text-xs text-muted-foreground">Asistentes</span>
               </div>
             </div>
-            -->
 
-            @if (sesionSeleccionada.observacionDocente && sesionSeleccionada.observacionDocente !== 'Sin observaciones') {
-              <div class="callout info">
+            <!-- Observación del docente si existe -->
+            @if (sesionSeleccionada.observacionDocente) {
+              <div class="callout" [class.warn]="codigoEstado(sesionSeleccionada) === 'RECHAZADO'" style="margin-bottom:1rem;">
                 <div class="callout-title">
                   <lucide-icon name="info" size="16"></lucide-icon>
-                  <span>Observación de la actividad</span>
+                  <span>Observación del docente</span>
                   @if (sesionSeleccionada.fechaObservacion) {
                     <span class="callout-date">{{ sesionSeleccionada.fechaObservacion | date:'dd/MM/yyyy' }}</span>
                   }
                 </div>
-                <div class="callout-body">
-                  {{ sesionSeleccionada.observacionDocente }}
-                </div>
+                <div class="callout-body">{{ sesionSeleccionada.observacionDocente }}</div>
               </div>
             }
 
+            <!-- Descripción de actividad -->
+            @if (sesionSeleccionada.descripcionActividad) {
+              <div class="callout info" style="margin-bottom:1rem;">
+                <div class="callout-title">
+                  <lucide-icon name="file-text" size="16"></lucide-icon>
+                  <span>Descripción de la actividad</span>
+                </div>
+                <div class="callout-body">{{ sesionSeleccionada.descripcionActividad }}</div>
+              </div>
+            }
+
+            <!-- Acciones contextuales en el panel -->
+            @if (puedeCompletar(sesionSeleccionada)) {
+              <button class="action-btn" type="button" style="width:100%;margin-bottom:1rem;justify-content:center;"
+                      (click)="abrirModalCompletar(sesionSeleccionada)">
+                <lucide-icon name="upload" size="15"></lucide-icon> Completar esta sesión
+              </button>
+            }
+            @if (puedeEvaluar(sesionSeleccionada)) {
+              <button class="action-btn" type="button" style="width:100%;margin-bottom:1rem;justify-content:center;"
+                      (click)="abrirModalEvaluar(sesionSeleccionada)">
+                <lucide-icon name="check-square" size="15"></lucide-icon> Evaluar esta sesión
+              </button>
+            }
+
+            <!-- Evidencias -->
             @if (isDetailLoading) {
               <div class="detail-body">
-                @for (_ of [1,2,3,4]; track $index) {
-                  <div class="skeleton-card"></div>
-                }
+                @for (_ of [1,2,3]; track $index) { <div class="skeleton-card"></div> }
               </div>
-            } @else if ((sesionSeleccionada.evidencias.length || 0) === 0) {
-              <div class="info-message" style="padding: 1.75rem 1rem;">
-                <lucide-icon name="file-x" size="40" class="text-muted-foreground"></lucide-icon>
-                <p style="margin-top:.75rem" class="font-medium">No hay evidencias adjuntas</p>
-                <p class="text-sm" style="margin-top:.25rem">Esta sesión no tiene archivos cargados.</p>
+            } @else if (!(sesionSeleccionada.evidencias?.length)) {
+              <div class="info-message" style="padding:1.25rem .5rem;">
+                <lucide-icon name="file-x" size="36" class="text-muted-foreground"></lucide-icon>
+                <p style="margin-top:.5rem;" class="font-medium text-sm">Sin evidencias adjuntas</p>
               </div>
             } @else {
+              <p class="text-xs text-muted-foreground" style="margin-bottom:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">
+                Evidencias ({{ sesionSeleccionada.evidencias!.length }})
+              </p>
               <div class="evidencias-grid">
-                @for (ev of sesionSeleccionada.evidencias; track ev.idEvidenciaRegistroActividad) {
+                @for (ev of sesionSeleccionada.evidencias!; track ev.idEvidenciaRegistroActividad) {
                   <div class="evidencia-card">
-                    <button
-                      class="evidencia-item"
-                      type="button"
-                      (click)="abrirEvidencia(ev)"
-                      title="Abrir evidencia"
-                    >
+                    <button class="evidencia-item" type="button" (click)="abrirEv(ev)" title="Abrir evidencia">
                       @if (esImagen(ev)) {
                         <img class="evidencia-thumb" [src]="ev.rutaArchivo" [alt]="ev.nombreArchivo" />
                       } @else {
                         <div class="evidencia-icon">
-                          <lucide-icon [name]="iconoEvidencia(ev)" size="22"></lucide-icon>
+                          <lucide-icon [name]="iconoEv(ev)" size="22"></lucide-icon>
                         </div>
                       }
-
                       <div class="evidencia-meta">
                         <div class="evidencia-name">{{ ev.nombreArchivo }}</div>
                         <div class="text-xs text-muted-foreground">
-                          {{ ev.mimeType }} • {{ ev.fechaSubida | date:'dd/MM/yyyy' }}
+                          {{ ev.mimeType }} · {{ ev.fechaSubida | date:'dd/MM/yyyy' }}
                         </div>
                       </div>
-
-                      <div class="evidencia-right">
-                        @let estEv = getEstadoEvidencia(ev);
-                        <span
-                          class="badge"
-                          [ngClass]="statusClass(estEv)"
-                          [attr.title]="estEv === 'OBSERVADO' ? tooltipObservado() : null"
-                        >
-                          {{ estEv || 'SUBIDO' }}
-                        </span>
-                      </div>
+                      <span class="badge" [ngClass]="statusClassEv(ev)">
+                        {{ ev.nombreEstadoEvidencia || 'SUBIDO' }}
+                      </span>
                     </button>
-
-                    @if (ev.observacionDocente && ev.observacionDocente !== 'Sin observaciones') {
+                    @if (ev.observacionDocente) {
                       <div class="callout warn">
                         <div class="callout-title">
-                          <lucide-icon name="info" size="16"></lucide-icon>
+                          <lucide-icon name="info" size="15"></lucide-icon>
                           <span>Observación</span>
-                          @if (ev.fechaObservacion) {
-                            <span class="callout-date">{{ ev.fechaObservacion | date:'dd/MM/yyyy' }}</span>
-                          }
                         </div>
                         <div class="callout-body">{{ ev.observacionDocente }}</div>
-                      </div>
-                    }
-
-                    @if (puedeEditarEvidencia(ev)) {
-                      <div class="evidencia-actions">
-                        <button class="btn-ghost-inline warning" type="button" (click)="editarEvidencia(ev)">
-                          <lucide-icon name="pencil" size="16"></lucide-icon>
-                          Editar evidencia
-                        </button>
                       </div>
                     }
                   </div>
                 }
               </div>
             }
+
           </div>
         }
       </div>
     </div>
   }
 
-  @if (isModalOpen) {
-    <div class="modal-overlay" (click)="cerrarModalRegistro()">
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL 1: PLANIFICAR                                                 -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  @if (isModalPlanificarOpen) {
+    <div class="modal-overlay" (click)="cerrarModalPlanificar()">
       <div class="modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
         <div class="modal-header">
           <div class="title-container">
-            <h3 class="title" style="font-size: 1.15rem;">Registrar actividad</h3>
-            <p class="subtitle">Completa los datos y adjunta tus evidencias (máx. 5 archivos).</p>
+            <h3 class="title" style="font-size:1.1rem;">Planificar sesión</h3>
+            <p class="subtitle">Reserva una fecha y lugar. El docente recibirá un aviso. 📋</p>
           </div>
-
-          <button class="btn-icon" type="button" (click)="cerrarModalRegistro()" [disabled]="isSubmitting" title="Cerrar">
+          <button class="btn-icon" type="button" (click)="cerrarModalPlanificar()" [disabled]="isPlanning">
             <lucide-icon name="x" size="18"></lucide-icon>
           </button>
         </div>
 
-        <form class="modal-form" [formGroup]="form" (ngSubmit)="submitRegistro()">
-          <div class="modal-scroll">
-            @if (formError) {
+        <form [formGroup]="formPlanificar" (ngSubmit)="submitPlanificar()">
+          <div class="modal-body">
+            @if (planError) {
               <div class="inline-error">
                 <lucide-icon name="alert-triangle" size="16"></lucide-icon>
-                <span>{{ formError }}</span>
+                <span>{{ planError }}</span>
               </div>
             }
 
             <div class="form-grid">
               <div class="field">
-                <label class="field-label">Fecha</label>
-                <input class="field-input" type="date" formControlName="fecha" />
-                @if (form.controls.fecha.touched && form.controls.fecha.invalid) {
-                  <div class="field-hint text-destructive text-xs">La fecha es obligatoria.</div>
+                <label class="field-label">Fecha *</label>
+                <input class="field-input" type="date" formControlName="fecha" [min]="hoy" />
+                @if (formPlanificar.controls.fecha.touched && formPlanificar.controls.fecha.invalid) {
+                  <div class="field-hint text-destructive text-xs">La fecha es obligatoria (no puede ser pasada).</div>
                 }
               </div>
-
               <div class="field">
-                <label class="field-label">Tema tratado</label>
-                <input class="field-input" type="text" formControlName="temaTratado" placeholder="Ej: Tutoría de laboratorio" />
-                @if (form.controls.temaTratado.touched && form.controls.temaTratado.invalid) {
-                  <div class="field-hint text-destructive text-xs">El tema es obligatorio.</div>
-                }
+                <label class="field-label">Hora inicio *</label>
+                <input class="field-input" type="time" formControlName="horaInicio" />
               </div>
-
+              <div class="field">
+                <label class="field-label">Hora fin *</label>
+                <input class="field-input" type="time" formControlName="horaFin" />
+              </div>
+              <div class="field">
+                <label class="field-label">Lugar *</label>
+                <input class="field-input" type="text" formControlName="lugar"
+                       placeholder="Ej: Aula 5, Lab. B, Zoom" />
+              </div>
               <div class="field full">
-                <label class="field-label">Descripción de la actividad</label>
-                <textarea class="field-input" rows="3" formControlName="descripcionActividad" placeholder="Describe brevemente lo realizado..."></textarea>
-                @if (form.controls.descripcionActividad.touched && form.controls.descripcionActividad.invalid) {
-                  <div class="field-hint text-destructive text-xs">La descripción es obligatoria.</div>
-                }
+                <label class="field-label">Tema a tratar *</label>
+                <input class="field-input" type="text" formControlName="temaTratado"
+                       placeholder="Ej: Resolución de ejercicios de cálculo diferencial" />
               </div>
-
-              <div class="field">
-                <label class="field-label">N° asistentes</label>
-                <input class="field-input" type="number" min="0" formControlName="numeroAsistentes" />
-              </div>
-
-              <div class="field">
-                <label class="field-label">Horas dedicadas</label>
-                <input class="field-input" type="number" min="0" step="0.5" formControlName="horasDedicadas" />
-                @if (form.controls.horasDedicadas.touched && form.controls.horasDedicadas.invalid) {
-                  <div class="field-hint text-destructive text-xs">Ingresa un valor mayor a 0.</div>
-                }
-              </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="field">
-              <label class="field-label">Evidencias</label>
-
-              <div class="dropzone">
-                <input
-                  class="dropzone-input"
-                  type="file"
-                  multiple
-                  (change)="onFilesSelected($any($event.target).files)"
-                  [disabled]="isSubmitting"
-                />
-
-                <div class="dropzone-content">
-                  <lucide-icon name="upload" size="18"></lucide-icon>
-                  <div>
-                    <div class="font-medium">Arrastra tus archivos aquí o haz clic para adjuntar</div>
-                    <div class="text-xs text-muted-foreground">PDF, imágenes u otros. Máx. {{ maxFiles }} archivos.</div>
-                  </div>
-                </div>
-              </div>
-
-              @if (selectedFiles.length > 0) {
-                <div class="files-list scroll-area">
-                  @for (f of selectedFiles; track f.name + '-' + $index) {
-                    <div class="file-item">
-                      <div class="file-left">
-                        <lucide-icon name="paperclip" size="16"></lucide-icon>
-                        <div class="file-meta">
-                          <div class="file-name">{{ f.name }}</div>
-                          <div class="text-xs text-muted-foreground">{{ (f.size / 1024) | number:'1.0-0' }} KB</div>
-                        </div>
-                      </div>
-
-                      <button class="btn-icon" type="button" (click)="removeFile($index)" [disabled]="isSubmitting" title="Quitar">
-                        <lucide-icon name="trash-2" size="16"></lucide-icon>
-                      </button>
-                    </div>
-                  }
-                </div>
-              }
-
-              @if (selectedFiles.length === 0) {
-                <div class="field-hint text-xs text-muted-foreground" style="margin-top: .5rem;">
-                  Debes adjuntar al menos 1 archivo para poder guardar.
-                </div>
-              }
             </div>
           </div>
 
           <div class="modal-footer sticky-footer">
-            <button class="action-btn secondary" type="button" (click)="cerrarModalRegistro()" [disabled]="isSubmitting">
+            <button class="action-btn secondary" type="button" (click)="cerrarModalPlanificar()" [disabled]="isPlanning">
               Cancelar
             </button>
-
-            <button class="action-btn" type="submit" [disabled]="!canSubmit">
-              @if (isSubmitting) {
-                <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon>
-                Guardando...
+            <button class="action-btn" type="submit" [disabled]="formPlanificar.invalid || isPlanning">
+              @if (isPlanning) {
+                <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon> Guardando...
               } @else {
-                <lucide-icon name="save" size="16"></lucide-icon>
-                Guardar
+                <lucide-icon name="calendar-plus" size="16"></lucide-icon> Planificar
               }
             </button>
           </div>
@@ -398,4 +366,186 @@
       </div>
     </div>
   }
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL 2: COMPLETAR                                                  -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  @if (isModalCompletarOpen && sesionACompletar) {
+    <div class="modal-overlay" (click)="cerrarModalCompletar()">
+      <div class="modal" style="width:min(780px,100%);" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+
+        <div class="modal-header" style="padding: 0.75rem 1.25rem;">
+          <div class="title-container">
+            <h3 class="title" style="font-size:1.05rem;">Completar sesión</h3>
+            <p class="subtitle" style="font-size: 0.75rem; margin-top: 0.1rem;">
+              {{ sesionACompletar.fecha | date:'dd/MM/yyyy' }} · {{ sesionACompletar.temaTratado }}
+            </p>
+          </div>
+          <button class="btn-icon" style="width: 32px; height: 32px;" type="button" (click)="cerrarModalCompletar()" [disabled]="isCompleting">
+            <lucide-icon name="x" size="16"></lucide-icon>
+          </button>
+        </div>
+
+        <form [formGroup]="formCompletar" (ngSubmit)="submitCompletar()">
+          <div class="modal-scroll" style="padding: 1rem 1.25rem;">
+
+            <div class="field description-field">
+              <label class="field-label" style="font-size: 0.75rem; margin-bottom: 0.2rem;">Descripción de la actividad realizada *</label>
+              <textarea class="field-input"
+                        style="min-height: 160px; resize: vertical;"
+                        rows="6"
+                        formControlName="descripcionActividad"
+                        placeholder="Describe detalladamente lo que realizaste en esta sesión..."></textarea>
+            </div>
+
+            <div class="divider" style="margin: 0.7rem 0;"></div>
+
+            <div class="field">
+              <label class="field-label" style="font-size: 0.75rem; margin-bottom: 0.2rem; display: flex; justify-content: space-between;">
+                Asistencia de estudiantes
+                <span class="text-xs text-muted-foreground font-normal">Clic para marcar</span>
+              </label>
+
+              <div class="table-card" style="margin-top: 0.25rem;">
+                <table class="data-table">
+                  <thead>
+                  <tr>
+                    <th style="width:52px;text-align:center;">Asistió</th>
+                    <th>Nombre</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                    @for (a of asistenciasCompletar; track a.idParticipanteAyudantia) {
+                      <tr (click)="toggleAsistenciaCompletar(a.idParticipanteAyudantia, !a.asistio)"
+                          style="cursor:pointer"
+                          [class.row-active]="a.asistio">
+                        <td style="text-align:center;">
+                          <input type="checkbox" [checked]="a.asistio" (click)="$event.stopPropagation()"
+                                 (change)="toggleAsistenciaCompletar(a.idParticipanteAyudantia, $any($event.target).checked)" />
+                        </td>
+                        <td style="font-size: 0.82rem; padding: 0.45rem 0.75rem;">{{ a.nombreCompleto }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="divider" style="margin: 0.7rem 0;"></div>
+
+            <div class="field">
+              <label class="field-label" style="font-size: 0.75rem; margin-bottom: 0.2rem;">Evidencias *</label>
+              <div class="dropzone" style="padding: 0.5rem;">
+                <input class="dropzone-input" type="file" multiple (change)="onArchivosCompletar($any($event.target).files)" />
+                <div class="dropzone-content" style="padding: 0.5rem;">
+                  <lucide-icon name="upload" size="16"></lucide-icon>
+                  <span class="text-sm">Adjuntar fotos o documentos</span>
+                </div>
+              </div>
+
+              @if (archivosCompletar.length > 0) {
+                <div class="files-list" style="margin-top: 0.75rem; display: grid; gap: 0.5rem;">
+                  @for (f of archivosCompletar; track $index) {
+                    <div class="file-item" style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: hsl(var(--muted)/.3); border-radius: var(--radius); border: 1px solid hsl(var(--border));">
+                      <div style="display: flex; align-items: center; gap: 0.6rem; min-width: 0;">
+                        <lucide-icon name="paperclip" size="14"></lucide-icon>
+                        <div style="min-width: 0;">
+                          <div style="font-size: 0.8rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;">{{ f.name }}</div>
+                          <div style="font-size: 0.7rem; color: hsl(var(--muted-foreground));">{{ (f.size / 1024) | number:'1.0-0' }} KB</div>
+                        </div>
+                      </div>
+                      <button class="btn-icon" style="width: 28px; height: 28px; color: hsl(var(--destructive));" type="button" (click)="quitarArchivoCompletar($index)">
+                        <lucide-icon name="trash-2" size="14"></lucide-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="modal-footer sticky-footer" style="padding: 0.75rem 1.25rem;">
+            <button class="action-btn secondary" type="button" (click)="cerrarModalCompletar()" [disabled]="isCompleting">
+              Cancelar
+            </button>
+            <button class="action-btn" type="submit" [disabled]="!puedeSubmitCompletar || isCompleting">
+              @if (isCompleting) { <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon> }
+              {{ isCompleting ? 'Enviando...' : 'Enviar a revisión' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- MODAL 3: EVALUAR (docente)                                          -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  @if (isModalEvaluarOpen && sesionAEvaluar) {
+    <div class="modal-overlay" (click)="cerrarModalEvaluar()">
+      <div class="modal" style="width:min(520px,100%);" (click)="$event.stopPropagation()" role="dialog" aria-modal="true">
+        <div class="modal-header">
+          <div class="title-container">
+            <h3 class="title" style="font-size:1.1rem;">Evaluar sesión</h3>
+            <p class="subtitle">
+              {{ sesionAEvaluar.fecha | date:'dd/MM/yyyy' }} · {{ sesionAEvaluar.temaTratado }}
+            </p>
+          </div>
+          <button class="btn-icon" type="button" (click)="cerrarModalEvaluar()" [disabled]="isEvaluating">
+            <lucide-icon name="x" size="18"></lucide-icon>
+          </button>
+        </div>
+
+        <form [formGroup]="formEvaluar" (ngSubmit)="submitEvaluar()">
+          <div class="modal-body">
+            @if (evaluarError) {
+              <div class="inline-error">
+                <lucide-icon name="alert-triangle" size="16"></lucide-icon>
+                <span>{{ evaluarError }}</span>
+              </div>
+            }
+
+            <div class="field" style="margin-bottom:1rem;">
+              <label class="field-label">Decisión *</label>
+              <div style="display:flex;gap:.75rem;">
+                <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;">
+                  <input type="radio" formControlName="codigoEstado" value="APROBADO" />
+                  <span class="badge status-aprobado">Aprobar</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;">
+                  <input type="radio" formControlName="codigoEstado" value="RECHAZADO" />
+                  <span class="badge status-rechazado">Rechazar</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="field-label">
+                Observaciones
+                @if (formEvaluar.value.codigoEstado === 'RECHAZADO') {
+                  <span class="text-destructive"> *</span>
+                }
+              </label>
+              <textarea class="field-input" rows="3" formControlName="observaciones"
+                        placeholder="Motivo de rechazo o comentarios para el ayudante…"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer sticky-footer">
+            <button class="action-btn secondary" type="button" (click)="cerrarModalEvaluar()" [disabled]="isEvaluating">
+              Cancelar
+            </button>
+            <button class="action-btn" type="submit" [disabled]="formEvaluar.invalid || isEvaluating">
+              @if (isEvaluating) {
+                <lucide-icon name="loader-2" size="16" class="animate-spin"></lucide-icon> Guardando...
+              } @else {
+                <lucide-icon name="check" size="16"></lucide-icon> Confirmar evaluación
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
 </div>

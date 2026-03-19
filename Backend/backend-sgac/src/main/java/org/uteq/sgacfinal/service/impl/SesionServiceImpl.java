@@ -15,7 +15,7 @@ import org.uteq.sgacfinal.exception.RecursoNoEncontradoException;
 import org.uteq.sgacfinal.repository.AyudantiaRepository;
 import org.uteq.sgacfinal.repository.EvidenciaRegistroActividadRepository;
 import org.uteq.sgacfinal.repository.ProgresoRepository;
-import org.uteq.sgacfinal.repository.RegistroActividadRepository;
+import org.uteq.sgacfinal.repository.RegistroActividadConfigRepository;
 import org.uteq.sgacfinal.service.SesionService;
 import org.uteq.sgacfinal.service.cloudinary.CloudinaryUploadServiceImpl;
 
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class SesionServiceImpl implements SesionService {
-    private final RegistroActividadRepository registroActividadRepository;
+    private final RegistroActividadConfigRepository registroActividadRepository;
     private final EvidenciaRegistroActividadRepository evidenciaRepository;
     private final AyudantiaRepository ayudantiaRepository;
     private final ProgresoRepository progresoRepository;

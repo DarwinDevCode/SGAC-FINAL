@@ -27,10 +27,12 @@ public class NotificacionSesionWsService {
         );
 
         try {
-            messagingTemplate.convertAndSend(destino, payload);
+            messagingTemplate.convertAndSend(destino, (Object) payload);
             log.debug("[WS-SESION] Notificación enviada a {}: {}", destino, titulo);
         } catch (Exception e) {
             log.warn("[WS-SESION] Fallo al enviar WebSocket a {}: {}", destino, e.getMessage());
         }
+
+
     }
 }

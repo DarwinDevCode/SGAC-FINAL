@@ -15,7 +15,7 @@ import org.uteq.sgacfinal.dto.Response.ActividadDetalleDTO;
 import org.uteq.sgacfinal.dto.Response.AyudanteResponseDTO;
 import org.uteq.sgacfinal.repository.DocenteMisAyudantesRepository;
 import org.uteq.sgacfinal.repository.EvidenciaRegistroActividadRepository;
-import org.uteq.sgacfinal.repository.RegistroActividadRepository;
+import org.uteq.sgacfinal.repository.RegistroActividadConfigRepository;
 import org.uteq.sgacfinal.service.IDocenteMisAyudantesService;
 import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IUsuarioSesionService;
@@ -34,7 +34,7 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
 
     private final IUsuarioSesionService usuarioSesionService;
     private final DocenteMisAyudantesRepository docenteMisAyudantesRepository;
-    private final RegistroActividadRepository registroActividadRepository;
+    private final RegistroActividadConfigRepository registroActividadConfigRepository;
     private final EvidenciaRegistroActividadRepository evidenciaRegistroActividadRepository;
     private final INotificacionService notificacionService;
 
@@ -118,13 +118,13 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
     public void evaluarActividad(Integer idActividad, EvaluarActividadRequestDTO request) {
         Integer idUsuario = usuarioSesionService.getIdUsuarioAutenticado();
 
-        if (!registroActividadRepository.perteneceAlDocente(idActividad, idUsuario)) {
+        if (!registroActividadConfigRepository.perteneceAlDocente(idActividad, idUsuario)) {
             throw new RuntimeException("No autorizado para evaluar esta actividad");
         }
 
         // Siempre actualiza fecha_observacion al momento de evaluar (requisito)
         LocalDate ahora = LocalDate.now();
-        int updated = registroActividadRepository.evaluarActividad(
+        int updated = registroActividadConfigRepository.evaluarActividad(
                 idActividad,
                 request.getIdTipoEstadoRegistro(),
                 request.getObservaciones(),
