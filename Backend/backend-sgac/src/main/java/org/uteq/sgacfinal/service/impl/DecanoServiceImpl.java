@@ -196,7 +196,7 @@ public class DecanoServiceImpl implements IDecanoService {
                 .nombreEstudiante(p.getEstudiante().getUsuario().getNombres() + " " + p.getEstudiante().getUsuario().getApellidos())
                 .cedula(p.getEstudiante().getUsuario().getCedula())
                 .nombreAsignatura(p.getConvocatoria().getAsignatura().getNombreAsignatura())
-                .nombrePeriodo(p.getConvocatoria().getPeriodoAcademico().getNombre())
+                .nombrePeriodo(p.getConvocatoria().getPeriodoAcademico().getNombrePeriodo())
                 .fechaPostulacion(p.getFechaPostulacion())
                 .estadoEvaluacion(p.getTipoEstadoPostulacion() != null ? p.getTipoEstadoPostulacion().getNombre() : "PENDIENTE")
                 .build()).collect(Collectors.toList());
