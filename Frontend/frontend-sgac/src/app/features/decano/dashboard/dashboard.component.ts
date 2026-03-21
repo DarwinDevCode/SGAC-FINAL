@@ -7,7 +7,9 @@ import { DecanoService } from '../../../core/services/decano-service';
 import { AuthService } from '../../../core/services/auth-service';
 import { DecanoResponseDTO, DecanoEstadisticasDTO } from '../../../core/dto/decano';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartData, ChartOptions } from 'chart.js';
+import { Chart, registerables, ChartData, ChartOptions } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-decano-dashboard',

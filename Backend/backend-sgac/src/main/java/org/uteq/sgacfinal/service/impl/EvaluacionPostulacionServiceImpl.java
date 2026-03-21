@@ -18,6 +18,7 @@ import org.uteq.sgacfinal.service.IEvaluacionPostulacionService;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,34 +34,43 @@ public class EvaluacionPostulacionServiceImpl implements IEvaluacionPostulacionS
     public List<PostulacionListadoCoordinadorDTO> listarPostulacionesCoordinador(Integer idUsuario) {
         log.info("Listando postulaciones para coordinador con idUsuario: {}", idUsuario);
 
-        List<Object[]> resultados = evaluacionRepository.listarPostulacionesCoordinador(idUsuario);
-        List<PostulacionListadoCoordinadorDTO> postulaciones = new ArrayList<>();
-
-        for (Object[] row : resultados) {
-            PostulacionListadoCoordinadorDTO dto = PostulacionListadoCoordinadorDTO.builder()
-                    .idPostulacion(getInteger(row[0]))
-                    .idConvocatoria(getInteger(row[1]))
-                    .idEstudiante(getInteger(row[2]))
-                    .nombreEstudiante(getString(row[3]))
-                    .matricula(getString(row[4]))
-                    .semestre(getInteger(row[5]))
-                    .nombreAsignatura(getString(row[6]))
-                    .nombreCarrera(getString(row[7]))
-                    .fechaPostulacion(getLocalDate(row[8]))
-                    .estadoCodigo(getString(row[9]))
-                    .estadoNombre(getString(row[10]))
-                    .requiereAtencion(getBoolean(row[11]))
-                    .totalDocumentos(getLong(row[12]))
-                    .documentosPendientes(getLong(row[13]))
-                    .documentosAprobados(getLong(row[14]))
-                    .documentosObservados(getLong(row[15]))
-                    .observaciones(getString(row[16]))
-                    .build();
-            postulaciones.add(dto);
+        log.info("Iniciando listarPostulacionesCoordinador para idUsuario: {}", idUsuario);
+        try {
+            List<Object[]> results = evaluacionRepository.listarPostulacionesCoordinador(idUsuario);
+            log.info("Repository retornó {} resultados para idUsuario: {}", results.size(), idUsuario);
+            
+            List<PostulacionListadoCoordinadorDTO> postulaciones = results.stream().map(row -> {
+                try {
+                    return PostulacionListadoCoordinadorDTO.builder()
+                        .idPostulacion(getInteger(row[0]))
+                        .idConvocatoria(getInteger(row[1]))
+                        .idEstudiante(getInteger(row[2]))
+                        .nombreEstudiante(getString(row[3]))
+                        .matricula(getString(row[4]))
+                        .semestre(getInteger(row[5]))
+                        .nombreAsignatura(getString(row[6]))
+                        .nombreCarrera(getString(row[7]))
+                        .fechaPostulacion(getLocalDate(row[8]))
+                        .estadoCodigo(getString(row[9]))
+                        .estadoNombre(getString(row[10]))
+                        .requiereAtencion(getBoolean(row[11]))
+                        .totalDocumentos(getLong(row[12]))
+                        .documentosPendientes(getLong(row[13]))
+                        .documentosAprobados(getLong(row[14]))
+                        .documentosObservados(getLong(row[15]))
+                        .observaciones(getString(row[16]))
+                        .build();
+                } catch (Exception e) {
+                    log.error("Error al mapear fila de postulación: {}", e.getMessage(), e);
+                    throw new RuntimeException("Error en mapeo de datos: " + e.getMessage());
+                }
+            }).collect(Collectors.toList());
+            log.info("Se encontraron {} postulaciones", postulaciones.size());
+            return postulaciones;
+        } catch (Exception e) {
+            log.error("Error en EvaluacionPostulacionServiceImpl.listarPostulacionesCoordinador: {}", e.getMessage(), e);
+            throw e;
         }
-
-        log.info("Se encontraron {} postulaciones", postulaciones.size());
-        return postulaciones;
     }
 
     @Override

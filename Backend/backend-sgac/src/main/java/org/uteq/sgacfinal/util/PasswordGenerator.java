@@ -31,3 +31,4 @@ public class PasswordGenerator {
         return new String(password);
     }
 }
+// Forzado de compilacion

@@ -13,8 +13,12 @@ import org.uteq.sgacfinal.dto.response.CoordinadorEstadisticasDTO;
 import org.uteq.sgacfinal.dto.response.CoordinadorConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.response.CoordinadorPostulanteReporteDTO;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.jdbc.core.JdbcTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,8 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
     private final CoordinadorRepository coordinadorRepository;
     private final IConvocatoriaRepository convocatoriaRepository;
     private final PostulacionRepository postulacionRepository;
+    private final JdbcTemplate jdbcTemplate;
+    private final ObjectMapper objectMapper;
 
     @Override
     public CoordinadorResponseDTO crear(CoordinadorRequestDTO request) {
@@ -111,103 +117,78 @@ public class CoordinadorServiceImpl implements ICoordinadorService {
     @Override
     @Transactional(readOnly = true)
     public CoordinadorEstadisticasDTO obtenerEstadisticasPropias(Integer idUsuario) {
-        /*
-        List<Convocatoria> convocatorias = convocatoriaRepository.findByCoordinadorPropio(idUsuario);
-
-        long totalConvocatorias = convocatorias.size();
-        long activas = convocatorias.stream().filter(c -> Boolean.TRUE.equals(c.getActivo())).count();
-        long inactivas = totalConvocatorias - activas;
-
-        List<Postulacion> todasLasPostulaciones = convocatorias.stream()
-                .flatMap(c -> c.getPostulaciones().stream())
-                .collect(Collectors.toList());
-
-        long totalPostulantes = todasLasPostulaciones.size();
-        long aprobados = todasLasPostulaciones.stream().filter(p -> "APROBADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-        long rechazados = todasLasPostulaciones.stream().filter(p -> "RECHAZADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-        long enEvaluacion = todasLasPostulaciones.stream().filter(p -> "EN_EVALUACION".equalsIgnoreCase(p.getEstadoPostulacion()) || "ASIGNADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-
-        List<CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO> topConvocatorias = convocatorias.stream()
-                .filter(c -> c.getPostulaciones() != null && !c.getPostulaciones().isEmpty())
-                .map(c -> new CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO(
-                        c.getAsignatura().getNombreAsignatura(),
-                        (long) c.getPostulaciones().size()
-                ))
-                .sorted(Comparator.comparing(CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO::getCantidadPostulantes).reversed())
-                .limit(5)
-                .collect(Collectors.toList());
-
-        return CoordinadorEstadisticasDTO.builder()
-                .totalConvocatoriasPropias(totalConvocatorias)
-                .convocatoriasActivas(activas)
-                .convocatoriasInactivas(inactivas)
-                .totalPostulantesRecibidos(totalPostulantes)
-                .postulantesAprobados(aprobados)
-                .postulantesRechazados(rechazados)
-                .postulantesEnEvaluacion(enEvaluacion)
-                .postulantesPorConvocatoria(topConvocatorias)
-                .build();
-
-        */
-        return new CoordinadorEstadisticasDTO();
+        String sql = "SELECT * FROM academico.fn_obtener_estadisticas_coordinador(?)";
+        
+        return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> {
+            CoordinadorEstadisticasDTO dto = new CoordinadorEstadisticasDTO();
+            dto.setTotalConvocatoriasPropias(rs.getLong("total_convocatorias_propias"));
+            dto.setConvocatoriasActivas(rs.getLong("convocatorias_activas"));
+            dto.setConvocatoriasInactivas(rs.getLong("convocatorias_inactivas"));
+            dto.setTotalPostulantesRecibidos(rs.getLong("total_postulantes_recibidos"));
+            dto.setPostulantesAprobados(rs.getLong("postulantes_aprobados"));
+            dto.setPostulantesRechazados(rs.getLong("postulantes_rechazados"));
+            dto.setPostulantesEnEvaluacion(rs.getLong("postulantes_en_evaluacion"));
+            dto.setPostulantesPendientes(rs.getLong("postulantes_pendientes"));
+            
+            String jsonTop = rs.getString("top_convocatorias");
+            try {
+                if (jsonTop != null && !jsonTop.isEmpty()) {
+                    List<CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO> topList = 
+                        objectMapper.readValue(jsonTop, new TypeReference<List<CoordinadorEstadisticasDTO.PostulantesPorConvocatoriaDTO>>() {});
+                    dto.setPostulantesPorConvocatoria(topList);
+                } else {
+                    dto.setPostulantesPorConvocatoria(new ArrayList<>());
+                }
+            } catch (Exception e) {
+                dto.setPostulantesPorConvocatoria(new ArrayList<>());
+            }
+            return dto;
+        }, idUsuario);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorConvocatoriaReporteDTO> reporteConvocatoriasPropias(Integer idUsuario) {
+        String sql = "SELECT * FROM academico.fn_reporte_convocatorias_coordinador(?)";
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Date fechaInicioSQL = rs.getDate("fecha_inicio");
+            Date fechaFinSQL = rs.getDate("fecha_fin");
+            
+            java.time.LocalDate fechaInicio = fechaInicioSQL != null ? fechaInicioSQL.toLocalDate() : null;
+            java.time.LocalDate fechaFin = fechaFinSQL != null ? fechaFinSQL.toLocalDate() : null;
 
-        /*
-        List<Convocatoria> convocatorias = convocatoriaRepository.findByCoordinadorPropio(idUsuario);
-
-        return convocatorias.stream().map(c -> CoordinadorConvocatoriaReporteDTO.builder()
-                .idConvocatoria(c.getIdConvocatoria())
-                .nombreAsignatura(c.getAsignatura().getNombreAsignatura())
-                .nombreCarrera(c.getAsignatura().getCarrera().getNombreCarrera())
-                .nombrePeriodo(c.getPeriodoAcademico().getNombrePeriodo())
-                .fechaInicio(c.getFechaPublicacion())
-                .fechaFin(c.getFechaCierre())
-                .cuposAprobados(c.getCuposDisponibles())
-                .estado(Boolean.TRUE.equals(c.getActivo()) ? "ACTIVO" : "INACTIVO")
-                .numeroPostulantes((long) (c.getPostulaciones() != null ? c.getPostulaciones().size() : 0))
-                .build()
-        ).collect(Collectors.toList());
-         */
-        return new ArrayList<>();
+            return CoordinadorConvocatoriaReporteDTO.builder()
+                    .idConvocatoria(rs.getInt("id_convocatoria"))
+                    .nombreAsignatura(rs.getString("nombre_asignatura"))
+                    .nombreCarrera(rs.getString("nombre_carrera"))
+                    .nombrePeriodo(rs.getString("nombre_periodo"))
+                    .fechaInicio(fechaInicio)
+                    .fechaFin(fechaFin)
+                    .cuposAprobados(rs.getInt("cupos_aprobados"))
+                    .estado(rs.getString("estado"))
+                    .numeroPostulantes(rs.getLong("numero_postulantes"))
+                    .build();
+        }, idUsuario);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CoordinadorPostulanteReporteDTO> reportePostulantesPropios(Integer idUsuario) {
-        /*
-        List<Postulacion> postulaciones = postulacionRepository.findByCoordinadorPropioActivo(idUsuario);
-
-        return postulaciones.stream().map(p -> CoordinadorPostulanteReporteDTO.builder()
-                .idPostulacion(p.getIdPostulacion())
-                .nombreEstudiante(p.getEstudiante().getUsuario().getNombres() + " " + p.getEstudiante().getUsuario().getApellidos())
-                .cedula(p.getEstudiante().getUsuario().getCedula())
-                .nombreAsignatura(p.getConvocatoria().getAsignatura().getNombreAsignatura())
-                .nombrePeriodo(p.getConvocatoria().getPeriodoAcademico().getNombrePeriodo())
-                .fechaPostulacion(p.getFechaPostulacion())
-                .estadoEvaluacion(p.getEstadoPostulacion())
-                .build()
-        ).collect(Collectors.toList());
-    }
-
-    private CoordinadorResponseDTO mapearADTO(Coordinador entidad) {
-        String nombreUsuario = entidad.getUsuario().getNombres() + " " + entidad.getUsuario().getApellidos();
-        return CoordinadorResponseDTO.builder()
-                .idCoordinador(entidad.getIdCoordinador())
-                .idUsuario(entidad.getUsuario().getIdUsuario())
-                .nombreCompletoUsuario(nombreUsuario)
-                .cedula(entidad.getUsuario().getCedula())
-                .idCarrera(entidad.getCarrera().getIdCarrera())
-                .nombreCarrera(entidad.getCarrera().getNombreCarrera())
-                .fechaInicio(entidad.getFechaInicio())
-                .fechaFin(entidad.getFechaFin())
-                .activo(entidad.getActivo())
-                .build();
-    }
-    */
-        return new ArrayList<>();
+        String sql = "SELECT * FROM academico.fn_reporte_postulantes_coordinador(?)";
+        
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            Date fechaPostSQL = rs.getDate("fecha_postulacion");
+            
+            return CoordinadorPostulanteReporteDTO.builder()
+                    .idPostulacion(rs.getInt("id_postulacion"))
+                    .nombreEstudiante(rs.getString("nombre_estudiante"))
+                    .cedula(rs.getString("cedula"))
+                    .nombreAsignatura(rs.getString("nombre_asignatura"))
+                    .nombrePeriodo(rs.getString("nombre_periodo"))
+                    .fechaPostulacion(fechaPostSQL != null ? fechaPostSQL.toLocalDate() : null)
+                    .estadoEvaluacion(rs.getString("estado_evaluacion"))
+                    .build();
+        }, idUsuario);
     }
 }

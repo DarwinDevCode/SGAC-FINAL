@@ -83,7 +83,7 @@ export class PadronEstudiantesComponent implements OnInit, OnDestroy {
       data: estudiante // Si es undefined, el modal sabrá que es creación
     });
 
-    dialogRef.afterClosed().subscribe((resultado) => {
+    dialogRef.afterClosed().subscribe((resultado: any) => {
       if (resultado) this.cargarPadron();
     });
   }

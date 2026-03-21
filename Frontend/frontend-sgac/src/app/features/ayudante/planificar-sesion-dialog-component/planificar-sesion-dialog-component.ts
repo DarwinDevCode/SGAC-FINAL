@@ -60,7 +60,7 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
     this.ayudantiaService.planificarSesion(request)
       .pipe(takeUntil(this.destroy$), finalize(() => this.enviando.set(false)))
       .subscribe({
-        next: (res) => { if (res.valido) this.dialogRef.close(true); else this.errorMsg.set(res.mensaje ?? 'No se pudo planificar.'); },
+        next: (res: any) => { if (res.valido) this.dialogRef.close(true); else this.errorMsg.set(res.mensaje ?? 'No se pudo planificar.'); },
         error: (err: HttpErrorResponse) => this.errorMsg.set(err?.error?.message ?? 'Error al planificar la sesión.'),
       });
   }

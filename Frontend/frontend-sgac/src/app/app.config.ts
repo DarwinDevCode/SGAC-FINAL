@@ -1,7 +1,7 @@
 import { ApplicationConfig, provideZoneChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-//import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 import { routes } from './app.routes';
 
 import {
@@ -110,7 +110,7 @@ import {
   Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
   Tag, LayoutGrid, Landmark, Square, FileSpreadsheet, Files, Globe, CloudUpload, FileCheck, FolderX, Image,
   File, HardDrive, CalendarCheck, ListOrdered, CloudCheck, Table2, AlignLeft, LoaderCircle, ClipboardX, UserCog,
-  Hourglass, UploadCloud
+  Hourglass, UploadCloud, PieChart
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -121,6 +121,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([authInterceptor])
     ),
+    provideCharts(withDefaultRegisterables()),
     importProvidersFrom(
       LucideAngularModule.pick({
         AlertCircle,
@@ -237,7 +238,8 @@ export const appConfig: ApplicationConfig = {
         ClipboardX,
         UserCog,
         Hourglass,
-        UploadCloud
+        UploadCloud,
+        PieChart
       })
     )
   ]

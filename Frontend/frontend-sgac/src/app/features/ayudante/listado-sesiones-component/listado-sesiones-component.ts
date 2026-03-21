@@ -97,7 +97,7 @@ export class ListadoSesionesComponent implements OnInit, OnDestroy {
       disableClose: false,
     });
 
-    dialogRef.afterClosed().subscribe((resultado) => {
+    dialogRef.afterClosed().subscribe((resultado: any) => {
       if (resultado) this.cargarSesiones();
     });
   }

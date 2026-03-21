@@ -44,8 +44,9 @@ public class EvaluacionPostulacionController {
             List<PostulacionListadoCoordinadorDTO> postulaciones = evaluacionService.listarPostulacionesCoordinador(idUsuario);
             return ResponseEntity.ok(postulaciones);
         } catch (Exception e) {
-            log.error("Error al listar postulaciones: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            log.error("Error crítico al listar postulaciones para el usuario {}: {}", idUsuario, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);
         }
     }
 

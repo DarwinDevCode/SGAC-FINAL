@@ -37,8 +37,14 @@
                 <div class="cd-kpi-label">Convocatorias Totales</div>
             </div>
             <div class="cd-kpi-sub">
-                <span class="cd-pill green">{{ estadisticas.convocatoriasActivas }} activas</span>
-                <span class="cd-pill slate">{{ estadisticas.convocatoriasInactivas }} cerradas</span>
+                <span class="cd-pill green">
+                    <lucide-icon name="check-circle" size="12"></lucide-icon>
+                    {{ estadisticas.convocatoriasActivas }} activas
+                </span>
+                <span class="cd-pill slate">
+                    <lucide-icon name="x-circle" size="12"></lucide-icon>
+                    {{ estadisticas.convocatoriasInactivas }} cerradas
+                </span>
             </div>
         </div>
 
@@ -51,8 +57,14 @@
                 <div class="cd-kpi-label">Postulantes Totales</div>
             </div>
             <div class="cd-kpi-sub">
-                <span class="cd-pill amber">{{ estadisticas.postulantesPendientes }} pendientes</span>
-                <span class="cd-pill cyan">{{ estadisticas.postulantesEnEvaluacion }} evaluación</span>
+                <span class="cd-pill amber">
+                    <lucide-icon name="clock" size="12"></lucide-icon>
+                    {{ estadisticas.postulantesPendientes }} pendientes
+                </span>
+                <span class="cd-pill cyan">
+                    <lucide-icon name="search" size="12"></lucide-icon>
+                    {{ estadisticas.postulantesEnEvaluacion }} evaluación
+                </span>
             </div>
         </div>
 
@@ -65,8 +77,14 @@
                 <div class="cd-kpi-label">Tasa de Selección</div>
             </div>
             <div class="cd-kpi-sub">
-                <span class="cd-pill green">{{ estadisticas.postulantesAprobados }} selec.</span>
-                <span class="cd-pill rose">{{ estadisticas.postulantesRechazados }} no selec.</span>
+                <span class="cd-pill green">
+                    <lucide-icon name="user-check" size="12"></lucide-icon>
+                    {{ estadisticas.postulantesAprobados }} selec.
+                </span>
+                <span class="cd-pill rose">
+                    <lucide-icon name="user-x" size="12"></lucide-icon>
+                    {{ estadisticas.postulantesRechazados }} no selec.
+                </span>
             </div>
         </div>
     </div>

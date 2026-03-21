@@ -21,7 +21,7 @@ export class GestionarParticipanteDialogComponent implements OnInit {
   private fb = inject(FormBuilder);
   private ayudantiaService = inject(AyudantiaService);
   private dialogRef = inject(MatDialogRef<GestionarParticipanteDialogComponent>);
-  public data = inject(MAT_DIALOG_DATA); // Recibe el estudiante si es edición
+  public data = inject<any>(MAT_DIALOG_DATA); // Recibe el estudiante si es edición
   private destroy$ = new Subject<void>();
 
   form!: FormGroup;
@@ -65,7 +65,7 @@ export class GestionarParticipanteDialogComponent implements OnInit {
     this.ayudantiaService.gestionarParticipante(request)
       .pipe(takeUntil(this.destroy$), finalize(() => this.enviando.set(false)))
       .subscribe({
-        next: (res) => {
+        next: (res: any) => {
           if (res.valido) this.dialogRef.close(true);
           else this.errorMsg.set(res.mensaje ?? 'Error al guardar el estudiante.');
         },
