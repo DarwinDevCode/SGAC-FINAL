@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.EvidenciaRegistroActividadRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EvidenciaRegistroActividadResponseDTO;
+import org.uteq.sgacfinal.dto.request.EvidenciaRegistroActividadRequestDTO;
+import org.uteq.sgacfinal.dto.response.EvidenciaRegistroActividadResponseDTO;
 import java.util.List;
 
 public interface IEvidenciaRegistroActividadService {

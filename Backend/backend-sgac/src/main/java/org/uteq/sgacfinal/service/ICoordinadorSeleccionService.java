@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Response.AsignaturaSelectableDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteSelectableDTO;
+import org.uteq.sgacfinal.dto.response.AsignaturaSelectableDTO;
+import org.uteq.sgacfinal.dto.response.DocenteSelectableDTO;
 
 import java.util.List;
 

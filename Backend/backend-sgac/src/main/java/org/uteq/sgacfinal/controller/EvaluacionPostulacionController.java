@@ -8,12 +8,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.DictaminarPostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluarDocumentoRequestDTO;
-import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.DictaminarPostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluarDocumentoRequestDTO;
+import org.uteq.sgacfinal.dto.request.LogAuditoriaRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.service.IEvaluacionPostulacionService;
 import org.uteq.sgacfinal.service.ILogAuditoriaService;
 

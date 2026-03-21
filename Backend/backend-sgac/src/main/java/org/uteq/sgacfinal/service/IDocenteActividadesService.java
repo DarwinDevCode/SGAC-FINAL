@@ -1,10 +1,10 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.CambiarEstadoActividadRequest;
-import org.uteq.sgacfinal.dto.Request.CambiarEstadoEvidenciaRequest;
-import org.uteq.sgacfinal.dto.Response.AyudanteResumenDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteDashboardDTO;
-import org.uteq.sgacfinal.dto.Response.RegistroActividadDocenteDTO;
+import org.uteq.sgacfinal.dto.request.CambiarEstadoActividadRequest;
+import org.uteq.sgacfinal.dto.request.CambiarEstadoEvidenciaRequest;
+import org.uteq.sgacfinal.dto.response.AyudanteResumenDTO;
+import org.uteq.sgacfinal.dto.response.DocenteDashboardDTO;
+import org.uteq.sgacfinal.dto.response.RegistroActividadDocenteDTO;
 
 import java.util.List;
 

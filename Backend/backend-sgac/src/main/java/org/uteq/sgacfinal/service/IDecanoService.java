@@ -1,11 +1,10 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.DecanoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.DecanoResponseDTO;
-import org.uteq.sgacfinal.dto.Response.DecanoEstadisticasDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.LogAuditoriaDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
+import org.uteq.sgacfinal.dto.request.DecanoRequestDTO;
+import org.uteq.sgacfinal.dto.response.DecanoResponseDTO;
+import org.uteq.sgacfinal.dto.response.DecanoEstadisticasDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.response.LogAuditoriaDTO;
 import java.util.List;
 
 public interface IDecanoService {
@@ -25,8 +24,6 @@ public interface IDecanoService {
     DecanoEstadisticasDTO obtenerEstadisticasPorFacultad(Integer idFacultad);
 
     List<ConvocatoriaReporteDTO> reporteConvocatoriasPorFacultad(Integer idFacultad);
-
-    List<CoordinadorPostulanteReporteDTO> reportePostulantesPorFacultad(Integer idFacultad);
 
     List<LogAuditoriaDTO> reporteAuditoriaPorFacultad(Integer idFacultad);
 }

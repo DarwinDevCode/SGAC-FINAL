@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Response.RespuestaOperacionDTO;
-import org.uteq.sgacfinal.dto.Response.convocatorias.TribunalEvaluacionResponseDTO;
+import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
+import org.uteq.sgacfinal.dto.response.convocatorias.TribunalEvaluacionResponseDTO;
 import org.uteq.sgacfinal.repository.convocatorias.PostulacionTypeRepository;
 import org.uteq.sgacfinal.service.convocatorias.IPostulacionTypeService;
 

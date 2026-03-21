@@ -1,0 +1,190 @@
+<div class="gestion-container sesion-list-wrapper ui-stack-lg">
+  <div class="sesion-top-bar">
+    <div class="ui-inline-actions">
+      <button class="btn btn-ghost ui-btn-ghost" (click)="cargarSesiones()" [disabled]="cargando()">
+        <lucide-icon [name]="cargando() ? 'loader' : 'refresh-cw'" size="15" [class.spin]="cargando()"></lucide-icon>
+        <span>Actualizar</span>
+      </button>
+      <button class="btn btn-primary ui-btn-primary" (click)="abrirPlanificar()" [disabled]="cargando()">
+        <lucide-icon name="plus" size="16"></lucide-icon>
+        <span>Nueva Sesión</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title ui-h2">Mis Sesiones</h2>
+      <p class="subtitle">Historial de actividades y sesiones de ayudantía</p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="cargando()">
+    <div class="sesion-skeleton-stats">
+      <div class="sesion-skeleton-stat" *ngFor="let _ of [1,2,3]"></div>
+    </div>
+    <div class="sesion-skeleton-table">
+      <div class="sesion-skeleton-header"></div>
+      <div class="sesion-skeleton-row" *ngFor="let _ of [1,2,3,4,5]"></div>
+    </div>
+  </ng-container>
+
+  <div *ngIf="!cargando() && errorMsg()" class="alert-banner error">
+    <div class="ui-alert-content">
+      <lucide-icon name="alert-circle" size="18"></lucide-icon>
+      <span>{{ errorMsg() }}</span>
+    </div>
+    <button class="btn btn-ghost ui-btn-ghost" (click)="cargarSesiones()">Reintentar</button>
+  </div>
+
+  <div *ngIf="!cargando() && !errorMsg() && totalSesiones() === 0" class="info-message ui-empty">
+    <lucide-icon name="calendar-x" size="48"></lucide-icon>
+    <p class="font-medium">Sin sesiones registradas</p>
+    <p class="text-sm text-muted-foreground">Comienza planificando tu primera sesión de ayudantía.</p>
+    <button class="btn btn-primary ui-btn-primary" (click)="abrirPlanificar()">
+      <lucide-icon name="calendar-plus" size="15"></lucide-icon> Planificar sesión
+    </button>
+  </div>
+
+  <ng-container *ngIf="!cargando() && !errorMsg() && totalSesiones() > 0">
+    <div class="stats-grid cols-3">
+      <div class="stat-card ui-card">
+        <div class="stat-icon green"><lucide-icon name="calendar-days" size="18"></lucide-icon></div>
+        <div>
+          <div class="stat-value">{{ totalSesiones() }}</div>
+          <div class="stat-label">Total de sesiones</div>
+        </div>
+      </div>
+      <div class="stat-card ui-card">
+        <div class="stat-icon blue"><lucide-icon name="clock" size="18"></lucide-icon></div>
+        <div>
+          <div class="stat-value">{{ sesionesActivas() }}</div>
+          <div class="stat-label">Editables</div>
+        </div>
+      </div>
+      <div class="stat-card ui-card">
+        <div class="stat-icon violet"><lucide-icon name="hourglass" size="18"></lucide-icon></div>
+        <div>
+          <div class="stat-value">{{ resumenHoras() }}h</div>
+          <div class="stat-label">Horas dedicadas</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-card">
+      <div class="search-wrapper">
+        <lucide-icon name="search" size="15" class="search-icon"></lucide-icon>
+        <input class="input-field search-input" type="text" placeholder="Filtrar por tema o lugar…"
+               [ngModel]="textoBusqueda()" (ngModelChange)="textoBusqueda.set($event)" />
+        <button *ngIf="textoBusqueda()" class="btn-icon" (click)="textoBusqueda.set('')" title="Limpiar">
+          <lucide-icon name="x" size="13"></lucide-icon>
+        </button>
+      </div>
+      <span class="text-sm text-muted-foreground">{{ sesioneFiltradas().length }} / {{ totalSesiones() }} sesión(es)</span>
+    </div>
+
+    <div class="table-card sesion-table-card">
+      <div class="sesion-scroll-container">
+        <table class="sesion-table">
+          <thead>
+          <tr class="sesion-head-row">
+            <th class="sesion-th sesion-th-tema"><div class="sesion-th-content"><lucide-icon name="file-text" size="13"></lucide-icon><span>Tema</span></div></th>
+            <th class="sesion-th sesion-th-fecha"><div class="sesion-th-content"><lucide-icon name="calendar" size="13"></lucide-icon><span>Fecha</span></div></th>
+            <th class="sesion-th sesion-th-horario"><div class="sesion-th-content"><lucide-icon name="clock" size="13"></lucide-icon><span>Horario</span></div></th>
+            <th class="sesion-th sesion-th-lugar"><div class="sesion-th-content"><lucide-icon name="map-pin" size="13"></lucide-icon><span>Lugar</span></div></th>
+            <th class="sesion-th sesion-th-horas"><div class="sesion-th-content"><lucide-icon name="hourglass" size="13"></lucide-icon><span>Horas</span></div></th>
+            <th class="sesion-th sesion-th-estado"><div class="sesion-th-content"><lucide-icon name="check-circle" size="13"></lucide-icon><span>Estado</span></div></th>
+            <th class="sesion-th sesion-th-acciones"><span>Acciones</span></th>
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngIf="sesioneFiltradas().length > 0; else sinResultados">
+            <tr *ngFor="let sesion of sesioneFiltradas(); trackBy: trackBySesion" class="sesion-row" [class.sesion-row-editable]="puedoEditar(sesion)">
+              <td class="sesion-td sesion-td-tema"><span class="sesion-tema-label">{{ sesion.temaTratado || '—' }}</span></td>
+              <td class="sesion-td sesion-td-fecha"><span class="sesion-valor">{{ formatearFecha(sesion.fecha) }}</span></td>
+              <td class="sesion-td sesion-td-horario"><span class="sesion-valor">{{ formatearHora(sesion.horaInicio) }} - {{ formatearHora(sesion.horaFin) }}</span></td>
+              <td class="sesion-td sesion-td-lugar"><span class="sesion-valor text-muted-foreground">{{ sesion.lugar || '—' }}</span></td>
+              <td class="sesion-td sesion-td-horas"><span class="sesion-valor font-bold">{{ sesion.horasDedicadas || 0 }}h</span></td>
+              <td class="sesion-td sesion-td-estado">
+                <span class="status-pill" [ngClass]="obtenerEstadoColor(sesion.codigoEstado)">{{ obtenerEstadoLabel(sesion.codigoEstado) }}</span>
+              </td>
+              <td class="sesion-td sesion-td-acciones">
+                <button class="btn-icon sesion-btn-detalle" (click)="gestionarClicSesion(sesion)" title="Ver detalles">
+                  <lucide-icon [name]="puedoEditar(sesion) ? 'arrow-right' : 'eye'" size="15"></lucide-icon>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #sinResultados>
+            <tr>
+              <td [attr.colspan]="7" class="sesion-empty-search">
+                <lucide-icon name="search-x" size="24"></lucide-icon>
+                <span>Sin resultados para "{{ textoBusqueda() }}"</span>
+              </td>
+            </tr>
+          </ng-template>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+
+  <div class="offcanvas-overlay" *ngIf="offcanvasAbierto()" (click)="cerrarOffcanvas()"></div>
+  <div class="offcanvas-panel" [class.open]="offcanvasAbierto()">
+    <div class="offcanvas-header">
+      <div class="title-container">
+        <h3 class="ui-h3">Detalle de Sesión</h3>
+        <p class="subtitle text-sm">Registro #{{ sesionSeleccionadaId() }}</p>
+      </div>
+      <button class="btn-icon close-btn" (click)="cerrarOffcanvas()" title="Cerrar panel">
+        <lucide-icon name="x" size="20"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="offcanvas-body">
+      <div class="info-banner ui-alert-content readonly-banner" style="margin-bottom: 1.5rem;">
+        <lucide-icon name="lock" size="18"></lucide-icon>
+        <span>Sesión bloqueada por estado: <strong>{{ obtenerEstadoLabel(detalleSesionRO()?.detalle?.codigoEstado || 'PENDIENTE') }}</strong></span>
+      </div>
+
+      <div *ngIf="cargandoDetalle()" style="text-align: center; padding: 2rem;">
+        <lucide-icon name="loader" class="spin" size="24"></lucide-icon>
+        <p>Cargando información...</p>
+      </div>
+
+      <!-- Aquí leemos el BorradorSesionResponseDTO mapeado -->
+      <div *ngIf="!cargandoDetalle() && detalleSesionRO() as borrador">
+
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">Tema Tratado</h4>
+          <p style="color: #4b5563; font-size: 0.875rem; background: #f9fafb; padding: 1rem; border-radius: 8px;">
+            {{ borrador.detalle.tema }}
+          </p>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">Descripción de la Actividad</h4>
+          <p style="color: #4b5563; font-size: 0.875rem; background: #f9fafb; padding: 1rem; border-radius: 8px; white-space: pre-line;">
+            {{ borrador.detalle.descripcionActual || 'Sin descripción registrada por el ayudante.' }}
+          </p>
+        </div>
+
+        <div>
+          <h4 style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; color: #374151;">Evidencias Adjuntas</h4>
+          <div *ngIf="!borrador.evidencias?.length" style="color: #6b7280; font-size: 0.875rem;">
+            No se adjuntaron evidencias.
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div *ngFor="let ev of borrador.evidencias" style="display: flex; align-items: center; gap: 0.75rem; background: #ffffff; border: 1px solid #e5e7eb; padding: 0.75rem; border-radius: 8px;">
+              <lucide-icon name="file" size="18" style="color: #9ca3af;"></lucide-icon>
+              <a [href]="ev.rutaArchivo" target="_blank" style="font-size: 0.875rem; color: #2563eb; text-decoration: none; font-weight: 500;">
+                {{ ev.nombreArchivo }}
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

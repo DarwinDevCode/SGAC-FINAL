@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.*;
-import org.uteq.sgacfinal.dto.Response.MensajeResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
-import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
+import org.uteq.sgacfinal.dto.request.*;
+import org.uteq.sgacfinal.dto.response.MensajeResponseDTO;
+import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
+import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;
 import org.uteq.sgacfinal.service.IAuthService;
 import org.uteq.sgacfinal.service.IUsuariosService;
 

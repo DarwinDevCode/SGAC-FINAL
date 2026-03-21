@@ -4,8 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.NotificationRequest;
-import org.uteq.sgacfinal.dto.Response.NotificacionResponseDTO;
+import org.uteq.sgacfinal.dto.request.NotificationRequest;
+import org.uteq.sgacfinal.dto.response.NotificacionResponseDTO;
 import org.uteq.sgacfinal.service.INotificacionService;
 
 import java.util.List;

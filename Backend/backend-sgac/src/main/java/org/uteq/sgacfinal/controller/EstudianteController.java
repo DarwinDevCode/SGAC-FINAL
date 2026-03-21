@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.EstudianteRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EstudianteResponseDTO;
+import org.uteq.sgacfinal.dto.request.EstudianteRequestDTO;
+import org.uteq.sgacfinal.dto.response.EstudianteResponseDTO;
 import org.uteq.sgacfinal.service.IEstudianteService;
 
 @RestController

@@ -47,11 +47,9 @@ export class SidebarComponent {
       { label: 'Inicio',             icon: 'LayoutDashboard', route: '/ayudante/dashboard' },
       { label: 'Cronograma',         icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Documentos',         icon: 'Library',         route: '/documentos-visor' },
-      // Registro de asistencia para la sesión activa (checkboxes)
-      { label: 'Asistencia',         icon: 'ClipboardList',   route: '/ayudante/actividades/asistencia' },
-      // Vista histórica: tabla dinámica sesiones × participantes
+      { label: 'Mi Padrón',          icon: 'Users',           route: '/ayudante/padron' },
+      { label: 'Mis Sesiones',       icon: 'CalendarClock',   route: '/ayudante/sesiones' },
       { label: 'Matriz de Asistencia', icon: 'Table2',        route: '/ayudante/asistencia/matriz' },
-      { label: 'Mis sesiones',       icon: 'CalendarClock',   route: '/ayudante/sesiones' },
       { label: 'Mis Informes',       icon: 'FileText',        route: '/ayudante/informes' },
       { label: 'Notificaciones',     icon: 'Bell',            route: '/notificaciones' },
     ],

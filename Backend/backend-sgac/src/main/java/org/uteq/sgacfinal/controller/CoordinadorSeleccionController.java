@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Response.AsignaturaSelectableDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteSelectableDTO;
+import org.uteq.sgacfinal.dto.response.AsignaturaSelectableDTO;
+import org.uteq.sgacfinal.dto.response.DocenteSelectableDTO;
 import org.uteq.sgacfinal.service.ICoordinadorSeleccionService;
 
 import java.util.List;

@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.LogAuditoriaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.LogAuditoriaResponseDTO;
+import org.uteq.sgacfinal.dto.request.LogAuditoriaRequestDTO;
+import org.uteq.sgacfinal.dto.response.LogAuditoriaResponseDTO;
 import java.util.List;
 
 public interface ILogAuditoriaService {

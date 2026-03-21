@@ -1,9 +1,9 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Response.TipoEstadoAyudantiaResponse;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoEvidenciaResponse;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoRegistroResponse;
-import org.uteq.sgacfinal.dto.Response.TipoEvidenciaResponse;
+import org.uteq.sgacfinal.dto.response.TipoEstadoAyudantiaResponse;
+import org.uteq.sgacfinal.dto.response.TipoEstadoEvidenciaResponse;
+import org.uteq.sgacfinal.dto.response.TipoEstadoRegistroResponse;
+import org.uteq.sgacfinal.dto.response.TipoEvidenciaResponse;
 
 import java.util.List;
 

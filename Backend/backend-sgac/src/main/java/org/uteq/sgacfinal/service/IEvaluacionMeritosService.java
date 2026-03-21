@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.EvaluacionMeritosRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EvaluacionMeritosResponseDTO;
+import org.uteq.sgacfinal.dto.request.EvaluacionMeritosRequestDTO;
+import org.uteq.sgacfinal.dto.response.EvaluacionMeritosResponseDTO;
 
 public interface IEvaluacionMeritosService {
 

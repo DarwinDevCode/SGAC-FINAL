@@ -190,7 +190,6 @@ export const routes: Routes = [
       },
 
       // ── Ayudante ──────────────────────────────────────────────────
-
       {
         path: 'ayudante/dashboard',
         loadComponent: () => import('./features/ayudante/dashboard/dashboard.component').then(m => m.DashboardComponent)
@@ -199,17 +198,24 @@ export const routes: Routes = [
         path: 'ayudante/actividades',
         loadComponent: () => import('./features/ayudante/actividades/actividades.component').then(m => m.ActividadesComponent)
       },
+      // NUEVO: Componente Padrón de Estudiantes
       {
-        path: 'ayudante/actividades/asistencia',
-        loadComponent: () => import('./features/ayudante/asistencia-dinamica-component/asistencia-dinamica-component').then(m => m.AsistenciaDinamicaComponent)
+        path: 'ayudante/padron',
+        loadComponent: () => import('../app/features/ayudante/padron-estudiantes-component/padron-estudiantes-component').then(m => m.PadronEstudiantesComponent)
       },
-      {
-        path: 'ayudante/asistencia/matriz',
-        loadComponent: () => import('../app/features/ayudante/matriz-asistencia-component/matriz-asistencia-component').then(m => m.MatrizAsistenciaComponent)
-      },
+      // NUEVO: Flujo Master-Detail (Listado -> Detalle)
       {
         path: 'ayudante/sesiones',
-        loadComponent: () => import('./features/ayudante/sesiones/sesiones').then(m => m.SesionesComponent)
+        loadComponent: () => import('../../src/app/features/ayudante/listado-sesiones-component/listado-sesiones-component').then(m => m.ListadoSesionesComponent)
+      },
+      {
+        path: 'ayudante/sesiones/detalle/:id',
+        loadComponent: () => import('../../src/app/features/ayudante/detalle-sesion-component/detalle-sesion-component').then(m => m.DetalleSesionComponent)
+      },
+      // Mantengo la Matriz por si se usa como reporte histórico general
+      {
+        path: 'ayudante/asistencia/matriz',
+        loadComponent: () => import('./features/ayudante/matriz-asistencia-component/matriz-asistencia-component').then(m => m.MatrizAsistenciaComponent)
       },
 
       // ── Docente ──────────────────────────────────────────────────────

@@ -1,9 +1,9 @@
 package org.uteq.sgacfinal.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import org.uteq.sgacfinal.dto.Request.PostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.DetallePostulacionResponseDTO;
-import org.uteq.sgacfinal.dto.Response.PostulacionResponseDTO;
+import org.uteq.sgacfinal.dto.request.PostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.response.DetallePostulacionResponseDTO;
+import org.uteq.sgacfinal.dto.response.PostulacionResponseDTO;
 import java.util.List;
 
 public interface IPostulacionService {

@@ -1,9 +1,9 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaEstudianteResponseDTO;
-import org.uteq.sgacfinal.dto.Response.ConvocatoriasEstudianteWrapperDTO;
-import org.uteq.sgacfinal.dto.Response.ValidacionContextoEstudianteDTO;
-import org.uteq.sgacfinal.dto.Response.ValidacionElegibilidadAcademicaDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaEstudianteResponseDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriasEstudianteWrapperDTO;
+import org.uteq.sgacfinal.dto.response.ValidacionContextoEstudianteDTO;
+import org.uteq.sgacfinal.dto.response.ValidacionElegibilidadAcademicaDTO;
 
 import java.util.List;
 

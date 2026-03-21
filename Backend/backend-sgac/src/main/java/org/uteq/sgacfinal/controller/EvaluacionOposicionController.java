@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.AsignarComisionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluacionOposicionRequestDTO;
+import org.uteq.sgacfinal.dto.request.AsignarComisionRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluacionOposicionRequestDTO;
 import org.uteq.sgacfinal.service.IEvaluacionOposicionService;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/evaluaciones")

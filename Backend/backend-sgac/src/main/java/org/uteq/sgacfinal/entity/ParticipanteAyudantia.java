@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Getter
 @Setter
 @Entity
@@ -38,5 +41,8 @@ public class ParticipanteAyudantia {
     @ColumnDefault("true")
     @Column(name = "activo")
     private Boolean activo;
+
+    @OneToMany(mappedBy = "idParticipanteAyudantia")
+    private Set<DetalleAsistenciaActividad> detalleAsistenciaActividads = new LinkedHashSet<>();
 
 }

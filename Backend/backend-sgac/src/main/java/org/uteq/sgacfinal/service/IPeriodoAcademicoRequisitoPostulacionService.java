@@ -1,8 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.PeriodoAcademicoRequisitoPostulacionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.PeriodoAcademicoRequisitoPostulacionResponseDTO;
-import java.util.List;
+import org.uteq.sgacfinal.dto.request.PeriodoAcademicoRequisitoPostulacionRequestDTO;
+import org.uteq.sgacfinal.dto.response.PeriodoAcademicoRequisitoPostulacionResponseDTO;
 
 public interface IPeriodoAcademicoRequisitoPostulacionService {
 

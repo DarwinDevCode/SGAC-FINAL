@@ -1,12 +1,12 @@
 package org.uteq.sgacfinal.service.evaluaciones;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.BancoTemasRequest;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.CambiarEstadoEvaluacionRequest;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.PuntajeJuradoRequest;
-import org.uteq.sgacfinal.dto.Request.evaluaciones.SorteoOposicionRequest;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.evaluaciones.ConvocatoriaOposicionDTO;
+import org.uteq.sgacfinal.dto.request.evaluaciones.BancoTemasRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.CambiarEstadoEvaluacionRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.PuntajeJuradoRequest;
+import org.uteq.sgacfinal.dto.request.evaluaciones.SorteoOposicionRequest;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.evaluaciones.ConvocatoriaOposicionDTO;
 
 import java.util.List;
 

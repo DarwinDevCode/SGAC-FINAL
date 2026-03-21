@@ -5,10 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.CoordinadorRequestDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorResponseDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorConvocatoriaReporteDTO;
-import org.uteq.sgacfinal.dto.Response.CoordinadorPostulanteReporteDTO;
+import org.uteq.sgacfinal.dto.request.CoordinadorRequestDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorResponseDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorConvocatoriaReporteDTO;
+import org.uteq.sgacfinal.dto.response.CoordinadorPostulanteReporteDTO;
 import org.uteq.sgacfinal.service.ICoordinadorService;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class CoordinadorController {
     }
 
     @GetMapping("/me/{idUsuario}/estadisticas")
-    public ResponseEntity<org.uteq.sgacfinal.dto.Response.CoordinadorEstadisticasDTO> getEstadisticas(@PathVariable Integer idUsuario) {
+    public ResponseEntity<org.uteq.sgacfinal.dto.response.CoordinadorEstadisticasDTO> getEstadisticas(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok(coordinadorService.obtenerEstadisticasPropias(idUsuario));
     }
 

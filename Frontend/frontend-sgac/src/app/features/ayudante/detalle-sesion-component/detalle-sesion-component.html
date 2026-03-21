@@ -1,0 +1,138 @@
+<div class="detalle-wrapper">
+  <div class="detalle-topbar">
+    <button class="btn btn-ghost" (click)="volver()">
+      <lucide-icon name="arrow-left" size="16"></lucide-icon>
+      <span>Volver</span>
+    </button>
+  </div>
+
+  <div *ngIf="cargando()" class="detalle-loading">
+    <div class="loading-spinner"></div>
+    <p>Cargando sesión…</p>
+  </div>
+
+  <div *ngIf="!cargando() && errorMsg()" class="alert-banner error">
+    <div class="ui-alert-content"><lucide-icon name="alert-circle" size="18"></lucide-icon><span>{{ errorMsg() }}</span></div>
+    <button class="btn btn-ghost" (click)="cargarSesion()">Reintentar</button>
+  </div>
+
+  <ng-container *ngIf="!cargando() && !errorMsg() && sesionInfo()">
+    <div class="gestion-container detalle-container ui-stack-lg">
+      <div class="detalle-hero">
+        <div class="hero-header">
+          <div class="hero-icon"><lucide-icon name="calendar-check" size="24"></lucide-icon></div>
+          <div class="hero-content">
+            <h1 class="hero-title">{{ sesionInfo()?.tema }}</h1>
+            <p class="hero-subtitle">Sesión de Ayudantía</p>
+          </div>
+        </div>
+        <div class="hero-grid">
+          <div class="hero-item">
+            <div class="hero-label"><lucide-icon name="calendar" size="14"></lucide-icon><span>Fecha</span></div>
+            <div class="hero-value">{{ formatearFecha(sesionInfo()?.fecha) }}</div>
+          </div>
+          <div class="hero-item">
+            <div class="hero-label"><lucide-icon name="clock" size="14"></lucide-icon><span>Horario</span></div>
+            <div class="hero-value">{{ formatearHora(sesionInfo()?.horario?.split('-')[0]?.trim()) }} - {{ formatearHora(sesionInfo()?.horario?.split('-')[1]?.trim()) }}</div>
+          </div>
+          <div class="hero-item">
+            <div class="hero-label"><lucide-icon name="map-pin" size="14"></lucide-icon><span>Lugar</span></div>
+            <div class="hero-value">{{ sesionInfo()?.lugar || '—' }}</div>
+          </div>
+          <div class="hero-item">
+            <div class="hero-label"><lucide-icon name="check-circle" size="14"></lucide-icon><span>Estado</span></div>
+            <div class="hero-value">
+              <span *ngIf="puedeEditar()" class="badge-editable">Editable</span>
+              <span *ngIf="!puedeEditar()" class="badge-finalizado">Finalizado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detalle-tabs">
+        <div class="tabs-bar">
+          <button class="tab-btn" [class.tab-btn-active]="pestanaActiva() === 'asistencia'" (click)="cambiarPestana('asistencia')"><lucide-icon name="users" size="15"></lucide-icon><span>Asistencia</span></button>
+          <button class="tab-btn" [class.tab-btn-active]="pestanaActiva() === 'borrador'" (click)="cambiarPestana('borrador')"><lucide-icon name="file-text" size="15"></lucide-icon><span>Descripción</span></button>
+          <button class="tab-btn" [class.tab-btn-active]="pestanaActiva() === 'evidencias'" (click)="cambiarPestana('evidencias')"><lucide-icon name="paperclip" size="15"></lucide-icon><span>Evidencias</span></button>
+        </div>
+
+        <div *ngIf="pestanaActiva() === 'asistencia'" class="tab-content">
+          <div class="asistencia-resumen-container" style="margin-bottom: 2rem;">
+            <div class="asistencia-resumen" style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+              <div class="resumen-item"><div class="resumen-icon presentes"><lucide-icon name="check-circle" size="18"></lucide-icon></div><div class="resumen-stats"><div class="resumen-valor">{{ asistentesPresentes() }}</div><div class="resumen-label">Presentes</div></div></div>
+              <div class="resumen-item"><div class="resumen-icon total"><lucide-icon name="users" size="18"></lucide-icon></div><div class="resumen-stats"><div class="resumen-valor">{{ totalAsistencias() }}</div><div class="resumen-label">Total</div></div></div>
+              <div class="resumen-item"><div class="resumen-icon percentage"><lucide-icon name="trending-up" size="18"></lucide-icon></div><div class="resumen-stats"><div class="resumen-valor">{{ porcentajeAsistencia() }}%</div><div class="resumen-label">Asistencia</div></div></div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-track" style="height: 8px; background-color: #e5e7eb; border-radius: 4px; overflow: hidden;">
+                <div class="progress-fill" [style.width.%]="porcentajeAsistencia()" [ngClass]="obtenerColorBarra(porcentajeAsistencia())" style="height: 100%; transition: width 0.3s ease;"></div>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="asistenciaError()" class="alert-banner error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ asistenciaError() }}</span></div>
+          <div class="estudiantes-list">
+            <div *ngFor="let est of estudiantes(); trackBy: trackByEstudiante" class="estudiante-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f3f4f6;">
+              <div class="estudiante-info">
+                <div class="estudiante-nombre" style="font-weight: 500;">{{ est.nombreCompleto }}</div>
+                <div class="estudiante-curso" style="font-size: 0.875rem; color: #6b7280;">{{ est.curso }} {{ est.paralelo ? '· ' + est.paralelo : '' }}</div>
+              </div>
+              <div class="toggle-wrapper" style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="toggle-label" style="font-size: 0.875rem; color: #6b7280;">{{ est.asistio ? 'Presente' : 'Ausente' }}</span>
+                <button class="toggle-btn" [ngStyle]="{'background-color': est.asistio ? '#10b981' : '#d1d5db', 'border-radius': '9999px', 'width': '40px', 'height': '20px', 'position': 'relative', 'border': 'none', 'cursor': puedeEditar() ? 'pointer' : 'not-allowed', 'opacity': puedeEditar() ? '1' : '0.5'}" [disabled]="!puedeEditar() || asistenciaEnvio()" (click)="marcarAsistencia(est, !est.asistio)">
+                  <span class="toggle-circle" [ngStyle]="{'position': 'absolute', 'top': '2px', 'left': est.asistio ? '22px' : '2px', 'width': '16px', 'height': '16px', 'background-color': '#ffffff', 'border-radius': '50%', 'transition': 'left 0.2s ease'}"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="pestanaActiva() === 'borrador'" class="tab-content">
+          <div *ngIf="borradorCargando()" class="loading-inline"><div class="spinner-small"></div><p>Cargando borrador…</p></div>
+          <div *ngIf="!borradorCargando() && borradorError()" class="alert-banner error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ borradorError() }}</span></div>
+          <div *ngIf="!borradorCargando() && !borradorError()" class="borrador-section">
+            <div class="form-group full-width">
+              <label for="descripcion" class="form-label">Descripción de la sesión <span *ngIf="!puedeEditar()" class="label-disabled">(lectura)</span></label>
+              <textarea id="descripcion" class="form-textarea" placeholder="Describe las actividades realizadas..." [value]="descripcion()" (input)="alCambiarDescripcion($event)" [disabled]="!puedeEditar()" rows="8"></textarea>
+              <div class="form-hint"><span>{{ descripcion().length }} caracteres</span><span *ngIf="guardarBorradorEnvio()" class="hint-saving">Guardando…</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="pestanaActiva() === 'evidencias'" class="tab-content">
+          <div *ngIf="puedeEditar()" class="upload-area">
+            <input #fileInput type="file" hidden (change)="subirArchivo($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" />
+            <button class="upload-btn" (click)="fileInput.click()" [disabled]="subiendeArchivo()">
+              <lucide-icon *ngIf="!subiendeArchivo()" name="upload-cloud" size="28"></lucide-icon>
+              <lucide-icon *ngIf="subiendeArchivo()" name="loader" size="28" class="spin"></lucide-icon>
+              <p class="upload-text"><strong>Haz clic para subir</strong> o arrastra archivos</p>
+              <p class="upload-hint">PDF, DOC, XLS, JPG, PNG (máx. 50 MB)</p>
+            </button>
+          </div>
+          <div *ngIf="subirArchivoError()" class="alert-banner error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ subirArchivoError() }}</span></div>
+          <div *ngIf="evidencias().length > 0; else sinEvidencias" class="evidencias-grid">
+            <div *ngFor="let ev of evidencias(); trackBy: trackByEvidencia" class="evidencia-card">
+              <div class="evidencia-header">
+                <lucide-icon name="file" size="20" class="file-icon"></lucide-icon>
+                <div class="evidencia-info"><div class="evidencia-nombre">{{ ev.nombreArchivo }}</div><div class="evidencia-meta">{{ obtenerTamanoArchivo(ev.tamanioBytes) }}</div></div>
+              </div>
+              <div class="evidencia-footer">
+                <span class="evidencia-fecha">{{ (ev.fechaSubida | date:'short') || '—' }}</span>
+                <button *ngIf="puedeEditar()" class="btn-eliminar" (click)="eliminarEvidencia(ev.idEvidencia)" title="Eliminar"><lucide-icon name="trash-2" size="14"></lucide-icon></button>
+              </div>
+            </div>
+          </div>
+          <ng-template #sinEvidencias><div class="evidencias-empty"><lucide-icon name="file-x" size="48"></lucide-icon><p>Sin evidencias</p><span *ngIf="puedeEditar()" class="empty-hint">Sube archivos que respalden la sesión</span></div></ng-template>
+        </div>
+      </div>
+
+      <div class="detalle-footer">
+        <div *ngIf="finalizarError()" class="alert-banner error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ finalizarError() }}</span></div>
+        <div class="footer-content">
+          <p class="footer-text"><lucide-icon name="info" size="14"></lucide-icon><span><strong>Importante:</strong> <span *ngIf="puedeEditar()">Una vez finalices, no podrás editar esta sesión.</span><span *ngIf="!puedeEditar()">Esta sesión ya ha sido finalizada.</span></span></p>
+          <button *ngIf="puedeEditar()" class="btn btn-primary btn-finalizar" (click)="finalizarSesion()" [disabled]="finalizando()"><lucide-icon *ngIf="!finalizando()" name="send" size="16"></lucide-icon><lucide-icon *ngIf="finalizando()" name="loader" size="16" class="spin"></lucide-icon><span>{{ finalizando() ? 'Finalizando…' : 'Finalizar y Enviar' }}</span></button>
+          <button *ngIf="!puedeEditar()" class="btn btn-secondary btn-finalizado" disabled><lucide-icon name="check-circle" size="16"></lucide-icon><span>Sesión Finalizada</span></button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.ComisionSeleccionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.ComisionSeleccionResponseDTO;
+import org.uteq.sgacfinal.dto.request.ComisionSeleccionRequestDTO;
+import org.uteq.sgacfinal.dto.response.ComisionSeleccionResponseDTO;
 import java.util.List;
 
 public interface IComisionSeleccionService {

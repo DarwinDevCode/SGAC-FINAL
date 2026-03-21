@@ -1,103 +1,83 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { SesionListado } from '../dto/sesion-listado';
-import { SesionDetalle } from '../dto/sesion-detalle';
-import { Evidencia } from '../dto/evidencia';
-import { ProgresoGeneral } from '../dto/progreso-general';
-import { ControlSemanal } from '../dto/control-semanal';
-import { RegistrarSesionResponse } from '../dto/registrar-sesion-response';
-import { RegistrarSesionRequest } from '../dto/registrar-sesion-request';
-import { FiltrosSesionRequest } from '../dto/filtros-sesion-request';
-import { SesionResponseDTO } from '../dto/sesion-response-dto';
 
-@Injectable({
-  providedIn: 'root'
-})
+import {
+  SesionResponseDTO,
+  PlanificarSesionRequest,
+  PlanificarSesionResponse,
+  CompletarSesionRequest,
+  CompletarSesionResponse,
+  EvaluarSesionRequest,
+  EvaluarSesionResponse,
+} from '../models/Sesiones';
+import {ControlSemanal} from '../dto/control-semanal';
+import {ProgresoGeneral} from '../dto/progreso-general';
+
+@Injectable({ providedIn: 'root' })
 export class SesionService {
-  private readonly baseUrl = environment.apiUrl;
-  private readonly URL = `${this.baseUrl}/postulante/sesiones`;
-  constructor(private http: HttpClient) { }
 
-  listarSesiones(
-    idUsuario: number,
-    filtros?: FiltrosSesionRequest
-  ): Observable<SesionListado[]> {
+  private http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/sesiones`;
 
-    let params = new HttpParams().set('idUsuario', idUsuario);
 
-    if (filtros?.fechaDesde) params = params.set('fechaDesde', filtros.fechaDesde);
-    if (filtros?.fechaHasta) params = params.set('fechaHasta', filtros.fechaHasta);
-    if (filtros?.estado) params = params.set('estado', filtros.estado);
-    if (filtros?.idPeriodo) params = params.set('idPeriodo', filtros.idPeriodo);
 
-    return this.http.get<SesionListado[]>(this.URL, { params });
+  listarMisSesiones(
+    _idAyudante?: number,
+    fechaDesde?:  string,
+    fechaHasta?:  string,
+    estadoCodigo?: string
+  ): Observable<SesionResponseDTO[]> {
+    let params = new HttpParams();
+    if (fechaDesde)    params = params.set('fechaDesde',   fechaDesde);
+    if (fechaHasta)    params = params.set('fechaHasta',   fechaHasta);
+    if (estadoCodigo)  params = params.set('estadoCodigo', estadoCodigo);
+    return this.http.get<SesionResponseDTO[]>(`${this.base}/mis-sesiones`, { params });
   }
 
-  detalleSesion(
-    idUsuario: number,
-    idRegistro: number
-  ): Observable<SesionDetalle> {
-
-    const params = new HttpParams().set('idUsuario', idUsuario);
-    return this.http.get<SesionDetalle>(`${this.URL}/${idRegistro}`, { params });
+  obtenerDetalleMiSesion(
+    _idAyudante: number,
+    idRegistroActividad: number
+  ): Observable<SesionResponseDTO> {
+    return this.http.get<SesionResponseDTO>(`${this.base}/${idRegistroActividad}`);
   }
 
-  evidenciasSesion(
-    idUsuario: number,
-    idRegistro: number
-  ): Observable<Evidencia[]> {
+  planificarSesion(request: PlanificarSesionRequest): Observable<PlanificarSesionResponse> {
+    return this.http.post<PlanificarSesionResponse>(`${this.base}/planificar`, request);
+  }
 
-    const params = new HttpParams().set('idUsuario', idUsuario);
-    return this.http.get<Evidencia[]>(`${this.URL}/${idRegistro}/evidencias`, { params });
+  completarSesion(
+    idRegistro: number,
+    request:    CompletarSesionRequest,
+    archivos:   File[]
+  ): Observable<CompletarSesionResponse> {
+    const fd = new FormData();
+    // El backend espera la parte "datos" como application/json
+    fd.append('datos', new Blob([JSON.stringify(request)], { type: 'application/json' }));
+    archivos.forEach(f => fd.append('archivos', f, f.name));
+    return this.http.post<CompletarSesionResponse>(`${this.base}/${idRegistro}/completar`, fd);
+  }
+
+  evaluarSesion(
+    idRegistro: number,
+    request:    EvaluarSesionRequest
+  ): Observable<EvaluarSesionResponse> {
+    return this.http.put<EvaluarSesionResponse>(`${this.base}/${idRegistro}/evaluar`, request);
   }
 
   progresoGeneral(idUsuario: number): Observable<ProgresoGeneral> {
     const params = new HttpParams().set('idUsuario', idUsuario);
-    return this.http.get<ProgresoGeneral>(`${this.URL}/progreso`, { params });
+    return this.http.get<ProgresoGeneral>(`${this.base}/progreso`, { params });
   }
 
   controlSemanal(idUsuario: number): Observable<ControlSemanal> {
     const params = new HttpParams().set('idUsuario', idUsuario);
-    return this.http.get<ControlSemanal>(`${this.URL}/control-semanal`, { params });
+    return this.http.get<ControlSemanal>(`${this.base}/control-semanal`, { params });
   }
 
-  registrarSesion(
-    idUsuario: number,
-    request: RegistrarSesionRequest,
-    files: File[]
-  ): Observable<RegistrarSesionResponse> {
-
-    const params = new HttpParams().set('idUsuario', idUsuario);
-
-    const formData = new FormData();
-
-    // El backend espera @RequestPart("request") como JSON
-    const jsonBlob = new Blob([JSON.stringify(request)], { type: 'application/json' });
-    formData.append('request', jsonBlob);
-
-    // El backend espera @RequestPart("archivos")
-    (files || []).forEach((file) => {
-      formData.append('archivos', file, file.name);
-    });
-
-    return this.http.post<RegistrarSesionResponse>(this.URL, formData, { params });
-  }
-
-  listarMisSesiones(idAyudante: number): Observable<SesionResponseDTO[]> {
+  listarMisSesionesPrincipales(idAyudante: number): Observable<SesionResponseDTO[]> {
     const params = new HttpParams().set('idAyudante', idAyudante);
-    return this.http.get<SesionResponseDTO[]>(`${this.URL}/mis-sesiones`, { params });
-  }
-
-  obtenerDetalleMiSesion(
-    idAyudante: number,
-    idRegistroActividad: number
-  ): Observable<SesionResponseDTO> {
-    const params = new HttpParams().set('idAyudante', idAyudante);
-    return this.http.get<SesionResponseDTO>(
-      `${this.URL}/mis-sesiones/${idRegistroActividad}`,
-      { params }
-    );
+    return this.http.get<SesionResponseDTO[]>(`${this.base}/mis-sesiones`, { params });
   }
 }

@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.uteq.sgacfinal.dto.Request.RegistrarSesionRequest;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.RegistrarSesionRequest;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.service.IAyudantiaService;
 import org.uteq.sgacfinal.service.SesionService;
 

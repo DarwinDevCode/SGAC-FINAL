@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.uteq.sgacfinal.dto.Request.LoginRequestDTO;
+import org.uteq.sgacfinal.dto.request.LoginRequestDTO;
 import org.uteq.sgacfinal.repository.IAuthRepository;
 import org.uteq.sgacfinal.service.impl.AuthServiceImpl;
 

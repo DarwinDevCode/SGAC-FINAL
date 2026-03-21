@@ -29,6 +29,7 @@
               "src/polyfills.ts"
             ],
             "styles": [
+              "src/material-theme.scss",
               "src/styles.css"
             ]
           },

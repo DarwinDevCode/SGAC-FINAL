@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.PermisoDTO;
-import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Request.GestionPermisosMasivoRequestDTO;
-import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.FiltroPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.request.GestionPermisosMasivoRequestDTO;
+import org.uteq.sgacfinal.dto.request.GestionPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.service.IPermisoService;
 
 import java.util.List;

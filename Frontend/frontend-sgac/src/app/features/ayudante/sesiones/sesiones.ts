@@ -9,8 +9,8 @@ import {
 import { Router } from '@angular/router';
 
 import { AuthService }       from '../../../core/services/auth-service';
-import { SesionService }     from '../../../core/services/ayudantia/sesion-service';
-import { AsistenciaService } from '../../../core/services/ayudantia/asistencia-service';
+import { SesionService }     from '../../../core/services/sesion-service';
+import { AsistenciaService } from '../../../core/services/asistencia-service';
 import { CatalogosService }  from '../../../core/services/catalogos-service';
 
 import {
@@ -21,7 +21,7 @@ import {
   EvaluarSesionRequest,
   AsistenciaItem,
   EvidenciaMetadata,
-} from '../../../core/models/ayudantia/Sesiones';
+} from '../../../core/models/Sesiones';
 import { TipoEvidencia } from '../../../core/dto/tipo-evidencia';
 
 type EvidenciaForm = {

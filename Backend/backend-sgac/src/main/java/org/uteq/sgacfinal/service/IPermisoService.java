@@ -1,10 +1,9 @@
 package org.uteq.sgacfinal.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.PermisoDTO;
-import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.FiltroPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.request.GestionPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 
 import java.util.List;
 

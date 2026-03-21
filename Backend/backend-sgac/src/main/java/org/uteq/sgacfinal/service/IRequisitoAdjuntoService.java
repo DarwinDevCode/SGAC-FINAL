@@ -1,9 +1,9 @@
 package org.uteq.sgacfinal.service;
 
 import org.springframework.web.multipart.MultipartFile;
-import org.uteq.sgacfinal.dto.Request.RequisitoAdjuntoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.RequisitoAdjuntoResponseDTO;
-import org.uteq.sgacfinal.dto.Response.SubsanacionDocumentoResponseDTO;
+import org.uteq.sgacfinal.dto.request.RequisitoAdjuntoRequestDTO;
+import org.uteq.sgacfinal.dto.response.RequisitoAdjuntoResponseDTO;
+import org.uteq.sgacfinal.dto.response.SubsanacionDocumentoResponseDTO;
 
 import java.util.List;
 

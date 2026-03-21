@@ -1,7 +1,7 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.AsignaturaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.AsignaturaResponseDTO;
+import org.uteq.sgacfinal.dto.request.AsignaturaRequestDTO;
+import org.uteq.sgacfinal.dto.response.AsignaturaResponseDTO;
 import java.util.List;
 
 public interface IAsignaturaService {

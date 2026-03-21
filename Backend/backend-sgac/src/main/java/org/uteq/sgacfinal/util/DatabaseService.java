@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Component;
-import org.uteq.sgacfinal.dto.Response.RespuestaOperacionDTO;
+import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
 
 import java.sql.Types;
 import java.util.Map;

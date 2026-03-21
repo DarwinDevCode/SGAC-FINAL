@@ -1,10 +1,10 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.AyudantiaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.AyudantiaDetalleResponseDTO;
-import org.uteq.sgacfinal.dto.Response.AyudantiaResponseDTO;
-import org.uteq.sgacfinal.dto.Response.RegistroActividadDetalleDTO;
-import org.uteq.sgacfinal.dto.Response.SesionResponseDTO;
+import org.uteq.sgacfinal.dto.request.AyudantiaRequestDTO;
+import org.uteq.sgacfinal.dto.response.AyudantiaDetalleResponseDTO;
+import org.uteq.sgacfinal.dto.response.AyudantiaResponseDTO;
+import org.uteq.sgacfinal.dto.response.RegistroActividadDetalleDTO;
+import org.uteq.sgacfinal.dto.response.SesionResponseDTO;
 
 import java.util.List;
 import java.util.Optional;

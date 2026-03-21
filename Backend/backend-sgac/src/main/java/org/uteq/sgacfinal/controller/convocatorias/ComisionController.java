@@ -3,8 +3,8 @@ package org.uteq.sgacfinal.controller.convocatorias;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Response.convocatorias.ComisionDetalleResponseDTO;
-import org.uteq.sgacfinal.dto.Response.convocatorias.GenerarComisionesResponseDTO;
+import org.uteq.sgacfinal.dto.response.convocatorias.ComisionDetalleResponseDTO;
+import org.uteq.sgacfinal.dto.response.convocatorias.GenerarComisionesResponseDTO;
 import org.uteq.sgacfinal.service.convocatorias.IComisionService;
 
 @RestController

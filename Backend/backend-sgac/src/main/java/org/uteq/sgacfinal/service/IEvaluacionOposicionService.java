@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.AsignarComisionRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluacionOposicionRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EvaluacionOposicionResponseDTO;
+import org.uteq.sgacfinal.dto.request.AsignarComisionRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluacionOposicionRequestDTO;
+import org.uteq.sgacfinal.dto.response.EvaluacionOposicionResponseDTO;
 import java.util.List;
 
 public interface IEvaluacionOposicionService {

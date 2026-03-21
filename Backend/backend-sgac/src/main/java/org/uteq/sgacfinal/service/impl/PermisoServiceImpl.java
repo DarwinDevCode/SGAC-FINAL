@@ -5,13 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.PermisoDTO;
-import org.uteq.sgacfinal.dto.Request.FiltroPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Response.*;
+import org.uteq.sgacfinal.dto.request.FiltroPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.request.GestionPermisosRequestDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.repository.IPermisoRepository;
 import org.uteq.sgacfinal.service.IPermisoService;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

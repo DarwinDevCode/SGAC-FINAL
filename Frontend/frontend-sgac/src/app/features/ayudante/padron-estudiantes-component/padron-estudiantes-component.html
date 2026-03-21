@@ -1,0 +1,106 @@
+<div class="gestion-container ui-stack-lg">
+
+  <div class="mz-top-bar">
+    <div class="ui-inline-actions">
+      <button class="btn ui-btn-ghost" (click)="cargarPadron()" [disabled]="cargando()">
+        <lucide-icon [name]="cargando() ? 'loader' : 'refresh-cw'" size="15" [class.spin]="cargando()"></lucide-icon>
+        <span>Actualizar</span>
+      </button>
+      <button class="btn ui-btn-primary" (click)="abrirModalGestion()" [disabled]="cargando()">
+        <lucide-icon name="user-plus" size="16"></lucide-icon>
+        <span>Nuevo Estudiante</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title ui-h2">Mi Padrón de Estudiantes</h2>
+      <p class="subtitle">Gestiona los alumnos inscritos en tu ayudantía</p>
+    </div>
+  </div>
+
+  <ng-container *ngIf="cargando()">
+    <div class="mz-skeleton-table">
+      <div class="mz-skeleton-header"></div>
+      <div class="mz-skeleton-row" *ngFor="let _ of [1,2,3,4]"></div>
+    </div>
+  </ng-container>
+
+  <div *ngIf="!cargando() && errorMsg()" class="ui-alert error">
+    <div class="ui-alert-content">
+      <lucide-icon name="alert-circle" size="18"></lucide-icon>
+      <span class="ui-alert-text">{{ errorMsg() }}</span>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!cargando() && !errorMsg()">
+
+    <div class="search-card">
+      <div class="mz-search-bar" style="justify-content: space-between;">
+        <div class="mz-search-input-wrap">
+          <lucide-icon name="search" size="15" class="mz-search-icon"></lucide-icon>
+          <input class="mz-search-input" type="text" placeholder="Buscar por nombre o curso..."
+                 [ngModel]="textoBusqueda()" (ngModelChange)="textoBusqueda.set($event)" />
+          <button *ngIf="textoBusqueda()" class="mz-search-clear" (click)="textoBusqueda.set('')" title="Limpiar">
+            <lucide-icon name="x" size="13"></lucide-icon>
+          </button>
+        </div>
+        <span class="text-sm text-muted-foreground font-medium">
+          Total inscritos: {{ totalEstudiantes() }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="totalEstudiantes() === 0" class="ui-empty">
+      <lucide-icon name="users" size="48" class="ui-subtle"></lucide-icon>
+      <p class="font-medium">Tu padrón está vacío</p>
+      <p class="text-sm text-muted-foreground">Añade a tus estudiantes para poder registrar su asistencia en las sesiones.</p>
+    </div>
+
+    <div *ngIf="totalEstudiantes() > 0" class="table-card mz-table-card">
+      <div class="mz-scroll-container">
+        <table class="mz-table data-table">
+          <thead>
+          <tr>
+            <th class="mz-th mz-sticky-col" style="min-width: 250px;">Nombre Completo</th>
+            <th class="mz-th" style="width: 150px;">Curso</th>
+            <th class="mz-th" style="width: 100px;">Paralelo</th>
+            <th class="mz-th" style="width: 100px; text-align: center;">Acciones</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let est of estudiantesFiltrados(); trackBy: trackByEstudiante" class="mz-row">
+            <td class="mz-td mz-sticky-col mz-td-nombre">
+              <span class="mz-nombre">{{ est.nombreCompleto }}</span>
+            </td>
+            <td class="mz-td">
+              <span class="badge blue">{{ est.curso }}</span>
+            </td>
+            <td class="mz-td">
+              <span class="badge violet">{{ est.paralelo || '—' }}</span>
+            </td>
+            <td class="mz-td" style="text-align: center;">
+              <div class="ui-inline-actions" style="justify-content: center;">
+                <button class="btn-icon" (click)="abrirModalGestion(est)" title="Editar">
+                  <lucide-icon name="edit-2" size="16"></lucide-icon>
+                </button>
+                <button class="btn-icon" style="color: var(--red-soft);" (click)="eliminarEstudiante(est)" title="Eliminar">
+                  <lucide-icon name="trash-2" size="16"></lucide-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="estudiantesFiltrados().length === 0 && textoBusqueda()">
+            <td colspan="4" class="mz-empty-search">
+              <lucide-icon name="search-x" size="20"></lucide-icon>
+              <span>No se encontraron estudiantes con "{{ textoBusqueda() }}"</span>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

@@ -2,7 +2,7 @@ package org.uteq.sgacfinal.repository;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.uteq.sgacfinal.dto.Response.RolResumenResponseDTO;
+import org.uteq.sgacfinal.dto.response.RolResumenResponseDTO;
 import org.uteq.sgacfinal.entity.TipoRol;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -36,7 +36,7 @@ public interface ITipoRolRepository extends JpaRepository<TipoRol, Integer> {
     boolean existsByNombreTipoRol(String nombreTipoRol);
 
 
-    @Query("SELECT new org.uteq.sgacfinal.dto.Response.RolResumenResponseDTO(t.idTipoRol, t.nombreTipoRol, t.rolBd.nombreRolBd, t.activo) " +
+    @Query("SELECT new org.uteq.sgacfinal.dto.response.RolResumenResponseDTO(t.idTipoRol, t.nombreTipoRol, t.rolBd.nombreRolBd, t.activo) " +
             "FROM TipoRol t " +
             "ORDER BY t.nombreTipoRol ASC")
     List<RolResumenResponseDTO> obtenerRolesParaPermisos();

@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service;
 
-import org.uteq.sgacfinal.dto.Request.LoginRequestDTO;
-import org.uteq.sgacfinal.dto.Request.SeleccionarRolRequestDTO;
-import org.uteq.sgacfinal.dto.Response.UsuarioResponseDTO;
+import org.uteq.sgacfinal.dto.request.LoginRequestDTO;
+import org.uteq.sgacfinal.dto.request.SeleccionarRolRequestDTO;
+import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;
 
 public interface IAuthService {
     UsuarioResponseDTO loginUsuario(LoginRequestDTO request);

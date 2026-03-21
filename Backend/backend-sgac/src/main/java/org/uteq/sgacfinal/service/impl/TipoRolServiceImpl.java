@@ -3,16 +3,14 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.GestionPermisosRequestDTO;
-import org.uteq.sgacfinal.dto.Request.TipoRolRequestDTO;
-import org.uteq.sgacfinal.dto.Response.RolResumenResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoRolResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoRolRequestDTO;
+import org.uteq.sgacfinal.dto.response.RolResumenResponseDTO;
+import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.entity.TipoRol;
 import org.uteq.sgacfinal.repository.ITipoRolRepository;
 import org.uteq.sgacfinal.service.ITipoRolService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

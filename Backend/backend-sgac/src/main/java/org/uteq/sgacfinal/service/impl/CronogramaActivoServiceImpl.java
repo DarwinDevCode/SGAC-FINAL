@@ -3,7 +3,7 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.uteq.sgacfinal.dto.Response.configuracion.CronogramaActivoResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.CronogramaActivoResponseDTO;
 import org.uteq.sgacfinal.repository.ICronogramaActivoRepository;
 import org.uteq.sgacfinal.service.ICronogramaActivoService;
 import com.fasterxml.jackson.databind.ObjectMapper;

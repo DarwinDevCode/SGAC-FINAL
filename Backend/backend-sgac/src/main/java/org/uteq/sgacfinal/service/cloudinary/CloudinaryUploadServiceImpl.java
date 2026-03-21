@@ -54,7 +54,7 @@ public class CloudinaryUploadServiceImpl {
 
         } catch (IOException ex) {
             log.error("Error subiendo archivo a Cloudinary: {}", originalName, ex);
-            throw new RuntimeException("No se pudo subir el archivo: " + originalName);
+            throw new RuntimeException("No se pudo subir el archivo: " + originalName + "\n" + ex);
         }
     }
 

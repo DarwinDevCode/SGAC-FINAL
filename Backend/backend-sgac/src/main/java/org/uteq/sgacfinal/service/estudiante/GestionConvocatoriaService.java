@@ -1,6 +1,6 @@
 package org.uteq.sgacfinal.service.estudiante;
 
-import org.uteq.sgacfinal.dto.Response.estudiante.ConvocatoriaEstudianteDTO;
+import org.uteq.sgacfinal.dto.response.estudiante.ConvocatoriaEstudianteDTO;
 
 import java.util.List;
 

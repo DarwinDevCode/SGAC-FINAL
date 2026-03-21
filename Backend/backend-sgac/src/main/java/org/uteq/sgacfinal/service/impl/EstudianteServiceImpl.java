@@ -3,14 +3,11 @@ package org.uteq.sgacfinal.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.EstudianteRequestDTO;
-import org.uteq.sgacfinal.dto.Response.EstudianteResponseDTO;
+import org.uteq.sgacfinal.dto.request.EstudianteRequestDTO;
+import org.uteq.sgacfinal.dto.response.EstudianteResponseDTO;
 import org.uteq.sgacfinal.entity.Estudiante;
 import org.uteq.sgacfinal.repository.EstudianteRepository;
 import org.uteq.sgacfinal.service.IEstudianteService;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

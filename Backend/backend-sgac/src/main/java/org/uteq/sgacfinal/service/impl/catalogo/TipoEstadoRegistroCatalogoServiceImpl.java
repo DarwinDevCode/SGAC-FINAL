@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.TipoEstadoRegistroRequestDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoEstadoRegistroResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoEstadoRegistroRequestDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.TipoEstadoRegistroResponseDTO;
 import org.uteq.sgacfinal.repository.catalogo.TipoEstadoRegistroCatalogoRepository;
 import org.uteq.sgacfinal.service.catalogo.ITipoEstadoRegistroCatalogoService;
 

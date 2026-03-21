@@ -1,37 +1,35 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { Subject, forkJoin } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
-import { LucideAngularModule } from 'lucide-angular';
+import {Component, OnInit, OnDestroy, inject} from '@angular/core';
+import { CommonModule }                 from '@angular/common';
+import { RouterModule }                 from '@angular/router';
+import { Subject, forkJoin }            from 'rxjs';
+import { takeUntil, finalize }          from 'rxjs/operators';
+import { LucideAngularModule }          from 'lucide-angular';
 
-import { SesionService as SesionServiceLegacy } from '../../../core/services/sesion-service';
-import { SesionService as SesionServiceAyudantia } from '../../../core/services/ayudantia/sesion-service';
+import { SesionService } from '../../../core/services/sesion-service';
 import { ProgresoGeneral } from '../../../core/dto/progreso-general';
 import { ControlSemanal } from '../../../core/dto/control-semanal';
 import { SesionListado } from '../../../core/dto/sesion-listado';
-import { AuthService } from '../../../core/services/auth-service';
-import { HttpErrorResponse } from '@angular/common/http';
+import {AuthService} from '../../../core/services/auth-service';
+import {HttpErrorResponse} from '@angular/common/http';
 
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  selector:    'app-dashboard',
+  standalone:  true,
+  imports:     [CommonModule, RouterModule, LucideAngularModule],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css']
+  styleUrls:   ['./dashboard.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
   authService = inject(AuthService);
-  sesionServiceLegacy = inject(SesionServiceLegacy);
-  sesionServiceAyudantia = inject(SesionServiceAyudantia);
+  sesionService = inject(SesionService);
 
   ID_USUARIO_MOCK = this.authService.getUser()?.idUsuario ?? 0;
 
   cargando = false;
-  progreso!: ProgresoGeneral;
+  progreso!:       ProgresoGeneral;
   controlSemanal!: ControlSemanal;
   ultimasSesiones: SesionListado[] = [];
   error: string | null = null;
@@ -47,29 +45,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   cargarDashboard(): void {
     this.cargando = true;
-    this.error = null;
+    this.error    = null;
 
     forkJoin({
-      progreso: this.sesionServiceLegacy.progresoGeneral(this.ID_USUARIO_MOCK),
-      semanal: this.sesionServiceLegacy.controlSemanal(this.ID_USUARIO_MOCK),
-      sesiones: this.sesionServiceAyudantia.listarMisSesiones()
+      progreso: this.sesionService.progresoGeneral(this.ID_USUARIO_MOCK),
+      semanal:  this.sesionService.controlSemanal(this.ID_USUARIO_MOCK),
+      sesiones: this.sesionService.listarMisSesionesPrincipales(this.ID_USUARIO_MOCK)
     })
       .pipe(takeUntil(this.destroy$), finalize(() => this.cargando = false))
       .subscribe({
         next: ({ progreso, semanal, sesiones }) => {
-          this.progreso = progreso;
-          this.controlSemanal = semanal;
-          this.ultimasSesiones = sesiones.slice(0, 5).map(s => ({
-            idRegistro: s.idRegistroActividad,
-            fecha: s.fecha,
-            temaTratado: s.temaTratado,
-            descripcion: s.descripcionActividad,
-            numeroAsistentes: 0,
-            horasDedicadas: s.horasDedicadas,
-            estado: s.nombreEstado,
-            totalEvidencias: 0,
-            tieneObservacion: s.codigoEstado === 'OBSERVADO'
-          } as SesionListado)); // top 5
+          this.progreso        = progreso;
+          this.controlSemanal  = semanal;
+          //this.ultimasSesiones = sesiones.slice(0, 5); // top 5
         },
         error: (err: HttpErrorResponse) => {
           console.log(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar');
@@ -96,7 +84,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   getClaseEstado(estado: string): string {
     const mapa: Record<string, string> = {
-      APROBADO: 'aprobado',
+      APROBADO:  'aprobado',
       PENDIENTE: 'pendiente',
       OBSERVADO: 'observado',
       RECHAZADO: 'rechazado'

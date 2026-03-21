@@ -1,6 +1,6 @@
 package org.uteq.sgacfinal.mapper;
 
-import org.uteq.sgacfinal.dto.Response.ConvocatoriaResponseDTO;
+import org.uteq.sgacfinal.dto.response.ConvocatoriaResponseDTO;
 import org.uteq.sgacfinal.entity.Convocatoria;
 
 public class ConvocatoriaMapper {

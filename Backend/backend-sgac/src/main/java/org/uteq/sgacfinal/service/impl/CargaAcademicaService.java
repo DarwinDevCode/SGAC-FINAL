@@ -6,10 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Request.SincronizarCargaRequest;
-import org.uteq.sgacfinal.dto.Response.AsignaturaJerarquiaDTO;
-import org.uteq.sgacfinal.dto.Response.DocenteActivoDTO;
-import org.uteq.sgacfinal.dto.Response.SincronizarCargaResponseDTO;
+import org.uteq.sgacfinal.dto.request.SincronizarCargaRequest;
+import org.uteq.sgacfinal.dto.response.AsignaturaJerarquiaDTO;
+import org.uteq.sgacfinal.dto.response.DocenteActivoDTO;
+import org.uteq.sgacfinal.dto.response.SincronizarCargaResponseDTO;
 import org.uteq.sgacfinal.repository.ICargaAcademicaRepository;
 import org.uteq.sgacfinal.service.EmailService;
 

@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service.catalogo;
 
-import org.uteq.sgacfinal.dto.Request.PrivilegioRequestDTO;
-import org.uteq.sgacfinal.dto.Response.PrivilegioFuncionResponseDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.request.PrivilegioRequestDTO;
+import org.uteq.sgacfinal.dto.response.PrivilegioFuncionResponseDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
 
 import java.util.List;
 

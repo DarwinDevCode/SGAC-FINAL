@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.uteq.sgacfinal.dto.Response.MetricasConvocatoriaDTO;
+import org.uteq.sgacfinal.dto.response.MetricasConvocatoriaDTO;
 import org.uteq.sgacfinal.entity.NotificacionW;
 import org.uteq.sgacfinal.entity.Usuario;
 import org.uteq.sgacfinal.repository.IUsuariosRepository;

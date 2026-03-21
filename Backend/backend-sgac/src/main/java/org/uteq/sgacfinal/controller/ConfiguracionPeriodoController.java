@@ -4,11 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.uteq.sgacfinal.dto.Request.configuracion.AjusteCronogramaRequestDTO;
-import org.uteq.sgacfinal.dto.Request.configuracion.PeriodoAcademicoRequestDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.CronogramaActivoResponseDTO;
-import org.uteq.sgacfinal.dto.Response.configuracion.PeriodoFaseResponseDTO;
+import org.uteq.sgacfinal.dto.request.configuracion.AjusteCronogramaRequestDTO;
+import org.uteq.sgacfinal.dto.request.configuracion.PeriodoAcademicoRequestDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.CronogramaActivoResponseDTO;
+import org.uteq.sgacfinal.dto.response.configuracion.PeriodoFaseResponseDTO;
 import org.uteq.sgacfinal.service.configuracion.ICronogramaService;
 import org.uteq.sgacfinal.service.configuracion.IPeriodoAcademicoService;
 

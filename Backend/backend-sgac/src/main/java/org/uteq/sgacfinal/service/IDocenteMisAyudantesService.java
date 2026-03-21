@@ -2,10 +2,10 @@ package org.uteq.sgacfinal.service;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
-import org.uteq.sgacfinal.dto.Request.EvaluarActividadRequestDTO;
-import org.uteq.sgacfinal.dto.Request.EvaluarEvidenciaRequestDTO;
-import org.uteq.sgacfinal.dto.Response.ActividadDetalleDTO;
-import org.uteq.sgacfinal.dto.Response.AyudanteResponseDTO;
+import org.uteq.sgacfinal.dto.request.EvaluarActividadRequestDTO;
+import org.uteq.sgacfinal.dto.request.EvaluarEvidenciaRequestDTO;
+import org.uteq.sgacfinal.dto.response.ActividadDetalleDTO;
+import org.uteq.sgacfinal.dto.response.AyudanteResponseDTO;
 
 import java.util.List;
 

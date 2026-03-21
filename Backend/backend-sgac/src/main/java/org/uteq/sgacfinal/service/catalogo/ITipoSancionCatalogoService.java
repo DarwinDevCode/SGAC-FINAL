@@ -1,8 +1,8 @@
 package org.uteq.sgacfinal.service.catalogo;
 
-import org.uteq.sgacfinal.dto.Request.TipoSancionAyudanteCatedraRequestDTO;
-import org.uteq.sgacfinal.dto.Response.StandardResponseDTO;
-import org.uteq.sgacfinal.dto.Response.TipoSancionAyudanteCatedraResponseDTO;
+import org.uteq.sgacfinal.dto.request.TipoSancionAyudanteCatedraRequestDTO;
+import org.uteq.sgacfinal.dto.response.StandardResponseDTO;
+import org.uteq.sgacfinal.dto.response.TipoSancionAyudanteCatedraResponseDTO;
 
 import java.util.List;
 
