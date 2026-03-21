@@ -120,7 +120,7 @@
             <div class="em-section-icon em-ic-asig"><lucide-icon name="book-open" size="16"></lucide-icon></div>
             <div>
               <h3 class="em-section-title">Calificación de la Asignatura</h3>
-              <p class="em-section-sub">Ingresa la nota de aprobación del estudiante en la asignatura (0–10). El sistema la convierte a puntos.</p>
+              <p class="em-section-sub">Ingresa la nota de aprobación del estudiante en la asignatura (0–10).</p>
             </div>
             <span class="em-pts-badge">Máx 10 pts</span>
           </div>
@@ -128,7 +128,7 @@
           <!-- Modo FINALIZADA: muestra el puntaje almacenado directamente -->
           <div *ngIf="evaluacionActual?.estado === 'FINALIZADA'" class="em-field-row">
             <div class="em-field">
-              <label class="em-label">Nota de aprobación (almacenada)</label>
+              <label class="em-label">Nota de aprobación</label>
               <div class="em-stored-value">
                 <lucide-icon name="lock" size="13"></lucide-icon>
                 <span>Nota convertida: <strong>{{ fmt2(evaluacionActual!.notaAsignatura) }} pts</strong></span>
@@ -188,7 +188,7 @@
             <div class="em-section-icon em-ic-sem"><lucide-icon name="graduation-cap" size="16"></lucide-icon></div>
             <div>
               <h3 class="em-section-title">Puntaje por Semestres</h3>
-              <p class="em-section-sub">Agrega la nota promedio de cada semestre cursado. El total se acumula con tope de 4.00.</p>
+              <p class="em-section-sub">Agrega la nota promedio de cada semestre cursado.</p>
             </div>
             <span class="em-pts-badge">Máx 4 pts</span>
           </div>

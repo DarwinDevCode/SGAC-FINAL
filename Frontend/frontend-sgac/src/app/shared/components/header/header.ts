@@ -1,3 +1,4 @@
+// src/app/shared/components/header/header.ts
 import { Component, inject, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
@@ -16,14 +17,13 @@ import { NotificationWSService } from '../../../core/services/notification-ws-se
   styleUrl: './header.css'
 })
 export class HeaderComponent implements OnInit {
-  private router = inject(Router);
-  private authService = inject(AuthService);
+  private router         = inject(Router);
+  private authService    = inject(AuthService);
   private notificationWS = inject(NotificationWSService);
 
   user = computed(() => this.authService.getUser());
 
   constructor() {
-    // Conectar WS en cuanto tengamos usuario logeado.
     effect(() => {
       const u = this.user();
       if (u?.idUsuario) {
@@ -39,26 +39,65 @@ export class HeaderComponent implements OnInit {
     )
   );
 
-  breadcrumbs = computed(() => {
-    const url = this.urlEvents() || '';
-    const parts = url.split('/').filter(p => p);
-    const names: Record<string, string> = {
-      student: 'Estudiante',
-      docente: 'Docente',
-      coordinador: 'Coordinación',
-      dashboard: 'Inicio',
-      admin: 'Administrador'
-    };
-    return parts.map((part, index) => ({
-      label: names[part] || part.charAt(0).toUpperCase() + part.slice(1),
-      path: '/' + parts.slice(0, index + 1).join('/')
-    }));
+  // ── Mapa completo segmento → etiqueta ────────────────────────────
+  private readonly NAMES: Record<string, string> = {
+    // Áreas / roles
+    student:      'Estudiante',
+    postulante:   'Postulante',
+    docente:      'Docente',
+    coordinador:  'Coordinación',
+    decano:       'Decanato',
+    admin:        'Administración',
+    ayudante:     'Ayudante',
+    comision:     'Comisión',
+
+    // Secciones
+    dashboard:              'Inicio',
+    consulta:               'Consulta',
+    convocatorias:          'Convocatorias',
+    validaciones:           'Validaciones',
+    oposicion:              'Gestión de Oposición',
+    sala:                   'Sala de Evaluación',
+    meritos:                'Méritos',
+    'evaluacion-meritos':   'Evaluación de Méritos',
+    'selector-meritos':     'Evaluación de Méritos',
+    resoluciones:           'Resoluciones y Actas',
+    reportes:               'Reportes',
+    usuarios:               'Gestión de Usuarios',
+    periodos:               'Períodos Académicos',
+    configuracion:          'Configuración Global',
+    'carga-academica':      'Carga Académica',
+    'rol-permiso':          'Roles y Permisos',
+    cronograma:             'Cronograma',
+    notificaciones:         'Notificaciones',
+    sesiones:               'Mis Sesiones',
+    informes:               'Mis Informes',
+    'mis-postulaciones':    'Mis Postulaciones',
+    'mis-ayudantes':        'Mis Ayudantes',
+    planificacion:          'Planificación de Actividades',
+    'aprobar-informes':     'Aprobar Informes',
+    'mi-oposicion':         'Mi Oposición',
+    'resultados-evaluacion':'Ver Resultados',
+  };
+
+  /**
+   * Devuelve SOLO el nombre de la página actual (último segmento no-numérico).
+   * Esto evita que la cadena completa "Coordinación / Evaluación de Méritos"
+   * desborde por debajo del sidebar fijo de 260 px.
+   */
+  paginaActual = computed((): string => {
+    const url = this.urlEvents() ?? this.router.url ?? '';
+    const parts = url
+      .split('?')[0]          // quitar query-string
+      .split('/')
+      .filter(p => p && !/^\d+$/.test(p));  // quitar vacíos e IDs numéricos
+
+    if (parts.length === 0) return 'Inicio';
+
+    const ultimo = parts[parts.length - 1];
+    return this.NAMES[ultimo]
+      ?? (ultimo.charAt(0).toUpperCase() + ultimo.slice(1).replace(/-/g, ' '));
   });
 
-  ngOnInit(): void {
-    // no-op: la campana maneja su propio estado; el WS se conecta en el effect.
-    //this.cargarNotificaciones();
-  }
-
-
+  ngOnInit(): void { /* WS se conecta en el effect */ }
 }
