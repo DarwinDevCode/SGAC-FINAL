@@ -107,6 +107,7 @@ export class SidebarComponent {
       { label: 'Cronograma',          icon: 'CalendarDays',    route: '/cronograma' },
       { label: 'Configuración Global',icon: 'Settings',        route: '/admin/configuracion' },
       { label: 'Roles y Permisos',    icon: 'Settings',        route: '/admin/rol-permiso' },
+      { label: 'Registro de Auditoría',icon: 'History',        route: '/admin/reportes-auditoria' },
       { label: 'Notificaciones',      icon: 'Bell',            route: '/notificaciones' },
     ],
   };

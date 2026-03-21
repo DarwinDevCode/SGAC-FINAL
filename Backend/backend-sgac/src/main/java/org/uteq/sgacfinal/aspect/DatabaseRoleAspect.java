@@ -7,61 +7,52 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.Session;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.uteq.sgacfinal.config.UserContext;
-
 import java.sql.Statement;
 
 @Aspect
 @Component
+@Order(1)
 @RequiredArgsConstructor
 @Slf4j
 public class DatabaseRoleAspect {
+
     private final EntityManager entityManager;
 
     @Around("execution(* org.uteq.sgacfinal.repository.*.*(..))")
     public Object applyDatabaseRole(ProceedingJoinPoint joinPoint) throws Throwable {
+        Integer userId = UserContext.getUserId();
         String appRole = UserContext.getAppRole();
-        boolean roleChanged = false;
+        String userIp = UserContext.getUserIp();
 
-
-        if (appRole != null && !appRole.isEmpty()) {
-            String dbRole = appRole.toLowerCase().startsWith("role_")
-                    ? appRole.toLowerCase()
-                    : "role_" + appRole.toLowerCase();
-
+        if (appRole != null) {
             try {
                 Session session = entityManager.unwrap(Session.class);
                 session.doWork(connection -> {
-                    try (Statement statement = connection.createStatement()) {
-                        statement.execute("SET LOCAL ROLE " + dbRole);
-                        log.debug("Rol de BD cambiado exitosamente a: {}", dbRole);
+                    try (Statement stmt = connection.createStatement()) {
+                        // 1. Rol de base de datos
+                        String dbRole = "role_" + appRole.toLowerCase().replace("role_", "");
+                        stmt.execute("SET ROLE " + dbRole);
+
+                        String safeId = (userId != null) ? userId.toString() : "0";
+                        String safeIp = (userIp != null && !userIp.isEmpty()) ? userIp : "127.0.0.1";
+
+                        stmt.execute("SELECT set_config('sgac.usuario_id', '" + safeId + "', false)");
+                        stmt.execute("SELECT set_config('sgac.ip_origen', '" + safeIp + "', false)");
+
+                        log.debug(">>>> ASPECT: Contexto inyectado -> ID: {}, IP: {}", safeId, safeIp);
                     }
                 });
-                roleChanged = true;
             } catch (Exception e) {
-                log.error("No se pudo hacer SET ROLE en la base de datos", e);
+                // Logueamos pero permitimos que continúe para no bloquear el login
+                log.warn(">>>> ASPECT WARN: No se pudo inyectar contexto (posible fase de auth): {}", e.getMessage());
             }
         }
 
-        try {
-            return joinPoint.proceed();
-        } finally {
-            if (roleChanged) {
-                try {
-                    Session session = entityManager.unwrap(Session.class);
-                    if (session.isOpen()) {
-                        session.doWork(connection -> {
-                            try (Statement statement = connection.createStatement()) {
-                                statement.execute("RESET ROLE");
-                                log.debug("Rol de BD reseteado al usuario por defecto.");
-                            }
-                        });
-                    }
-                } catch (Exception e) {
-                    log.error("Error al resetear el rol de BD", e);
-                }
-            }
-        }
+        // IMPORTANTE: NO usamos bloque 'finally' con RESET ALL aquí.
+        // El RESET lo hace el pool de conexiones o se sobreescribe en la siguiente petición.
+        return joinPoint.proceed();
     }
 }

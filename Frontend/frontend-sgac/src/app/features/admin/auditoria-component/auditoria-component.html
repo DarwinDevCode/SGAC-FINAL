@@ -1,0 +1,219 @@
+<div class="gestion-container mz-wrapper ui-stack-lg">
+
+  <!-- Top bar -->
+  <div class="mz-top-bar">
+    <div class="ui-inline-actions">
+      <button class="btn btn-ghost ui-btn-ghost" (click)="cargarDatos()" [disabled]="cargando()">
+        <lucide-icon [name]="cargando() ? 'loader' : 'refresh-cw'" size="15" [class.spin]="cargando()"></lucide-icon>
+        <span>Actualizar</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2 class="title ui-h2">Registro de Auditoría</h2>
+    <p class="subtitle">Monitoreo y trazabilidad de cambios en el sistema</p>
+  </div>
+
+  <ng-container *ngIf="!errorMsg()">
+
+    <!-- ================= DASHBOARD SUPERIOR (NUEVO) ================= -->
+    <div class="dashboard-section" style="margin-bottom: 1.5rem;">
+
+      <!-- KPIs -->
+      <div class="mz-stats-bar stats-grid" *ngIf="kpis()" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1rem;">
+        <div class="stat-card ui-card">
+          <div class="stat-icon" style="color: #3b82f6; background: #eff6ff; padding: 0.5rem; border-radius: 8px;">
+            <lucide-icon name="calendar-clock" size="20"></lucide-icon>
+          </div>
+          <div>
+            <div class="stat-value">{{ kpis()?.actividadHoy | number }}</div>
+            <div class="stat-label">Movimientos Hoy</div>
+          </div>
+        </div>
+        <div class="stat-card ui-card">
+          <div class="stat-icon" style="color: #64748b; background: #f8fafc; padding: 0.5rem; border-radius: 8px;">
+            <lucide-icon name="database" size="20"></lucide-icon>
+          </div>
+          <div>
+            <div class="stat-value">{{ kpis()?.totalRegistros | number }}</div>
+            <div class="stat-label">Histórico Total</div>
+          </div>
+        </div>
+        <div class="stat-card ui-card">
+          <div class="stat-icon" style="color: #d97706; background: #fffbeb; padding: 0.5rem; border-radius: 8px;">
+            <lucide-icon name="edit-3" size="20"></lucide-icon>
+          </div>
+          <div>
+            <div class="stat-value">{{ kpis()?.totalUpdates | number }}</div>
+            <div class="stat-label">Updates</div>
+          </div>
+        </div>
+        <div class="stat-card ui-card">
+          <div class="stat-icon" style="color: #dc2626; background: #fef2f2; padding: 0.5rem; border-radius: 8px;">
+            <lucide-icon name="trash-2" size="20"></lucide-icon>
+          </div>
+          <div>
+            <div class="stat-value">{{ kpis()?.totalDeletes | number }}</div>
+            <div class="stat-label">Deletes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICA EVOLUCIÓN -->
+      <div class="ui-card" style="padding: 1.25rem;">
+        <div style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <lucide-icon name="trending-up" size="18" class="text-muted-foreground"></lucide-icon>
+          <h3 class="ui-h2" style="font-size: 1.05rem; margin: 0;">Evolución de Actividad (Últimos 14 días)</h3>
+        </div>
+        <div style="position: relative; height: 260px; width: 100%;">
+          <canvas id="auditoriaChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+    <!-- ================= FIN DASHBOARD SUPERIOR ================= -->
+
+
+    <!-- TARJETA DE FILTROS (TU CÓDIGO INTACTO) -->
+    <div class="ui-card search-card">
+      <div class="filters-grid">
+
+        <div class="search-wrapper">
+          <lucide-icon name="activity" size="15" class="search-icon"></lucide-icon>
+          <select class="input-field search-input" [ngModel]="filtroAccion()" (ngModelChange)="filtroAccion.set($event); aplicarFiltros()">
+            <option value="">Cualquier acción</option>
+            <option value="INSERT">INSERT (Creaciones)</option>
+            <option value="UPDATE">UPDATE (Modificaciones)</option>
+            <option value="DELETE">DELETE (Eliminaciones)</option>
+          </select>
+        </div>
+
+        <div class="search-wrapper">
+          <lucide-icon name="database" size="15" class="search-icon"></lucide-icon>
+          <input type="text" class="input-field search-input" placeholder="Tabla afectada..."
+                 [ngModel]="filtroTabla()" (ngModelChange)="filtroTabla.set($event)" (keyup.enter)="aplicarFiltros()" />
+        </div>
+
+        <div class="search-wrapper">
+          <lucide-icon name="user" size="15" class="search-icon"></lucide-icon>
+          <input type="number" class="input-field search-input" placeholder="ID de Usuario..."
+                 [ngModel]="filtroUsuario()" (ngModelChange)="filtroUsuario.set($event)" (keyup.enter)="aplicarFiltros()" />
+        </div>
+
+        <div class="search-wrapper">
+          <lucide-icon name="calendar" size="15" class="search-icon"></lucide-icon>
+          <input type="date" class="input-field search-input" title="Fecha Inicio"
+                 [ngModel]="filtroFechaInicio()" (ngModelChange)="filtroFechaInicio.set($event); aplicarFiltros()" />
+        </div>
+
+        <div class="search-wrapper">
+          <lucide-icon name="calendar" size="15" class="search-icon"></lucide-icon>
+          <input type="date" class="input-field search-input" title="Fecha Fin"
+                 [ngModel]="filtroFechaFin()" (ngModelChange)="filtroFechaFin.set($event); aplicarFiltros()" />
+        </div>
+
+        <button *ngIf="filtroAccion() || filtroTabla() || filtroUsuario() || filtroFechaInicio() || filtroFechaFin()"
+                class="btn btn-ghost ui-btn-ghost text-sm" style="grid-column: 1 / -1; justify-self: start;"
+                (click)="limpiarFiltros()">
+          Limpiar filtros
+        </button>
+      </div>
+
+      <div class="text-sm text-muted-foreground mt-2" style="text-align: right; border-top: 1px solid var(--border-softer); padding-top: 0.5rem;">
+        {{ totalElementos() }} registro(s) encontrados
+      </div>
+    </div>
+
+    <!-- TABLA PRINCIPAL (TU CÓDIGO INTACTO) -->
+    <div class="table-card mz-table-card" *ngIf="!cargando()">
+      <div class="mz-scroll-container">
+        <table class="mz-table">
+          <thead>
+          <tr class="mz-head-row">
+            <th class="mz-th">Fecha y Hora</th>
+            <th class="mz-th">Usuario</th>
+            <th class="mz-th">Acción</th>
+            <th class="mz-th">Tabla Afectada</th>
+            <th class="mz-th">IP Origen</th>
+            <th class="mz-th" style="text-align: center;">Detalles</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let reg of registros()" class="mz-row">
+            <td class="mz-td td-muted" style="white-space: nowrap;">{{ reg.fechaHora | date:'MMM d, y, h:mm a' }}</td>
+            <td class="mz-td">
+              <div class="mz-nombre-cell">
+                <span class="mz-nombre">{{ reg.usuarioEjecutor }}</span>
+                <span class="mz-curso text-muted-foreground">CI: {{ reg.cedula || 'N/A' }}</span>
+              </div>
+            </td>
+            <td class="mz-td">
+                <span class="badge-accion" [ngClass]="'badge-' + reg.accion.toLowerCase()">
+                  {{ reg.accion }}
+                </span>
+            </td>
+            <td class="mz-td font-medium">{{ reg.tablaAfectada }}</td>
+            <td class="mz-td td-muted" style="font-family: monospace;">{{ reg.ipOrigen }}</td>
+            <td class="mz-td" style="text-align: center;">
+              <button class="btn-icon ui-btn-soft" title="Ver diferencias" (click)="verDetalles(reg)">
+                <lucide-icon name="file-json-2" size="16"></lucide-icon>
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINADOR (TU CÓDIGO INTACTO) -->
+      <div class="mz-top-bar" style="padding: 1rem; border-top: 1px solid var(--border-softer); justify-content: space-between;">
+        <span class="text-sm td-muted">Página {{ paginaActual() + 1 }}</span>
+        <div class="ui-inline-actions">
+          <button class="btn btn-ghost ui-btn-ghost text-sm" [disabled]="paginaActual() === 0" (click)="cambiarPagina(paginaActual() - 1)">Anterior</button>
+          <button class="btn btn-ghost ui-btn-ghost text-sm" [disabled]="registros().length < pageSize()" (click)="cambiarPagina(paginaActual() + 1)">Siguiente</button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- MODAL VISUALIZADOR (TU CÓDIGO INTACTO) -->
+<div class="mz-modal-overlay" *ngIf="registroSeleccionado()" (click)="cerrarModal()">
+  <div class="mz-modal ui-card" (click)="$event.stopPropagation()">
+
+    <div class="mz-modal-header">
+      <div>
+        <h3 class="ui-h2" style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <lucide-icon name="history" size="20"></lucide-icon>
+          Detalle de Operación
+          <span class="badge-accion" [ngClass]="'badge-' + registroSeleccionado()?.accion?.toLowerCase()" style="font-size: 0.7rem;">
+            {{ registroSeleccionado()?.accion }}
+          </span>
+        </h3>
+        <p class="text-sm text-muted-foreground" style="margin: 0.25rem 0 0 0;">
+          Tabla: <strong style="color: hsl(var(--foreground))">{{ registroSeleccionado()?.tablaAfectada }}</strong> |
+          IP: <strong style="color: hsl(var(--foreground))">{{ registroSeleccionado()?.ipOrigen }}</strong>
+        </p>
+      </div>
+      <button class="btn-icon ui-btn-ghost" (click)="cerrarModal()">
+        <lucide-icon name="x" size="20"></lucide-icon>
+      </button>
+    </div>
+
+    <div class="mz-modal-body">
+      <div class="diff-grid">
+        <!-- Valor Anterior -->
+        <div class="diff-panel old-value">
+          <div class="diff-header"><lucide-icon name="file-minus" size="14"></lucide-icon> Valor Anterior</div>
+          <pre class="diff-content">{{ formatearJson(registroSeleccionado()?.valorAnterior) }}</pre>
+        </div>
+
+        <!-- Valor Nuevo -->
+        <div class="diff-panel new-value">
+          <div class="diff-header"><lucide-icon name="file-plus" size="14"></lucide-icon> Valor Nuevo</div>
+          <pre class="diff-content">{{ formatearJson(registroSeleccionado()?.valorNuevo) }}</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

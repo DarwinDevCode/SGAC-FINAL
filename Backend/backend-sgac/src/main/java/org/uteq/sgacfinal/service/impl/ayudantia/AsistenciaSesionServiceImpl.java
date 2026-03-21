@@ -30,6 +30,12 @@ public class AsistenciaSesionServiceImpl implements AsistenciaSesionService {
 
     @Override
     @Transactional
+    public RespuestaOperacionDTO<AsistenciaSesionActualResponseDTO> obtenerAsistenciaPorId(Integer idUsuario, Integer idRegistro) {
+        return asistenciaRepository.obtenerAsistenciaPorId(idUsuario, idRegistro);
+    }
+
+    @Override
+    @Transactional
     public RespuestaOperacionDTO<PlanificacionResponseDTO> planificarSesion(PlanificarSesionRequestDTO request) {
         RespuestaOperacionDTO<PlanificacionResponseDTO> response = asistenciaRepository.planificarSesion(request);
 

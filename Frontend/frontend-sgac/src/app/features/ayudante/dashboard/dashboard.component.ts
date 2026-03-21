@@ -57,7 +57,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: ({ progreso, semanal, sesiones }) => {
           this.progreso        = progreso;
           this.controlSemanal  = semanal;
-          //this.ultimasSesiones = sesiones.slice(0, 5); // top 5
         },
         error: (err: HttpErrorResponse) => {
           console.log(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar');

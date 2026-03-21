@@ -1,0 +1,208 @@
+/* Incluir aquí las variables y utilidades base de tu archivo compartido (ui-stack-lg, ui-card, etc) */
+
+/* ── Badges de Acción (Basados en tus variables de feedback pastel) ── */
+.badge-accion {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.badge-insert {
+  background: var(--green-soft-bg, #ecfdf5);
+  color: var(--green-ink, #047857);
+  border: 1px solid #bbf7d0;
+}
+
+.badge-update {
+  background: var(--amber-soft-bg, #fff7ed);
+  color: var(--amber-ink, #92400e);
+  border: 1px solid #fde68a;
+}
+
+.badge-delete {
+  background: var(--red-soft-bg, #fef2f2);
+  color: var(--red-ink, #b91c1c);
+  border: 1px solid #fecaca;
+}
+
+/* ── Modal & Diff Viewer ── */
+.mz-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: grid;
+  place-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.mz-modal {
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background: hsl(var(--card));
+  overflow: hidden;
+}
+
+.mz-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-softer, #e2e8f0);
+}
+
+.mz-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .diff-grid { grid-template-columns: 1fr; }
+}
+
+.diff-panel {
+  border-radius: var(--radius-sm, 8px);
+  border: 1px solid var(--border-softer, #e2e8f0);
+  overflow: hidden;
+}
+
+.diff-header {
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.old-value .diff-header { background: var(--red-soft-bg, #fef2f2); color: var(--red-ink, #b91c1c); border-bottom: 1px solid #fecaca; }
+.new-value .diff-header { background: var(--green-soft-bg, #ecfdf5); color: var(--green-ink, #047857); border-bottom: 1px solid #bbf7d0; }
+
+.diff-content {
+  margin: 0;
+  padding: 1rem;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.82rem;
+  background: hsl(var(--muted) / 0.1);
+  color: hsl(var(--foreground));
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+/* ── Layout de Filtros (Responsive Grid) ── */
+.search-card { padding: 1rem 1.25rem; margin-bottom: 1rem; }
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-wrapper { max-width: 100%; display: flex; position: relative; }
+.search-input { width: 100%; padding-left: 2rem; }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted-fg); }
+
+/* ── Badges Minimalistas ── */
+.badge-accion {
+  display: inline-flex; align-items: center; padding: 0.25rem 0.6rem;
+  border-radius: 6px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.03em;
+}
+.badge-insert { background: #ecfdf5; color: #047857; border: 1px solid #bbf7d0; }
+.badge-update { background: #fff7ed; color: #92400e; border: 1px solid #fde68a; }
+.badge-delete { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+/* ── Modal Diff Premium ── */
+.mz-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(3px);
+  display: grid; place-items: center; z-index: 1000; padding: 1rem;
+}
+
+.mz-modal {
+  width: 100%; max-width: 950px; max-height: 85vh;
+  display: flex; flex-direction: column;
+  background: hsl(var(--card));
+  border-radius: var(--radius-md); box-shadow: var(--shadow-m);
+}
+
+.mz-modal-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-softer);
+  background: hsl(var(--muted) / 0.1);
+}
+
+.mz-modal-body { padding: 1.5rem; overflow-y: auto; }
+
+.diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+@media (max-width: 768px) { .diff-grid { grid-template-columns: 1fr; } }
+
+.diff-panel {
+  border-radius: var(--radius-sm); border: 1px solid var(--border-softer);
+  overflow: hidden; display: flex; flex-direction: column;
+}
+
+.diff-header {
+  padding: 0.6rem 1rem; font-size: 0.8rem; font-weight: 600;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.old-value .diff-header { background: #fef2f2; color: #b91c1c; border-bottom: 1px solid #fecaca; }
+.new-value .diff-header { background: #ecfdf5; color: #047857; border-bottom: 1px solid #bbf7d0; }
+
+/* Efecto de editor de código */
+.diff-content {
+  margin: 0; padding: 1rem;
+  font-family: 'Consolas', 'Monaco', monospace; font-size: 0.82rem; line-height: 1.5;
+  background: #f8fafc; color: #334155;
+  overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+  flex: 1;
+}
+
+.old-value .diff-content { background: #fffcfc; }
+.new-value .diff-content { background: #fcfdfc; }
+/* Agrega esto al final de tu archivo CSS actual, no borres lo anterior */
+
+/* Utilidad para el grid de KPIs */
+.stats-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: hsl(var(--foreground));
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--muted-fg);
+  margin-top: 0.25rem;
+  letter-spacing: 0.05em;
+}

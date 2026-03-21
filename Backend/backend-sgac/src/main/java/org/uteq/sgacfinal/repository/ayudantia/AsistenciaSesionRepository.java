@@ -45,4 +45,13 @@ public class AsistenciaSesionRepository {
         return db.ejecutarFuncion("ayudantia", "fn_marcar_asistencia", params,
                 new TypeReference<Void>() {});
     }
+
+    public RespuestaOperacionDTO<AsistenciaSesionActualResponseDTO> obtenerAsistenciaPorId(Integer idUsuario, Integer idRegistro) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("p_id_usuario", idUsuario)
+                .addValue("p_id_registro", idRegistro);
+
+        return db.ejecutarFuncion("ayudantia", "fn_obtener_asistencia_por_id", params,
+                new TypeReference<AsistenciaSesionActualResponseDTO>() {});
+    }
 }

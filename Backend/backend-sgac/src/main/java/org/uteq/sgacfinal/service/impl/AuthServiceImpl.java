@@ -114,7 +114,7 @@ public class AuthServiceImpl implements IAuthService {
             }
         }
 
-        String finalToken = jwtService.generateToken(username, rolSolicitado.trim());
+        String finalToken = jwtService.generateToken(username, rolSolicitado.trim(), idUsuario);
 
         return UsuarioResponseDTO.builder()
                 .idUsuario(idUsuario)
@@ -122,7 +122,7 @@ public class AuthServiceImpl implements IAuthService {
                 .apellidos(apellidos)
                 .correo(correo)
                 .nombreUsuario(username)
-                .rolActual(rolSolicitado.trim())  // el contexto activo
+                .rolActual(rolSolicitado.trim())
                 .roles(listaRoles)
                 .token(finalToken)
                 .activo(true)

@@ -49,10 +49,11 @@ public class JwtService {
         return buildToken(claims, username, PRE_AUTH_EXPIRY_MS);
     }
 
-    public String generateToken(String username, String rolActual) {
+    public String generateToken(String username, String rolActual, Integer idUsuario) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_ROL,  rolActual);
         claims.put(CLAIM_TYPE, TYPE_FINAL);
+        claims.put(CLAIM_ID_USUARIO, idUsuario);
         return buildToken(claims, username, FINAL_EXPIRY_MS);
     }
 

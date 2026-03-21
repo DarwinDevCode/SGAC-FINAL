@@ -63,14 +63,12 @@
             </td>
             <td class="text-right" style="display: flex; gap: 6px; justify-content: flex-end;">
 
-              <!-- Editar -->
               <button class="btn-icon" title="Editar periodo"
                       [disabled]="p.estado === 'INACTIVO'"
                       (click)="abrirModalEditar(p)">
                 <lucide-icon name="Edit" size="16"></lucide-icon>
               </button>
 
-              <!-- Configurar cronograma (PLANIFICACION o CONFIGURADO) -->
               @if (puedeConfigurarCronograma(p)) {
                 <button class="btn-icon btn-icon--calendar"
                         title="Configurar cronograma"
@@ -79,10 +77,6 @@
                 </button>
               }
 
-              <!-- ── NUEVO: Iniciar periodo (solo CONFIGURADO) ───────────
-                   Icono Play verde — visible únicamente cuando el periodo
-                   ya tiene cronograma aprobado y está listo para iniciar.
-                   ─────────────────────────────────────────────────────── -->
               @if (puedeIniciar(p)) {
                 <button class="btn-icon btn-icon--iniciar"
                         title="Iniciar periodo — pasar a EN PROCESO"
@@ -91,7 +85,6 @@
                 </button>
               }
 
-              <!-- Importar requisitos -->
               @if (p.estado !== 'INACTIVO') {
                 <button class="btn-icon" title="Importar Requisitos"
                         (click)="abrirModalImportar(p.idPeriodoAcademico ?? 0)">
@@ -99,7 +92,6 @@
                 </button>
               }
 
-              <!-- Desactivar (solo EN PROCESO) -->
               @if (p.estado === 'EN PROCESO') {
                 <button class="btn-icon" title="Desactivar Periodo"
                         (click)="cambiarEstado(p, false)">
@@ -120,7 +112,6 @@
     </table>
   </div>
 </div>
-
 
 <!-- ============================================================ -->
 <!-- DIALOG: Stepper (Apertura + Cronograma)                     -->
@@ -302,27 +293,44 @@
                         <span class="estado-pending">Pendiente</span>
                       }
                     </td>
-                    <td class="u-td gantt-td">
+
+                    <!-- ── ZONA GANTT INTERACTIVA ────────────────────────────────────── -->
+                    <td class="u-td gantt-td" #ganttContainer>
                       @for (col of ganttColumns; track col.label + col.leftPct) {
                         <div class="gantt-vline" [style.left.%]="col.leftPct"></div>
                       }
+
                       @if (getFaseBarStyle(fase); as barStyle) {
                         <div class="gantt-bar-wrap"
+                             [class.is-dragging]="draggedFase === fase"
                              [style.left]="barStyle.left"
                              [style.width]="barStyle.width">
+
+                          <!-- Tirador Izquierdo -->
+                          <div class="gantt-resize-handle left"
+                               (mousedown)="iniciarDrag($event, fase, 'RESIZE_L', ganttContainer)"></div>
+
+                          <!-- Barra Central -->
                           <div class="gantt-bar"
                                [class.gantt-bar--error]="fase.tieneError"
                                [style.background]="getFaseColor(i)"
-                               [title]="fase.nombreFase">
+                               [title]="fase.nombreFase"
+                               (mousedown)="iniciarDrag($event, fase, 'DRAG', ganttContainer)">
                             <span class="gantt-bar-text">{{ fase.nombreFase }}</span>
                             @if (fase.tieneError) {
                               <lucide-icon name="AlertTriangle" size="10" class="gantt-bar-warn"></lucide-icon>
                             }
                           </div>
+
+                          <!-- Tirador Derecho -->
+                          <div class="gantt-resize-handle right"
+                               (mousedown)="iniciarDrag($event, fase, 'RESIZE_R', ganttContainer)"></div>
+
+                          <!-- Tooltip de Error -->
                           @if (fase.tieneError) {
                             <div class="gantt-tooltip">
                               <div class="gantt-tooltip-title">
-                                <lucide-icon name="AlertTriangle" size="12"></lucide-icon> Error de Traslape
+                                <lucide-icon name="AlertTriangle" size="12"></lucide-icon> Error de Cronograma
                               </div>
                               <div>{{ fase.mensajeError }}</div>
                             </div>
@@ -361,18 +369,12 @@
   </div>
 }
 
-
 <!-- ============================================================ -->
-<!-- MODAL: Confirmar Inicio de Periodo  ← NUEVO                 -->
-<!--                                                              -->
-<!-- Aparece solo cuando el admin pulsa el botón PlayCircle       -->
-<!-- en un periodo CONFIGURADO. Muestra nombre + fechas para      -->
-<!-- que la decisión sea consciente e irreversible.               -->
+<!-- MODAL: Confirmar Inicio de Periodo                           -->
 <!-- ============================================================ -->
 @if (modalIniciarAbierto && periodoAIniciar) {
   <div class="modal-backdrop">
     <div class="modal-box modal-confirm">
-
       <div class="modal-header">
         <h3 class="modal-title">
           <lucide-icon name="PlayCircle" size="20" style="color:#15803d;"></lucide-icon>
@@ -383,10 +385,7 @@
           <lucide-icon name="X" size="18"></lucide-icon>
         </button>
       </div>
-
-      <!-- Cuerpo con resumen del periodo a iniciar -->
       <div class="confirm-body">
-
         <div class="confirm-periodo-card">
           <lucide-icon name="Calendar" size="18" style="color:#15803d; flex-shrink:0;"></lucide-icon>
           <div>
@@ -399,7 +398,6 @@
           </div>
           <span class="status-pill configurado" style="margin-left:auto;">CONFIGURADO</span>
         </div>
-
         <div class="confirm-warning">
           <lucide-icon name="AlertTriangle" size="16" style="flex-shrink:0;"></lucide-icon>
           <div>
@@ -410,16 +408,12 @@
               periodo de forma automática.</p>
           </div>
         </div>
-
         <p style="font-size:.85rem; color:#64748b; margin:0;">
           ¿Confirmas que el cronograma está revisado y que deseas iniciar el periodo?
         </p>
       </div>
-
       <div class="form-footer">
-        <button class="btn-ghost" (click)="cerrarModalIniciar()" [disabled]="iniciandoPeriodo">
-          Cancelar
-        </button>
+        <button class="btn-ghost" (click)="cerrarModalIniciar()" [disabled]="iniciandoPeriodo">Cancelar</button>
         <button class="btn-iniciar" (click)="confirmarInicio()" [disabled]="iniciandoPeriodo">
           @if (iniciandoPeriodo) {
             <lucide-icon name="Loader" size="16" class="spin"></lucide-icon> Iniciando…
@@ -428,11 +422,9 @@
           }
         </button>
       </div>
-
     </div>
   </div>
 }
-
 
 <!-- ============================================================ -->
 <!-- MODAL: Editar Periodo                                        -->
@@ -483,7 +475,6 @@
     </div>
   </div>
 }
-
 
 <!-- ============================================================ -->
 <!-- MODAL: Importar Requisitos                                   -->

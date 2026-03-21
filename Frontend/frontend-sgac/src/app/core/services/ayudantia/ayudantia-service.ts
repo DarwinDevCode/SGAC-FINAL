@@ -22,6 +22,7 @@ import {
   providedIn: 'root'
 })
 export class AyudantiaService {
+  private readonly apiUrl = `${environment.apiUrl}/ayudantias`;
 
   private readonly URL_PARTICIPANTES = `${environment.apiUrl}/ayudantias/participantes`;
   private readonly URL_SESIONES = `${environment.apiUrl}/ayudantias/sesiones`;
@@ -101,6 +102,13 @@ export class AyudantiaService {
   obtenerPadron(): Observable<RespuestaOperacion<ParticipantePadronDTO[]>> {
     return this.http.get<RespuestaOperacion<ParticipantePadronDTO[]>>(
       this.URL_PARTICIPANTES
+    );
+  }
+
+
+  obtenerSesionPorId(idRegistro: number): Observable<RespuestaOperacion<AsistenciaSesionActualResponseDTO>> {
+    return this.http.get<RespuestaOperacion<AsistenciaSesionActualResponseDTO>>(
+      `${this.URL_SESIONES}/${idRegistro}/asistencia`
     );
   }
 }

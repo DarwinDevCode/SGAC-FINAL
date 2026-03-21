@@ -8,5 +8,6 @@ public record SesionInfoDTO(
     String fecha,
     String horario,
     String lugar,
-    @JsonAlias("puede_editar") Boolean puedeEditar
+    @JsonAlias("puede_editar") Boolean puedeEditar,
+    String estado
 ) {}

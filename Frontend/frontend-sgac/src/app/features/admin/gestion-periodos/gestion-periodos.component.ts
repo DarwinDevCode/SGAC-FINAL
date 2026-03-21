@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormsModule, ReactiveFormsModule,
@@ -78,7 +78,6 @@ export class GestionPeriodosComponent implements OnInit {
   importarConfig = { idDestino: null as number|null, idFuente: null as number|null };
 
   // ── MODAL INICIAR ──────────────────────────────────────────────────────────
-  /** Periodo seleccionado para la confirmación de inicio */
   periodoAIniciar: PeriodoAcademicoDTO | null = null;
   modalIniciarAbierto = false;
   iniciandoPeriodo = false;
@@ -116,11 +115,6 @@ export class GestionPeriodosComponent implements OnInit {
   }
 
   // ── MODAL INICIAR ──────────────────────────────────────────────────────────
-  /**
-   * Abre el modal de confirmación para iniciar un periodo CONFIGURADO.
-   * El modal muestra el nombre y las fechas del periodo para que el
-   * administrador confirme conscientemente la acción.
-   */
   abrirModalIniciar(p: PeriodoAcademicoDTO): void {
     this.periodoAIniciar    = p;
     this.modalIniciarAbierto = true;
@@ -143,7 +137,6 @@ export class GestionPeriodosComponent implements OnInit {
           this.cerrarModalIniciar();
           this.cargarPeriodos();
         } else {
-          // Errores de negocio del PL/pgSQL (otro periodo activo, etc.)
           this.toastSrv(res.mensaje ?? 'No se pudo iniciar el periodo');
         }
       },
@@ -212,6 +205,7 @@ export class GestionPeriodosComponent implements OnInit {
   }
 
   // ── PASO 2 ─────────────────────────────────────────────────────────────────
+  // ── PASO 2 ─────────────────────────────────────────────────────────────────
   cargarFases(id: number): void {
     this.cargandoFases = true;
     this.configuracionSvc.obtenerCronograma(id).subscribe({
@@ -224,11 +218,62 @@ export class GestionPeriodosComponent implements OnInit {
             fechaInicio: f.fechaInicio, fechaFin: f.fechaFin,
             tieneError: false, mensajeError: '',
           }));
+
+          // CORRECCIÓN: Detectamos si es el cronograma por defecto
+          // Es por defecto si TODAS las fases están vacías o si TODAS duran exactamente 1 día (fechaInicio === fechaFin)
+          const esCronogramaPorDefecto = this.fasesEditables.every(f =>
+            !f.fechaInicio || !f.fechaFin || f.fechaInicio === f.fechaFin
+          );
+
+          if (esCronogramaPorDefecto && this.fasesEditables.length > 0) {
+            this.distribuirFasesUniformemente();
+          }
+
           this.validarCronograma();
         } else { this.toastErr(res.mensaje ?? 'No se pudieron cargar las fases'); }
       },
       error: () => { this.cargandoFases = false; this.toastErr('Error al obtener el cronograma'); },
     });
+  }
+
+  // ── NUEVO MATEMÁTICO: DISTRIBUCIÓN UNIFORME DE FASES ───────────────────────
+  distribuirFasesUniformemente(): void {
+    const totalFases = this.fasesEditables.length;
+    const pInicio = this.toDate(this.periodoRangoInicio);
+    const pFin = this.toDate(this.periodoRangoFin);
+
+    // Días totales del periodo (+1 para incluir inicio y fin cerrados)
+    const diasTotalesPeriodo = Math.round((pFin.getTime() - pInicio.getTime()) / 86400000) + 1;
+
+    // Repartimos usando enteros
+    const diasPorFase = Math.max(1, Math.floor(diasTotalesPeriodo / totalFases));
+
+    let fechaActual = new Date(pInicio.getTime());
+
+    for (let i = 0; i < totalFases; i++) {
+      const fase = this.fasesEditables[i];
+
+      // Si nos quedamos sin días (muy raro, solo si el periodo dura muy poco), truncamos al final
+      if (fechaActual > pFin) {
+        fechaActual = new Date(pFin.getTime());
+      }
+
+      fase.fechaInicio = this.toString(fechaActual);
+
+      if (i === totalFases - 1) {
+        // La última fase absorbe todos los días sobrantes y ancla su fin al fin del periodo
+        fase.fechaFin = this.periodoRangoFin;
+      } else {
+        // Fin de la fase = inicio + dias que le tocan - 1 día
+        let finFase = this.addDays(fechaActual, diasPorFase - 1);
+        if (finFase > pFin) finFase = new Date(pFin.getTime()); // Seguro matemático
+
+        fase.fechaFin = this.toString(finFase);
+
+        // La siguiente fase empieza al día siguiente
+        fechaActual = this.addDays(finFase, 1);
+      }
+    }
   }
 
   validarCronograma(): void {
@@ -303,7 +348,6 @@ export class GestionPeriodosComponent implements OnInit {
   puedeConfigurarCronograma(p: PeriodoAcademicoDTO): boolean {
     return p.estado === 'PLANIFICACION' || p.estado === 'CONFIGURADO';
   }
-  /** Solo los periodos CONFIGURADO pueden iniciarse */
   puedeIniciar(p: PeriodoAcademicoDTO): boolean {
     return p.estado === 'CONFIGURADO';
   }
@@ -389,5 +433,94 @@ export class GestionPeriodosComponent implements OnInit {
       }
     }
     return cols;
+  }
+
+  // ── 🖱️ LÓGICA DE DRAG & DROP DEL GANTT ──────────────────────────────────────
+  draggingAction: 'DRAG' | 'RESIZE_L' | 'RESIZE_R' | null = null;
+  draggedFase: FaseEditable | null = null;
+  dragStartX: number = 0;
+  dragStartFechaInicio: Date | null = null;
+  dragStartFechaFin: Date | null = null;
+  pixelsPerDay: number = 0;
+
+  iniciarDrag(event: MouseEvent, fase: FaseEditable, accion: 'DRAG' | 'RESIZE_L' | 'RESIZE_R', container: HTMLElement): void {
+    if (!fase.fechaInicio || !fase.fechaFin || !this.periodoRangoInicio || !this.periodoRangoFin) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.draggingAction = accion;
+    this.draggedFase = fase;
+    this.dragStartX = event.clientX;
+    this.dragStartFechaInicio = this.toDate(fase.fechaInicio);
+    this.dragStartFechaFin = this.toDate(fase.fechaFin);
+
+    const pI = this.toDate(this.periodoRangoInicio);
+    const pF = this.toDate(this.periodoRangoFin);
+    const totalDays = Math.max(1, (pF.getTime() - pI.getTime()) / 86400000);
+    this.pixelsPerDay = container.getBoundingClientRect().width / totalDays;
+  }
+
+  @HostListener('document:mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (!this.draggingAction || !this.draggedFase || !this.dragStartFechaInicio || !this.dragStartFechaFin) return;
+
+    const deltaX = event.clientX - this.dragStartX;
+    const deltaDays = Math.round(deltaX / this.pixelsPerDay);
+
+    let newInicioDate = new Date(this.dragStartFechaInicio.getTime());
+    let newFinDate = new Date(this.dragStartFechaFin.getTime());
+    const limiteMin = this.toDate(this.periodoRangoInicio);
+    const limiteMax = this.toDate(this.periodoRangoFin);
+
+    if (this.draggingAction === 'DRAG') {
+      newInicioDate = this.addDays(newInicioDate, deltaDays);
+      newFinDate = this.addDays(newFinDate, deltaDays);
+
+      const duracion = Math.round((this.dragStartFechaFin.getTime() - this.dragStartFechaInicio.getTime()) / 86400000);
+
+      if (newInicioDate < limiteMin) {
+        newInicioDate = new Date(limiteMin.getTime());
+        newFinDate = this.addDays(newInicioDate, duracion);
+      }
+
+      if (newFinDate > limiteMax) {
+        newFinDate = new Date(limiteMax.getTime());
+        newInicioDate = this.addDays(newFinDate, -duracion);
+      }
+
+    } else if (this.draggingAction === 'RESIZE_L') {
+      newInicioDate = this.addDays(newInicioDate, deltaDays);
+      if (newInicioDate < limiteMin) newInicioDate = limiteMin;
+      if (newInicioDate > newFinDate) newInicioDate = newFinDate;
+    } else if (this.draggingAction === 'RESIZE_R') {
+      newFinDate = this.addDays(newFinDate, deltaDays);
+      if (newFinDate > limiteMax) newFinDate = limiteMax;
+      if (newFinDate < newInicioDate) newFinDate = newInicioDate;
+    }
+
+    this.draggedFase.fechaInicio = this.toString(newInicioDate);
+    this.draggedFase.fechaFin = this.toString(newFinDate);
+
+    this.validarCronograma();
+  }
+
+  @HostListener('document:mouseup')
+  onMouseUp(): void {
+    this.draggingAction = null;
+    this.draggedFase = null;
+  }
+
+  private toDate(str: string): Date { return new Date(str + 'T00:00:00'); }
+  private addDays(d: Date, days: number): Date {
+    const res = new Date(d.getTime());
+    res.setDate(res.getDate() + days);
+    return res;
+  }
+  private toString(d: Date): string {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
   }
 }

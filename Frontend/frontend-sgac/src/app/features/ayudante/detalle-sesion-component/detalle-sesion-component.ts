@@ -97,8 +97,9 @@ export class DetalleSesionComponent implements OnInit, OnDestroy {
     this.cargando.set(true);
     this.errorMsg.set(null);
     this.ayudantiaService
-      // @ts-ignore
-      .obtenerSesionActual(this.idRegistro)
+      //.obtenerSesionPorId(this.idRegistro) // <--- AQUÍ USAMOS EL NUEVO MÉTODO
+      //.obtenerSesionActual()
+      .obtenerSesionPorId(this.idRegistro)
       .pipe(takeUntil(this.destroy$), finalize(() => this.cargando.set(false)))
       .subscribe({
         next: (res) => {

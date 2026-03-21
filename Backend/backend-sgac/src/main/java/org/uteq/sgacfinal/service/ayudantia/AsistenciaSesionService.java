@@ -10,4 +10,5 @@ public interface AsistenciaSesionService {
     RespuestaOperacionDTO<PlanificacionResponseDTO> planificarSesion(PlanificarSesionRequestDTO request);
     RespuestaOperacionDTO<AsistenciaSesionActualResponseDTO> obtenerAsistenciaSesionActual(Integer idUsuario);
     RespuestaOperacionDTO<Void> marcarAsistencia(MarcadoAsistenciaRequestDTO request);
+    RespuestaOperacionDTO<AsistenciaSesionActualResponseDTO> obtenerAsistenciaPorId(Integer idUsuario, Integer idRegistro);
 }

@@ -69,6 +69,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/gestion-catalogos/gestion-catalogos').then(m => m.GestionCatalogosComponent)
       },
       {
+        path: 'admin/reportes-auditoria',
+        loadComponent: () => import('./features/admin/auditoria-component/auditoria-component').then(m => m.AuditoriaComponent)
+      },
+      {
         path: 'admin/carga-academica',
         loadComponent: () => import('./features/admin/carga-academica/carga-academica').then(m => m.CargaAcademicaComponent)
       },

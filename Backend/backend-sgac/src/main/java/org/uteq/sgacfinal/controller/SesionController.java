@@ -38,6 +38,24 @@ public class SesionController {
         );
     }
 
+    @GetMapping("/progreso")
+    public ResponseEntity<ProgresoGeneralResponse> progresoGeneral(
+            @RequestParam Integer idUsuario) {
+        return ResponseEntity.ok(sesionService.progresoGeneral(idUsuario));
+    }
+
+    @GetMapping("/control-semanal")
+    public ResponseEntity<ControlSemanalResponse> controlSemanal(
+            @RequestParam Integer idUsuario) {
+        return ResponseEntity.ok(sesionService.controlSemanal(idUsuario));
+    }
+
+    @GetMapping("/mis-sesiones")
+    @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
+    public ResponseEntity<List<SesionResponseDTO>> listarMisSesiones(@RequestParam Integer idAyudante) {
+        return ResponseEntity.ok(ayudantiaService.listarSesionesPorAyudante(idAyudante));
+    }
+
     @GetMapping("/{idRegistro}")
     public ResponseEntity<SesionDetalleResponse> detalleSesion(
             @RequestParam Integer idUsuario,
@@ -52,16 +70,15 @@ public class SesionController {
         return ResponseEntity.ok(sesionService.evidenciasSesion(idUsuario, idRegistro));
     }
 
-    @GetMapping("/progreso")
-    public ResponseEntity<ProgresoGeneralResponse> progresoGeneral(
-            @RequestParam Integer idUsuario) {
-        return ResponseEntity.ok(sesionService.progresoGeneral(idUsuario));
-    }
+    @GetMapping("/mis-sesiones/{idRegistroActividad}")
+    @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
+    public ResponseEntity<SesionResponseDTO> detalleMiSesion(
+            @RequestParam Integer idAyudante,
+            @PathVariable Integer idRegistroActividad) {
 
-    @GetMapping("/control-semanal")
-    public ResponseEntity<ControlSemanalResponse> controlSemanal(
-            @RequestParam Integer idUsuario) {
-        return ResponseEntity.ok(sesionService.controlSemanal(idUsuario));
+        return ayudantiaService.obtenerDetalleSesionConEvidencias(idAyudante, idRegistroActividad)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -74,26 +91,5 @@ public class SesionController {
         if (!response.getExito())
             return ResponseEntity.badRequest().body(response);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @GetMapping("/mis-sesiones")
-    @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
-    public ResponseEntity<List<SesionResponseDTO>> listarMisSesiones(@RequestParam Integer idAyudante) {
-        return ResponseEntity.ok(ayudantiaService.listarSesionesPorAyudante(idAyudante));
-    }
-
-    /**
-     * Módulo "Mis Sesiones" para AYUDANTE_CATEDRA.
-     * Detalle de una sesión específica (incluye evidencias).
-     */
-    @GetMapping("/mis-sesiones/{idRegistroActividad}")
-    @PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
-    public ResponseEntity<SesionResponseDTO> detalleMiSesion(
-            @RequestParam Integer idAyudante,
-            @PathVariable Integer idRegistroActividad) {
-
-        return ayudantiaService.obtenerDetalleSesionConEvidencias(idAyudante, idRegistroActividad)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

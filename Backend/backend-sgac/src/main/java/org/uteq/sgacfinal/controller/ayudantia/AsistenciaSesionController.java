@@ -48,4 +48,13 @@ public class AsistenciaSesionController {
             @RequestBody MarcadoAsistenciaRequestDTO request) {
         return ResponseEntity.ok(asistenciaService.marcarAsistencia(request));
     }
+
+    @GetMapping("/{idRegistro}/asistencia")
+    public ResponseEntity<RespuestaOperacionDTO<AsistenciaSesionActualResponseDTO>> obtenerAsistenciaPorId(
+            @PathVariable Integer idRegistro) {
+
+        Integer idUsuario = sesionService.getIdUsuarioAutenticado();
+        return ResponseEntity.ok(asistenciaService.obtenerAsistenciaPorId(idUsuario, idRegistro));
+    }
+
 }
