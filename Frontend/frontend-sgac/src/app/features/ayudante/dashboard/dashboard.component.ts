@@ -57,7 +57,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: ({ progreso, semanal, sesiones }) => {
           this.progreso        = progreso;
           this.controlSemanal  = semanal;
-          //this.ultimasSesiones = sesiones.slice(0, 5); // top 5
+          this.ultimasSesiones = sesiones.slice(0, 5).map(s => ({
+            idRegistro:       s.idRegistroActividad,
+            fecha:            s.fecha,
+            temaTratado:      s.temaTratado,
+            horasDedicadas:   s.horasDedicadas ?? 0,
+            numeroAsistentes: 0, // No viene en el DTO de listado general
+            estado:           s.nombreEstado,
+            tieneObservacion: !!s.observacionDocente,
+            totalEvidencias:  s.evidencias?.length ?? 0
+          }));
         },
         error: (err: HttpErrorResponse) => {
           console.log(err.error?.data?.message || err.error?.message || err.message || 'Error al cargar');

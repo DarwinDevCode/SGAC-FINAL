@@ -23,6 +23,10 @@ import org.uteq.sgacfinal.repository.ayudantia.RegistroActividadRepository;
 import org.uteq.sgacfinal.repository.ayudantia.SesionRepository;
 import org.uteq.sgacfinal.service.EmailService;
 import org.uteq.sgacfinal.service.ayudantia.SesionService;
+import org.uteq.sgacfinal.repository.ProgresoRepository;
+import org.uteq.sgacfinal.dto.response.ProgresoGeneralResponse;
+import org.uteq.sgacfinal.dto.response.ControlSemanalResponse;
+import java.math.BigDecimal;
 import org.uteq.sgacfinal.service.cloudinary.CloudinaryUploadServiceImpl;
 
 import java.time.LocalDate;
@@ -44,6 +48,7 @@ public class SesionServiceConfigImpl implements SesionService {
     private final EmailService emailService;
     private final NotificacionSesionWsService wsService;
     private final ObjectMapper objectMapper;
+    private final ProgresoRepository progresoRepository;
 
     @Override
     @Transactional
@@ -341,6 +346,92 @@ public class SesionServiceConfigImpl implements SesionService {
     // ═════════════════════════════════════════════════════════════════════
     // HELPERS — Navegación correcta del grafo de entidades
     // ═════════════════════════════════════════════════════════════════════
+
+    @Override
+    public ProgresoGeneralResponse progresoGeneral(Integer idUsuario) {
+        // Resolvemos el ID de ayudantía para este usuario, ya que las funciones DB suelen esperarlo
+        Integer idAyudantia = sesionRepo.obtenerIdAyudantiaPorUsuario(idUsuario);
+        
+        List<Object[]> resultado = progresoRepository.progresoGeneral(idAyudantia);
+        if (resultado.isEmpty()) {
+            throw new RecursoNoEncontradoException(
+                    "No se encontró información de progreso para la ayudantía del usuario: " + idUsuario
+            );
+        }
+        return mapearProgresoGeneral(resultado.get(0));
+    }
+
+    @Override
+    public ControlSemanalResponse controlSemanal(Integer idUsuario) {
+        // Resolvemos el ID de ayudantía para este usuario
+        Integer idAyudantia = sesionRepo.obtenerIdAyudantiaPorUsuario(idUsuario);
+        
+        List<Object[]> resultado = progresoRepository.controlSemanal(idAyudantia);
+        if (resultado.isEmpty()) {
+            throw new RecursoNoEncontradoException(
+                    "No se encontró información de control semanal para la ayudantía del usuario: " + idUsuario
+            );
+        }
+        return mapearControlSemanal(resultado.get(0));
+    }
+
+    private ProgresoGeneralResponse mapearProgresoGeneral(Object[] fila) {
+        return ProgresoGeneralResponse.builder()
+                .horasAprobadas(toBigDecimal(    fila[0]))
+                .horasPendientes(toBigDecimal(   fila[1]))
+                .horasObservadas(toBigDecimal(   fila[2]))
+                .horasTotalesRegistradas(toBigDecimal(fila[3]))
+                .horasMaximas(toBigDecimal(      fila[4]))
+                .porcentajeAvance(toBigDecimal(  fila[5]))
+                .totalSesiones(toLong(           fila[6]))
+                .sesionesAprobadas(toLong(       fila[7]))
+                .sesionesPendientes(toLong(      fila[8]))
+                .sesionesObservadas(toLong(      fila[9]))
+                .build();
+    }
+
+    private ControlSemanalResponse mapearControlSemanal(Object[] fila) {
+        return ControlSemanalResponse.builder()
+                .semanaInicio(toLocalDate(       fila[0]))
+                .semanaFin(toLocalDate(          fila[1]))
+                .horasRegistradas(toBigDecimal(  fila[2]))
+                .horasAprobadasSemana(toBigDecimal(fila[3]))
+                .horasPendientesSemana(toBigDecimal(fila[4]))
+                .limiteSemanal(toBigDecimal(     fila[5]))
+                .horasDisponibles(toBigDecimal(  fila[6]))
+                .superaLimite(toBoolean(         fila[7]))
+                .sesionesSemana(toLong(          fila[8]))
+                .build();
+    }
+
+    private BigDecimal toBigDecimal(Object o) {
+        if (o == null) return BigDecimal.ZERO;
+        if (o instanceof BigDecimal) return (BigDecimal) o;
+        if (o instanceof Number) return new BigDecimal(((Number) o).doubleValue());
+        try { return new BigDecimal(o.toString()); } catch (Exception e) { return BigDecimal.ZERO; }
+    }
+
+    private Long toLong(Object o) {
+        if (o == null) return 0L;
+        if (o instanceof Long) return (Long) o;
+        if (o instanceof Number) return ((Number) o).longValue();
+        try { return Long.parseLong(o.toString()); } catch (Exception e) { return 0L; }
+    }
+
+    private Boolean toBoolean(Object o) {
+        if (o == null) return false;
+        if (o instanceof Boolean) return (Boolean) o;
+        if (o instanceof Number) return ((Number) o).intValue() != 0;
+        return Boolean.parseBoolean(o.toString());
+    }
+
+    private LocalDate toLocalDate(Object o) {
+        if (o == null) return null;
+        if (o instanceof java.sql.Date) return ((java.sql.Date) o).toLocalDate();
+        if (o instanceof java.sql.Timestamp) return ((java.sql.Timestamp) o).toLocalDateTime().toLocalDate();
+        if (o instanceof LocalDate) return (LocalDate) o;
+        try { return LocalDate.parse(o.toString()); } catch (Exception e) { return null; }
+    }
 
     private Usuario resolverDocente(RegistroActividad actividad) {
         return actividad

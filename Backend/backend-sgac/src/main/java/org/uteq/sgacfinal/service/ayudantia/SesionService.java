@@ -5,6 +5,7 @@ import org.uteq.sgacfinal.dto.request.CompletarSesionRequestDTO;
 import org.uteq.sgacfinal.dto.request.EvaluarSesionRequest;
 import org.uteq.sgacfinal.dto.request.PlanificarSesionRequest;
 import org.uteq.sgacfinal.dto.response.SesionDTO;
+import org.uteq.sgacfinal.dto.response.*;
 import org.uteq.sgacfinal.dto.response.CompletarSesionResponseDTO;
 import org.uteq.sgacfinal.dto.response.EvaluarSesionResponse;
 import org.uteq.sgacfinal.dto.response.PlanificarSesionResponseDTO;
@@ -36,4 +37,8 @@ public interface SesionService {
             Integer   idAyudantia);
 
     SesionDTO detalleSesion(Integer idUsuario, Integer idRegistroActividad);
+
+    // Métodos para el Dashboard del Ayudante
+    ProgresoGeneralResponse progresoGeneral(Integer idUsuario);
+    ControlSemanalResponse controlSemanal(Integer idUsuario);
 }

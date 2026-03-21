@@ -13,6 +13,8 @@ import org.uteq.sgacfinal.dto.request.CompletarSesionRequestDTO;
 import org.uteq.sgacfinal.dto.request.EvaluarSesionRequest;
 import org.uteq.sgacfinal.dto.request.PlanificarSesionRequest;
 import org.uteq.sgacfinal.dto.response.SesionDTO;
+import org.uteq.sgacfinal.dto.response.ProgresoGeneralResponse;
+import org.uteq.sgacfinal.dto.response.ControlSemanalResponse;
 import org.uteq.sgacfinal.dto.response.CompletarSesionResponseDTO;
 import org.uteq.sgacfinal.dto.response.EvaluarSesionResponse;
 import org.uteq.sgacfinal.dto.response.PlanificarSesionResponseDTO;
@@ -102,6 +104,20 @@ public class SesionConfigController {
 
         Integer idUsuario = extraerIdUsuario(auth);
         return ResponseEntity.ok(sesionService.detalleSesion(idUsuario, idRegistro));
+    }
+
+    @GetMapping("/progreso")
+    @PreAuthorize("hasAnyAuthority('AYUDANTE_CATEDRA')")
+    public ResponseEntity<ProgresoGeneralResponse> progresoGeneral(
+            @RequestParam Integer idUsuario) {
+        return ResponseEntity.ok(sesionService.progresoGeneral(idUsuario));
+    }
+
+    @GetMapping("/control-semanal")
+    @PreAuthorize("hasAnyAuthority('AYUDANTE_CATEDRA')")
+    public ResponseEntity<ControlSemanalResponse> controlSemanal(
+            @RequestParam Integer idUsuario) {
+        return ResponseEntity.ok(sesionService.controlSemanal(idUsuario));
     }
 
     private Integer extraerIdUsuario(Authentication auth) {
