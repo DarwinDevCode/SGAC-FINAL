@@ -73,11 +73,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this.decanoService.obtenerEstadisticasPorFacultad(decano.idFacultad).subscribe({
               next: (stats) => {
                 this.estadisticas = stats;
-                this.configurarGraficos(stats);
+
+                // PROTECCIÓN 1: Asegurarnos de que stats exista antes de configurar
+                if (stats) {
+                  this.configurarGraficos(stats);
+                }
+
                 this.loading = false;
               },
               error: () => {
-                // Si falla el endpoint nuevo, al menos mostramos error genérico
                 this.errorMensaje = 'No se pudieron cargar las estadísticas de la facultad.';
                 this.loading = false;
               }
@@ -94,9 +98,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private configurarGraficos(stats: DecanoEstadisticasDTO) {
+    // PROTECCIÓN 2: Si el backend envía null, usamos un arreglo vacío '|| []'
+    const actividad = stats.actividadPorCoordinador || [];
+
     // 1. Gráfico de Barras: Actividad por Coordinador
-    const labelsCoordinadores = stats.actividadPorCoordinador.map(c => c.nombreCoordinador);
-    const dataCoordinadores = stats.actividadPorCoordinador.map(c => c.totalConvocatorias);
+    const labelsCoordinadores = actividad.map(c => c.nombreCoordinador);
+    const dataCoordinadores = actividad.map(c => c.totalConvocatorias);
 
     this.barChartData = {
       labels: labelsCoordinadores,
@@ -111,12 +118,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       ]
     };
 
+    // PROTECCIÓN 3: Si los números vienen null, usamos '0' por defecto
+    const activas = stats.convocatoriasActivas || 0;
+    const inactivas = stats.convocatoriasInactivas || 0;
+
     // 2. Gráfico Doughnut: Estado de Convocatorias
     this.doughnutChartData = {
       labels: ['Activas', 'Inactivas'],
       datasets: [
         {
-          data: [stats.convocatoriasActivas, stats.convocatoriasInactivas],
+          data: [activas, inactivas],
           backgroundColor: ['#10b981', '#ef4444'], // green-500, red-500
           hoverBackgroundColor: ['#059669', '#dc2626'] // green-600, red-600
         }

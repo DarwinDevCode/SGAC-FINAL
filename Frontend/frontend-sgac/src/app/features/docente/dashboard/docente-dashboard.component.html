@@ -1,186 +1,191 @@
-<div class="gestion-container">
+<div class="dc-doc-dashboard">
 
-  <!-- CABECERA -->
-  <div class="section-header">
-    <div class="title-container">
-      <h2 class="title">Dashboard Docente</h2>
-      <p class="subtitle">Resumen general de tus convocatorias y actividades pendientes.</p>
+  <!-- ── HEADER ── -->
+  <div class="dc-doc-header">
+    <div>
+      <h2 class="dc-doc-title">Panel del Docente</h2>
+      <p class="dc-doc-subtitle">Resumen de tus convocatorias, ayudantes y actividades pendientes</p>
     </div>
-
-    <button class="btn btn-primary" type="button" (click)="nuevaConvocatoria()">
-      <lucide-icon name="Plus" size="16"></lucide-icon>
-      Nueva Convocatoria
-    </button>
+    <span class="badge blue">DOCENTE</span>
   </div>
 
-  <!-- Error global -->
-  @if (error) {
-    <div class="alert-banner error">
-      <lucide-icon name="AlertCircle" size="18"></lucide-icon>
-      {{ error }}
+  <!-- ── LOADING ── -->
+  @if (loading) {
+    <div class="dc-doc-loading">
+      <div class="dc-doc-spinner"></div>
+      <p>Cargando panel...</p>
     </div>
   }
 
-  <!-- CARGA (Skeletons) -->
-  @if (loading) {
-    <div class="stats-grid cols-4">
-      @for (i of [1,2,3,4]; track i) {
-        <div class="stat-card">
-          <div class="sk-circle"></div>
-          <div class="sk-lines">
-            <div class="sk-line w-50"></div>
-            <div class="sk-line w-70"></div>
-          </div>
-        </div>
-      }
+  <!-- ── ERROR ── -->
+  @if (!loading && error) {
+    <div class="dc-doc-error">
+      <lucide-icon name="alert-circle" size="40" style="color:#f59e0b"></lucide-icon>
+      <p>{{ error }}</p>
     </div>
+  }
 
-    <div class="bottom-grid">
-      <div class="table-card"><div class="sk-block" style="height: 220px;"></div></div>
-      <div class="table-card"><div class="sk-block" style="height: 220px;"></div></div>
-    </div>
+  @if (!loading && !error && dashboard) {
 
-  } @else if (resumen) {
+    <!-- ── KPI GRID ── -->
+    <div class="dc-doc-kpi-grid">
 
-    <!-- STAT CARDS -->
-    <div class="stats-grid cols-4">
-
-      <div class="stat-card">
-        <div class="stat-icon blue">
-          <lucide-icon name="Briefcase" size="22"></lucide-icon>
+      <div class="dc-doc-kpi-card dc-doc-kpi-blue">
+        <div class="dc-doc-kpi-icon">
+          <lucide-icon name="file-text" size="22"></lucide-icon>
         </div>
-        <div>
-          <div class="stat-value">{{ resumen.totalConvocatoriasActivas }}</div>
-          <div class="stat-label">Convocatorias abiertas</div>
+        <div class="dc-doc-kpi-body">
+          <div class="dc-doc-kpi-value">{{ dashboard.totalConvocatoriasActivas }}</div>
+          <div class="dc-doc-kpi-label">Convocatorias Activas</div>
         </div>
+        <button class="dc-doc-kpi-action" (click)="irA('/docente')" title="Ver convocatorias">
+          <lucide-icon name="chevron-right" size="16"></lucide-icon>
+        </button>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon violet">
-          <lucide-icon name="ClipboardList" size="22"></lucide-icon>
+      <div class="dc-doc-kpi-card dc-doc-kpi-violet">
+        <div class="dc-doc-kpi-icon">
+          <lucide-icon name="users" size="22"></lucide-icon>
         </div>
-        <div>
-          <div class="stat-value">{{ resumen.totalPostulacionesPendientes }}</div>
-          <div class="stat-label">Postulaciones pendientes</div>
+        <div class="dc-doc-kpi-body">
+          <div class="dc-doc-kpi-value">{{ dashboard.totalAyudantesAsignados }}</div>
+          <div class="dc-doc-kpi-label">Ayudantes Asignados</div>
         </div>
+        <button class="dc-doc-kpi-action" (click)="irA('/docente/mis-ayudantes')" title="Ver ayudantes">
+          <lucide-icon name="chevron-right" size="16"></lucide-icon>
+        </button>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon green">
-          <lucide-icon name="Users" size="22"></lucide-icon>
+      <div class="dc-doc-kpi-card dc-doc-kpi-amber"
+           [class.dc-doc-kpi-alert]="dashboard.totalPostulacionesPendientes > 0">
+        <div class="dc-doc-kpi-icon">
+          <lucide-icon name="clock" size="22"></lucide-icon>
         </div>
-        <div>
-          <div class="stat-value">{{ resumen.totalAyudantesAsignados }}</div>
-          <div class="stat-label">Ayudantes asignados</div>
+        <div class="dc-doc-kpi-body">
+          <div class="dc-doc-kpi-value">{{ dashboard.totalPostulacionesPendientes }}</div>
+          <div class="dc-doc-kpi-label">Postulaciones Pendientes</div>
         </div>
+        @if (dashboard.totalPostulacionesPendientes > 0) {
+          <span class="dc-doc-alert-dot"></span>
+        }
       </div>
 
-      <div class="stat-card" [class.stat-alert]="resumen.totalActividadesPorRevisar > 0">
-        <div class="stat-icon" [class]="resumen.totalActividadesPorRevisar > 0 ? 'amber' : 'green'">
-          <lucide-icon [name]="resumen.totalActividadesPorRevisar > 0 ? 'AlertCircle' : 'ShieldCheck'" size="22"></lucide-icon>
+      <div class="dc-doc-kpi-card dc-doc-kpi-rose"
+           [class.dc-doc-kpi-alert]="dashboard.totalActividadesPorRevisar > 0">
+        <div class="dc-doc-kpi-icon">
+          <lucide-icon name="clipboard-check" size="22"></lucide-icon>
         </div>
-        <div>
-          <div class="stat-value">{{ resumen.totalActividadesPorRevisar }}</div>
-          <div class="stat-label">Actividades por revisar</div>
+        <div class="dc-doc-kpi-body">
+          <div class="dc-doc-kpi-value">{{ dashboard.totalActividadesPorRevisar }}</div>
+          <div class="dc-doc-kpi-label">Actividades por Revisar</div>
         </div>
-      </div>
-
-    </div>
-
-    <!-- GRID INFERIOR: Acciones rápidas + Actividades recientes -->
-    <div class="bottom-grid">
-
-      <div class="quick-access">
-        <h3 class="section-subtitle">Accesos rápidos</h3>
-        <div class="actions-grid cols-2">
-
-          <button type="button" class="action-card green" (click)="nuevaConvocatoria()">
-            <div class="action-icon green">
-              <lucide-icon name="PlusCircle" size="20"></lucide-icon>
-            </div>
-            <div>
-              <div class="action-title">Nueva Convocatoria</div>
-              <div class="action-desc">Crear un nuevo proceso de ayudantía</div>
-            </div>
-          </button>
-
-          <button type="button" class="action-card blue" (click)="evaluarPostulantes()">
-            <div class="action-icon blue">
-              <lucide-icon name="Users" size="20"></lucide-icon>
-            </div>
-            <div>
-              <div class="action-title">Evaluar postulantes</div>
-              <div class="action-desc">Revisar y calificar postulaciones</div>
-            </div>
-          </button>
-
-          <button type="button" class="action-card amber" (click)="reportes()">
-            <div class="action-icon amber">
-              <lucide-icon name="FileText" size="20"></lucide-icon>
-            </div>
-            <div>
-              <div class="action-title">Reportes</div>
-              <div class="action-desc">Exportar información y métricas</div>
-            </div>
-          </button>
-
-          <button type="button" class="action-card violet" routerLink="/notificaciones">
-            <div class="action-icon violet">
-              <lucide-icon name="Bell" size="20"></lucide-icon>
-            </div>
-            <div>
-              <div class="action-title">Notificaciones</div>
-              <div class="action-desc">Revisar avisos del sistema</div>
-            </div>
-          </button>
-
-        </div>
-      </div>
-
-      <div class="ultimas-sesiones">
-        <div class="ultimas-header">
-          <h3 class="section-subtitle">Actividades recientes</h3>
-          <a class="ver-todas-link" routerLink="/docente/actividades">
-            Ver todas <lucide-icon name="ArrowRight" size="14"></lucide-icon>
-          </a>
-        </div>
-
-        @if (resumen.ultimasActividades.length === 0) {
-          <div class="empty-sesiones">
-            <lucide-icon name="ClipboardCheck" size="36"></lucide-icon>
-            <p class="m-0">No hay actividades recientes por revisar.</p>
-          </div>
-        } @else {
-          <div class="sesiones-list">
-            @for (a of resumen.ultimasActividades; track a.idRegistro) {
-              <div class="sesion-item" (click)="revisarActividad(a.idRegistro)">
-                <div class="sesion-fecha">
-                  <div class="fecha-dia">{{ a.fecha | date:'dd' }}</div>
-                  <div class="fecha-mes">{{ a.fecha | date:'MMM' }}</div>
-                </div>
-
-                <div class="sesion-info">
-                  <div class="sesion-tema">
-                    <lucide-icon name="ClipboardList" size="14" class="text-muted-foreground"></lucide-icon>
-                    {{ a.tema }}
-                  </div>
-                  <div class="sesion-meta">
-                    <span class="text-xs text-muted-foreground">{{ a.nombreEstudiante }}</span>
-                    <span class="id-pill">#{{ a.idRegistro }}</span>
-                  </div>
-                </div>
-
-                <button class="btn-icon" type="button" (click)="$event.stopPropagation(); revisarActividad(a.idRegistro)">
-                  <lucide-icon name="ArrowRight" size="16"></lucide-icon>
-                </button>
-              </div>
-            }
-          </div>
+        @if (dashboard.totalActividadesPorRevisar > 0) {
+          <span class="dc-doc-alert-dot"></span>
         }
       </div>
 
     </div>
 
+    <!-- ── ÚLTIMAS ACTIVIDADES + QUICK ACTIONS ── -->
+    <div class="dc-doc-main-grid">
+
+      <!-- Tabla de últimas actividades -->
+      <div class="dc-doc-card dc-doc-wide">
+        <div class="dc-doc-card-header">
+          <h3>Últimas Actividades Registradas</h3>
+          <p>Actividad reciente de tus ayudantes</p>
+        </div>
+
+        @if (dashboard.ultimasActividades && dashboard.ultimasActividades.length > 0) {
+          <div class="dc-doc-activity-list">
+            @for (act of dashboard.ultimasActividades; track act.idRegistro) {
+              <div class="dc-doc-activity-row">
+                <div class="dc-doc-activity-avatar">
+                  {{ act.nombreEstudiante.charAt(0).toUpperCase() }}
+                </div>
+                <div class="dc-doc-activity-info">
+                  <span class="dc-doc-activity-nombre">{{ act.nombreEstudiante }}</span>
+                  <span class="dc-doc-activity-tema">{{ act.tema }}</span>
+                </div>
+                <div class="dc-doc-activity-meta">
+                  <span class="dc-doc-activity-fecha">{{ formatFecha(act.fecha) }}</span>
+                  <span class="dc-doc-activity-badge" [class]="getEstadoClass(act.fecha)">
+                            {{ getEstadoLabel(act.fecha) }}
+                        </span>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="dc-doc-empty">
+            <lucide-icon name="clipboard-list" size="36"></lucide-icon>
+            <p>No hay actividades recientes</p>
+          </div>
+        }
+      </div>
+
+      <!-- Acciones rápidas -->
+      <div class="dc-doc-actions-col">
+        <div class="dc-doc-card">
+          <div class="dc-doc-card-header">
+            <h3>Acceso Rápido</h3>
+            <p>Módulos principales del docente</p>
+          </div>
+          <div class="dc-doc-shortcut-grid">
+            <button class="dc-doc-shortcut" (click)="irA('/comision/sala')">
+              <div class="dc-doc-sc-icon blue">
+                <lucide-icon name="mic-vocal" size="22"></lucide-icon>
+              </div>
+              <span class="dc-doc-sc-label">Evaluar Postulante</span>
+              <span class="dc-doc-sc-sub">Sala de evaluación</span>
+            </button>
+
+            <button class="dc-doc-shortcut" (click)="irA('/resultados-evaluacion')">
+              <div class="dc-doc-sc-icon amber">
+                <lucide-icon name="trophy" size="22"></lucide-icon>
+              </div>
+              <span class="dc-doc-sc-label">Ver Resultados</span>
+              <span class="dc-doc-sc-sub">Ranking final</span>
+            </button>
+
+            <button class="dc-doc-shortcut" (click)="irA('/documentos-visor')">
+              <div class="dc-doc-sc-icon violet">
+                <lucide-icon name="library" size="22"></lucide-icon>
+              </div>
+              <span class="dc-doc-sc-label">Documentos</span>
+              <span class="dc-doc-sc-sub">Visor de documentos</span>
+            </button>
+
+            <button class="dc-doc-shortcut" (click)="irA('/comision')">
+              <div class="dc-doc-sc-icon emerald">
+                <lucide-icon name="gavel" size="22"></lucide-icon>
+              </div>
+              <span class="dc-doc-sc-label">Tribunal</span>
+              <span class="dc-doc-sc-sub">Comisión de selección</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Notificación si hay pendientes -->
+        @if (dashboard.totalActividadesPorRevisar > 0 || dashboard.totalPostulacionesPendientes > 0) {
+          <div class="dc-doc-alert-card">
+            <lucide-icon name="triangle-alert" size="20" style="color:#b45309;flex-shrink:0"></lucide-icon>
+            <div>
+              <p class="dc-doc-alert-title">Atención requerida</p>
+              <p class="dc-doc-alert-body">
+                @if (dashboard.totalActividadesPorRevisar > 0) {
+                  {{ dashboard.totalActividadesPorRevisar }} actividad(es) esperando tu revisión.<br>
+                }
+                @if (dashboard.totalPostulacionesPendientes > 0) {
+                  {{ dashboard.totalPostulacionesPendientes }} postulación(es) sin procesar.
+                }
+              </p>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
   }
 
 </div>

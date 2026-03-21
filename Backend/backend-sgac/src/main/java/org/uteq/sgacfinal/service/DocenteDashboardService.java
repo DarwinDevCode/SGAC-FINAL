@@ -5,4 +5,3 @@ import org.uteq.sgacfinal.dto.response.DocenteDashboardDTO;
 public interface DocenteDashboardService {
     DocenteDashboardDTO obtenerResumen();
 }
-

@@ -22,4 +22,3 @@ public class DocenteDashboardController {
         return ResponseEntity.ok(docenteDashboardService.obtenerResumen());
     }
 }
-

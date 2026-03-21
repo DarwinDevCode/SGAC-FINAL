@@ -1,130 +1,130 @@
 /* Reuse common patterns */
 .gestion-container {
-    padding: 1rem;
+  padding: 1rem;
 }
 
 .section-header {
-    margin-bottom: 2rem;
+  margin-bottom: 2rem;
 }
 
 .title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
 }
 
 .subtitle {
-    font-size: 0.9rem;
-    color: #64748b;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .info-message {
-    text-align: center;
-    padding: 3rem;
-    color: #64748b;
+  text-align: center;
+  padding: 3rem;
+  color: #64748b;
 }
 
 .error-state {
-    text-align: center;
-    padding: 4rem 2rem;
-    border-radius: 8px;
+  text-align: center;
+  padding: 4rem 2rem;
+  border-radius: 8px;
 }
 
 .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
 }
 
 .metric-card {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
 }
 
 .metric-icon-box {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .metric-info {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .metric-label {
-    font-size: 0.85rem;
-    color: #64748b;
-    font-weight: 500;
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 500;
 }
 
 .metric-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: #0f172a;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .action-card {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .table-card {
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    overflow: hidden;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
 }
 
 /* ---- P10: Panel notificaciones masivas ---- */
 .notif-masiva-card {
-    margin-top: 2rem;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
-    padding: 1.25rem 1.5rem;
+  margin-top: 2rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .notif-masiva-header {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    font-size: .875rem;
-    font-weight: 700;
-    color: #0f172a;
-    margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .875rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 1rem;
 }
 
 .notif-masiva-body {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .75rem;
-    align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  align-items: flex-start;
 }
 
 .resp-masiva {
-    font-size: .8rem;
-    margin: .4rem 0 0;
+  font-size: .8rem;
+  margin: .4rem 0 0;
 }
 
 .resp-masiva.ok {
-    color: #16a34a;
+  color: #16a34a;
 }
 
 .resp-masiva.err {
-    color: #ef4444;
+  color: #ef4444;
 }
 
 /* Stat card rose */
 .stat-icon.rose {
-    background: #fff1f2;
-    color: #e11d48;
+  background: #fff1f2;
+  color: #e11d48;
 }

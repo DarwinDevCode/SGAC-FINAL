@@ -22,6 +22,11 @@ public class DecanoController {
 
     private final IDecanoService decanoService;
 
+    @GetMapping
+    public ResponseEntity<List<DecanoResponseDTO>> findAll() {
+        return ResponseEntity.ok(decanoService.listarActivos());
+    }
+
     @GetMapping("/facultad/{idFacultad}/estadisticas")
     public ResponseEntity<DecanoEstadisticasDTO> getEstadisticas(@PathVariable Integer idFacultad) {
         return ResponseEntity.ok(decanoService.obtenerEstadisticasPorFacultad(idFacultad));
@@ -37,9 +42,9 @@ public class DecanoController {
         return ResponseEntity.ok(decanoService.reporteAuditoriaPorFacultad(idFacultad));
     }
 
-    @GetMapping
-    public ResponseEntity<List<DecanoResponseDTO>> findAll() {
-        return ResponseEntity.ok(decanoService.listarActivos());
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<DecanoResponseDTO> findByUsuario(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(decanoService.buscarPorUsuario(idUsuario));
     }
 
     @GetMapping("/{id}")
@@ -47,10 +52,6 @@ public class DecanoController {
         return ResponseEntity.ok(decanoService.buscarPorId(id));
     }
 
-    @GetMapping("/usuario/{idUsuario}")
-    public ResponseEntity<DecanoResponseDTO> findByUsuario(@PathVariable Integer idUsuario) {
-        return ResponseEntity.ok(decanoService.buscarPorUsuario(idUsuario));
-    }
 
     @PostMapping
     public ResponseEntity<DecanoResponseDTO> create(@Valid @RequestBody DecanoRequestDTO request) {

@@ -12,4 +12,3 @@ export interface DocenteDashboardDTO {
   totalActividadesPorRevisar: number;
   ultimasActividades: DocenteDashboardUltimaActividadDTO[];
 }
-

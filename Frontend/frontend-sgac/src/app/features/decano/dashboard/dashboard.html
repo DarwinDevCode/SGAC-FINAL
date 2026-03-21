@@ -1,104 +1,104 @@
 <div class="gestion-container">
-    <div class="section-header">
-        <div class="title-container">
-            <h2 class="title">Decanato</h2>
-            <p class="subtitle" *ngIf="decanoData">
-                {{ decanoData.nombreCompletoUsuario }} — {{ decanoData.nombreFacultad }}
-            </p>
-        </div>
-        <span class="badge amber">DECANO</span>
+  <div class="section-header">
+    <div class="title-container">
+      <h2 class="title">Decanato</h2>
+      <p class="subtitle" *ngIf="decanoData">
+        {{ decanoData.nombreCompletoUsuario }} — {{ decanoData.nombreFacultad }}
+      </p>
     </div>
+    <span class="badge amber">DECANO</span>
+  </div>
 
-    @if (loading) {
+  @if (loading) {
     <div class="info-message">
-        <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
-        <p style="margin-top:.75rem">Cargando panel...</p>
+      <lucide-icon name="loader-2" class="animate-spin" size="32"></lucide-icon>
+      <p style="margin-top:.75rem">Cargando panel...</p>
     </div>
-    } @else if (errorMensaje) {
+  } @else if (errorMensaje) {
     <div class="error-state" style="padding:3rem 1rem">
-        <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
-        <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
+      <lucide-icon name="alert-circle" size="48" style="color:#f59e0b"></lucide-icon>
+      <p style="margin-top:.75rem;font-weight:600">{{ errorMensaje }}</p>
     </div>
-    } @else {
+  } @else {
 
     <!-- Stats -->
     <div class="stats-grid cols-3">
-        <div class="stat-card">
-            <div class="stat-icon amber"><lucide-icon name="file-text" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas?.totalConvocatorias || 0 }}</div>
-                <div class="stat-label">Convocatorias Totales</div>
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon amber"><lucide-icon name="file-text" size="22"></lucide-icon></div>
+        <div>
+          <div class="stat-value">{{ estadisticas?.totalConvocatorias || 0 }}</div>
+          <div class="stat-label">Convocatorias Totales</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas?.totalPostulantes || 0 }}</div>
-                <div class="stat-label">Postulantes Totales</div>
-            </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon blue"><lucide-icon name="users" size="22"></lucide-icon></div>
+        <div>
+          <div class="stat-value">{{ estadisticas?.totalPostulantes || 0 }}</div>
+          <div class="stat-label">Postulantes Totales</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon green"><lucide-icon name="file-signature" size="22"></lucide-icon></div>
-            <div>
-                <div class="stat-value">{{ estadisticas?.postulantesEnEvaluacion || 0 }}</div>
-                <div class="stat-label">En Evaluación / Comisiones</div>
-            </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green"><lucide-icon name="file-signature" size="22"></lucide-icon></div>
+        <div>
+          <div class="stat-value">{{ estadisticas?.postulantesEnEvaluacion || 0 }}</div>
+          <div class="stat-label">En Evaluación / Comisiones</div>
         </div>
+      </div>
     </div>
 
     <!-- Charts -->
     @if (estadisticas && estadisticas.actividadPorCoordinador.length > 0) {
-    <div class="charts-wrapper">
+      <div class="charts-wrapper">
         <div class="chart-card">
-            <div class="chart-header">
-                <h3>Actividad por Coordinador</h3>
-                <p>Volumen de convocatorias gestionadas</p>
-            </div>
-            <div class="chart-container">
-                <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
-                </canvas>
-            </div>
+          <div class="chart-header">
+            <h3>Actividad por Coordinador</h3>
+            <p>Volumen de convocatorias gestionadas</p>
+          </div>
+          <div class="chart-container">
+            <canvas baseChart [data]="barChartData" [options]="barChartOptions" [type]="barChartType">
+            </canvas>
+          </div>
         </div>
         <div class="chart-card doughnut-card">
-            <div class="chart-header">
-                <h3>Resumen Convocatorias</h3>
-                <p>Activas vs Inactivas</p>
-            </div>
-            <div class="chart-container">
-                <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions"
+          <div class="chart-header">
+            <h3>Resumen Convocatorias</h3>
+            <p>Activas vs Inactivas</p>
+          </div>
+          <div class="chart-container">
+            <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions"
                     [type]="doughnutChartType">
-                </canvas>
-            </div>
+            </canvas>
+          </div>
         </div>
-    </div>
+      </div>
     }
 
     <!-- Quick Actions -->
     <p class="subtitle"
-        style="font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
-        Acceso Rápido</p>
+       style="font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem">
+      Acceso Rápido</p>
     <div class="actions-grid cols-3">
-        <a routerLink="/decano/convocatorias" class="action-card amber">
-            <div class="action-icon amber"><lucide-icon name="file-text" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Convocatorias</div>
-                <div class="action-desc">Ver convocatorias activas</div>
-            </div>
-        </a>
-        <a routerLink="/decano/comisiones" class="action-card blue">
-            <div class="action-icon blue"><lucide-icon name="users" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Designar Comisiones</div>
-                <div class="action-desc">Asignar comisiones de selección</div>
-            </div>
-        </a>
-        <a routerLink="/decano/reportes" class="action-card green">
-            <div class="action-icon green"><lucide-icon name="bar-chart-3" size="20"></lucide-icon></div>
-            <div>
-                <div class="action-title">Auditoría y Reportes</div>
-                <div class="action-desc">Reportes del periodo académico</div>
-            </div>
-        </a>
+      <a routerLink="/decano/convocatorias" class="action-card amber">
+        <div class="action-icon amber"><lucide-icon name="file-text" size="20"></lucide-icon></div>
+        <div>
+          <div class="action-title">Convocatorias</div>
+          <div class="action-desc">Ver convocatorias activas</div>
+        </div>
+      </a>
+      <a routerLink="/decano/comisiones" class="action-card blue">
+        <div class="action-icon blue"><lucide-icon name="users" size="20"></lucide-icon></div>
+        <div>
+          <div class="action-title">Designar Comisiones</div>
+          <div class="action-desc">Asignar comisiones de selección</div>
+        </div>
+      </a>
+      <a routerLink="/decano/reportes" class="action-card green">
+        <div class="action-icon green"><lucide-icon name="bar-chart-3" size="20"></lucide-icon></div>
+        <div>
+          <div class="action-title">Auditoría y Reportes</div>
+          <div class="action-desc">Reportes del periodo académico</div>
+        </div>
+      </a>
     </div>
-    }
+  }
 </div>
