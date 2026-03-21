@@ -1,174 +1,174 @@
-<div class="admin-dashboard">
+<!-- dashboard.html -->
+<div class="gestion-container admin-dashboard">
 
-  <!-- HEADER -->
-  <div class="dash-header">
-    <div>
-      <h1 class="dash-title">Consultas y Reportes del Administrador</h1>
-      <p class="dash-subtitle">Monitoreo analítico y centro de control del Sistema SGAC</p>
+  <!-- ── Encabezado ──────────────────────────────────────────── -->
+  <div class="section-header">
+    <div class="title-container">
+      <h1 class="title">Consultas y Reportes</h1>
+      <p class="subtitle">Monitoreo analítico y centro de control del Sistema SGAC</p>
     </div>
   </div>
 
-  <!-- LOADING -->
+  <!-- ── Loading ─────────────────────────────────────────────── -->
   @if (loading) {
-  <div class="loading-state">
-    <lucide-icon name="Loader2" size="36" class="spin-icon"></lucide-icon>
-    <p>Cargando métricas del sistema...</p>
-  </div>
+    <div class="info-message">
+      <lucide-icon name="Loader2" size="36" class="spin"></lucide-icon>
+      <p>Cargando métricas del sistema...</p>
+    </div>
   }
 
-  <!-- ERROR -->
+  <!-- ── Error ───────────────────────────────────────────────── -->
   @if (error && !loading) {
-  <div class="error-state">
-    <lucide-icon name="AlertCircle" size="40"></lucide-icon>
-    <p>{{ error }}</p>
-  </div>
+    <div class="alert-banner error">
+      <lucide-icon name="AlertCircle" size="18"></lucide-icon>
+      <span>{{ error }}</span>
+    </div>
   }
 
   @if (data && !loading) {
 
-  <!-- KPI CARDS -->
-  <div class="kpi-grid">
-    <div class="kpi-card blue">
-      <div class="kpi-icon">
-        <lucide-icon name="Users" size="24"></lucide-icon>
+    <!-- ── KPI Cards ─────────────────────────────────────────── -->
+    <div class="stats-grid cols-4">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <lucide-icon name="Users" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ data.totalUsuarios }}</div>
+          <div class="stat-label">Usuarios totales</div>
+        </div>
       </div>
-      <div class="kpi-info">
-        <span class="kpi-value">{{ data.totalUsuarios }}</span>
-        <span class="kpi-label">Usuarios totales</span>
+
+      <div class="stat-card">
+        <div class="stat-icon green">
+          <lucide-icon name="FileText" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ data.totalConvocatorias }}</div>
+          <div class="stat-label">Convocatorias abiertas</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon violet">
+          <lucide-icon name="TrendingUp" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value">{{ data.totalPostulaciones }}</div>
+          <div class="stat-label">Postulaciones recibidas</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon amber">
+          <lucide-icon name="CalendarClock" size="22"></lucide-icon>
+        </div>
+        <div>
+          <div class="stat-value stat-value--sm">{{ data.periodoActivo }}</div>
+          <div class="stat-label">Período académico activo</div>
+        </div>
       </div>
     </div>
 
-    <div class="kpi-card green">
-      <div class="kpi-icon">
-        <lucide-icon name="FileText" size="24"></lucide-icon>
+    <!-- ── Fila 1: Líneas + Donut ────────────────────────────── -->
+    <div class="dash-charts-row">
+      <div class="dash-chart-card dash-chart-card--wide">
+        <div class="dash-chart-header">
+          <h3 class="dash-chart-title">Tendencia de Actividad (Últimos 6 Meses)</h3>
+          <span class="badge blue">Líneas</span>
+        </div>
+        <div class="dash-chart-body">
+          <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" type="line"></canvas>
+        </div>
       </div>
-      <div class="kpi-info">
-        <span class="kpi-value">{{ data.totalConvocatorias }}</span>
-        <span class="kpi-label">Convocatorias abiertas</span>
+
+      <div class="dash-chart-card">
+        <div class="dash-chart-header">
+          <h3 class="dash-chart-title">Usuarios por Rol</h3>
+          <span class="badge blue">Distribución</span>
+        </div>
+        <div class="dash-chart-body">
+          <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" type="doughnut"></canvas>
+        </div>
       </div>
     </div>
 
-    <div class="kpi-card violet">
-      <div class="kpi-icon">
-        <lucide-icon name="TrendingUp" size="24"></lucide-icon>
+    <!-- ── Fila 2: Barras + Actividad ────────────────────────── -->
+    <div class="dash-charts-row">
+      <div class="dash-chart-card">
+        <div class="dash-chart-header">
+          <h3 class="dash-chart-title">Postulaciones por Facultad</h3>
+          <span class="badge blue">Barras</span>
+        </div>
+        <div class="dash-chart-body">
+          <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar"></canvas>
+        </div>
       </div>
-      <div class="kpi-info">
-        <span class="kpi-value">{{ data.totalPostulaciones }}</span>
-        <span class="kpi-label">Postulaciones recibidas</span>
-      </div>
-    </div>
 
-    <div class="kpi-card amber">
-      <div class="kpi-icon">
-        <lucide-icon name="CalendarClock" size="24"></lucide-icon>
-      </div>
-      <div class="kpi-info">
-        <span class="kpi-value kpi-value-sm">{{ data.periodoActivo }}</span>
-        <span class="kpi-label">Período académico activo</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 1: Line Chart + Doughnut -->
-  <div class="charts-row">
-    <div class="chart-card wide">
-      <div class="chart-header">
-        <h3>Tendencia de Actividad (Últimos 6 Meses)</h3>
-        <span class="chart-badge">Gráfico de Líneas</span>
-      </div>
-      <div class="chart-body">
-        <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" type="line">
-        </canvas>
-      </div>
-    </div>
-
-    <div class="chart-card narrow">
-      <div class="chart-header">
-        <h3>Usuarios por Rol</h3>
-        <span class="chart-badge">Distribución</span>
-      </div>
-      <div class="chart-body">
-        <canvas baseChart [data]="doughnutChartData" [options]="doughnutChartOptions" type="doughnut">
-        </canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- ROW 2: Bar Chart + Activity Timeline -->
-  <div class="charts-row">
-    <div class="chart-card medium">
-      <div class="chart-header">
-        <h3>Postulaciones por Facultad</h3>
-        <span class="chart-badge">Barras</span>
-      </div>
-      <div class="chart-body">
-        <canvas baseChart [data]="barChartData" [options]="barChartOptions" type="bar">
-        </canvas>
-      </div>
-    </div>
-
-    <div class="chart-card medium activity-card">
-      <div class="chart-header">
-        <h3>Actividad Reciente del Sistema</h3>
-        <span class="chart-badge">En tiempo real</span>
-      </div>
-      <div class="activity-list">
-        @for (log of data.ultimasAcciones; track log.idLog) {
-        <div class="activity-item">
-          <div class="activity-dot"></div>
-          <div class="activity-content">
-            <p class="activity-user">{{ log.usuario }}</p>
-            <p class="activity-action">{{ log.accion }}</p>
-            <div class="activity-meta">
-              <span class="activity-module">{{ log.modulo }}</span>
-              <span class="activity-time">{{ getTimeAgo(log.fecha) }}</span>
+      <div class="dash-chart-card dash-activity-card">
+        <div class="dash-chart-header">
+          <h3 class="dash-chart-title">Actividad Reciente</h3>
+          <span class="badge green">En tiempo real</span>
+        </div>
+        <div class="dash-activity-list">
+          @for (log of data.ultimasAcciones; track log.idLog) {
+            <div class="dash-activity-item">
+              <span class="dash-activity-dot"></span>
+              <div class="dash-activity-content">
+                <p class="dash-activity-user">{{ log.usuario }}</p>
+                <p class="dash-activity-action">{{ log.accion }}</p>
+                <div class="flex items-center gap-2">
+                  <span class="badge amber">{{ log.modulo }}</span>
+                  <span class="dash-activity-time">{{ getTimeAgo(log.fecha) }}</span>
+                </div>
+              </div>
             </div>
-          </div>
+          } @empty {
+            <div class="info-message">
+              <lucide-icon name="Inbox" size="32"></lucide-icon>
+              <p>No hay actividad reciente registrada.</p>
+            </div>
+          }
         </div>
-        } @empty {
-        <div class="empty-activity">
-          <lucide-icon name="Inbox" size="36"></lucide-icon>
-          <p>No hay actividad reciente registrada.</p>
-        </div>
-        }
       </div>
     </div>
-  </div>
 
-  <!-- ROW 3: Quick Access -->
-  <div class="quick-section">
-    <h3 class="section-title">Accesos Rápidos</h3>
-    <div class="quick-grid">
-      <a [routerLink]="['/admin/usuarios']" class="quick-card blue">
-        <lucide-icon name="Users" size="20"></lucide-icon>
-        <div>
-          <div class="quick-title">Gestión de Usuarios</div>
-          <div class="quick-desc">Crear y administrar perfiles</div>
-        </div>
-      </a>
-      <a [routerLink]="['/admin/configuracion']" class="quick-card green">
-        <lucide-icon name="HardDrive" size="20"></lucide-icon>
-        <div>
-          <div class="quick-title">Configuración Global</div>
-          <div class="quick-desc">Administrar catálogos</div>
-        </div>
-      </a>
-      <a [routerLink]="['/admin/rol-permiso']" class="quick-card violet">
-        <lucide-icon name="Shield" size="20"></lucide-icon>
-        <div>
-          <div class="quick-title">Roles y Permisos</div>
-          <div class="quick-desc">Gestionar accesos al sistema</div>
-        </div>
-      </a>
-      <a [routerLink]="['/admin/periodos']" class="quick-card amber">
-        <lucide-icon name="CalendarClock" size="20"></lucide-icon>
-        <div>
-          <div class="quick-title">Períodos Académicos</div>
-          <div class="quick-desc">Gestionar ciclos lectivos</div>
-        </div>
-      </a>
+    <!-- ── Accesos rápidos ───────────────────────────────────── -->
+    <div>
+      <h3 class="subtitle" style="font-weight:700; color:hsl(var(--foreground)); margin-bottom:.875rem;">
+        Accesos Rápidos
+      </h3>
+      <div class="actions-grid cols-4">
+        <a [routerLink]="['/admin/usuarios']" class="action-card blue">
+          <div class="action-icon blue"><lucide-icon name="Users" size="20"></lucide-icon></div>
+          <div>
+            <div class="action-title">Gestión de Usuarios</div>
+            <div class="action-desc">Crear y administrar perfiles</div>
+          </div>
+        </a>
+        <a [routerLink]="['/admin/configuracion']" class="action-card green">
+          <div class="action-icon green"><lucide-icon name="HardDrive" size="20"></lucide-icon></div>
+          <div>
+            <div class="action-title">Configuración Global</div>
+            <div class="action-desc">Administrar catálogos</div>
+          </div>
+        </a>
+        <a [routerLink]="['/admin/rol-permiso']" class="action-card violet">
+          <div class="action-icon violet"><lucide-icon name="Shield" size="20"></lucide-icon></div>
+          <div>
+            <div class="action-title">Roles y Permisos</div>
+            <div class="action-desc">Gestionar accesos al sistema</div>
+          </div>
+        </a>
+        <a [routerLink]="['/admin/periodos']" class="action-card amber">
+          <div class="action-icon amber"><lucide-icon name="CalendarClock" size="20"></lucide-icon></div>
+          <div>
+            <div class="action-title">Períodos Académicos</div>
+            <div class="action-desc">Gestionar ciclos lectivos</div>
+          </div>
+        </a>
+      </div>
     </div>
-  </div>
 
   }
 </div>

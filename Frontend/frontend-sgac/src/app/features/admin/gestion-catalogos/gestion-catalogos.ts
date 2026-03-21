@@ -51,7 +51,7 @@ export interface CatalogoOpcion {
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './gestion-catalogos.html',
-  styleUrl: './gestion-catalogos.css',
+  styleUrls: ['./gestion-catalogos.css', '../admin-shared.css'],
 })
 
 export class GestionCatalogosComponent implements OnInit, OnDestroy {

@@ -1,13 +1,14 @@
+<!-- carga-academica.html -->
 <div class="gestion-container">
 
   <!-- ═══════════════════════════════════════════════════════════
-       VISTA 1 — TABLA DE SELECCIÓN DE DOCENTE
+       VISTA 1 — SELECCIÓN DE DOCENTE
        ═══════════════════════════════════════════════════════════ -->
   @if (vista === 'seleccion') {
 
     <div class="section-header">
-      <div>
-        <h2 class="title">Gestión de Carga Académica</h2>
+      <div class="title-container">
+        <h1 class="title">Gestión de Carga Académica</h1>
         <p class="subtitle">Seleccione un docente para gestionar su asignación de materias.</p>
       </div>
     </div>
@@ -30,38 +31,40 @@
         <tr>
           <th>Docente</th>
           <th>Cédula</th>
-          <th class="text-center">Asignaturas</th>
-          <th class="text-right">Acción</th>
+          <th class="td-center">Asignaturas</th>
+          <th class="td-right">Acción</th>
         </tr>
         </thead>
         <tbody>
           @if (cargandoDocentes) {
-            <tr><td colspan="4" class="td-center">
-              <lucide-icon name="Loader2" size="18" class="spin"></lucide-icon>
-              Cargando docentes…
-            </td></tr>
+            <tr>
+              <td colspan="4" class="td-empty">
+                <lucide-icon name="Loader2" size="18" class="spin"></lucide-icon>
+                Cargando docentes…
+              </td>
+            </tr>
           } @else if (docentesFiltrados.length === 0) {
-            <tr><td colspan="4" class="td-center td-muted">Sin resultados.</td></tr>
+            <tr><td colspan="4" class="td-empty td-muted">Sin resultados.</td></tr>
           } @else {
             @for (d of docentesFiltrados; track d.idDocente) {
               <tr>
                 <td>
-                  <div class="docente-cell">
-                    <div class="docente-avatar">{{ d.nombres[0] }}{{ d.apellidos[0] }}</div>
+                  <div class="ca-docente-cell">
+                    <div class="ca-avatar">{{ d.nombres[0] }}{{ d.apellidos[0] }}</div>
                     <div>
-                      <div class="docente-nombre">{{ d.nombres }} {{ d.apellidos }}</div>
-                      <div class="docente-correo">{{ d.correo }}</div>
+                      <div class="full-name">{{ d.nombres }} {{ d.apellidos }}</div>
+                      <div class="user-email">{{ d.correo }}</div>
                     </div>
                   </div>
                 </td>
-                <td class="text-mono">{{ d.cedula }}</td>
-                <td class="text-center">
+                <td class="td-mono">{{ d.cedula }}</td>
+                <td class="td-center">
                   <span class="badge-count" [class.empty]="d.totalAsignaturas === 0">
                     {{ d.totalAsignaturas }}
                   </span>
                 </td>
-                <td class="text-right">
-                  <button type="button" class="btn-primary" (click)="seleccionarDocente(d)">
+                <td class="td-right">
+                  <button type="button" class="btn btn-primary" (click)="seleccionarDocente(d)">
                     Gestionar <lucide-icon name="ChevronRight" size="14"></lucide-icon>
                   </button>
                 </td>
@@ -78,28 +81,25 @@
        ═══════════════════════════════════════════════════════════ -->
   @if (vista === 'gestion' && docenteSeleccionado) {
 
-    <!-- Encabezado con datos del docente -->
-    <div class="panel-header">
-      <button type="button" class="btn-back" (click)="volverASeleccion()">
-        <lucide-icon name="ArrowLeft" size="16"></lucide-icon>
-        Volver
-      </button>
-
-      <div class="docente-info-header">
-        <div class="docente-avatar large">
+    <div class="section-header">
+      <div class="ca-docente-info-header">
+        <button type="button" class="btn btn-ghost" (click)="volverASeleccion()">
+          <lucide-icon name="ArrowLeft" size="16"></lucide-icon> Volver
+        </button>
+        <div class="ca-avatar ca-avatar--lg">
           {{ docenteSeleccionado.nombres[0] }}{{ docenteSeleccionado.apellidos[0] }}
         </div>
         <div>
-          <h2 class="panel-docente-nombre">
+          <h2 class="title ca-docente-nombre">
             {{ docenteSeleccionado.nombres }} {{ docenteSeleccionado.apellidos }}
           </h2>
-          <p class="panel-docente-correo">{{ docenteSeleccionado.correo }}</p>
+          <p class="subtitle">{{ docenteSeleccionado.correo }}</p>
         </div>
       </div>
 
       <button
         type="button"
-        class="btn-guardar"
+        class="btn btn-primary"
         [disabled]="guardando || cargandoPanel"
         (click)="guardarCambios()"
       >
@@ -115,11 +115,11 @@
 
     <!-- Banner de resultado -->
     @if (resultado) {
-      <div class="result-banner">
+      <div class="alert-banner success">
         <lucide-icon name="CheckCircle2" size="18"></lucide-icon>
-        <div class="result-body">
+        <div>
           <strong>{{ resultado.mensaje }}</strong>
-          <span class="result-mail">
+          <span class="ca-result-mail">
             📧 Notificación enviada a {{ resultado.correoDocente }}
           </span>
         </div>
@@ -129,43 +129,43 @@
       </div>
     }
 
-    <!-- Panel de dos columnas -->
-    <div class="dual-panel">
+    <!-- Panel dual -->
+    <div class="ca-dual-panel">
 
-      <!-- ── Columna izquierda: Carga actual ────────────────── -->
-      <div class="panel-col">
-        <div class="col-header">
+      <!-- Carga actual -->
+      <div class="ca-panel-col">
+        <div class="ca-col-header">
           <lucide-icon name="BookOpen" size="16"></lucide-icon>
-          <h3>Carga actual</h3>
-          <span class="count-chip" [class.empty]="cargaActual.length === 0">
+          <h3 class="ca-col-title">Carga actual</h3>
+          <span class="badge-count" [class.empty]="cargaActual.length === 0">
             {{ cargaActual.length }}
           </span>
         </div>
 
-        <div class="col-body">
+        <div class="ca-col-body">
           @if (cargandoPanel) {
-            <div class="col-empty">
-              <lucide-icon name="Loader2" size="28" class="spin empty-icon"></lucide-icon>
+            <div class="ca-col-empty">
+              <lucide-icon name="Loader2" size="28" class="spin td-muted"></lucide-icon>
               <p>Cargando asignaturas…</p>
             </div>
           } @else if (cargaActual.length === 0) {
-            <div class="col-empty">
-              <lucide-icon name="BookX" size="32" class="empty-icon"></lucide-icon>
+            <div class="ca-col-empty">
+              <lucide-icon name="BookX" size="32" class="td-muted"></lucide-icon>
               <p>Sin asignaturas asignadas.</p>
               <p class="td-muted">Añada materias desde el catálogo →</p>
             </div>
           } @else {
-            <ul class="asig-list">
+            <ul class="ca-asig-list">
               @for (a of cargaActual; track a.idAsignatura) {
-                <li class="asig-item">
-                  <div class="asig-info">
-                    <span class="asig-nombre">{{ a.nombreAsignatura }}</span>
-                    <span class="asig-meta">{{ a.nombreCarrera }} · Sem. {{ a.semestre }}</span>
-                    <span class="asig-facultad">{{ a.nombreFacultad }}</span>
+                <li class="ca-asig-item">
+                  <div class="ca-asig-info">
+                    <span class="ca-asig-nombre">{{ a.nombreAsignatura }}</span>
+                    <span class="ca-asig-meta">{{ a.nombreCarrera }} · Sem. {{ a.semestre }}</span>
+                    <span class="ca-asig-facultad">{{ a.nombreFacultad }}</span>
                   </div>
                   <button
                     type="button"
-                    class="btn-revocar"
+                    class="ca-btn-revocar"
                     title="Quitar asignatura"
                     (click)="revocarAsignatura(a)"
                   >
@@ -178,43 +178,40 @@
         </div>
       </div>
 
-      <!-- ── Columna derecha: Catálogo global ───────────────── -->
-      <div class="panel-col">
-        <div class="col-header">
+      <!-- Catálogo global -->
+      <div class="ca-panel-col">
+        <div class="ca-col-header">
           <lucide-icon name="Library" size="16"></lucide-icon>
-          <h3>Catálogo de asignaturas</h3>
+          <h3 class="ca-col-title">Catálogo de asignaturas</h3>
           @if (!cargandoAsignaturas) {
-            <span class="count-chip muted">{{ asignaturasFiltradas.length }}</span>
+            <span class="badge-count" [class.empty]="asignaturasFiltradas.length === 0">
+              {{ asignaturasFiltradas.length }}
+            </span>
           }
         </div>
 
-        <!-- Filtros -->
-        <div class="filters-row">
-          <select
-            [(ngModel)]="filtroFacultad"
-            (ngModelChange)="onFacultadChange()"
-            class="input-field filter-select"
-          >
+        <div class="ca-filters-row">
+          <select [(ngModel)]="filtroFacultad" (ngModelChange)="onFacultadChange()" class="input-field ca-filter-select">
             <option [ngValue]="0">Todas las facultades</option>
             @for (f of facultades; track f.id) {
               <option [ngValue]="f.id">{{ f.nombre }}</option>
             }
           </select>
 
-          <select [(ngModel)]="filtroCarrera" class="input-field filter-select">
+          <select [(ngModel)]="filtroCarrera" class="input-field ca-filter-select">
             <option [ngValue]="0">Todas las carreras</option>
             @for (c of carreras; track c.id) {
               <option [ngValue]="c.id">{{ c.nombre }}</option>
             }
           </select>
 
-          <div class="filter-search-wrap">
-            <lucide-icon name="Search" size="14" class="filter-icon"></lucide-icon>
+          <div class="ca-filter-search-wrap">
+            <lucide-icon name="Search" size="14" class="ca-filter-icon"></lucide-icon>
             <input
               type="text"
               [(ngModel)]="filtroAsignatura"
               placeholder="Buscar asignatura…"
-              class="input-field filter-input"
+              class="input-field ca-filter-input"
             />
           </div>
 
@@ -223,29 +220,29 @@
           </button>
         </div>
 
-        <div class="col-body">
+        <div class="ca-col-body">
           @if (cargandoAsignaturas) {
-            <div class="col-empty">
-              <lucide-icon name="Loader2" size="28" class="spin empty-icon"></lucide-icon>
+            <div class="ca-col-empty">
+              <lucide-icon name="Loader2" size="28" class="spin td-muted"></lucide-icon>
               <p>Cargando catálogo…</p>
             </div>
           } @else if (asignaturasFiltradas.length === 0) {
-            <div class="col-empty">
-              <lucide-icon name="SearchX" size="28" class="empty-icon"></lucide-icon>
+            <div class="ca-col-empty">
+              <lucide-icon name="SearchX" size="28" class="td-muted"></lucide-icon>
               <p class="td-muted">Sin resultados para los filtros aplicados.</p>
             </div>
           } @else {
-            <ul class="asig-list">
+            <ul class="ca-asig-list">
               @for (a of asignaturasFiltradas; track a.idAsignatura) {
-                <li class="asig-item catalog">
-                  <div class="asig-info">
-                    <span class="asig-nombre">{{ a.nombreAsignatura }}</span>
-                    <span class="asig-meta">{{ a.nombreCarrera }} · Sem. {{ a.semestre }}</span>
-                    <span class="asig-facultad">{{ a.nombreFacultad }}</span>
+                <li class="ca-asig-item ca-asig-item--catalog">
+                  <div class="ca-asig-info">
+                    <span class="ca-asig-nombre">{{ a.nombreAsignatura }}</span>
+                    <span class="ca-asig-meta">{{ a.nombreCarrera }} · Sem. {{ a.semestre }}</span>
+                    <span class="ca-asig-facultad">{{ a.nombreFacultad }}</span>
                   </div>
                   <button
                     type="button"
-                    class="btn-agregar"
+                    class="ca-btn-agregar"
                     title="Añadir a carga actual"
                     (click)="agregarAsignatura(a)"
                   >

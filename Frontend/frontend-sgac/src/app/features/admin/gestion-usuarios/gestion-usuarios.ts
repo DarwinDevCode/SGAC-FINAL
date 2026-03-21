@@ -37,7 +37,7 @@ interface FormRegistro {
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './gestion-usuarios.html',
-  styleUrl: './gestion-usuarios.css',
+  styleUrls: ['./gestion-usuarios.css', '../admin-shared.css'],
 })
 export class GestionUsuarios implements OnInit, OnDestroy {
 

@@ -20,8 +20,12 @@ import {CatalogosService} from '../../../core/services/catalogos-service';
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './gestion-permisos.html',
-  styleUrls: ['./gestion-permisos.css']
+  styleUrls: [
+    '../admin-shared.css',
+    './gestion-permisos.css'
+  ]
 })
+
 export class GestionPermisosComponent implements OnInit {
 
   private tipoRolService = inject(TipoRolService);

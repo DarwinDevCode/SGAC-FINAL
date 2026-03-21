@@ -19,7 +19,7 @@ type Vista = 'seleccion' | 'gestion';
   standalone: true,
   imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './carga-academica.html',
-  styleUrl: './carga-academica.css',
+  styleUrls: ['./carga-academica.css', '../admin-shared.css'],
 })
 export class CargaAcademicaComponent implements OnInit, OnDestroy {
 

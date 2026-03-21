@@ -1,0 +1,145 @@
+/* ================================================================
+   ADMIN SHARED — variables y overrides locales para el módulo admin
+   Complementa styles.css global. No dupliques clases que ya existan
+   en el global; solo agrega las que son exclusivas de admin.
+   ================================================================ */
+
+/* ── Spinner ────────────────────────────────────────────────── */
+@keyframes admin-spin { to { transform: rotate(360deg); } }
+.spin { animation: admin-spin .75s linear infinite; display: inline-flex; }
+
+/* ── Celda de usuario (tabla) ───────────────────────────────── */
+.user-info-cell { display: flex; flex-direction: column; gap: 2px; }
+.full-name      { font-weight: 600; font-size: .9rem; color: hsl(var(--foreground)); }
+.user-email     { font-size: .8rem; color: hsl(var(--muted-foreground)); }
+.user-username  { font-size: .7rem; color: #94a3b8; }
+
+/* ── Badges de rol (tabla usuarios) ────────────────────────── */
+.roles-wrapper  { display: flex; gap: .4rem; flex-wrap: wrap; }
+.badge-rol {
+  padding: .2rem .6rem; border-radius: 999px;
+  font-size: .7rem; font-weight: 500; border: 1px solid; cursor: pointer;
+  transition: opacity .15s;
+}
+.badge-rol.active   { background: #f0fdf4; color: #166634; border-color: #bbf7d0; }
+.badge-rol.inactive { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+.badge-rol.disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Celdas con alineación ──────────────────────────────────── */
+.td-center   { text-align: center; }
+.td-right    { text-align: right; }
+.td-mono     { font-family: monospace; font-size: .85rem; }
+.td-muted    { color: hsl(var(--muted-foreground)); }
+.td-wrap     { max-width: 280px; white-space: normal; line-height: 1.45; }
+.td-empty {
+  text-align: center; padding: 2.5rem 1rem !important;
+  color: hsl(var(--muted-foreground)); font-size: .875rem;
+}
+
+/* ── Badges de conteo (azul) ────────────────────────────────── */
+.badge-count {
+  display: inline-block; padding: .2rem .65rem; border-radius: 999px;
+  font-size: .78rem; font-weight: 700; background: #dbeafe; color: #1d4ed8;
+}
+.badge-count.empty { background: hsl(var(--muted) / .4); color: hsl(var(--muted-foreground)); }
+
+/* ── Modal ──────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(15,23,42,.48);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; padding: 1rem; backdrop-filter: blur(2px);
+}
+.modal-box {
+  background: hsl(var(--card)); width: 100%; max-width: 650px;
+  max-height: 90vh; border-radius: 1rem; overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0,0,0,.16);
+  animation: modal-in .18s ease;
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(-8px) scale(.98); }
+  to   { opacity: 1; transform: none; }
+}
+.modal-box--wide { max-width: min(1320px, 96vw); width: 96vw; }
+.modal-box--md   { max-width: 500px; }
+
+.modal-header {
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid hsl(var(--border));
+  display: flex; justify-content: space-between; align-items: center;
+  background: hsl(var(--muted) / .25);
+  border-radius: 1rem 1rem 0 0;
+  position: sticky; top: 0; z-index: 1;
+}
+.modal-title    { font-size: .95rem; font-weight: 700; color: hsl(var(--foreground)); margin: 0; }
+.modal-subtitle { font-size: .78rem; color: hsl(var(--muted-foreground)); margin: 3px 0 0; }
+
+/* ── Formularios en modal ───────────────────────────────────── */
+.user-form {
+  padding: 1.5rem;
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem;
+  align-items: start;
+}
+.full-width { grid-column: span 2; }
+.form-group { display: flex; flex-direction: column; gap: .3rem; }
+.form-group label { font-size: .8rem; font-weight: 600; color: #475569; }
+.form-group small { font-size: .72rem; color: hsl(var(--muted-foreground)); }
+
+.form-section-label {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: hsl(var(--muted-foreground));
+  padding-top: .75rem; border-top: 1px solid hsl(var(--border));
+}
+.form-section-label:first-of-type { border-top: none; padding-top: 0; }
+
+.form-footer {
+  display: flex; justify-content: flex-end; align-items: center;
+  gap: .75rem; padding-top: 1rem;
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* ── Password notice ────────────────────────────────────────── */
+.password-notice {
+  display: flex; align-items: flex-start; gap: .75rem;
+  background: #eff6ff; border: 1px solid #bfdbfe;
+  border-radius: var(--radius); padding: .75rem 1rem;
+  color: #1d4ed8; font-size: .8rem;
+}
+.password-notice strong { display: block; margin-bottom: 2px; font-weight: 700; }
+.password-notice p { margin: 0; color: #2563eb; line-height: 1.4; }
+
+/* ── Roles checkboxes ───────────────────────────────────────── */
+.roles-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(165px,1fr)); gap: .6rem;
+}
+.rol-checkbox-label {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .6rem .9rem; border: 1.5px solid hsl(var(--border));
+  border-radius: var(--radius); cursor: pointer;
+  font-size: .85rem; font-weight: 500; color: #475569;
+  background: white; transition: all .15s; user-select: none;
+}
+.rol-checkbox-label:hover { border-color: hsl(var(--primary) / .45); background: hsl(var(--primary) / .04); }
+.rol-checkbox-label.selected {
+  border-color: hsl(var(--primary)); background: hsl(var(--primary) / .08);
+  color: hsl(var(--primary)); font-weight: 600;
+}
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.checkbox-custom {
+  width: 18px; height: 18px; border-radius: 4px; border: 2px solid currentColor;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  background: transparent; transition: background .15s;
+}
+.rol-checkbox-label.selected .checkbox-custom { background: hsl(var(--primary)); color: white; border-color: hsl(var(--primary)); }
+.roles-badge-preview {
+  margin-right: auto; font-size: .78rem; color: #64748b;
+  background: #f1f5f9; padding: .25rem .65rem; border-radius: 999px;
+}
+
+/* ── Responsive modal form ──────────────────────────────────── */
+@media (max-width: 600px) {
+  .user-form { grid-template-columns: 1fr; }
+  .full-width { grid-column: span 1; }
+  .roles-grid { grid-template-columns: 1fr 1fr; }
+  .password-notice { grid-column: span 1; }
+}

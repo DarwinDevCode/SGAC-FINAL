@@ -32,7 +32,7 @@ Chart.register(...registerables);
     standalone: true,
     imports: [CommonModule, LucideAngularModule, RouterLink, BaseChartDirective],
     templateUrl: './dashboard.html',
-    styleUrl: './dashboard.css',
+    styleUrls: ['./dashboard.css', '../admin-shared.css'],
     providers: [
         {
             provide: LUCIDE_ICONS,

@@ -1,9 +1,13 @@
+<!-- gestion-usuarios.html -->
 <div class="gestion-container">
 
   <!-- ── Encabezado ──────────────────────────────────────────── -->
   <div class="section-header">
-    <h2 class="title">Gestión de Usuarios</h2>
-    <button type="button" class="btn-primary" (click)="abrirModalCrear()">
+    <div class="title-container">
+      <h1 class="title">Gestión de Usuarios</h1>
+      <p class="subtitle">Administre cuentas, roles y accesos del sistema.</p>
+    </div>
+    <button type="button" class="btn btn-primary" (click)="abrirModalCrear()">
       <lucide-icon name="UserPlus" size="18"></lucide-icon>
       Nuevo Usuario
     </button>
@@ -25,21 +29,23 @@
 
   <!-- ── Tabla ────────────────────────────────────────────────── -->
   <div class="table-card">
-    <table class="data-table" role="table" aria-label="Lista de usuarios del sistema">
+    <table class="data-table" role="table">
       <thead>
       <tr>
         <th>Usuario</th>
         <th>Roles asignados</th>
         <th>Estado</th>
-        <th class="text-right">Acciones</th>
+        <th class="td-right">Acciones</th>
       </tr>
       </thead>
       <tbody>
         @if (loading) {
-          <tr><td colspan="4" class="loading-cell">
-            <lucide-icon name="Loader2" size="20" class="spin"></lucide-icon>
-            Cargando datos…
-          </td></tr>
+          <tr>
+            <td colspan="4" class="td-empty">
+              <lucide-icon name="Loader2" size="20" class="spin"></lucide-icon>
+              Cargando datos…
+            </td>
+          </tr>
         } @else {
           @for (user of usuariosFiltrados; track user.idUsuario) {
             <tr>
@@ -77,7 +83,7 @@
                 </span>
               </td>
 
-              <td class="text-right">
+              <td class="td-right">
                 <button
                   type="button"
                   class="btn-icon"
@@ -89,21 +95,22 @@
               </td>
             </tr>
           } @empty {
-            <tr><td colspan="4" class="empty-cell">No hay usuarios que coincidan con la búsqueda.</td></tr>
+            <tr>
+              <td colspan="4" class="td-empty">
+                No hay usuarios que coincidan con la búsqueda.
+              </td>
+            </tr>
           }
         }
       </tbody>
     </table>
   </div>
 
-  <!-- ══════════════════════════════════════════════════════════ -->
-  <!--  Modal de Registro                                        -->
-  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ══ Modal de Registro ══════════════════════════════════════ -->
   @if (mostrarModal) {
     <div class="modal-backdrop" (click)="cerrarModal()">
       <div class="modal-box" (click)="$event.stopPropagation()">
 
-        <!-- Header del modal -->
         <div class="modal-header">
           <div>
             <h3 class="modal-title">Registrar Nuevo Usuario</h3>
@@ -116,10 +123,8 @@
           </button>
         </div>
 
-        <!-- ── Formulario ──────────────────────────────────── -->
         <form class="user-form" (submit)="guardarUsuario(); $event.preventDefault()">
 
-          <!-- Sección: Datos personales -->
           <div class="form-section-label full-width">
             <lucide-icon name="User" size="14"></lucide-icon>
             Datos personales
@@ -154,15 +159,10 @@
           <div class="form-group">
             <label for="f-username">Nombre de usuario *</label>
             <input id="f-username" [(ngModel)]="form.username" name="username"
-                   required minlength="3" class="input-field"
-                   placeholder="jperez" />
-            <span class="field-hint">
-              <lucide-icon name="Info" size="12"></lucide-icon>
-              Se convertirá a minúsculas automáticamente.
-            </span>
+                   required minlength="3" class="input-field" placeholder="jperez" />
+            <small>Se convertirá a minúsculas automáticamente.</small>
           </div>
 
-          <!-- Placeholder donde antes iba el campo contraseña -->
           <div class="password-notice form-group">
             <lucide-icon name="KeyRound" size="16"></lucide-icon>
             <div>
@@ -171,7 +171,6 @@
             </div>
           </div>
 
-          <!-- Sección: Roles -->
           <div class="form-section-label full-width">
             <lucide-icon name="ShieldCheck" size="14"></lucide-icon>
             Roles del sistema *
@@ -179,20 +178,15 @@
 
           <div class="roles-grid full-width">
             @if (rolesCheckbox.length === 0) {
-              <p class="roles-loading">
+              <p class="td-muted">
                 <lucide-icon name="Loader2" size="14" class="spin"></lucide-icon>
                 Cargando roles…
               </p>
             } @else {
               @for (rol of rolesCheckbox; track rol.idTipoRol) {
-                <label class="rol-checkbox-label"
-                       [class.selected]="rol.seleccionado">
-                  <input
-                    type="checkbox"
-                    [(ngModel)]="rol.seleccionado"
-                    [name]="'rol_' + rol.idTipoRol"
-                    class="sr-only"
-                  />
+                <label class="rol-checkbox-label" [class.selected]="rol.seleccionado">
+                  <input type="checkbox" [(ngModel)]="rol.seleccionado"
+                         [name]="'rol_' + rol.idTipoRol" class="sr-only" />
                   <span class="checkbox-custom">
                     @if (rol.seleccionado) {
                       <lucide-icon name="Check" size="12"></lucide-icon>
@@ -204,13 +198,12 @@
             }
           </div>
 
-          <!-- ── Campos condicionales: ESTUDIANTE / COORDINADOR → Carrera ── -->
+          <!-- Datos académicos: ESTUDIANTE / COORDINADOR -->
           @if (necesitaCarrera) {
             <div class="form-section-label full-width">
               <lucide-icon name="BookOpen" size="14"></lucide-icon>
               Datos académicos
             </div>
-
             <div class="form-group full-width">
               <label for="f-carrera">Carrera *</label>
               <select id="f-carrera" [(ngModel)]="form.idCarrera" name="idCarrera" class="input-field">
@@ -228,7 +221,6 @@
               <input id="f-matricula" [(ngModel)]="form.matricula" name="matricula"
                      class="input-field" placeholder="2024-A-001" />
             </div>
-
             <div class="form-group">
               <label for="f-semestre">Semestre *</label>
               <input id="f-semestre" [(ngModel)]="form.semestre" name="semestre"
@@ -236,13 +228,12 @@
             </div>
           }
 
-          <!-- ── Campo condicional: DECANO → Facultad ─────────────── -->
+          <!-- Asignación institucional: DECANO -->
           @if (necesitaFacultad) {
             <div class="form-section-label full-width">
               <lucide-icon name="Building2" size="14"></lucide-icon>
               Asignación institucional
             </div>
-
             <div class="form-group full-width">
               <label for="f-facultad">Facultad *</label>
               <select id="f-facultad" [(ngModel)]="form.idFacultad" name="idFacultad" class="input-field">
@@ -254,32 +245,29 @@
             </div>
           }
 
-          <!-- ── Campo condicional: AYUDANTE_CATEDRA → Horas ──────── -->
+          <!-- Contrato ayudantía: AYUDANTE_CATEDRA -->
           @if (necesitaHoras) {
             <div class="form-section-label full-width">
               <lucide-icon name="Clock" size="14"></lucide-icon>
               Contrato de ayudantía
             </div>
-
             <div class="form-group">
               <label for="f-horas">Horas asignadas *</label>
               <input id="f-horas" [(ngModel)]="form.horasAyudante" name="horasAyudante"
-                     type="number" min="1" step="0.5" class="input-field"
-                     placeholder="20" />
+                     type="number" min="1" step="0.5" class="input-field" placeholder="20" />
             </div>
           }
 
-          <!-- ── Footer del formulario ──────────────────────────── -->
           <div class="form-footer full-width">
             <span class="roles-badge-preview">
               @if (rolesSeleccionados.length > 0) {
                 {{ rolesSeleccionados.length }} rol(es) seleccionado(s)
               }
             </span>
-            <button type="button" class="btn-ghost" (click)="cerrarModal()" [disabled]="guardando">
+            <button type="button" class="btn btn-ghost" (click)="cerrarModal()" [disabled]="guardando">
               Cancelar
             </button>
-            <button type="submit" class="btn-primary" [disabled]="guardando">
+            <button type="submit" class="btn btn-primary" [disabled]="guardando">
               @if (guardando) {
                 <lucide-icon name="Loader2" size="16" class="spin"></lucide-icon>
                 Registrando…

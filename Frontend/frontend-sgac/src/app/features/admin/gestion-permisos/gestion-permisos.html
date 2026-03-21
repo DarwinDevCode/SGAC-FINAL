@@ -1,181 +1,251 @@
+<!-- gestion-permisos.html -->
 <div class="gestion-container">
-  <div class="section-header" style="margin-bottom: 20px;">
-    <div>
-      <h2 class="title" style="margin-bottom: 5px;">Gestión de Privilegios (PostgreSQL)</h2>
-      <p style="color: #64748b; font-size: 0.9rem; margin: 0;">Administre accesos y privilegios para roles físicos de base de datos.</p>
+
+  <div class="section-header">
+    <div class="title-container">
+      <h1 class="title">Gestión de Privilegios (PostgreSQL)</h1>
+      <p class="subtitle">Administre accesos y privilegios para roles físicos de base de datos.</p>
     </div>
   </div>
 
   <div class="table-card">
-    <table class="data-table" style="table-layout: fixed; width: 100%;">
+    <table class="data-table">
       <thead>
       <tr>
-        <th style="width: 80px;">ID</th>
+        <th>ID</th>
         <th>Nombre del Rol (Lógico)</th>
-        <th style="width: 200px;">Rol en BD</th>
-        <th style="width: 120px;">Estado</th>
-        <th style="width: 320px;" class="text-right">Acciones</th>
+        <th>Rol en BD</th>
+        <th>Estado</th>
+        <th class="td-right">Acciones</th>
       </tr>
       </thead>
       <tbody>
         @for (rol of rolesList; track rol.idTipoRol) {
           <tr>
             <td>{{ rol.idTipoRol }}</td>
-            <td style="font-weight: 500;">{{ rol.nombreLogico }}</td>
-            <td><span class="status-pill" style="font-family: monospace; background: #f1f5f9; font-size: 0.9rem;">{{ rol.nombreRolBd }}</span></td>
-            <td><span class="status-pill" [class.active]="rol.activo" [class.inactive]="!rol.activo">{{ rol.activo ? 'Activo' : 'Inactivo' }}</span></td>
-            <td class="text-right" style="display: flex; gap: 8px; justify-content: flex-end;">
-              <button class="btn-action-view" (click)="abrirModalVerPermisos(rol)">
-                <lucide-icon name="Eye" size="14"></lucide-icon> Ver Permisos
-              </button>
-
-              <button class="btn-action-grant" (click)="abrirModalOtorgarPermisos(rol)">
-                <lucide-icon name="Plus" size="14"></lucide-icon> Otorgar
-              </button>
+            <td class="full-name">{{ rol.nombreLogico }}</td>
+            <td>
+              <span class="gp-rol-bd-pill">{{ rol.nombreRolBd }}</span>
+            </td>
+            <td>
+              <span class="status-pill" [class.active]="rol.activo" [class.inactive]="!rol.activo">
+                {{ rol.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="td-right">
+              <div class="gp-action-group">
+                <button class="btn gp-btn-view" (click)="abrirModalVerPermisos(rol)">
+                  <lucide-icon name="Eye" size="14"></lucide-icon> Ver Permisos
+                </button>
+                <button class="btn gp-btn-grant" (click)="abrirModalOtorgarPermisos(rol)">
+                  <lucide-icon name="Plus" size="14"></lucide-icon> Otorgar
+                </button>
+              </div>
             </td>
           </tr>
         } @empty {
-          <tr><td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">No hay roles registrados.</td></tr>
+          <tr><td colspan="5" class="td-empty">No hay roles registrados.</td></tr>
         }
       </tbody>
     </table>
   </div>
 
+  <!-- SOLO LOS DOS MODALES — reemplaza los bloques @if(mostrarModalVer) y @if(mostrarModalOtorgar) en gestion-permisos.html -->
+
+  <!-- ══ MODAL: VER PERMISOS ════════════════════════════════════ -->
   @if (mostrarModalVer && rolSeleccionado) {
     <div class="modal-backdrop">
-      <div class="modal-box" style="max-width: 1150px; width: 95%; height: 85vh; display: flex; flex-direction: column;">
+      <!--
+        CLAVE: las dos clases juntas "modal-box gp-modal-permisos"
+        permiten que el CSS sobreescriba overflow-y del global.
+        modal-box--wide establece el ancho máximo.
+      -->
+      <div class="modal-box modal-box--wide gp-modal-permisos">
+
+        <!-- Header: flex-shrink:0, no scrollea -->
         <div class="modal-header">
           <div>
-            <h3 style="margin: 0;"><lucide-icon name="ShieldCheck" size="20" color="#2563eb"></lucide-icon> Privilegios de: {{ rolSeleccionado.nombreLogico }}</h3>
-            <p style="margin: 2px 0 0 0; font-family: monospace; font-size: 0.8rem; color: #64748b;">Role: {{ rolSeleccionado.nombreRolBd }}</p>
+            <h3 class="modal-title">
+              <lucide-icon name="ShieldCheck" size="18"></lucide-icon>
+              Privilegios de: {{ rolSeleccionado.nombreLogico }}
+            </h3>
+            <p class="modal-subtitle gp-rol-bd">Role: {{ rolSeleccionado.nombreRolBd }}</p>
           </div>
-          <button type="button" class="btn-icon" (click)="cerrarModales()"><lucide-icon name="X" size="18"></lucide-icon></button>
+          <button type="button" class="btn-icon" (click)="cerrarModales()">
+            <lucide-icon name="X" size="18"></lucide-icon>
+          </button>
         </div>
 
+        <!-- Banner (fuera del body scrollable, también flex-shrink:0) -->
         @if (notificacion) {
-          <div [style.background-color]="notificacion.exito ? '#dcfce7' : '#fee2e2'"
-               [style.color]="notificacion.exito ? '#166534' : '#991b1b'"
-               style="margin: 10px 20px; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 700;">
-            <lucide-icon [name]="notificacion.exito ? 'CheckCircle' : 'AlertCircle'" size="20"></lucide-icon>
+          <div class="alert-banner" [class.success]="notificacion.exito" [class.error]="!notificacion.exito">
+            <lucide-icon [name]="notificacion.exito ? 'CheckCircle' : 'AlertCircle'" size="18"></lucide-icon>
             <span>{{ notificacion.mensaje }}</span>
           </div>
         }
 
-        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex: 1;">
-          <div class="filter-bar" style="display: flex; gap: 12px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; align-items: flex-end;">
-            <div class="form-group" style="flex: 1; margin: 0;"><label style="font-size: 0.7rem; font-weight: 700;">ESQUEMA</label>
+        <!--
+          ZONA QUE SCROLLEA:
+          - flex:1 para ocupar el espacio entre header y footer
+          - min-height:0 para activar overflow en contexto flex
+          - overflow-y:auto para la barra de scroll
+        -->
+        <div class="gp-modal-body">
+
+          <!-- Filtros (flex-shrink:0 dentro del body) -->
+          <div class="gp-filter-bar">
+            <div class="form-group">
+              <label>Esquema</label>
               <select class="input-field" [(ngModel)]="filtros.esquema" (change)="cargarPermisos()">
                 <option value="todo">Todos</option>
-                @for (e of esquemasDisponibles; track e) { <option [value]="e">{{e}}</option> }
+                @for (e of esquemasDisponibles; track e) {
+                  <option [value]="e">{{ e }}</option>
+                }
               </select>
             </div>
-            <div class="form-group" style="flex: 1; margin: 0;"><label style="font-size: 0.7rem; font-weight: 700;">CATEGORÍA</label>
+            <div class="form-group">
+              <label>Categoría</label>
               <select class="input-field" [(ngModel)]="filtros.categoria" (change)="cargarPermisos()">
                 <option value="todo">Todas</option>
-                @for (t of tiposObjetoDisponibles; track t.idTipoObjetoSeguridad) { <option [value]="t.nombreTipoObjeto">{{t.nombreTipoObjeto}}</option> }
+                @for (t of tiposObjetoDisponibles; track t.idTipoObjetoSeguridad) {
+                  <option [value]="t.nombreTipoObjeto">{{ t.nombreTipoObjeto }}</option>
+                }
               </select>
             </div>
-            <div class="form-group" style="flex: 2; margin: 0;"><label style="font-size: 0.7rem; font-weight: 700;">BÚSQUEDA RÁPIDA</label>
-              <input type="text" class="input-field" placeholder="Buscar por nombre..." [(ngModel)]="terminoBusqueda" (ngModelChange)="filtrarPermisosRapido()">
+            <div class="form-group gp-search-group">
+              <label>Búsqueda rápida</label>
+              <input type="text" class="input-field"
+                     placeholder="Buscar por nombre..."
+                     [(ngModel)]="terminoBusqueda"
+                     (ngModelChange)="filtrarPermisosRapido()">
             </div>
           </div>
 
-          <div class="table-card" style="margin: 0; border: 1px solid #e2e8f0;">
-            <table class="data-table" style="table-layout: fixed; width: 100%;">
+          <!-- Tabla de permisos (esta sección crece y causa el scroll) -->
+          <div class="table-card">
+            <table class="data-table gp-table-fixed">
               <thead>
               <tr>
-                <th style="width: 15%;">Esquema</th>
-                <th style="width: 40%;">Elemento</th>
-                <th style="width: 20%;">Categoría</th>
-                <th style="width: 15%; text-align: center;">Privilegio</th>
-                <th style="width: 10%; text-align: right;">Acción</th>
+                <th class="gp-col-esquema">Esquema</th>
+                <th class="gp-col-elemento">Elemento</th>
+                <th class="gp-col-categoria">Categoría</th>
+                <th class="gp-col-privilegio td-center">Privilegio</th>
+                <th class="gp-col-accion td-right">Acción</th>
               </tr>
               </thead>
               <tbody>
                 @for (p of permisosListFiltrados; track $index) {
                   <tr>
-                    <td><span style="font-size: 0.75rem; font-weight: 700;">{{ p.esquema }}</span></td>
-                    <td style="font-family: monospace; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.elemento }}</td>
-                    <td><span style="font-size: 0.75rem;">{{ p.categoria }}</span></td>
-                    <td class="text-center"><span class="status-pill" [ngStyle]="getPrivilegioColor(p.privilegio)" style="font-weight: 600; font-size: 0.65rem;">{{ p.privilegio }}</span></td>
-                    <td class="text-right"><button class="btn-icon" style="color: #ef4444;" (click)="confirmarRevocarPermiso(p)"><lucide-icon name="Trash2" size="16"></lucide-icon></button></td>
+                    <td><span class="badge blue">{{ p.esquema }}</span></td>
+                    <td class="td-mono gp-td-truncate">{{ p.elemento }}</td>
+                    <td class="td-muted">{{ p.categoria }}</td>
+                    <td class="td-center">
+                    <span class="status-pill" [ngStyle]="getPrivilegioColor(p.privilegio)">
+                      {{ p.privilegio }}
+                    </span>
+                    </td>
+                    <td class="td-right">
+                      <button class="btn-icon gp-btn-danger" (click)="confirmarRevocarPermiso(p)">
+                        <lucide-icon name="Trash2" size="16"></lucide-icon>
+                      </button>
+                    </td>
                   </tr>
                 } @empty {
-                  <tr><td colspan="5" style="text-align: center; padding: 50px; color: #94a3b8;"><p>No se encontraron privilegios registrados.</p></td></tr>
+                  <tr>
+                    <td colspan="5" class="td-empty">No se encontraron privilegios registrados.</td>
+                  </tr>
                 }
               </tbody>
             </table>
           </div>
+
+        </div><!-- /gp-modal-body -->
+
+        <!-- Footer: flex-shrink:0, siempre visible abajo -->
+        <div class="gp-modal-footer">
+        <span class="gp-footer-count">
+          Total: <strong>{{ permisosListFiltrados.length }}</strong> privilegios asignados
+        </span>
+          <button class="btn btn-primary" (click)="cerrarModales()">Cerrar</button>
         </div>
 
-        <div class="form-footer" style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; background: white;">
-          <span style="font-size: 0.95rem; font-weight: 700; color: #1e293b;">Total: <span style="color: #2563eb;">{{ permisosListFiltrados.length }}</span> privilegios asignados</span>
-          <button class="btn-primary" style="padding: 10px 25px;" (click)="cerrarModales()">Cerrar</button>
-        </div>
       </div>
     </div>
   }
 
+
+  <!-- ══ MODAL: OTORGAR PERMISOS ════════════════════════════════ -->
   @if (mostrarModalOtorgar && rolSeleccionado) {
     <div class="modal-backdrop">
-      <div class="modal-box" style="max-width: 1150px; width: 95%; height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-box modal-box--wide gp-modal-permisos">
+
         <div class="modal-header">
           <div>
-            <h3 style="margin:0;"><lucide-icon name="PlusCircle" size="20" color="#2563eb"></lucide-icon> Otorgar Privilegios: {{ rolSeleccionado.nombreLogico }}</h3>
-            <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #64748b;">Navegue por el catálogo de base de datos para asignar accesos.</p>
+            <h3 class="modal-title">
+              <lucide-icon name="PlusCircle" size="18"></lucide-icon>
+              Otorgar Privilegios: {{ rolSeleccionado.nombreLogico }}
+            </h3>
+            <p class="modal-subtitle">Navegue por el catálogo de base de datos para asignar accesos.</p>
           </div>
-          <button type="button" class="btn-icon" (click)="cerrarModales()"><lucide-icon name="X" size="18"></lucide-icon></button>
+          <button type="button" class="btn-icon" (click)="cerrarModales()">
+            <lucide-icon name="X" size="18"></lucide-icon>
+          </button>
         </div>
 
         @if (notificacion) {
-          <div [style.background-color]="notificacion.exito ? '#dcfce7' : '#fee2e2'"
-               [style.color]="notificacion.exito ? '#166534' : '#991b1b'"
-               style="margin: 10px 20px; padding: 12px; border-radius: 6px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; font-weight: 700;">
-            <lucide-icon [name]="notificacion.exito ? 'CheckCircle' : 'AlertCircle'" size="20"></lucide-icon>
+          <div class="alert-banner" [class.success]="notificacion.exito" [class.error]="!notificacion.exito">
+            <lucide-icon [name]="notificacion.exito ? 'CheckCircle' : 'AlertCircle'" size="18"></lucide-icon>
             <span>{{ notificacion.mensaje }}</span>
           </div>
         }
 
         @if (resultadoOperacion) {
-          <div [style.background-color]="resultadoOperacion.exito ? '#f0fdf4' : '#fef2f2'"
-               style="margin: 0 20px 10px 20px; padding: 10px; border-radius: 6px; border: 1px solid #bbf7d0; font-size: 0.85rem;">
-            <strong>Resultado:</strong> {{ resultadoOperacion.mensaje }}
+          <div class="alert-banner" [class.success]="resultadoOperacion.exito" [class.error]="!resultadoOperacion.exito">
+            <strong>Resultado:</strong>&nbsp;{{ resultadoOperacion.mensaje }}
             (Procesados: {{ resultadoOperacion.totalProcesados }}, Éxitos: {{ resultadoOperacion.exitosos }})
           </div>
         }
 
-        <div style="padding: 20px; overflow-y: auto; background-color: #f8fafc; flex: 1;">
-          <div class="menu-jerarquico-container" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <!-- Zona scrollable -->
+        <div class="gp-modal-body">
+          <div class="gp-jerarquia">
             @for (esc of esquemasDisponibles; track esc) {
-              <div class="esquema-row">
-                <button (click)="toggleEsquema(esc)"
-                        style="width: 100%; text-align: left; padding: 12px 20px; border: none; background: #fff; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; cursor: pointer; color: #334155; font-weight: 700;">
+              <div class="gp-esquema-row">
+                <button class="gp-tree-btn" (click)="toggleEsquema(esc)">
                   <lucide-icon [name]="esquemaSeleccionado === esc ? 'ChevronDown' : 'ChevronRight'" size="16"></lucide-icon>
-                  <lucide-icon name="Folder" size="16" color="#3b82f6"></lucide-icon> {{ esc }}
+                  <lucide-icon name="Folder" size="16" class="gp-icon-folder"></lucide-icon>
+                  {{ esc }}
                 </button>
 
                 @if (esquemaSeleccionado === esc) {
-                  <div style="padding-left: 30px; background: #fcfdfe;">
+                  <div class="gp-tree-indent">
                     @for (tipo of tiposObjetoDisponibles; track tipo.idTipoObjetoSeguridad) {
-                      <button (click)="toggleCategoria(tipo)"
-                              style="width: 100%; text-align: left; padding: 10px 20px; border: none; background: transparent; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; cursor: pointer; color: #475569; font-size: 0.85rem; font-weight: 600;">
-                        <lucide-icon [name]="categoriaSeleccionada?.idTipoObjetoSeguridad === tipo.idTipoObjetoSeguridad ? 'ChevronDown' : 'ChevronRight'" size="14"></lucide-icon> {{ tipo.nombreTipoObjeto }}
+                      <button class="gp-tree-btn gp-tree-btn--cat" (click)="toggleCategoria(tipo)">
+                        <lucide-icon [name]="categoriaSeleccionada?.idTipoObjetoSeguridad === tipo.idTipoObjetoSeguridad ? 'ChevronDown' : 'ChevronRight'" size="14"></lucide-icon>
+                        {{ tipo.nombreTipoObjeto }}
                       </button>
 
                       @if (categoriaSeleccionada?.idTipoObjetoSeguridad === tipo.idTipoObjetoSeguridad) {
-                        <div style="padding: 10px 20px 10px 45px; background: #fff;">
-                          @if (loadingElementos) { <p style="font-size: 0.8rem; color: #2563eb;">Consultando catálogo...</p> }
-
+                        <div class="gp-tree-elementos">
+                          @if (loadingElementos) {
+                            <p class="gp-loading-msg">
+                              <lucide-icon name="Loader2" size="14" class="spin"></lucide-icon>
+                              Consultando catálogo...
+                            </p>
+                          }
                           @for (el of elementosBdList; track el) {
-                            <div style="padding: 10px 0; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
-                              <div style="display: flex; align-items: center; gap: 8px;">
-                                <lucide-icon name="Database" size="14" color="#94a3b8"></lucide-icon>
-                                <span style="font-family: monospace; font-size: 0.85rem; font-weight: 700;">{{ el }}</span>
+                            <div class="gp-elemento-row">
+                              <div class="gp-elemento-name">
+                                <lucide-icon name="Database" size="14" class="td-muted"></lucide-icon>
+                                <span class="td-mono">{{ el }}</span>
                               </div>
-                              <div style="display: flex; gap: 12px;">
+                              <div class="gp-privilegios-group">
                                 @for (priv of privilegiosPorTipo; track priv.idPrivilegio) {
-                                  <label style="display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #64748b; cursor: pointer; padding: 4px 8px; background: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
-                                    <input type="checkbox" [checked]="isCheckSelected(el, priv.nombrePrivilegio)" (change)="gestionarCheckBatch(el, priv.nombrePrivilegio, $event)"> {{ priv.nombrePrivilegio | lowercase }}
+                                  <label class="gp-priv-label">
+                                    <input type="checkbox"
+                                           [checked]="isCheckSelected(el, priv.nombrePrivilegio)"
+                                           (change)="gestionarCheckBatch(el, priv.nombrePrivilegio, $event)">
+                                    {{ priv.nombrePrivilegio | lowercase }}
                                   </label>
                                 }
                               </div>
@@ -189,20 +259,25 @@
               </div>
             }
           </div>
-        </div>
+        </div><!-- /gp-modal-body -->
 
-        <div class="form-footer" style="padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; background: white;">
-          <span style="font-size: 0.9rem; color: #64748b; font-weight: 600;">
-            Pendientes: <span style="color: #2563eb; font-size: 1rem;">{{ seleccionPendiente.length }}</span> cambios marcados
-          </span>
-          <div style="display: flex; gap: 10px;">
-            <button class="btn-ghost" (click)="cerrarModales()">Cancelar</button>
-            <button class="btn-primary" [disabled]="seleccionPendiente.length === 0 || procesandoEnvio" (click)="otorgarPermisosMasivo()">
-              {{ procesandoEnvio ? 'Aplicando Transacción...' : 'Otorgar Permisos' }}
+        <!-- Footer fijo -->
+        <div class="gp-modal-footer">
+        <span class="gp-footer-count">
+          Pendientes: <strong>{{ seleccionPendiente.length }}</strong> cambios marcados
+        </span>
+          <div class="flex gap-2">
+            <button class="btn btn-ghost" (click)="cerrarModales()">Cancelar</button>
+            <button class="btn btn-primary"
+                    [disabled]="seleccionPendiente.length === 0 || procesandoEnvio"
+                    (click)="otorgarPermisosMasivo()">
+              {{ procesandoEnvio ? 'Aplicando...' : 'Otorgar Permisos' }}
             </button>
           </div>
         </div>
+
       </div>
     </div>
   }
+
 </div>
