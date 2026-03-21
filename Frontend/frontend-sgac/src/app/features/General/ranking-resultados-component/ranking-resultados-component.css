@@ -246,6 +246,47 @@
 .rk-dot-eleg { background: #1d4ed8; }
 .rk-dot-no   { background: #cbd5e1; }
 
+.rk-export-group {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+
+.rk-btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  height: 2.2rem;
+  padding: 0 .875rem;
+  border: none;
+  border-radius: 8px;
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .15s, opacity .15s;
+  white-space: nowrap;
+}
+.rk-btn-export:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+.rk-btn-excel {
+  background: #166534;
+  color: #fff;
+}
+.rk-btn-excel:hover:not(:disabled) {
+  background: #14532d;
+}
+
+.rk-btn-pdf {
+  background: #dc2626;
+  color: #fff;
+}
+.rk-btn-pdf:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
 @media (max-width: 640px) {
   .rk-stats { flex-direction: column; }
   .rk-filters-panel { flex-direction: column; }

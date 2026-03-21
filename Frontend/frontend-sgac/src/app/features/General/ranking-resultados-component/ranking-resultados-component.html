@@ -1,11 +1,11 @@
-<!-- src/app/features/ranking/ranking-resultados/ranking-resultados.component.html -->
+<!-- src/app/features/General/ranking-resultados-component/ranking-resultados-component.html -->
 <div class="rk-wrapper">
 
   <!-- ══ TOAST ══════════════════════════════════════════════════════ -->
   <div *ngIf="toastMsg" class="rk-toast"
        [class.rk-toast-ok]="toastTipo==='ok'"
        [class.rk-toast-err]="toastTipo==='err'">
-    <lucide-icon name="circle-check-big" size="15"></lucide-icon>
+    <lucide-icon [name]="toastTipo==='ok' ? 'circle-check-big' : 'circle-x'" size="15"></lucide-icon>
     <span>{{ toastMsg }}</span>
   </div>
 
@@ -18,7 +18,32 @@
       <h1 class="rk-title">Resultados Finales de Selección</h1>
       <p class="rk-subtitle">Ranking consolidado — Méritos + Oposición</p>
     </div>
-    <button *ngIf="!loading && !faseNoPublicada && !error" class="rk-btn-reload" (click)="cargar()" title="Actualizar">
+
+    <!-- Botones de exportación: solo para DECANO / COORDINADOR / ADMINISTRADOR -->
+    <div *ngIf="esRolAutorizadoParaReportes() && !loading && !faseNoPublicada && !error"
+         class="rk-export-group">
+      <button class="rk-btn-export rk-btn-excel"
+              (click)="generarReporteExcel()"
+              [disabled]="descargandoExcel"
+              title="Exportar a Excel">
+        <lucide-icon [name]="descargandoExcel ? 'loader' : 'table'"
+                     size="15"
+                     [class.rk-spin]="descargandoExcel"></lucide-icon>
+        {{ descargandoExcel ? 'Generando...' : 'Excel' }}
+      </button>
+      <button class="rk-btn-export rk-btn-pdf"
+              (click)="generarReportePdf()"
+              [disabled]="descargandoPdf"
+              title="Exportar a PDF">
+        <lucide-icon [name]="descargandoPdf ? 'loader' : 'file-text'"
+                     size="15"
+                     [class.rk-spin]="descargandoPdf"></lucide-icon>
+        {{ descargandoPdf ? 'Generando...' : 'PDF' }}
+      </button>
+    </div>
+
+    <button *ngIf="!loading && !faseNoPublicada && !error"
+            class="rk-btn-reload" (click)="cargar()" title="Actualizar">
       <lucide-icon name="refresh-cw" size="15"></lucide-icon>
     </button>
   </div>
@@ -82,7 +107,6 @@
     <!-- Panel de filtros -->
     <div class="rk-filters-panel">
 
-      <!-- Buscador -->
       <div class="rk-search-wrap">
         <lucide-icon name="search" size="15" class="rk-search-icon"></lucide-icon>
         <input
@@ -97,7 +121,6 @@
         </button>
       </div>
 
-      <!-- Filtro asignatura -->
       <select *ngIf="asignaturas.length > 1"
               class="rk-select"
               [(ngModel)]="filtroAsignatura"
@@ -106,7 +129,6 @@
         <option *ngFor="let a of asignaturas" [value]="a">{{ a }}</option>
       </select>
 
-      <!-- Filtro carrera -->
       <select *ngIf="carreras.length > 1"
               class="rk-select"
               [(ngModel)]="filtroCarrera"
@@ -115,22 +137,21 @@
         <option *ngFor="let c of carreras" [value]="c">{{ c }}</option>
       </select>
 
-      <!-- Orden puntaje -->
       <button class="rk-btn-orden" (click)="toggleOrden()" title="Ordenar por puntaje">
-        <lucide-icon [name]="ordenDir === 'desc' ? 'arrow-down-wide-narrow' : 'arrow-up-narrow-wide'" size="15"></lucide-icon>
+        <lucide-icon
+          [name]="ordenDir === 'desc' ? 'arrow-down-wide-narrow' : 'arrow-up-narrow-wide'"
+          size="15"></lucide-icon>
         Puntaje {{ ordenDir === 'desc' ? 'mayor a menor' : 'menor a mayor' }}
       </button>
 
-      <!-- Limpiar filtros -->
       <button *ngIf="busqueda || filtroAsignatura || filtroCarrera"
               class="rk-btn-limpiar" (click)="limpiarFiltros()">
         <lucide-icon name="filter-x" size="14"></lucide-icon>
         Limpiar
       </button>
-
     </div>
 
-    <!-- Contador de resultados filtrados -->
+    <!-- Contador -->
     <p class="rk-count">
       <lucide-icon name="list-filter" size="13"></lucide-icon>
       {{ filtrados.length }} resultado{{ filtrados.length !== 1 ? 's' : '' }}
@@ -139,7 +160,7 @@
       </span>
     </p>
 
-    <!-- Estado vacío tras filtrar -->
+    <!-- Estado vacío -->
     <div *ngIf="filtrados.length === 0" class="rk-state-box">
       <lucide-icon name="inbox" size="28" class="rk-icon-muted"></lucide-icon>
       <p class="rk-state-text">No hay resultados que coincidan con los filtros.</p>
@@ -164,19 +185,16 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let r of filtrados"
-            [class]="claseFilaTabla(r.estado)">
+        <tr *ngFor="let r of filtrados" [class]="claseFilaTabla(r.estado)">
 
           <!-- Posición -->
           <td class="rk-td-pos">
-              <span *ngIf="r.posicion === 1 && r.estado === 'SELECCIONADO'"
-                    class="rk-medal rk-medal-oro">🥇</span>
-            <span *ngIf="r.posicion === 2 && r.estado === 'SELECCIONADO'"
-                  class="rk-medal rk-medal-plata">🥈</span>
-            <span *ngIf="r.posicion === 3 && r.estado === 'SELECCIONADO'"
-                  class="rk-medal rk-medal-bronce">🥉</span>
-            <span *ngIf="r.posicion > 3 || r.estado !== 'SELECCIONADO'"
-                  class="rk-pos-num">{{ r.posicion }}</span>
+            <span *ngIf="r.posicion === 1 && r.estado === 'SELECCIONADO'" class="rk-medal">🥇</span>
+            <span *ngIf="r.posicion === 2 && r.estado === 'SELECCIONADO'" class="rk-medal">🥈</span>
+            <span *ngIf="r.posicion === 3 && r.estado === 'SELECCIONADO'" class="rk-medal">🥉</span>
+            <span *ngIf="r.posicion > 3 || r.estado !== 'SELECCIONADO'" class="rk-pos-num">
+                {{ r.posicion }}
+              </span>
           </td>
 
           <!-- Postulante -->
@@ -190,13 +208,9 @@
             </div>
           </td>
 
-          <!-- Asignatura (si hay más de una) -->
           <td *ngIf="asignaturas.length > 1" class="rk-td-asig">{{ r.asignatura }}</td>
+          <td *ngIf="carreras.length > 1"    class="rk-td-carrera">{{ r.carrera }}</td>
 
-          <!-- Carrera (si hay más de una) -->
-          <td *ngIf="carreras.length > 1" class="rk-td-carrera">{{ r.carrera }}</td>
-
-          <!-- Puntajes -->
           <td class="rk-td-num">{{ formatPuntaje(r.meritos) }}</td>
           <td class="rk-td-num">{{ formatPuntaje(r.oposicion) }}</td>
           <td class="rk-td-num rk-td-total"
@@ -205,7 +219,6 @@
             {{ formatPuntaje(r.total) }}
           </td>
 
-          <!-- Estado -->
           <td>
             <div class="rk-badge-wrap">
                 <span class="rk-badge" [ngClass]="badgeEstado(r.estado)">
@@ -217,22 +230,21 @@
                 </span>
             </div>
           </td>
-
         </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- Leyenda de estados -->
+    <!-- Leyenda -->
     <div class="rk-leyenda">
       <span class="rk-leyenda-item">
         <span class="rk-leyenda-dot rk-dot-sel"></span>
-        Seleccionado: total ≥ 25 pts y dentro del cupo de vacantes
+        Seleccionado: total ≥ 25 pts y dentro del cupo
       </span>
       <span class="rk-leyenda-sep">·</span>
       <span class="rk-leyenda-item">
         <span class="rk-leyenda-dot rk-dot-eleg"></span>
-        Elegible: total ≥ 25 pts pero fuera del cupo
+        Elegible: total ≥ 25 pts, fuera del cupo
       </span>
       <span class="rk-leyenda-sep">·</span>
       <span class="rk-leyenda-item">
