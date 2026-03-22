@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule }       from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { ConfiguracionService } from '../../../core/services/configuracion/Configuracion';
+import { CronogramaActivoService } from '../../../core/services/configuracion/cronograma-activo-service';
 import { CronogramaActivoResponse, PeriodoInfo, FaseInfo } from '../../../core/models/configuracion/Cronograma';
 
 export interface GanttCol {
@@ -20,7 +20,7 @@ export interface GanttCol {
 })
 export class CronogramaActivoComponent implements OnInit, OnDestroy {
 
-  private svc = inject(ConfiguracionService);
+  private svc = inject(CronogramaActivoService);
 
   cargando   = true;
   error      = '';

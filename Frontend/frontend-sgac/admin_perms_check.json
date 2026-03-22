@@ -1,0 +1,68 @@
+{
+  "comisionPerms": [
+    {
+      "grantee": "role_coordinador",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "role_coordinador",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "role_coordinador",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "administrador_consultas",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "administrador_consultas",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "administrador_consultas",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "administrador_consultas",
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "DELETE"
+    }
+  ],
+  "schemaUsage": [
+    {
+      "nspname": "postulacion",
+      "admin_has_usage": true,
+      "coord_has_usage": true
+    },
+    {
+      "nspname": "academico",
+      "admin_has_usage": true,
+      "coord_has_usage": true
+    },
+    {
+      "nspname": "convocatoria",
+      "admin_has_usage": true,
+      "coord_has_usage": true
+    },
+    {
+      "nspname": "seguridad",
+      "admin_has_usage": true,
+      "coord_has_usage": false
+    }
+  ]
+}

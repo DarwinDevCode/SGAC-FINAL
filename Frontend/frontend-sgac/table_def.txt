@@ -1,0 +1,62 @@
+[
+  {
+    "column_name": "id_registro_actividad",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "id_ayudantia",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "descripcion_actividad",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "tema_tratado",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "fecha",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "horas_dedicadas",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "id_tipo_estado_registro",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "column_name": "observaciones",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "fecha_observacion",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "hora_inicio",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "hora_fin",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "column_name": "lugar",
+    "is_nullable": "YES",
+    "column_default": null
+  }
+]

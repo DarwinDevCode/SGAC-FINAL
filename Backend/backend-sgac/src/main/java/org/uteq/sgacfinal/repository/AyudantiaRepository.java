@@ -63,9 +63,10 @@ public interface AyudantiaRepository extends JpaRepository<Ayudantia, Integer> {
                 ra.descripcion_actividad,
                 ra.tema_tratado,
                 ra.fecha,
-                ra.numero_asistentes,
+                (SELECT CAST(COUNT(*) AS INTEGER) FROM ayudantia.detalle_asistencia_actividad daa WHERE daa.id_registro_actividad = ra.id_registro_actividad) AS numero_asistentes,
                 ra.horas_dedicadas,
                 ra.id_tipo_estado_registro,
+                ter.codigo AS codigo_estado,
                 ter.nombre_estado AS nombre_estado,
                 ra.observaciones,
                 ra.fecha_observacion

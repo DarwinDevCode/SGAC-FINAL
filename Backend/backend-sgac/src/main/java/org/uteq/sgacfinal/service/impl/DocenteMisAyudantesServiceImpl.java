@@ -90,8 +90,9 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
                         .fechaSubida((LocalDate) e[5])
                         .idTipoEstadoEvidencia((Integer) e[6])
                         .estadoEvidencia((String) e[7])
-                        .observaciones((String) e[8])
-                        .fechaObservacion((LocalDate) e[9])
+                        .codigoEstado((String) e[8])
+                        .observaciones((String) e[9])
+                        .fechaObservacion((LocalDate) e[10])
                         .build());
             }
 
@@ -105,8 +106,9 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
                     .horasDedicadas((java.math.BigDecimal) a[6])
                     .idTipoEstadoRegistro((Integer) a[7])
                     .estadoRegistro((String) a[8])
-                    .observaciones((String) a[9])
-                    .fechaObservacion((LocalDate) a[10])
+                    .codigoEstado((String) a[9])
+                    .observaciones((String) a[10])
+                    .fechaObservacion((LocalDate) a[11])
                     .evidencias(evidenciasDto)
                     .build());
         }
@@ -122,11 +124,27 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No autorizado para evaluar esta actividad");
         }
 
-        // Siempre actualiza fecha_observacion al momento de evaluar (requisito)
+        String codigoEstado = null;
+        if (request.getIdTipoEstadoRegistro() != null) {
+            switch (request.getIdTipoEstadoRegistro()) {
+                case 1 -> codigoEstado = "PENDIENTE";
+                case 2 -> codigoEstado = "APROBADO";
+                case 3 -> codigoEstado = "OBSERVADO";
+                case 4 -> codigoEstado = "RECHAZADO";
+                default -> codigoEstado = "PENDIENTE";
+            }
+        }
+        
+        Integer idRealEstado = docenteMisAyudantesRepository.getIdEstadoRegistroPorCodigo(codigoEstado);
+        
+        if (idRealEstado == null) {
+            throw new RuntimeException("Código de estado no válido en la base de datos: " + codigoEstado);
+        }
+
         LocalDate ahora = LocalDate.now();
         int updated = registroActividadConfigRepository.evaluarActividad(
                 idActividad,
-                request.getIdTipoEstadoRegistro(),
+                idRealEstado,
                 request.getObservaciones(),
                 ahora
         );
@@ -159,10 +177,27 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No autorizado para evaluar esta evidencia");
         }
 
+        String codigoEstado = null;
+        if (request.getIdTipoEstadoEvidencia() != null) {
+            switch (request.getIdTipoEstadoEvidencia()) {
+                case 1 -> codigoEstado = "SUBIDO";
+                case 2 -> codigoEstado = "REVISADO";
+                case 3 -> codigoEstado = "APROBADO";
+                case 4 -> codigoEstado = "RECHAZADO";
+                case 5 -> codigoEstado = "OBSERVADO";
+                default -> codigoEstado = "SUBIDO";
+            }
+        }
+        Integer idRealEstado = docenteMisAyudantesRepository.getIdEstadoEvidenciaPorCodigo(codigoEstado);
+        
+        if (idRealEstado == null) {
+             throw new RuntimeException("Código de estado de evidencia no válido: " + codigoEstado);
+        }
+
         LocalDate ahora = LocalDate.now();
         int updated = evidenciaRegistroActividadRepository.evaluarEvidencia(
                 idEvidencia,
-                request.getIdTipoEstadoEvidencia(),
+                idRealEstado,
                 request.getObservaciones(),
                 ahora
         );
@@ -171,8 +206,8 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No se pudo evaluar la evidencia");
         }
 
-        // Notificación solo cuando cambia a OBSERVADO (5)
-        if (request.getIdTipoEstadoEvidencia() != null && request.getIdTipoEstadoEvidencia() == 5) {
+        // Notificación solo cuando cambia a OBSERVADO
+        if ("OBSERVADO".equals(codigoEstado)) {
             Integer idUsuarioAyudante = docenteMisAyudantesRepository
                     .obtenerIdUsuarioAyudantePorEvidencia(idUsuario, idEvidencia);
 

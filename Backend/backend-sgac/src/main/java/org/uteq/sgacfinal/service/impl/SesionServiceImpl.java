@@ -189,14 +189,15 @@ public class SesionServiceImpl implements SesionService {
     private SesionListadoResponse mapearSesionListado(Object[] fila) {
         return SesionListadoResponse.builder()
                 .idRegistro(toInteger(fila[0]))
-                .fecha(toLocalDate(       fila[1]))
+                .fecha(toLocalDate(       fila[3]))
                 .temaTratado((String)     fila[2])
-                .descripcion((String)     fila[3])
+                .descripcion((String)     fila[1])
                 .numeroAsistentes(toInteger(fila[4]))
                 .horasDedicadas(toBigDecimal(fila[5]))
-                .estado((String)          fila[6])
-                .totalEvidencias(toLong(fila[7]))
-                .tieneObservacion(toBoolean(fila[8]))
+                .estado((String)          fila[8])
+                .codigo((String)          fila[7])
+                .totalEvidencias(0L)    // No devuelto por este query
+                .tieneObservacion(fila[9] != null)
                 .build();
     }
 

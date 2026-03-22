@@ -18,6 +18,7 @@ public class SesionListadoResponse {
     private Integer numeroAsistentes;
     private BigDecimal horasDedicadas;
     private String estado;
+    private String codigo;
     private Long totalEvidencias;
     private Boolean tieneObservacion;
 }

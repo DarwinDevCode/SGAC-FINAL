@@ -1,0 +1,298 @@
+{
+  "roles": [
+    "role_coordinador",
+    "administrador_consultas"
+  ],
+  "functions": [
+    {
+      "schema": "postulacion",
+      "function": "fn_obtener_detalle_postulacion_coordinador",
+      "owner": "administrador_consultas",
+      "is_security_definer": false
+    },
+    {
+      "schema": "postulacion",
+      "function": "fn_listar_postulaciones_coordinador",
+      "owner": "administrador_consultas",
+      "is_security_definer": false
+    }
+  ],
+  "schemaPerms": [
+    {
+      "nspname": "ayudantia",
+      "has_usage": true
+    },
+    {
+      "nspname": "postulacion",
+      "has_usage": true
+    },
+    {
+      "nspname": "academico",
+      "has_usage": true
+    },
+    {
+      "nspname": "convocatoria",
+      "has_usage": true
+    },
+    {
+      "nspname": "seguridad",
+      "has_usage": false
+    },
+    {
+      "nspname": "public",
+      "has_usage": true
+    }
+  ],
+  "tablePermissions": [
+    {
+      "table_schema": "postulacion",
+      "table_name": "requisito_adjunto",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "requisito_adjunto",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "requisito_adjunto",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "tipo_estado_postulacion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "tipo_estado_postulacion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "tipo_estado_postulacion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "tipo_estado_evaluacion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "tipo_estado_evaluacion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "tipo_estado_evaluacion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "evaluacion_oposicion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "evaluacion_oposicion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "evaluacion_oposicion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "carrera",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "coordinador",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "postulacion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "postulacion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "postulacion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "asignatura",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "periodo_academico",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "configuracion_oposicion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "configuracion_oposicion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "configuracion_oposicion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "docente",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "docente_asignatura",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "estudiante",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "log_auditoria",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "ayudante_catedra",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "facultad",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "academico",
+      "table_name": "decano",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "tipo_requisito_postulacion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "tipo_requisito_postulacion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "tipo_requisito_postulacion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "tipo_estado_requisito",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "tipo_estado_requisito",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "tipo_estado_requisito",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "periodo_academico_requisito_postulacion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "periodo_academico_requisito_postulacion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "periodo_academico_requisito_postulacion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "convocatoria",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "convocatoria",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "convocatoria",
+      "table_name": "convocatoria",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "banco_temas",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "banco_temas",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "banco_temas",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "comision_seleccion",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "evaluacion_meritos",
+      "privilege_type": "INSERT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "evaluacion_meritos",
+      "privilege_type": "SELECT"
+    },
+    {
+      "table_schema": "postulacion",
+      "table_name": "evaluacion_meritos",
+      "privilege_type": "UPDATE"
+    }
+  ]
+}

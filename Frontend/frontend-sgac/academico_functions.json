@@ -1,0 +1,50 @@
+[
+  {
+    "nspname": "academico",
+    "proname": "fn_gestionar_carga_docente"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_verificar_elegibilidad_academica"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_iniciar_periodo_academico"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_abrir_periodo_academico"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_listar_asignaturas_docente"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_listar_docentes_activos"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_listar_jerarquia_asignaturas"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_obtener_id_periodo_activo"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_get_facultades_activas"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_get_asignaturas_por_carrera"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_verificar_estado_periodo"
+  },
+  {
+    "nspname": "academico",
+    "proname": "fn_get_carreras_activas"
+  }
+]

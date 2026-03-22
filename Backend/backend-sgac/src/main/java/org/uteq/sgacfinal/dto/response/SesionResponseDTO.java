@@ -22,6 +22,7 @@ public class SesionResponseDTO {
     private BigDecimal horasDedicadas;
 
     private Integer idTipoEstadoRegistro;
+    private String codigoEstado;
     private String estadoRevision;
 
     // Nuevo: nombre del estado (tabla ayudantia.tipo_estado_registro)

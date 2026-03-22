@@ -194,13 +194,14 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
         // 9 fecha_observacion
 
         Integer idTipoEstadoRegistro = row[6] != null ? ((Number) row[6]).intValue() : null;
-        String nombreEstado = row[7] != null ? row[7].toString() : null;
+        String codigoEstado = row[7] != null ? row[7].toString() : null;
+        String nombreEstado = row[8] != null ? row[8].toString() : null;
 
-        String observacion = (row[8] != null && !row[8].toString().isBlank())
-                ? row[8].toString()
+        String observacion = (row[9] != null && !row[9].toString().isBlank())
+                ? row[9].toString()
                 : "Sin observaciones";
 
-        LocalDate fechaObs = toLocalDate(row[9]);
+        LocalDate fechaObs = toLocalDate(row[10]);
 
         return SesionResponseDTO.builder()
                 .idRegistroActividad(row[0] != null ? ((Number) row[0]).intValue() : null)
@@ -210,6 +211,7 @@ public class AyudantiaServiceImpl implements IAyudantiaService {
                 .numeroAsistentes(row[4] != null ? ((Number) row[4]).intValue() : null)
                 .horasDedicadas((BigDecimal) row[5])
                 .idTipoEstadoRegistro(idTipoEstadoRegistro)
+                .codigoEstado(codigoEstado)
                 // mantenemos estadoRevision por compatibilidad (mismo valor que nombreEstado)
                 .estadoRevision(nombreEstado)
                 .nombreEstado(nombreEstado)

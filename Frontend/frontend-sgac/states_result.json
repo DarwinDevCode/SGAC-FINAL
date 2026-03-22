@@ -1,0 +1,104 @@
+{
+  "registro": [
+    {
+      "id_tipo_estado_registro": 17,
+      "nombre_estado": "Pendiente",
+      "descripcion": "Registro enviado, sin revisar",
+      "activo": true,
+      "codigo": "PENDIENTE"
+    },
+    {
+      "id_tipo_estado_registro": 18,
+      "nombre_estado": "Aprobado",
+      "descripcion": "Registro validado por el docente",
+      "activo": true,
+      "codigo": "APROBADO"
+    },
+    {
+      "id_tipo_estado_registro": 20,
+      "nombre_estado": "Rechazado",
+      "descripcion": "Registro inválido",
+      "activo": true,
+      "codigo": "RECHAZADO"
+    },
+    {
+      "id_tipo_estado_registro": 21,
+      "nombre_estado": "Aceptado",
+      "descripcion": "Actividad aceptada por el docente",
+      "activo": true,
+      "codigo": "ACEPTADO"
+    },
+    {
+      "id_tipo_estado_registro": 19,
+      "nombre_estado": "Con observaciones",
+      "descripcion": "Tiene comentarios, requiere corrección",
+      "activo": true,
+      "codigo": "OBSERVADO"
+    },
+    {
+      "id_tipo_estado_registro": 22,
+      "nombre_estado": "Borrador",
+      "descripcion": "Estado inicial. La sesión está en proceso de edición por el ayudante y aún no ha sido enviada a revisión.",
+      "activo": true,
+      "codigo": "BORRADOR"
+    },
+    {
+      "id_tipo_estado_registro": 23,
+      "nombre_estado": "Planificado",
+      "descripcion": "Sesion planificada para más adelante",
+      "activo": true,
+      "codigo": "PLANIFICADO"
+    }
+  ],
+  "evidencia": [
+    {
+      "id_tipo_estado_evidencia": 18,
+      "nombre_estado": "Estado pendiente",
+      "descripcion": "Evidencia pendiente de revisión",
+      "activo": true,
+      "codigo": "PENDIENTE"
+    },
+    {
+      "id_tipo_estado_evidencia": 19,
+      "nombre_estado": "Revisado",
+      "descripcion": "El docente lo ha revisado",
+      "activo": true,
+      "codigo": "REVISADO"
+    },
+    {
+      "id_tipo_estado_evidencia": 20,
+      "nombre_estado": "Aprobado",
+      "descripcion": "Evidencia válida y aceptada",
+      "activo": true,
+      "codigo": "APROBADO"
+    },
+    {
+      "id_tipo_estado_evidencia": 21,
+      "nombre_estado": "Rechazado",
+      "descripcion": "Evidencia inválida, sin posibilidad a corregir",
+      "activo": true,
+      "codigo": "RECHAZADO"
+    },
+    {
+      "id_tipo_estado_evidencia": 22,
+      "nombre_estado": "En observación",
+      "descripcion": "Evidencia necesita correccion",
+      "activo": true,
+      "codigo": "OBSERVADO"
+    },
+    {
+      "id_tipo_estado_evidencia": 23,
+      "nombre_estado": "Aceptada",
+      "descripcion": "Evidencia aceptada",
+      "activo": false,
+      "codigo": "ACEPTADO"
+    },
+    {
+      "id_tipo_estado_evidencia": 24,
+      "nombre_estado": "Subido",
+      "descripcion": "Evidencia cargada",
+      "activo": true,
+      "codigo": "SUBIDO"
+    }
+  ]
+}

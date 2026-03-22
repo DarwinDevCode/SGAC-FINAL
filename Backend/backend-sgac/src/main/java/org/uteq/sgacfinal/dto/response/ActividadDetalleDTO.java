@@ -30,6 +30,7 @@ public class ActividadDetalleDTO {
 
     private Integer idTipoEstadoRegistro;
     private String estadoRegistro;
+    private String codigoEstado;
 
     private String observaciones;
     private LocalDate fechaObservacion;
@@ -50,6 +51,7 @@ public class ActividadDetalleDTO {
 
         private Integer idTipoEstadoEvidencia;
         private String estadoEvidencia;
+        private String codigoEstado;
 
         private String observaciones;
         private LocalDate fechaObservacion;

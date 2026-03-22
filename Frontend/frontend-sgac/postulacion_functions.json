@@ -1,0 +1,134 @@
+[
+  {
+    "nspname": "postulacion",
+    "proname": "fn_obtener_tribunal_evaluacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "sp_notificar_coordinador_subsanacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_generar_comisiones_automaticas"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_obtener_evaluacion_meritos"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_listar_convocatorias_para_oposicion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_resolver_mi_sala"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_cambiar_estado_evaluacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_listar_postulaciones_para_meritos"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_reabrir_evaluacion_meritos"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_obtener_ranking_resultados"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_resolver_sala_usuario"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_registrar_puntaje_jurado"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_obtener_mi_turno"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_eliminar_tipo_estado_postulacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "sp_finalizar_proceso_seleccion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_consultar_mi_turno"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_evaluar_documento_individual"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_obtener_detalle_postulacion_coordinador"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_listar_tipo_estado_postulacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_ejecutar_sorteo_oposicion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_gestionar_banco_temas"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_obtener_documentos_postulacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_guardar_evaluacion_meritos"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_crear_tipo_estado_postulacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_actualizar_tipo_estado_postulacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_consultar_comision_detalle"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_ver_detalle_postulacion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_listar_postulaciones_coordinador"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_finalizar_proceso_seleccion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_cambiar_estado_postulacion_revision"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_subsanar_documento_estudiante"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_consultar_cronograma_oposicion"
+  },
+  {
+    "nspname": "postulacion",
+    "proname": "fn_dictaminar_postulacion"
+  }
+]

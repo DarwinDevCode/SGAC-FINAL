@@ -19,7 +19,7 @@ import java.sql.Statement;
 public class DatabaseRoleAspect {
     private final EntityManager entityManager;
 
-    @Around("execution(* org.uteq.sgacfinal.repository.*.*(..))")
+    @Around("execution(* org.uteq.sgacfinal.repository..*.*(..))")
     public Object applyDatabaseRole(ProceedingJoinPoint joinPoint) throws Throwable {
         String appRole = UserContext.getAppRole();
         boolean roleChanged = false;
@@ -35,7 +35,7 @@ public class DatabaseRoleAspect {
                 session.doWork(connection -> {
                     try (Statement statement = connection.createStatement()) {
                         statement.execute("SET LOCAL ROLE " + dbRole);
-                        log.debug("Rol de BD cambiado exitosamente a: {}", dbRole);
+                        log.info("Rol de BD cambiado exitosamente a: {}", dbRole);
                     }
                 });
                 roleChanged = true;
@@ -54,7 +54,7 @@ public class DatabaseRoleAspect {
                         session.doWork(connection -> {
                             try (Statement statement = connection.createStatement()) {
                                 statement.execute("RESET ROLE");
-                                log.debug("Rol de BD reseteado al usuario por defecto.");
+                                log.info("Rol de BD reseteado al usuario por defecto.");
                             }
                         });
                     }

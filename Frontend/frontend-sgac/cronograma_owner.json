@@ -1,0 +1,8 @@
+[
+  {
+    "schema": "postulacion",
+    "function": "fn_consultar_cronograma_oposicion",
+    "owner": "administrador_consultas",
+    "is_security_definer": true
+  }
+]

@@ -50,14 +50,10 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
         JOIN ayudantia.tipo_estado_ayudantia tea
           ON tea.id_tipo_estado_ayudantia = a.id_tipo_estado_ayudantia
         WHERE d.id_usuario = :idUsuario
-          AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
-          AND c.activo = true
-          AND p.activo = true
         ORDER BY a.id_ayudantia DESC
         """, nativeQuery = true)
     List<Object[]> listarMisAyudantes(@Param("idUsuario") Integer idUsuario);
-
 
     /**
      * Lista registros de actividad de una ayudantía validando que pertenece al docente (por idUsuario).
@@ -69,10 +65,11 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ra.descripcion_actividad,
           ra.tema_tratado,
           ra.fecha,
-          ra.numero_asistentes,
+          (SELECT CAST(COUNT(*) AS INTEGER) FROM ayudantia.detalle_asistencia_actividad daa WHERE daa.id_registro_actividad = ra.id_registro_actividad) AS numero_asistentes,
           ra.horas_dedicadas,
           ra.id_tipo_estado_registro,
           ter.nombre_estado AS nombre_estado,
+          ter.codigo AS codigo_estado,
           ra.observaciones,
           ra.fecha_observacion
         FROM ayudantia.registro_actividad ra
@@ -90,7 +87,6 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ON pa.id_periodo_academico = c.id_periodo_academico
         WHERE ra.id_ayudantia = :idAyudantia
           AND d.id_usuario = :idUsuario
-          AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
         ORDER BY ra.fecha DESC, ra.id_registro_actividad DESC
         """, nativeQuery = true)
@@ -110,6 +106,7 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ev.fecha_subida,
           ev.id_tipo_estado_evidencia,
           tee.nombre_estado AS nombre_estado_evidencia,
+          tee.codigo AS codigo_estado_evidencia,
           ev.observaciones,
           ev.fecha_observacion
         FROM ayudantia.evidencia_registro_actividad ev
@@ -129,7 +126,6 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ON tee.id_tipo_estado_evidencia = ev.id_tipo_estado_evidencia
         WHERE ev.id_registro_actividad = :idRegistroActividad
           AND d.id_usuario = :idUsuario
-          AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
         ORDER BY ev.id_evidencia_registro_actividad
         """, nativeQuery = true)
@@ -158,7 +154,6 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ON pa.id_periodo_academico = c.id_periodo_academico
         WHERE ra.id_registro_actividad = :idRegistroActividad
           AND d.id_usuario = :idUsuario
-          AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
         LIMIT 1
         """, nativeQuery = true)
@@ -189,7 +184,6 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ON pa.id_periodo_academico = c.id_periodo_academico
         WHERE ev.id_evidencia_registro_actividad = :idEvidencia
           AND d.id_usuario = :idUsuario
-          AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
         LIMIT 1
         """, nativeQuery = true)
@@ -218,5 +212,10 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
         """, nativeQuery = true)
     String obtenerRutaArchivoEvidencia(@Param("idUsuario") Integer idUsuario,
                                       @Param("idEvidencia") Integer idEvidencia);
-}
 
+    @Query(value = "SELECT id_tipo_estado_registro FROM ayudantia.tipo_estado_registro WHERE UPPER(codigo) = UPPER(:codigo) LIMIT 1", nativeQuery = true)
+    Integer getIdEstadoRegistroPorCodigo(@Param("codigo") String codigo);
+
+    @Query(value = "SELECT id_tipo_estado_evidencia FROM ayudantia.tipo_estado_evidencia WHERE UPPER(codigo) = UPPER(:codigo) LIMIT 1", nativeQuery = true)
+    Integer getIdEstadoEvidenciaPorCodigo(@Param("codigo") String codigo);
+}
