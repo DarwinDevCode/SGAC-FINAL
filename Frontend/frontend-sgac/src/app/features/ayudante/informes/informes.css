@@ -1,0 +1,106 @@
+.gestion-container {
+    padding: 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.title {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+}
+
+.subtitle {
+    color: #666;
+    margin: 0.25rem 0 0 0;
+}
+
+.btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-primary:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Document Preview Styles */
+.report-document-preview {
+    background: white;
+    padding: 2.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1a202c;
+    line-height: 1.6;
+    border-radius: 4px;
+    min-height: 400px;
+}
+
+.report-document-preview h1 {
+    font-size: 1.8rem;
+    color: #2d3748;
+    border-bottom: 2px solid #4f46e5;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.report-document-preview h2 {
+    font-size: 1.3rem;
+    color: #4a5568;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    border-left: 4px solid #4f46e5;
+    padding-left: 0.75rem;
+}
+
+.report-document-preview p {
+    margin-bottom: 1rem;
+    text-align: justify;
+}
+
+.report-document-preview table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+}
+
+.report-document-preview th {
+    background: #f7fafc;
+    color: #4a5568;
+    font-weight: 600;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: left;
+}
+
+.report-document-preview td {
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.report-document-preview ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.report-document-preview li {
+    margin-bottom: 0.5rem;
+}

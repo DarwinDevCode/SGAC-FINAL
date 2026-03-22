@@ -63,10 +63,9 @@ public interface AyudantiaRepository extends JpaRepository<Ayudantia, Integer> {
                 ra.descripcion_actividad,
                 ra.tema_tratado,
                 ra.fecha,
-                (SELECT CAST(COUNT(*) AS INTEGER) FROM ayudantia.detalle_asistencia_actividad daa WHERE daa.id_registro_actividad = ra.id_registro_actividad) AS numero_asistentes,
+                ra.numero_asistentes,
                 ra.horas_dedicadas,
                 ra.id_tipo_estado_registro,
-                ter.codigo AS codigo_estado,
                 ter.nombre_estado AS nombre_estado,
                 ra.observaciones,
                 ra.fecha_observacion
@@ -126,6 +125,6 @@ public interface AyudantiaRepository extends JpaRepository<Ayudantia, Integer> {
             @Param("idRegistroActividad") Integer idRegistroActividad
     );
 
-    @Query(value = "SELECT ayudantia.fn_obtener_id_ayudantia_por_usuario(:idUsuario)", nativeQuery = true)
-    Optional<Integer> ayudantiaPorUsuario(@Param("idUsuario") Integer idUsuario);
+    @Query(value = "SELECT ayudantia.fn_obtener_id_ayudantia(:idUsuario)", nativeQuery = true)
+    Optional<Integer> findIdAyudantiaActivaByUsuario(@Param("idUsuario") Integer idUsuario);
 }
