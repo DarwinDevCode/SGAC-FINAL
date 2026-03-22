@@ -11,6 +11,8 @@
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V64__gestionar_convocatorias_postulantes.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V66__ranking_postulacion.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V67__gestion_meritos.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V68__gestion_asistentes.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V69__declaracion_ganadores_promocion.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/backend-sgac/src/main/resources/db/migration/V8__actualizacion_funcion_mostrar_permisos.sql" dialect="PostgreSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>

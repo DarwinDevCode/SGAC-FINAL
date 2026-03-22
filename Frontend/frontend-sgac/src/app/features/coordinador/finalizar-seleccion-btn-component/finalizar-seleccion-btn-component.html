@@ -1,0 +1,142 @@
+<button class="btn fs-btn-cerrar" (click)="abrirModal()">
+  <lucide-icon name="flag" size="15"></lucide-icon>
+  Cerrar selección
+</button>
+
+<ng-template #modalTemplate>
+  <div class="fs-modal-backdrop">
+    <div class="fs-modal-box">
+
+      <!-- ── Cabecera ──────────────────────────────────────────── -->
+      <div class="fs-modal-header">
+        <h3 class="fs-modal-title">
+          <lucide-icon name="flag" size="18" class="fs-icon-warn"></lucide-icon>
+          Cerrar proceso de selección
+        </h3>
+        <button type="button" class="fs-btn-icon" (click)="cerrarModal()"
+                [disabled]="ejecutando()">
+          <lucide-icon name="x" size="18"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- ══ ESTADO: CONFIRMACIÓN ═════════════════════════════════ -->
+      @if (!resultado() && !errorMsg()) {
+        <div class="fs-modal-body">
+
+          <div class="fs-alert-warn">
+            <lucide-icon name="triangle-alert" size="16"></lucide-icon>
+            <span>Esta acción es <strong>irreversible</strong> sin intervención manual.</span>
+          </div>
+
+          <p class="fs-modal-desc">
+            Al confirmar, el sistema ejecutará automáticamente los siguientes pasos
+            sobre la convocatoria
+            @if (nombreConvocatoria) {
+              <strong>«{{ nombreConvocatoria }}»</strong>
+            }:
+          </p>
+
+          <ol class="fs-steps">
+            <li>
+              <lucide-icon name="trophy" size="14"></lucide-icon>
+              <span>Calcula el <strong>ranking final</strong> (Méritos + Oposición)
+              aplicando criterio de desempate.</span>
+            </li>
+            <li>
+              <lucide-icon name="tag" size="14"></lucide-icon>
+              <span>Actualiza el estado de cada postulante:
+                <span class="fs-badge-sel">SELECCIONADO</span>,
+                <span class="fs-badge-el">ELEGIBLE</span> o
+                <span class="fs-badge-no">NO SELECCIONADO</span>.
+              </span>
+            </li>
+            <li>
+              <lucide-icon name="user-check" size="14"></lucide-icon>
+              <span>Promueve a los ganadores al rol
+              <strong>Ayudante de Cátedra</strong> en el sistema y en la BD.</span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="fs-form-footer">
+          <button class="fs-btn-ghost" (click)="cerrarModal()"
+                  [disabled]="ejecutando()">Cancelar</button>
+          <button class="fs-btn-confirmar"
+                  (click)="confirmarFinalizar()"
+                  [disabled]="ejecutando()">
+            <lucide-icon
+              [name]="ejecutando() ? 'loader' : 'flag'"
+              size="15"
+              [class.fs-spin]="ejecutando()"></lucide-icon>
+            {{ ejecutando() ? 'Procesando...' : 'Sí, cerrar selección' }}
+          </button>
+        </div>
+      }
+
+      <!-- ══ ESTADO: ERROR ═════════════════════════════════════════ -->
+      @if (!resultado() && errorMsg()) {
+        <div class="fs-modal-body">
+          <div class="fs-alert-err">
+            <lucide-icon name="circle-x" size="18"></lucide-icon>
+            <div>
+              <p class="fs-err-title">El proceso no se pudo completar</p>
+              <p class="fs-err-detail">{{ errorMsg() }}</p>
+            </div>
+          </div>
+          <p class="fs-modal-note">
+            No se realizó ningún cambio en la base de datos (rollback automático).
+            Revisa el mensaje de error y vuelve a intentarlo.
+          </p>
+        </div>
+        <div class="fs-form-footer">
+          <button class="fs-btn-ghost" (click)="cerrarModal()">Cerrar</button>
+          <button class="fs-btn-primary" (click)="confirmarFinalizar()">
+            <lucide-icon name="refresh-cw" size="14"></lucide-icon> Reintentar
+          </button>
+        </div>
+      }
+
+      <!-- ══ ESTADO: ÉXITO ════════════════════════════════════════ -->
+      @if (resultado()?.exito) {
+        <div class="fs-modal-body">
+          <div class="fs-alert-ok">
+            <lucide-icon name="circle-check-big" size="18"></lucide-icon>
+            <span>Proceso completado exitosamente.</span>
+          </div>
+
+          <div class="fs-resumen-grid">
+            <div class="fs-resumen-card fs-card-sel">
+              <span class="fs-resumen-num">{{ resultado()!.resumen!.seleccionados }}</span>
+              <span class="fs-resumen-lbl">Seleccionados</span>
+            </div>
+            <div class="fs-resumen-card fs-card-el">
+              <span class="fs-resumen-num">{{ resultado()!.resumen!.elegibles }}</span>
+              <span class="fs-resumen-lbl">Elegibles</span>
+            </div>
+            <div class="fs-resumen-card fs-card-no">
+              <span class="fs-resumen-num">{{ resultado()!.resumen!.noSeleccionados }}</span>
+              <span class="fs-resumen-lbl">No seleccionados</span>
+            </div>
+            <div class="fs-resumen-card fs-card-ay">
+              <span class="fs-resumen-num">{{ resultado()!.resumen!.ayudantiasAbiertas }}</span>
+              <span class="fs-resumen-lbl">Ayudantías abiertas</span>
+            </div>
+          </div>
+
+          <p class="fs-modal-note">
+            <lucide-icon name="info" size="12"></lucide-icon>
+            Las ayudantías se crearon en estado <strong>Pendiente</strong>.
+            El coordinador debe activarlas desde el módulo de Gestión de Ayudantías.
+          </p>
+        </div>
+
+        <div class="fs-form-footer">
+          <button class="fs-btn-primary" (click)="cerrarModal()">
+            <lucide-icon name="check" size="14"></lucide-icon> Entendido
+          </button>
+        </div>
+      }
+
+    </div>
+  </div>
+</ng-template>

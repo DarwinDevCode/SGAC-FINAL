@@ -1,4 +1,3 @@
-// src/app/features/coordinador/convocatorias/convocatorias.component.ts
 import {
   Component, inject, OnInit, OnDestroy
 } from '@angular/core';
@@ -30,18 +29,23 @@ import {
 } from '../../../core/models/convocatoria/convocatoria';
 import { PeriodoAcademicoDTO }    from '../../../core/dto/periodo-academico';
 import { DocenteComboDTO, AsignaturaComboDTO } from '../../../core/models/convocatoria/convocatoria.model';
+import { FinalizarSeleccionBtnComponent } from '../finalizar-seleccion-btn-component/finalizar-seleccion-btn-component';
+import { ResumenSeleccion } from '../../../core/models/convocatoria/finalizar-seleccion';
+
+const ROLES_CIERRE = ['COORDINADOR', 'DECANO', 'ADMINISTRADOR'];
+const ESTADOS_CON_CIERRE: string[] = ['EN_EVALUACION', 'RESUELTA', 'ABIERTA'];
 
 @Component({
   selector:    'app-coordinador-convocatorias-crud',
   standalone:  true,
   imports:     [CommonModule, FormsModule, ReactiveFormsModule,
-    RouterModule, LucideAngularModule],
+    RouterModule, LucideAngularModule,
+    FinalizarSeleccionBtnComponent],
   templateUrl: './convocatorias.html',
   styleUrl:    './convocatorias.css',
 })
 export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
 
-  // ── Servicios ────────────────────────────────────────────────────────────
   private readonly convSrv   = inject(ConvocatoriaService);
   private readonly coordSrv  = inject(CoordinadorService);
   private readonly periodoSrv= inject(PeriodoAcademicoService);
@@ -49,32 +53,23 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   private readonly fb        = inject(FormBuilder);
   private readonly subs      = new Subscription();
 
-  // ── Datos ────────────────────────────────────────────────────────────────
   convocatorias:   ConvocatoriaDTO[]    = [];
   periodoActivo:   PeriodoAcademicoDTO | null = null;
   docentes:        DocenteComboDTO[]    = [];
   asignaturas:     AsignaturaComboDTO[] = [];
   periodosMap      = new Map<number, string>();
-
-  // ── UI General ───────────────────────────────────────────────────────────
   loading        = true;
   textoBusqueda  = '';
   toastMensaje   = '';
   toastTipo: 'success' | 'error' = 'success';
-  private toastTimer: any;
-
-  // ── Fase / contexto ──────────────────────────────────────────────────────
-  /** Resultado de verificar-fase; se consulta al abrir el formulario */
+  private toastTimer: ReturnType<typeof setTimeout> | undefined;
   faseInfo:        VerificarFaseResponse | null = null;
   verificandoFase  = false;
-
-  // ── Modal Crear / Editar ─────────────────────────────────────────────────
   mostrarModal = false;
   modoEdicion  = false;
   loadingForm  = false;
   editId:      number | null = null;
 
-  /** PARCIAL: solo cupos/estado. COMPLETA: cambia docente/asignatura */
   tipoEdicion: 'PARCIAL' | 'COMPLETA' = 'PARCIAL';
   checkPostResult: VerificarPostulantesResponse | null = null;
 
@@ -86,13 +81,10 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
   });
 
   readonly estadoOpciones = ['ABIERTA', 'CERRADA', 'EN_EVALUACION', 'RESUELTA'];
-
-  // ── Modal Desactivar ─────────────────────────────────────────────────────
   mostrarModalDesactivar = false;
   convDesactivar: ConvocatoriaDTO | null = null;
   desactivando   = false;
 
-  // ── Computed ─────────────────────────────────────────────────────────────
   get convocatoriasFiltradas(): ConvocatoriaDTO[] {
     const t = this.textoBusqueda.toLowerCase().trim();
     if (!t) return this.convocatorias;
@@ -107,7 +99,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     return this.periodosMap.get(id) || String(id);
   }
 
-  // ── Ciclo de vida ────────────────────────────────────────────────────────
   ngOnInit(): void {
     this.cargarDatos();
     this.cargarDocentes();
@@ -115,7 +106,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void { this.subs.unsubscribe(); }
 
-  // ── Carga inicial ────────────────────────────────────────────────────────
   cargarDatos(): void {
     this.loading = true;
     const user = this.authSrv.getUser();
@@ -158,7 +148,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ── Cambio de docente ────────────────────────────────────────────────────
   onDocenteChange(event: Event): void {
     const id = +(event.target as HTMLSelectElement).value || null;
     this.form.patchValue({ idDocente: id, idAsignatura: null });
@@ -174,11 +163,10 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ── Modal Crear ──────────────────────────────────────────────────────────
   abrirModalCrear(): void {
     this.modoEdicion  = false;
     this.editId       = null;
-    this.tipoEdicion  = 'COMPLETA';   // crear siempre requiere todos los campos
+    this.tipoEdicion  = 'COMPLETA';
     this.checkPostResult = null;
     this.asignaturas  = [];
     this.form.reset({ cuposDisponibles: 1, estado: 'ABIERTA',
@@ -188,7 +176,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     this.consultarFase();
   }
 
-  // ── Modal Editar ─────────────────────────────────────────────────────────
   abrirModalEditar(conv: ConvocatoriaDTO): void {
     this.modoEdicion  = true;
     this.editId       = conv.idConvocatoria ?? null;
@@ -214,7 +201,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
       this.asignaturas = [];
     }
 
-    // 1. Verificar postulantes para definir tipoEdicion
     if (this.editId) {
       this.subs.add(
         this.convSrv.checkPostulantes(this.editId)
@@ -223,7 +209,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
             this.checkPostResult = res as VerificarPostulantesResponse | null;
             this.tipoEdicion     = res?.tienePostulantes ? 'PARCIAL' : 'COMPLETA';
             if (this.tipoEdicion === 'PARCIAL') {
-              // Bloquear campos que no se pueden cambiar con postulantes
               this.form.get('idDocente')?.disable();
               this.form.get('idAsignatura')?.disable();
             } else {
@@ -233,7 +218,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
       );
     }
 
-    // 2. Consultar fase igualmente (para mostrar el banner informativo)
     this.consultarFase();
   }
 
@@ -243,7 +227,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     this.form.get('idDocente')?.enable();
   }
 
-  // ── Verificar fase del cronograma ────────────────────────────────────────
   private consultarFase(): void {
     this.verificandoFase = true;
     this.subs.add(
@@ -256,14 +239,12 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ── Guardar (crear o actualizar) ─────────────────────────────────────────
   guardar(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.loadingForm = true;
     const raw = this.form.getRawValue();
 
     if (!this.modoEdicion) {
-      // ── CREAR ────────────────────────────────────────────────────────────
       const payload: ConvocatoriaCrearRequest = {
         idAsignatura:     raw.idAsignatura,
         idDocente:        raw.idDocente,
@@ -277,7 +258,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
         })
       );
     } else {
-      // ── ACTUALIZAR ───────────────────────────────────────────────────────
       const payload: ConvocatoriaActualizarRequest = {
         idConvocatoria:   this.editId!,
         tipoEdicion:      this.tipoEdicion,
@@ -309,7 +289,6 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     this.loadingForm = false;
   }
 
-  // ── Desactivar ───────────────────────────────────────────────────────────
   abrirModalDesactivar(conv: ConvocatoriaDTO): void {
     this.convDesactivar = conv;
     this.mostrarModalDesactivar = true;
@@ -340,11 +319,32 @@ export class CoordinadorConvocatoriasComponent implements OnInit, OnDestroy {
     );
   }
 
-  // ── Toast interno ────────────────────────────────────────────────────────
+  esRolAutorizadoParaCierre(): boolean {
+    const rol = this.authSrv.getUser()?.rolActual?.toUpperCase() ?? '';
+    return ROLES_CIERRE.includes(rol);
+  }
+
+  puedeFinalizarSeleccion(conv: ConvocatoriaDTO): boolean {
+    return this.esRolAutorizadoParaCierre() &&
+      ESTADOS_CON_CIERRE.includes(conv.estado ?? '');
+  }
+
+  onSeleccionFinalizada(resumen: ResumenSeleccion): void {
+    this.showToast(
+      `Selección cerrada: ${resumen.seleccionados} seleccionado(s), ` +
+      `${resumen.ayudantiasAbiertas} ayudantía(s) habilitada(s).`,
+      'success'
+    );
+    this.cargarDatos();
+  }
+
   showToast(msg: string, tipo: 'success' | 'error'): void {
     clearTimeout(this.toastTimer);
     this.toastMensaje = msg;
     this.toastTipo    = tipo;
-    this.toastTimer   = setTimeout(() => this.toastMensaje = '', tipo === 'error' ? 9000 : 4000);
+    this.toastTimer   = setTimeout(
+      () => this.toastMensaje = '',
+      tipo === 'error' ? 9000 : 4000
+    );
   }
 }

@@ -107,7 +107,8 @@ import {
   MicVocal,
   BookOpenText,
   Shuffle, PartyPopper, Play, UserX, ListFilter, CalendarCheck2, UserPlus, KeyRound, Library, FilterX, BookX, SearchX,
-  Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen
+  Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
+  Tag
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -211,7 +212,8 @@ export const appConfig: ApplicationConfig = {
         ArrowUpNarrowWide,
         Table,
         Star,
-        LockOpen
+        LockOpen,
+        Tag
       })
     )
   ]

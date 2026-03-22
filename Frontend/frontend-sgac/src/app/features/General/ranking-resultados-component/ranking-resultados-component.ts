@@ -4,14 +4,13 @@ import {
 import { CommonModule }        from '@angular/common';
 import { FormsModule }         from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-
 import { RankingService }                  from '../../../core/services/resultados/ranking-service';
 import { AuthService }                     from '../../../core/services/auth-service';
 import { ResultadoRanking, EstadoRanking } from '../../../core/models/resultados/Ranking';
 
+
 type OrdenDir = 'asc' | 'desc';
 
-// Roles que pueden descargar reportes
 const ROLES_REPORTE = ['DECANO', 'COORDINADOR', 'ADMINISTRADOR'];
 
 @Component({
@@ -26,30 +25,21 @@ export class RankingResultadosComponent implements OnInit, OnDestroy {
   private svc     = inject(RankingService);
   private authSvc = inject(AuthService);
 
-  // ── Estado de carga ───────────────────────────────────────────────
   loading         = true;
   error           = '';
   faseNoPublicada = false;
   mensajeFase     = '';
-
-  // ── Datos ─────────────────────────────────────────────────────────
   private todos: ResultadoRanking[] = [];
   filtrados:     ResultadoRanking[] = [];
-
-  // ── Filtros y orden ───────────────────────────────────────────────
   busqueda         = '';
   filtroAsignatura = '';
   filtroCarrera    = '';
   ordenDir: OrdenDir = 'desc';
-
   asignaturas: string[] = [];
   carreras:    string[] = [];
-
-  // ── Descarga ──────────────────────────────────────────────────────
   descargandoExcel = false;
   descargandoPdf   = false;
 
-  // ── Estadísticas ──────────────────────────────────────────────────
   get totalSeleccionados(): number {
     return this.todos.filter(r => r.estado === 'SELECCIONADO').length;
   }
@@ -58,27 +48,21 @@ export class RankingResultadosComponent implements OnInit, OnDestroy {
   }
   get totalResultados(): number { return this.todos.length; }
 
-  // Toast
-  private toastTimer: any;
+  get procesoCerrado(): boolean {
+    return this.todos.some(r => r.estado === 'SELECCIONADO');
+  }
+
+  private toastTimer: ReturnType<typeof setTimeout> | undefined;
   toastMsg  = '';
   toastTipo = 'ok';
 
-  // ═══════════════════════════════════════════════════════════════════
   ngOnInit(): void  { this.cargar(); }
   ngOnDestroy(): void { clearTimeout(this.toastTimer); }
 
-  // ── Seguridad de UI ───────────────────────────────────────────────
-
-  /**
-   * Devuelve true si el rol activo del usuario permite ver y descargar
-   * reportes. Se usa en *ngIf de los botones de exportación.
-   */
   esRolAutorizadoParaReportes(): boolean {
     const rol = this.authSvc.getUser()?.rolActual?.toUpperCase() ?? '';
     return ROLES_REPORTE.includes(rol);
   }
-
-  // ── Carga de datos ─────────────────────────────────────────────────
 
   cargar(): void {
     this.loading         = true;
@@ -107,8 +91,6 @@ export class RankingResultadosComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  // ── Filtros ────────────────────────────────────────────────────────
 
   private construirFiltros(): void {
     this.asignaturas = [...new Set(this.todos.map(r => r.asignatura))].sort();
@@ -142,8 +124,6 @@ export class RankingResultadosComponent implements OnInit, OnDestroy {
       return this.ordenDir === 'desc' ? -diff : diff;
     });
   }
-
-  // ── Exportación ────────────────────────────────────────────────────
 
   generarReporteExcel(): void {
     if (this.descargandoExcel) return;
@@ -183,21 +163,19 @@ export class RankingResultadosComponent implements OnInit, OnDestroy {
       : 'application/pdf';
     const url = window.URL.createObjectURL(new Blob([blob], { type: mime }));
     const a   = document.createElement('a');
-    a.href    = url;
+    a.href     = url;
     a.download = nombre;
     a.click();
     window.URL.revokeObjectURL(url);
   }
 
   private nombreArchivo(ext: string): string {
-    const hoy = new Date();
+    const hoy  = new Date();
     const yyyy = hoy.getFullYear();
     const mm   = String(hoy.getMonth() + 1).padStart(2, '0');
     const dd   = String(hoy.getDate()).padStart(2, '0');
     return `Ranking_Final_${yyyy}${mm}${dd}.${ext}`;
   }
-
-  // ── Helpers de vista ──────────────────────────────────────────────
 
   badgeEstado(estado: EstadoRanking): string {
     return ({ SELECCIONADO: 'badge-green', ELEGIBLE: 'badge-blue',

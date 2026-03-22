@@ -1,0 +1,309 @@
+<!-- asistencia-dinamica.component.html -->
+<div class="gestion-container ad-wrapper">
+
+  <!-- ══ TOAST ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="toast()" class="ad-toast"
+       [class.ad-toast-ok]="toast()?.tipo === 'ok'"
+       [class.ad-toast-err]="toast()?.tipo === 'err'"
+       [class.ad-toast-warn]="toast()?.tipo === 'warn'">
+    <lucide-icon
+      [name]="toast()?.tipo === 'ok' ? 'circle-check-big'
+             : toast()?.tipo === 'warn' ? 'triangle-alert' : 'circle-x'"
+      size="15"></lucide-icon>
+    <span>{{ toast()?.texto }}</span>
+  </div>
+
+  <!-- ── Botón volver ─────────────────────────────────────────────────── -->
+  <div>
+    <button class="btn btn-ghost ad-back-btn" (click)="volver()">
+      <lucide-icon name="arrow-left" size="15"></lucide-icon> Volver a la actividad
+    </button>
+  </div>
+
+  <!-- ── Encabezado de sección ────────────────────────────────────────── -->
+  <div class="section-header">
+    <div class="title-container">
+      <div class="ad-page-icon">
+        <lucide-icon name="clipboard-list" size="20"></lucide-icon>
+      </div>
+      <div>
+        <h2 class="title">Control de Asistencia</h2>
+        <p class="subtitle">Gestiona el padrón de estudiantes y registra la asistencia de la actividad.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CARGANDO ════════════════════════════════════════════════════════ -->
+  <div *ngIf="vistaEstado() === 'cargando'" class="info-message">
+    <lucide-icon name="loader" size="28" class="spin ad-muted"></lucide-icon>
+    <p>Cargando datos de asistencia...</p>
+  </div>
+
+  <!-- ══ ERROR ═══════════════════════════════════════════════════════════ -->
+  <div *ngIf="vistaEstado() === 'error'" class="alert-banner error">
+    <lucide-icon name="circle-x" size="18"></lucide-icon>
+    <span>{{ errorMsg() }}</span>
+    <button class="btn btn-ghost" (click)="volver()">Volver</button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- ESTADO A: VACÍO — Dropzone                                         -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="vistaEstado() === 'vacio'">
+    <div class="ad-empty-card">
+
+      <!-- Cabecera informativa -->
+      <div class="ad-empty-header">
+        <div class="ad-empty-icon">
+          <lucide-icon name="users" size="26"></lucide-icon>
+        </div>
+        <div>
+          <h3 class="ad-empty-title">Sin padrón de participantes</h3>
+          <p class="ad-empty-desc">
+            Para registrar asistencia primero debes cargar la lista de estudiantes
+            de esta ayudantía usando el archivo Excel.
+          </p>
+        </div>
+      </div>
+
+      <!-- Dropzone -->
+      <div class="ad-dropzone"
+           [class.ad-dropzone-over]="dragOver()"
+           [class.ad-dropzone-processing]="procesandoExcel()"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave()"
+           (drop)="onDrop($event)"
+           (click)="!procesandoExcel() && fileInput.click()">
+
+        <input #fileInput type="file" accept=".xlsx" hidden (change)="onFileInput($event)" />
+
+        <ng-container *ngIf="!procesandoExcel()">
+          <div class="ad-dz-icon">
+            <lucide-icon name="file-spreadsheet" size="36"></lucide-icon>
+          </div>
+          <p class="ad-dz-title">Arrastra tu archivo aquí</p>
+          <p class="ad-dz-sub">o haz clic para seleccionar</p>
+          <span class="ad-dz-hint">Solo archivos .xlsx · Máximo 2 MB</span>
+        </ng-container>
+
+        <ng-container *ngIf="procesandoExcel()">
+          <lucide-icon name="loader" size="32" class="spin ad-muted"></lucide-icon>
+          <p class="ad-dz-title">Analizando archivo...</p>
+        </ng-container>
+      </div>
+
+      <!-- Separador + descarga de plantilla -->
+      <div class="ad-empty-footer">
+        <div class="ad-divider">
+          <span>¿No tienes el formato correcto?</span>
+        </div>
+        <button class="btn ad-btn-plantilla"
+                (click)="descargarPlantilla()"
+                [disabled]="descargandoPlantilla()">
+          <lucide-icon
+            [name]="descargandoPlantilla() ? 'loader' : 'download'"
+            size="15"
+            [class.spin]="descargandoPlantilla()"></lucide-icon>
+          {{ descargandoPlantilla() ? 'Descargando...' : 'Descargar plantilla Excel' }}
+        </button>
+        <p class="ad-hint-plantilla">
+          La plantilla incluye las columnas: <strong>Nombre Completo</strong>,
+          <strong>Curso</strong> y <strong>Paralelo</strong>.
+        </p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- ESTADO B: PREVISUALIZACIÓN                                         -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="vistaEstado() === 'preview' && previewData()">
+    <div class="ad-preview-card">
+
+      <!-- Encabezado del preview -->
+      <div class="ad-preview-header">
+        <div class="ad-preview-meta">
+          <div class="ad-preview-file">
+            <lucide-icon name="file-spreadsheet" size="18"></lucide-icon>
+            <span class="ad-preview-filename">{{ archivoSeleccionado()?.name }}</span>
+            <span class="td-muted ad-preview-size">
+              ({{ formatBytes(archivoSeleccionado()?.size ?? 0) }})
+            </span>
+          </div>
+          <div class="ad-preview-stats">
+            <span class="badge green">{{ previewData()!.totalFilas }} fila(s)</span>
+            <span *ngIf="filasConError() > 0" class="badge amber">
+              <lucide-icon name="triangle-alert" size="11"></lucide-icon>
+              {{ filasConError() }} con error
+            </span>
+            <span *ngIf="filasConError() === 0" class="badge green">
+              <lucide-icon name="circle-check-big" size="11"></lucide-icon>
+              Sin errores
+            </span>
+          </div>
+        </div>
+
+        <!-- Banner de estado del archivo -->
+        <div *ngIf="previewData()!.tieneErrores" class="alert-banner warning ad-preview-banner">
+          <lucide-icon name="triangle-alert" size="16"></lucide-icon>
+          <span>El archivo tiene errores. Corrígelos antes de importar o sube un nuevo archivo.</span>
+        </div>
+        <div *ngIf="!previewData()!.tieneErrores" class="alert-banner success ad-preview-banner">
+          <lucide-icon name="circle-check-big" size="16"></lucide-icon>
+          <span>{{ previewData()!.mensaje }}</span>
+        </div>
+      </div>
+
+      <!-- Tabla de previsualización -->
+      <div class="table-card ad-preview-table-wrap">
+        <table class="data-table">
+          <thead>
+          <tr>
+            <th style="width: 48px;">#</th>
+            <th>Nombre Completo</th>
+            <th>Curso</th>
+            <th>Paralelo</th>
+            <th style="width: 80px; text-align:center;">Estado</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let fila of previewData()!.filas; trackBy: trackByFila"
+              [class.ad-row-error]="!fila.valida">
+            <td class="td-muted">{{ fila.fila }}</td>
+
+            <td>
+              <div class="ad-cell-wrap">
+                  <span [class.ad-cell-error]="!fila.valida && !fila.nombreCompleto">
+                    {{ fila.nombreCompleto || '—' }}
+                  </span>
+              </div>
+            </td>
+
+            <td>{{ fila.curso || '—' }}</td>
+            <td>{{ fila.paralelo || '—' }}</td>
+
+            <td style="text-align:center;">
+              <lucide-icon *ngIf="fila.valida"
+                           name="circle-check-big" size="16" class="ad-icon-ok"></lucide-icon>
+              <div *ngIf="!fila.valida" class="ad-errores-tip">
+                <lucide-icon name="circle-x" size="16" class="ad-icon-err"></lucide-icon>
+                <div class="ad-errores-tooltip">
+                  <p *ngFor="let e of fila.errores">• {{ e }}</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Acciones del preview -->
+      <div class="ad-preview-actions">
+        <button class="btn btn-ghost" (click)="volverADropzone()">
+          <lucide-icon name="arrow-left" size="14"></lucide-icon> Subir otro archivo
+        </button>
+        <button class="btn btn-primary"
+                [disabled]="!previewValido() || confirmando()"
+                (click)="confirmarCargaMasiva()">
+          <lucide-icon
+            [name]="confirmando() ? 'loader' : 'check'"
+            size="15"
+            [class.spin]="confirmando()"></lucide-icon>
+          {{ confirmando() ? 'Guardando...' : 'Confirmar e importar' }}
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <!-- ESTADO C: ACTIVO — Lista de asistencia con checkboxes             -->
+  <!-- ══════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="vistaEstado() === 'activo'">
+
+    <!-- Tarjeta de resumen -->
+    <div class="ad-summary-bar">
+      <div class="ad-summary-item">
+        <span class="ad-summary-num ad-num-total">{{ detalleAsistencia().length }}</span>
+        <span class="ad-summary-lbl">Total</span>
+      </div>
+      <div class="ad-summary-item">
+        <span class="ad-summary-num ad-num-presentes">{{ presentes() }}</span>
+        <span class="ad-summary-lbl">Presentes</span>
+      </div>
+      <div class="ad-summary-item">
+        <span class="ad-summary-num ad-num-ausentes">{{ ausentes() }}</span>
+        <span class="ad-summary-lbl">Ausentes</span>
+      </div>
+      <div class="ad-summary-item ad-summary-barra-wrap">
+        <div class="ad-pct-label">{{ porcentajeAsistencia() }}%</div>
+        <div class="ad-barra-pct">
+          <div class="ad-barra-pct-fill"
+               [style.width.%]="porcentajeAsistencia()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles rápidos -->
+    <div class="ad-list-controls">
+      <div class="ad-quick-btns">
+        <button class="btn btn-ghost ad-btn-sm" (click)="marcarTodos(true)">
+          <lucide-icon name="check-square" size="13"></lucide-icon> Todos presentes
+        </button>
+        <button class="btn btn-ghost ad-btn-sm" (click)="marcarTodos(false)">
+          <lucide-icon name="square" size="13"></lucide-icon> Todos ausentes
+        </button>
+      </div>
+      <div *ngIf="asistenciaGuardada()" class="ad-saved-badge">
+        <lucide-icon name="circle-check-big" size="13"></lucide-icon>
+        <span>Guardado</span>
+      </div>
+    </div>
+
+    <!-- Lista de participantes -->
+    <div class="table-card">
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th style="width: 52px; text-align:center;">Asistió</th>
+          <th>Nombre Completo</th>
+          <th>Curso</th>
+          <th>Paralelo</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let d of detalleAsistencia(); trackBy: trackById"
+            [class.ad-row-presente]="d.asistio"
+            [class.ad-row-ausente]="!d.asistio"
+            (click)="toggleAsistencia(d.idParticipante, !d.asistio)"
+            style="cursor: pointer;">
+          <td style="text-align:center;">
+            <div class="ad-checkbox" [class.ad-checked]="d.asistio">
+              <lucide-icon *ngIf="d.asistio" name="check" size="12"></lucide-icon>
+            </div>
+          </td>
+          <td>
+            <span class="ad-nombre">{{ d.nombreCompleto }}</span>
+          </td>
+          <td class="td-muted">{{ d.curso || '—' }}</td>
+          <td class="td-muted">{{ d.paralelo || '—' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Acciones -->
+    <div class="ad-list-actions">
+      <button class="btn btn-primary"
+              (click)="guardarAsistencia()"
+              [disabled]="guardandoAsist()">
+        <lucide-icon
+          [name]="guardandoAsist() ? 'loader' : 'save'"
+          size="15"
+          [class.spin]="guardandoAsist()"></lucide-icon>
+        {{ guardandoAsist() ? 'Guardando...' : 'Guardar asistencia' }}
+      </button>
+    </div>
+
+  </ng-container>
+
+</div>

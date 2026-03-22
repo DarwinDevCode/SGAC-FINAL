@@ -1,15 +1,14 @@
-<!-- src/app/features/General/ranking-resultados-component/ranking-resultados-component.html -->
 <div class="rk-wrapper">
 
-  <!-- ══ TOAST ══════════════════════════════════════════════════════ -->
-  <div *ngIf="toastMsg" class="rk-toast"
-       [class.rk-toast-ok]="toastTipo==='ok'"
-       [class.rk-toast-err]="toastTipo==='err'">
-    <lucide-icon [name]="toastTipo==='ok' ? 'circle-check-big' : 'circle-x'" size="15"></lucide-icon>
-    <span>{{ toastMsg }}</span>
-  </div>
+  @if (toastMsg) {
+    <div class="rk-toast"
+         [class.rk-toast-ok]="toastTipo==='ok'"
+         [class.rk-toast-err]="toastTipo==='err'">
+      <lucide-icon [name]="toastTipo==='ok' ? 'circle-check-big' : 'circle-x'" size="15"></lucide-icon>
+      <span>{{ toastMsg }}</span>
+    </div>
+  }
 
-  <!-- ══ HEADER ══════════════════════════════════════════════════════ -->
   <div class="rk-header">
     <div class="rk-header-icon">
       <lucide-icon name="trophy" size="22"></lucide-icon>
@@ -19,65 +18,70 @@
       <p class="rk-subtitle">Ranking consolidado — Méritos + Oposición</p>
     </div>
 
-    <!-- Botones de exportación: solo para DECANO / COORDINADOR / ADMINISTRADOR -->
-    <div *ngIf="esRolAutorizadoParaReportes() && !loading && !faseNoPublicada && !error"
-         class="rk-export-group">
-      <button class="rk-btn-export rk-btn-excel"
-              (click)="generarReporteExcel()"
-              [disabled]="descargandoExcel"
-              title="Exportar a Excel">
-        <lucide-icon [name]="descargandoExcel ? 'loader' : 'table'"
-                     size="15"
-                     [class.rk-spin]="descargandoExcel"></lucide-icon>
-        {{ descargandoExcel ? 'Generando...' : 'Excel' }}
+    @if (esRolAutorizadoParaReportes() && !loading && !faseNoPublicada && !error) {
+      <div class="rk-export-group">
+        <button class="rk-btn-export rk-btn-excel"
+                (click)="generarReporteExcel()"
+                [disabled]="descargandoExcel"
+                title="Exportar a Excel">
+          <lucide-icon [name]="descargandoExcel ? 'loader' : 'table'"
+                       size="15"
+                       [class.rk-spin]="descargandoExcel"></lucide-icon>
+          {{ descargandoExcel ? 'Generando...' : 'Excel' }}
+        </button>
+        <button class="rk-btn-export rk-btn-pdf"
+                (click)="generarReportePdf()"
+                [disabled]="descargandoPdf"
+                title="Exportar a PDF">
+          <lucide-icon [name]="descargandoPdf ? 'loader' : 'file-text'"
+                       size="15"
+                       [class.rk-spin]="descargandoPdf"></lucide-icon>
+          {{ descargandoPdf ? 'Generando...' : 'PDF' }}
+        </button>
+      </div>
+    }
+
+    @if (!loading && !faseNoPublicada && !error) {
+      <button class="rk-btn-reload" (click)="cargar()" title="Actualizar">
+        <lucide-icon name="refresh-cw" size="15"></lucide-icon>
       </button>
-      <button class="rk-btn-export rk-btn-pdf"
-              (click)="generarReportePdf()"
-              [disabled]="descargandoPdf"
-              title="Exportar a PDF">
-        <lucide-icon [name]="descargandoPdf ? 'loader' : 'file-text'"
-                     size="15"
-                     [class.rk-spin]="descargandoPdf"></lucide-icon>
-        {{ descargandoPdf ? 'Generando...' : 'PDF' }}
+    }
+  </div>
+
+  @if (loading) {
+    <div class="rk-state-box">
+      <lucide-icon name="loader" size="28" class="rk-spin rk-icon-muted"></lucide-icon>
+      <p class="rk-state-text">Cargando resultados...</p>
+    </div>
+  }
+
+  @if (!loading && faseNoPublicada) {
+    <div class="rk-fase-box">
+      <div class="rk-fase-icon">
+        <lucide-icon name="clock" size="28"></lucide-icon>
+      </div>
+      <h2 class="rk-fase-title">Resultados en procesamiento</h2>
+      <p class="rk-fase-msg">{{ mensajeFase }}</p>
+      <p class="rk-fase-hint">
+        Los resultados se publicarán en la fase de
+        <strong>Publicación de Resultados Finales</strong>.
+      </p>
+    </div>
+  }
+
+  <!-- ══ ERROR ═══════════════════════════════════════════════════════════ -->
+  @if (!loading && !faseNoPublicada && error) {
+    <div class="rk-state-box rk-state-err">
+      <lucide-icon name="circle-x" size="28" class="rk-icon-err"></lucide-icon>
+      <p class="rk-state-text">{{ error }}</p>
+      <button class="rk-btn-reload" (click)="cargar()">
+        <lucide-icon name="refresh-cw" size="14"></lucide-icon> Reintentar
       </button>
     </div>
+  }
 
-    <button *ngIf="!loading && !faseNoPublicada && !error"
-            class="rk-btn-reload" (click)="cargar()" title="Actualizar">
-      <lucide-icon name="refresh-cw" size="15"></lucide-icon>
-    </button>
-  </div>
-
-  <!-- ══ LOADER ══════════════════════════════════════════════════════ -->
-  <div *ngIf="loading" class="rk-state-box">
-    <lucide-icon name="loader" size="28" class="rk-spin rk-icon-muted"></lucide-icon>
-    <p class="rk-state-text">Cargando resultados...</p>
-  </div>
-
-  <!-- ══ FASE NO PUBLICADA ═══════════════════════════════════════════ -->
-  <div *ngIf="!loading && faseNoPublicada" class="rk-fase-box">
-    <div class="rk-fase-icon">
-      <lucide-icon name="clock" size="28"></lucide-icon>
-    </div>
-    <h2 class="rk-fase-title">Resultados en procesamiento</h2>
-    <p class="rk-fase-msg">{{ mensajeFase }}</p>
-    <p class="rk-fase-hint">
-      Los resultados se publicarán en la fase de
-      <strong>Publicación de Resultados Finales</strong>.
-    </p>
-  </div>
-
-  <!-- ══ ERROR ═══════════════════════════════════════════════════════ -->
-  <div *ngIf="!loading && !faseNoPublicada && error" class="rk-state-box rk-state-err">
-    <lucide-icon name="circle-x" size="28" class="rk-icon-err"></lucide-icon>
-    <p class="rk-state-text">{{ error }}</p>
-    <button class="rk-btn-reload" (click)="cargar()">
-      <lucide-icon name="refresh-cw" size="14"></lucide-icon> Reintentar
-    </button>
-  </div>
-
-  <!-- ══ CONTENIDO PRINCIPAL ═════════════════════════════════════════ -->
-  <ng-container *ngIf="!loading && !faseNoPublicada && !error">
+  <!-- ══ CONTENIDO PRINCIPAL ═════════════════════════════════════════════ -->
+  @if (!loading && !faseNoPublicada && !error) {
 
     <!-- Tarjetas de resumen -->
     <div class="rk-stats">
@@ -116,26 +120,34 @@
           [(ngModel)]="busqueda"
           (ngModelChange)="aplicarFiltros()"
         />
-        <button *ngIf="busqueda" class="rk-search-clear" (click)="busqueda=''; aplicarFiltros()">
-          <lucide-icon name="x" size="13"></lucide-icon>
-        </button>
+        @if (busqueda) {
+          <button class="rk-search-clear" (click)="busqueda=''; aplicarFiltros()">
+            <lucide-icon name="x" size="13"></lucide-icon>
+          </button>
+        }
       </div>
 
-      <select *ngIf="asignaturas.length > 1"
-              class="rk-select"
-              [(ngModel)]="filtroAsignatura"
-              (ngModelChange)="aplicarFiltros()">
-        <option value="">Todas las asignaturas</option>
-        <option *ngFor="let a of asignaturas" [value]="a">{{ a }}</option>
-      </select>
+      @if (asignaturas.length > 1) {
+        <select class="rk-select"
+                [(ngModel)]="filtroAsignatura"
+                (ngModelChange)="aplicarFiltros()">
+          <option value="">Todas las asignaturas</option>
+          @for (a of asignaturas; track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+      }
 
-      <select *ngIf="carreras.length > 1"
-              class="rk-select"
-              [(ngModel)]="filtroCarrera"
-              (ngModelChange)="aplicarFiltros()">
-        <option value="">Todas las carreras</option>
-        <option *ngFor="let c of carreras" [value]="c">{{ c }}</option>
-      </select>
+      @if (carreras.length > 1) {
+        <select class="rk-select"
+                [(ngModel)]="filtroCarrera"
+                (ngModelChange)="aplicarFiltros()">
+          <option value="">Todas las carreras</option>
+          @for (c of carreras; track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      }
 
       <button class="rk-btn-orden" (click)="toggleOrden()" title="Ordenar por puntaje">
         <lucide-icon
@@ -144,96 +156,115 @@
         Puntaje {{ ordenDir === 'desc' ? 'mayor a menor' : 'menor a mayor' }}
       </button>
 
-      <button *ngIf="busqueda || filtroAsignatura || filtroCarrera"
-              class="rk-btn-limpiar" (click)="limpiarFiltros()">
-        <lucide-icon name="filter-x" size="14"></lucide-icon>
-        Limpiar
-      </button>
+      @if (busqueda || filtroAsignatura || filtroCarrera) {
+        <button class="rk-btn-limpiar" (click)="limpiarFiltros()">
+          <lucide-icon name="filter-x" size="14"></lucide-icon>
+          Limpiar
+        </button>
+      }
     </div>
 
     <!-- Contador -->
     <p class="rk-count">
       <lucide-icon name="list-filter" size="13"></lucide-icon>
       {{ filtrados.length }} resultado{{ filtrados.length !== 1 ? 's' : '' }}
-      <span *ngIf="busqueda || filtroAsignatura || filtroCarrera">
-        (filtrado de {{ totalResultados }})
-      </span>
+      @if (busqueda || filtroAsignatura || filtroCarrera) {
+        <span>(filtrado de {{ totalResultados }})</span>
+      }
     </p>
 
     <!-- Estado vacío -->
-    <div *ngIf="filtrados.length === 0" class="rk-state-box">
-      <lucide-icon name="inbox" size="28" class="rk-icon-muted"></lucide-icon>
-      <p class="rk-state-text">No hay resultados que coincidan con los filtros.</p>
-      <button class="rk-btn-reload" (click)="limpiarFiltros()">
-        <lucide-icon name="filter-x" size="14"></lucide-icon> Limpiar filtros
-      </button>
-    </div>
+    @if (filtrados.length === 0) {
+      <div class="rk-state-box">
+        <lucide-icon name="inbox" size="28" class="rk-icon-muted"></lucide-icon>
+        <p class="rk-state-text">No hay resultados que coincidan con los filtros.</p>
+        <button class="rk-btn-reload" (click)="limpiarFiltros()">
+          <lucide-icon name="filter-x" size="14"></lucide-icon> Limpiar filtros
+        </button>
+      </div>
+    }
 
-    <!-- ══ TABLA ══════════════════════════════════════════════════════ -->
-    <div *ngIf="filtrados.length > 0" class="rk-table-wrap">
-      <table class="rk-table">
-        <thead>
-        <tr>
-          <th class="rk-th-pos">#</th>
-          <th>Postulante</th>
-          <th *ngIf="asignaturas.length > 1">Asignatura</th>
-          <th *ngIf="carreras.length > 1">Carrera</th>
-          <th class="rk-th-num">Méritos</th>
-          <th class="rk-th-num">Oposición</th>
-          <th class="rk-th-num rk-th-total">Total</th>
-          <th>Estado</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let r of filtrados" [class]="claseFilaTabla(r.estado)">
+    <!-- ══ TABLA ══════════════════════════════════════════════════════════ -->
+    @if (filtrados.length > 0) {
+      <div class="rk-table-wrap">
+        <table class="rk-table">
+          <thead>
+          <tr>
+            <th class="rk-th-pos">#</th>
+            <th>Postulante</th>
+            @if (asignaturas.length > 1) { <th>Asignatura</th> }
+            @if (carreras.length > 1)    { <th>Carrera</th>    }
+            <th class="rk-th-num">Méritos</th>
+            <th class="rk-th-num">Oposición</th>
+            <th class="rk-th-num rk-th-total">Total</th>
+            <th>Estado</th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- track por posición+postulante: evita re-renderizar filas
+               que no cambiaron tras recargar la lista post-cierre -->
+            @for (r of filtrados; track r.posicion + r.postulante) {
+              <tr [class]="claseFilaTabla(r.estado)">
 
-          <!-- Posición -->
-          <td class="rk-td-pos">
-            <span *ngIf="r.posicion === 1 && r.estado === 'SELECCIONADO'" class="rk-medal">🥇</span>
-            <span *ngIf="r.posicion === 2 && r.estado === 'SELECCIONADO'" class="rk-medal">🥈</span>
-            <span *ngIf="r.posicion === 3 && r.estado === 'SELECCIONADO'" class="rk-medal">🥉</span>
-            <span *ngIf="r.posicion > 3 || r.estado !== 'SELECCIONADO'" class="rk-pos-num">
-                {{ r.posicion }}
-              </span>
-          </td>
+                <!-- Posición -->
+                <td class="rk-td-pos">
+                  @if (r.posicion === 1 && r.estado === 'SELECCIONADO') {
+                    <span class="rk-medal">🥇</span>
+                  } @else if (r.posicion === 2 && r.estado === 'SELECCIONADO') {
+                    <span class="rk-medal">🥈</span>
+                  } @else if (r.posicion === 3 && r.estado === 'SELECCIONADO') {
+                    <span class="rk-medal">🥉</span>
+                  } @else {
+                    <span class="rk-pos-num">{{ r.posicion }}</span>
+                  }
+                </td>
 
-          <!-- Postulante -->
-          <td>
-            <div class="rk-td-postulante">
-              <div class="rk-avatar">{{ inicialesPostulante(r.postulante) }}</div>
-              <div>
-                <p class="rk-nombre">{{ r.postulante }}</p>
-                <p class="rk-semestre">Semestre {{ r.semestre }}</p>
-              </div>
-            </div>
-          </td>
+                <!-- Postulante -->
+                <td>
+                  <div class="rk-td-postulante">
+                    <div class="rk-avatar">{{ inicialesPostulante(r.postulante) }}</div>
+                    <div>
+                      <p class="rk-nombre">{{ r.postulante }}</p>
+                      <p class="rk-semestre">Semestre {{ r.semestre }}</p>
+                    </div>
+                  </div>
+                </td>
 
-          <td *ngIf="asignaturas.length > 1" class="rk-td-asig">{{ r.asignatura }}</td>
-          <td *ngIf="carreras.length > 1"    class="rk-td-carrera">{{ r.carrera }}</td>
+                @if (asignaturas.length > 1) {
+                  <td class="rk-td-asig">{{ r.asignatura }}</td>
+                }
+                @if (carreras.length > 1) {
+                  <td class="rk-td-carrera">{{ r.carrera }}</td>
+                }
 
-          <td class="rk-td-num">{{ formatPuntaje(r.meritos) }}</td>
-          <td class="rk-td-num">{{ formatPuntaje(r.oposicion) }}</td>
-          <td class="rk-td-num rk-td-total"
-              [class.rk-total-verde]="r.estado === 'SELECCIONADO'"
-              [class.rk-total-azul]="r.estado === 'ELEGIBLE'">
-            {{ formatPuntaje(r.total) }}
-          </td>
+                <td class="rk-td-num">{{ formatPuntaje(r.meritos) }}</td>
+                <td class="rk-td-num">{{ formatPuntaje(r.oposicion) }}</td>
+                <td class="rk-td-num rk-td-total"
+                    [class.rk-total-verde]="r.estado === 'SELECCIONADO'"
+                    [class.rk-total-azul]="r.estado === 'ELEGIBLE'">
+                  {{ formatPuntaje(r.total) }}
+                </td>
 
-          <td>
-            <div class="rk-badge-wrap">
-                <span class="rk-badge" [ngClass]="badgeEstado(r.estado)">
-                  <lucide-icon [name]="iconoEstado(r.estado)" size="12"></lucide-icon>
-                  {{ labelEstado(r.estado) }}
-                </span>
-              <span *ngIf="r.estado === 'SELECCIONADO'" class="rk-cupo-hint">
-                  Plaza {{ r.posicion }}/{{ r.cuposDisponibles }}
-                </span>
-            </div>
-          </td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+                <td>
+                  <div class="rk-badge-wrap">
+                    <span class="rk-badge" [ngClass]="badgeEstado(r.estado)">
+                      <lucide-icon [name]="iconoEstado(r.estado)" size="12"></lucide-icon>
+                      {{ labelEstado(r.estado) }}
+                    </span>
+                    @if (r.estado === 'SELECCIONADO') {
+                      <span class="rk-cupo-hint">
+                        Plaza {{ r.posicion }}/{{ r.cuposDisponibles }}
+                      </span>
+                    }
+                  </div>
+                </td>
+
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
 
     <!-- Leyenda -->
     <div class="rk-leyenda">
@@ -253,5 +284,6 @@
       </span>
     </div>
 
-  </ng-container>
+  }
+
 </div>

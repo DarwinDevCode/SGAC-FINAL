@@ -1,0 +1,206 @@
+/* finalizar-seleccion-btn.component.css
+   ─────────────────────────────────────────────────────────────────────
+   Con ViewEncapsulation.None este archivo se inserta como hoja de
+   estilos GLOBAL. Para no contaminar el resto de la app, TODAS las
+   clases propias de este componente llevan el prefijo "fs-".
+   Las únicas excepciones son las clases utilitarias que ya vienen del
+   styles.css global (btn, badge, td-muted, alert-banner), que no se
+   redefinen aquí.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* ── Nodo raíz del portal (div vacío pegado a <body>) ──────────────── */
+.fs-portal-host {
+  /* Sin estilos: es solo el contenedor de montaje */
+}
+
+/* ── Botón disparador ─────────────────────────────────────────────── */
+.fs-btn-cerrar {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: #fef3c7; color: #92400e;
+  border: 1px solid #fcd34d; border-radius: .5rem;
+  font-size: .82rem; font-weight: 700; cursor: pointer;
+  padding: .5rem 1rem; transition: background .15s;
+  white-space: nowrap; font-family: inherit;
+}
+.fs-btn-cerrar:hover { background: #fde68a; }
+
+/* ── Backdrop — cubre el viewport completo ───────────────────────────
+   Funciona correctamente porque el nodo está en <body>,
+   que nunca tiene transforms CSS.                                    */
+.fs-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+/* ── Caja del modal ───────────────────────────────────────────────── */
+.fs-modal-box {
+  background: #fff;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  border-radius: 1rem;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+  animation: fs-modal-in .2s ease;
+  font-family: inherit;
+}
+@keyframes fs-modal-in {
+  from { opacity: 0; transform: translateY(-12px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0)     scale(1);   }
+}
+
+/* ── Cabecera ─────────────────────────────────────────────────────── */
+.fs-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex; justify-content: space-between; align-items: center;
+  background: #f8fafc;
+  border-radius: 1rem 1rem 0 0;
+}
+.fs-modal-title {
+  margin: 0; font-size: 1rem; font-weight: 700; color: #0f172a;
+  display: flex; align-items: center; gap: .5rem;
+}
+.fs-icon-warn { color: #d97706; }
+
+/* ── Botón X del modal ────────────────────────────────────────────── */
+.fs-btn-icon {
+  padding: .35rem; border-radius: .4rem;
+  background: transparent; border: none; color: #9ca3af;
+  cursor: pointer; display: inline-flex; align-items: center;
+  transition: background .13s, color .13s;
+}
+.fs-btn-icon:hover    { background: #f3f4f6; color: #374151; }
+.fs-btn-icon:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Cuerpo del modal ─────────────────────────────────────────────── */
+.fs-modal-body {
+  padding: 1.25rem 1.5rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.fs-modal-desc {
+  font-size: .875rem; color: #1e293b;
+  line-height: 1.6; margin: 0;
+}
+
+/* ── Banners de estado (warning / error / success) ───────────────── */
+.fs-alert-warn, .fs-alert-err, .fs-alert-ok {
+  display: flex; align-items: flex-start; gap: .6rem;
+  padding: .75rem 1rem; border-radius: .5rem;
+  font-size: .85rem; font-weight: 500; line-height: 1.5;
+  border: 1px solid;
+}
+.fs-alert-warn { background: #fffbeb; color: #92400e;  border-color: #fcd34d; }
+.fs-alert-err  { background: #fef2f2; color: #991b1b;  border-color: #fecaca; }
+.fs-alert-ok   { background: #f0fdf4; color: #15803d;  border-color: #86efac; }
+
+/* ── Lista de pasos ───────────────────────────────────────────────── */
+.fs-steps {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: .5rem;
+}
+.fs-steps li {
+  display: flex; align-items: flex-start; gap: .6rem;
+  font-size: .84rem; color: #1e293b; line-height: 1.5;
+  background: #f8fafc; border-radius: 8px;
+  padding: .5rem .75rem; border: 1px solid #e2e8f0;
+}
+
+/* ── Badges de estado dentro de los pasos ────────────────────────── */
+.fs-badge-sel, .fs-badge-el, .fs-badge-no {
+  display: inline-block;
+  padding: .1rem .5rem; border-radius: 999px;
+  font-size: .7rem; font-weight: 700; letter-spacing: .03em;
+}
+.fs-badge-sel { background: #dcfce7; color: #15803d; }
+.fs-badge-el  { background: #dbeafe; color: #1d4ed8; }
+.fs-badge-no  { background: #f1f5f9; color: #475569; }
+
+/* ── Nota al pie ──────────────────────────────────────────────────── */
+.fs-modal-note {
+  font-size: .78rem; color: #64748b; margin: 0;
+  display: flex; align-items: center; gap: .35rem; line-height: 1.5;
+}
+
+/* ── Footer con botones ───────────────────────────────────────────── */
+.fs-form-footer {
+  display: flex; justify-content: flex-end; gap: .75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+  border-radius: 0 0 1rem 1rem;
+}
+
+/* ── Botones del modal ────────────────────────────────────────────── */
+.fs-btn-ghost {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .55rem 1.1rem; border-radius: .5rem;
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  background: transparent; color: #6b7280; border: none;
+  font-family: inherit; transition: background .15s;
+}
+.fs-btn-ghost:hover:not(:disabled) { background: #f3f4f6; }
+.fs-btn-ghost:disabled { opacity: .65; cursor: not-allowed; }
+
+.fs-btn-primary {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .55rem 1.1rem; border-radius: .5rem;
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  background: #166534; color: #fff; border: none;
+  font-family: inherit; transition: background .15s;
+}
+.fs-btn-primary:hover:not(:disabled) { background: #14532d; }
+.fs-btn-primary:disabled { opacity: .65; cursor: not-allowed; }
+
+.fs-btn-confirmar {
+  display: inline-flex; align-items: center; gap: .4rem;
+  padding: .55rem 1.25rem; border-radius: .5rem;
+  font-size: .85rem; font-weight: 700; cursor: pointer;
+  background: #d97706; color: #fff; border: none;
+  font-family: inherit; transition: background .15s;
+}
+.fs-btn-confirmar:hover:not(:disabled) { background: #b45309; }
+.fs-btn-confirmar:disabled { opacity: .65; cursor: not-allowed; }
+
+/* ── Spinner ──────────────────────────────────────────────────────── */
+@keyframes fs-spin-anim { to { transform: rotate(360deg); } }
+.fs-spin { animation: fs-spin-anim .75s linear infinite; display: inline-flex; }
+
+/* ── Error ────────────────────────────────────────────────────────── */
+.fs-err-title  { font-size: .875rem; font-weight: 700; margin: 0 0 .2rem; color: #991b1b; }
+.fs-err-detail { font-size: .82rem; margin: 0; line-height: 1.5; }
+
+/* ── Grilla de resumen (4 tarjetas) ──────────────────────────────── */
+.fs-resumen-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem;
+}
+@media (max-width: 540px) {
+  .fs-resumen-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.fs-resumen-card {
+  display: flex; flex-direction: column; align-items: center; gap: .2rem;
+  padding: .875rem .5rem; border-radius: 10px; border: 1px solid #e2e8f0;
+}
+.fs-resumen-num {
+  font-size: 1.75rem; font-weight: 800;
+  font-family: inherit; line-height: 1;
+}
+.fs-resumen-lbl {
+  font-size: .68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .05em; color: #64748b; text-align: center;
+}
+.fs-card-sel { background: #f0fdf4; }
+.fs-card-sel .fs-resumen-num { color: #16a34a; }
+.fs-card-el  { background: #eff6ff; }
+.fs-card-el  .fs-resumen-num { color: #2563eb; }
+.fs-card-no  { background: #fef2f2; }
+.fs-card-no  .fs-resumen-num { color: #dc2626; }
+.fs-card-ay  { background: #f0fdf4; }
+.fs-card-ay  .fs-resumen-num { color: #166534; }

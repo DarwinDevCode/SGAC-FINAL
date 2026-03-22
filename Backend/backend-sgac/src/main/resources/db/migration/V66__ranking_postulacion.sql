@@ -99,7 +99,7 @@ BEGIN
             LIMIT  1
             ) eo_fin ON TRUE
         WHERE po.activo = TRUE
-          AND c.activo  = TRUE
+          AND (c.activo  = TRUE OR c.estado = 'CERRADA' OR c.estado = 'RESUELTA')
           AND c.id_periodo_academico = v_id_periodo
     ),
 

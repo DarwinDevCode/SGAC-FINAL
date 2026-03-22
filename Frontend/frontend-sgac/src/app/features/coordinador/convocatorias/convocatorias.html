@@ -89,18 +89,25 @@
             </div>
           </div>
 
-          <!-- Footer -->
+          <!-- ── Footer ─────────────────────────────────────────────────
+               Contiene el enlace "Ver postulantes" y, cuando el estado
+               de la convocatoria lo permite, el botón de cierre de selección.
+               El método puedeFinalizarSeleccion() agrupa las dos condiciones:
+                 1. El rol del usuario es COORDINADOR / DECANO / ADMINISTRADOR.
+                 2. El estado de la convocatoria es EN_EVALUACION o RESUELTA.
+          ──────────────────────────────────────────────────────────────── -->
           <div class="cv-card-footer">
             <a [routerLink]="['/coordinador/postulantes', c.idConvocatoria]" class="cv-link">
               Ver postulantes →
             </a>
-            <!--
-            <a [routerLink]="['/coordinador/oposicion', c.idConvocatoria]"
-               class="cv-btn-oposicion"
-               title="Gestionar Banco de Temas y Sorteo">
-              <lucide-icon name="Gavel" size="14"></lucide-icon>
-              Oposición
-            </a> -->
+
+            @if (puedeFinalizarSeleccion(c)) {
+              <app-finalizar-seleccion-btn
+                [idConvocatoria]="c.idConvocatoria!"
+                [nombreConvocatoria]="c.nombreAsignatura || ''"
+                (seleccionFinalizada)="onSeleccionFinalizada($event)">
+              </app-finalizar-seleccion-btn>
+            }
           </div>
         </div>
       }

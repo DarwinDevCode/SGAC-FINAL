@@ -17,6 +17,7 @@ import org.uteq.sgacfinal.exception.AccesoDenegadoException;
 import org.uteq.sgacfinal.security.UsuarioPrincipal;
 import org.uteq.sgacfinal.service.reportes.ReporteUtilService;
 import org.uteq.sgacfinal.service.resultados.IRankingService;
+import org.uteq.sgacfinal.util.ExtraerAuth;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +31,7 @@ public class RankingController {
     private final IRankingService svc;
     private final ObjectMapper    objectMapper;
     private final ReporteUtilService reporteSvc;
+    private final ExtraerAuth extraerAuth;
 
     private static final Set<String> ROLES_REPORTE = Set.of("DECANO", "COORDINADOR", "ADMINISTRADOR");
 
@@ -45,60 +47,34 @@ public class RankingController {
     @GetMapping("/resultados")
     public ResponseEntity<String> obtenerResultados(
             Authentication authentication,
-            @RequestHeader(value = "X-Active-Role", required = false) String rolSesion // <--- Recibimos el rol activo
+            @RequestHeader(value = "X-Active-Role", required = false) String rolSesion
     ) {
-        Integer idUsuario = null;
-        String rolFinal = "ESTUDIANTE";
+        ExtraerAuth.ExtraidoAuth ea = extraerAuth.extraer(authentication, rolSesion);
+        log.info("Ejecutando Ranking - Usuario: {} | Rol Activo: {}", ea.idUsuario(), ea.rol());
 
-        if (authentication != null && authentication.getPrincipal() instanceof UsuarioPrincipal principal) {
-            idUsuario = principal.getIdUsuario();
-
-            List<String> rolesPermitidos = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .toList();
-
-            if (rolSesion != null && rolesPermitidos.contains(rolSesion))
-                rolFinal = rolSesion;
-            else
-                rolFinal = rolesPermitidos.get(0);
-        }
-
-        if (idUsuario == null) return ResponseEntity.status(401).build();
-
-        log.info("Ejecutando Ranking - Usuario: {} | Rol Activo: {}", idUsuario, rolFinal);
-        JsonNode resultado = svc.obtenerRankingResultados(idUsuario, rolFinal);
-
-        try {
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(objectMapper.writeValueAsString(resultado));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("{\"error\":\"Error al serializar la respuesta\"}");
-        }
+        JsonNode resultado = svc.obtenerRankingResultados(ea.idUsuario(), ea.rol());
+        return jsonResponse(resultado);
     }
 
     @GetMapping("/exportar/excel")
     public ResponseEntity<byte[]> exportarExcel(
             Authentication auth,
             @RequestHeader(value = "X-Active-Role", required = false) String rolSesion) {
-        ExtraidoAuth ea = extraer(auth, rolSesion);
+
+        ExtraerAuth.ExtraidoAuth ea = extraerAuth.extraer(auth, rolSesion);
         verificarRolReporte(ea.rol(), ea.idUsuario());
 
         JsonNode datos = svc.obtenerRankingResultados(ea.idUsuario(), ea.rol());
         List<Map<String, Object>> filas = jsonNodeALista(datos);
 
         String titulo = "Ranking Final de Selección de Ayudantes — Período Activo";
-        byte[] excel  = reporteSvc.exportarExcel(titulo, CABECERAS, CAMPOS, filas);
+        byte[] excel = reporteSvc.exportarExcel(titulo, CABECERAS, CAMPOS, filas);
 
-        String nombreArchivo = "Ranking_Final_" +
-                LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
+        String nombreArchivo = "Ranking_Final_" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".xlsx";
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + nombreArchivo + "\"")
-                .contentType(MediaType.parseMediaType(
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + nombreArchivo + "\"")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(excel);
     }
 
@@ -106,7 +82,8 @@ public class RankingController {
     public ResponseEntity<byte[]> exportarPdf(
             Authentication auth,
             @RequestHeader(value = "X-Active-Role", required = false) String rolSesion) {
-        ExtraidoAuth ea = extraer(auth,  rolSesion);
+
+        ExtraerAuth.ExtraidoAuth ea = extraerAuth.extraer(auth, rolSesion);
         verificarRolReporte(ea.rol(), ea.idUsuario());
 
         JsonNode datos = svc.obtenerRankingResultados(ea.idUsuario(), ea.rol());
@@ -135,6 +112,7 @@ public class RankingController {
         }
     }
 
+    /*
     private ExtraidoAuth extraer(Authentication auth, String rolSesion) {
         if (auth == null || !(auth.getPrincipal() instanceof UsuarioPrincipal p)) {
             throw new AccesoDenegadoException("No autenticado.");
@@ -154,6 +132,7 @@ public class RankingController {
         String nombre = p.getUsuario().getNombres() + " " + p.getUsuario().getApellidos();
         return new ExtraidoAuth(p.getIdUsuario(), rolFinal, nombre);
     }
+     */
 
     private List<Map<String, Object>> jsonNodeALista(JsonNode nodo) {
         try {
@@ -173,7 +152,9 @@ public class RankingController {
         }
     }
 
+    /*
     private record ExtraidoAuth(Integer idUsuario, String rol, String nombreUsuario) {}
+    */
 
     private ResponseEntity<String> jsonResponse(JsonNode node) {
         try {
