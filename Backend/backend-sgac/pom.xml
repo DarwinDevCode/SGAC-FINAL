@@ -196,6 +196,29 @@
                     <argLine>-XX:+EnableDynamicAgentLoading</argLine>
                 </configuration>
             </plugin>
+
+            <!-- Alinear checksums en flyway_schema_history cuando se editan migraciones ya aplicadas: .\mvnw.cmd flyway:repair -->
+            <plugin>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <configuration>
+                    <url>jdbc:postgresql://localhost:5432/SGAC-FINAL</url>
+                    <user>postgres</user>
+                    <password>Postgresql123.</password>
+                    <schemas>
+                        <schema>seguridad</schema>
+                        <schema>public</schema>
+                        <schema>academico</schema>
+                        <schema>ayudantia</schema>
+                        <schema>convocatoria</schema>
+                        <schema>notificacion</schema>
+                        <schema>postulacion</schema>
+                    </schemas>
+                    <locations>
+                        <location>classpath:db/migration</location>
+                    </locations>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 

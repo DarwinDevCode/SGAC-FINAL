@@ -217,6 +217,10 @@ export const routes: Routes = [
         path: 'ayudante/asistencia/matriz',
         loadComponent: () => import('./features/ayudante/matriz-asistencia-component/matriz-asistencia-component').then(m => m.MatrizAsistenciaComponent)
       },
+      {
+        path: 'ayudante/informes',
+        loadComponent: () => import('./features/ayudante/informes/informes.component').then(m => m.InformesComponent)
+      },
 
       // ── Docente ──────────────────────────────────────────────────────
       {

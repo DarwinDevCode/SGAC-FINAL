@@ -128,4 +128,9 @@ public interface AyudantiaRepository extends JpaRepository<Ayudantia, Integer> {
 
     @Query(value = "SELECT ayudantia.fn_obtener_id_ayudantia_por_usuario(:idUsuario)", nativeQuery = true)
     Optional<Integer> ayudantiaPorUsuario(@Param("idUsuario") Integer idUsuario);
+
+    /** Alias usado por el módulo de informes mensuales. */
+    default Optional<Integer> findIdAyudantiaActivaByUsuario(Integer idUsuario) {
+        return ayudantiaPorUsuario(idUsuario);
+    }
 }

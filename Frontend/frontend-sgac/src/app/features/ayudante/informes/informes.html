@@ -1,0 +1,94 @@
+<div class="gestion-container">
+    <div class="section-header">
+        <div class="title-container">
+            <h2 class="title">Mis Informes Mensuales</h2>
+            <p class="subtitle">Gestiona y envía tus reportes de actividades de ayudantía.</p>
+        </div>
+        <div class="actions">
+            <button class="btn-primary" (click)="generarBorrador()" [disabled]="isGenerating">
+                <lucide-icon name="sparkles" size="18"></lucide-icon>
+                {{ isGenerating ? 'Generando...' : 'Generar Borrador Mes Actual (IA)' }}
+            </button>
+        </div>
+    </div>
+
+    <div *ngIf="error" class="alert-error" style="color:red; margin-bottom: 1rem;">
+        {{ error }}
+    </div>
+    <div *ngIf="success" class="alert-success" style="color:green; margin-bottom: 1rem;">
+        {{ success }}
+    </div>
+
+    <div *ngIf="isLoading" style="margin-top: 2rem;">Cargando informes...</div>
+
+    <div style="display:flex;flex-direction:column;gap:1rem" *ngIf="!isLoading">
+        <div class="informe-card" *ngFor="let informe of informes"
+            style="border: 1px solid #ddd; padding: 1rem; border-radius: 8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+                <div style="display:flex;align-items:center;gap:1rem">
+                    <div class="stat-icon violet"
+                        style="width:2.5rem;height:2.5rem; background:#f0f0f0; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                        <lucide-icon name="file-text" size="18"></lucide-icon>
+                    </div>
+                    <div>
+                        <p style="font-weight:600;font-size:1.1rem;margin:0">Mes: {{ informe.mes }} / {{ informe.anio }}
+                        </p>
+                        <p class="subtitle" style="margin:.2rem 0 0 0;font-size:.85rem; color:#666;">
+                            Actualizado: {{ informe.fechaGeneracion | date:'medium' }}
+                        </p>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:.75rem">
+                    <span class="status-pill"
+                        style="padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; background: #e0f7fa; color: #006064; font-weight:bold;">
+                        {{ informe.estado }}
+                    </span>
+                </div>
+            </div>
+
+            <div *ngIf="informe.estado === 'BORRADOR_GENERADO' || informe.estado === 'EN_ELABORACION'"
+                style="margin-top: 1rem; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+
+                <div style="background: #f8f9fa; padding: 0.5rem 1rem; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;">
+                    <p style="font-weight: 600; font-size: 0.9rem; margin: 0;">{{ isEditing(informe.idInformeMensual) ? 'Editor de Informe (HTML)' : 'Vista Previa del Informe' }}</p>
+                    <button class="btn-secondary" (click)="toggleEdit(informe.idInformeMensual)"
+                        style="font-size: 0.8rem; padding: 4px 12px; border-radius: 4px; border: 1px solid #ddd; background: white; cursor: pointer;">
+                        <lucide-icon [name]="isEditing(informe.idInformeMensual) ? 'eye' : 'edit-3'" size="14" style="vertical-align: middle; margin-right: 4px;"></lucide-icon>
+                        {{ isEditing(informe.idInformeMensual) ? 'Ver Formato' : 'Editar Texto' }}
+                    </button>
+                </div>
+
+                <div style="padding: 1rem;">
+                    <textarea *ngIf="isEditing(informe.idInformeMensual)" [(ngModel)]="informe.contenidoBorrador" rows="15"
+                        style="width: 100%; padding: 0.75rem; font-family: 'Courier New', Courier, monospace; font-size: 0.9rem; border: 1px solid #ddd; border-radius: 4px; background: #fafafa;"></textarea>
+
+                    <div *ngIf="!isEditing(informe.idInformeMensual)"
+                        [innerHTML]="informe.contenidoBorrador"
+                        class="report-document-preview">
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                        <button class="btn-success" (click)="enviarARevision(informe)" [disabled]="isSubmitting"
+                            style="padding: 0.5rem 1.5rem; background: #2e7d32; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 0.5rem;">
+                            <lucide-icon name="send" size="18"></lucide-icon>
+                            Enviar a Revisión Final
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="informe.estado !== 'BORRADOR_GENERADO' && informe.estado !== 'EN_ELABORACION'"
+                style="margin-top: 1rem; background: #f9f9f9; padding: 1rem; border-radius: 4px;">
+                <p style="font-weight: bold; margin-bottom: 0.5rem;">Contenido del Informe:</p>
+                <div [innerHTML]="informe.contenidoBorrador" style="font-size: 0.9rem; line-height: 1.5;"></div>
+                <div *ngIf="informe.observaciones" style="margin-top: 1rem; color: #c62828;">
+                    <p><strong>Observaciones / Motivo de Rechazo:</strong> {{ informe.observaciones }}</p>
+                </div>
+            </div>
+
+        </div>
+        <div *ngIf="informes.length === 0" style="text-align: center; color: #777; margin-top: 2rem;">
+            No tienes informes generados aún.
+        </div>
+    </div>
+</div>
