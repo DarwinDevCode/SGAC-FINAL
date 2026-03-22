@@ -42,8 +42,8 @@
           <div class="hero-item">
             <div class="hero-label"><lucide-icon name="check-circle" size="14"></lucide-icon><span>Estado</span></div>
             <div class="hero-value">
-              <span *ngIf="puedeEditar()" class="badge-editable">Editable</span>
-              <span *ngIf="!puedeEditar()" class="badge-finalizado">Finalizado</span>
+              <span *ngIf="puedeEditar()" class="badge-editable">En curso</span>
+              <span *ngIf="!puedeEditar()" class="badge-finalizado">{{ getEstadoSesionTexto() }}</span>
             </div>
           </div>
         </div>
@@ -128,9 +128,9 @@
       <div class="detalle-footer">
         <div *ngIf="finalizarError()" class="alert-banner error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ finalizarError() }}</span></div>
         <div class="footer-content">
-          <p class="footer-text"><lucide-icon name="info" size="14"></lucide-icon><span><strong>Importante:</strong> <span *ngIf="puedeEditar()">Una vez finalices, no podrás editar esta sesión.</span><span *ngIf="!puedeEditar()">Esta sesión ya ha sido finalizada.</span></span></p>
+          <p class="footer-text"><lucide-icon name="info" size="14"></lucide-icon><span><strong>Importante:</strong> <span *ngIf="puedeEditar()">Una vez finalices, no podrás editar esta sesión.</span><span *ngIf="!puedeEditar()">La sesión se encuentra actualmente fuera del horario establecido.</span></span></p>
           <button *ngIf="puedeEditar()" class="btn btn-primary btn-finalizar" (click)="finalizarSesion()" [disabled]="finalizando()"><lucide-icon *ngIf="!finalizando()" name="send" size="16"></lucide-icon><lucide-icon *ngIf="finalizando()" name="loader" size="16" class="spin"></lucide-icon><span>{{ finalizando() ? 'Finalizando…' : 'Finalizar y Enviar' }}</span></button>
-          <button *ngIf="!puedeEditar()" class="btn btn-secondary btn-finalizado" disabled><lucide-icon name="check-circle" size="16"></lucide-icon><span>Sesión Finalizada</span></button>
+          <button *ngIf="!puedeEditar()" class="btn btn-secondary btn-finalizado" disabled><lucide-icon name="clock" size="16"></lucide-icon><span>Fuera del horario de sesión</span></button>
         </div>
       </div>
     </div>

@@ -52,7 +52,6 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
         WHERE d.id_usuario = :idUsuario
           AND pa.estado = 'EN PROCESO'
           AND pa.activo = true
-          AND c.activo = true
           AND p.activo = true
         ORDER BY a.id_ayudantia DESC
         """, nativeQuery = true)
@@ -69,7 +68,7 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
           ra.descripcion_actividad,
           ra.tema_tratado,
           ra.fecha,
-          ra.numero_asistentes,
+          (SELECT CAST(COUNT(*) AS INTEGER) FROM ayudantia.detalle_asistencia_actividad daa WHERE daa.id_registro_actividad = ra.id_registro_actividad AND daa.asistio = true) AS numero_asistentes,
           ra.horas_dedicadas,
           ra.id_tipo_estado_registro,
           ter.nombre_estado AS nombre_estado,
@@ -218,5 +217,11 @@ public interface DocenteMisAyudantesRepository extends JpaRepository<Ayudantia, 
         """, nativeQuery = true)
     String obtenerRutaArchivoEvidencia(@Param("idUsuario") Integer idUsuario,
                                       @Param("idEvidencia") Integer idEvidencia);
+
+    @Query(value = "SELECT id_tipo_estado_registro FROM ayudantia.tipo_estado_registro WHERE codigo = :codigo LIMIT 1", nativeQuery = true)
+    Integer getIdEstadoRegistroPorCodigo(@Param("codigo") String codigo);
+
+    @Query(value = "SELECT id_tipo_estado_evidencia FROM ayudantia.tipo_estado_evidencia WHERE codigo = :codigo LIMIT 1", nativeQuery = true)
+    Integer getIdEstadoEvidenciaPorCodigo(@Param("codigo") String codigo);
 }
 

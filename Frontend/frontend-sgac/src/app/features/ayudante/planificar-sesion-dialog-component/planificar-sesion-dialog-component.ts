@@ -19,7 +19,7 @@ import { PlanificarSesionRequestDTO } from '../../../core/models/ayudantia/asist
 export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private ayudantiaService = inject(AyudantiaService);
-  private dialogRef = inject(MatDialogRef<PlanificarSesionDialogComponent>);
+  private dialogRef = inject<any>(MatDialogRef);
   private destroy$ = new Subject<void>();
 
   form!: FormGroup;

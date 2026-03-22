@@ -255,6 +255,27 @@ export class DetalleSesionComponent implements OnInit, OnDestroy {
 
   volver(): void { this.router.navigate(['/ayudante/sesiones']); }
   cambiarPestana(pestaña: PestanaActiva): void { this.pestanaActiva.set(pestaña); }
+  
+  // Devuelve si la sesión ya pasó o es en el futuro para mostrar mensajes más claros
+  getEstadoSesionTexto(): string {
+    if (this.puedeEditar()) return 'Editable';
+    const ses = this.sesionInfo();
+    if (!ses || !ses.fecha || !ses.horario) return 'Fuera de horario';
+    
+    // El servidor usa la hora de Guayaquil para "puede_editar"
+    // Pero asumiendo que solo queremos un texto referencial
+    const [horaInicioStr, horaFinStr] = ses.horario.split('-');
+    
+    const fechaSesionInicio = new Date(`${ses.fecha}T${horaInicioStr.trim()}:00`);
+    const ahora = new Date();
+    
+    if (ahora < fechaSesionInicio) {
+      return 'Próxima / Aún no inicia';
+    } else {
+      return 'Fuera de horario';
+    }
+  }
+
   formatearFecha(iso: string): string {
     return iso ? new Date(iso + 'T00:00:00').toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '—';
   }

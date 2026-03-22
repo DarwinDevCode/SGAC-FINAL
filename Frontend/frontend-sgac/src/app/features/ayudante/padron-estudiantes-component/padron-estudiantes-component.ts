@@ -21,7 +21,7 @@ import { ParticipantePadronDTO} from '../../../core/models/general/respuesta-ope
 export class PadronEstudiantesComponent implements OnInit, OnDestroy {
 
   private ayudantiaService = inject(AyudantiaService);
-  private dialog = inject(MatDialog);
+  private dialog = inject<any>(MatDialog);
   private destroy$ = new Subject<void>();
 
   // Estado
@@ -83,7 +83,7 @@ export class PadronEstudiantesComponent implements OnInit, OnDestroy {
       data: estudiante // Si es undefined, el modal sabrá que es creación
     });
 
-    dialogRef.afterClosed().subscribe((resultado) => {
+    dialogRef.afterClosed().subscribe((resultado: boolean) => {
       if (resultado) this.cargarPadron();
     });
   }

@@ -1,0 +1,135 @@
+﻿Connected to DB.
+--- FUNCTION: fn_obtener_asistencia_sesion_actual ---
+CREATE OR REPLACE FUNCTION ayudantia.fn_obtener_asistencia_sesion_actual(p_id_usuario integer)
+ RETURNS seguridad.res_operacion
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_id_ayudantia INTEGER;
+    v_sesion RECORD;
+    v_puede_editar BOOLEAN := FALSE;
+    v_estudiantes_json JSON;
+BEGIN
+    SELECT a.id_ayudantia INTO v_id_ayudantia
+    FROM ayudantia.ayudantia a
+             JOIN postulacion.postulacion p ON a.id_postulacion = p.id_postulacion
+             JOIN academico.estudiante e ON p.id_estudiante = e.id_estudiante
+    WHERE e.id_usuario = p_id_usuario
+      AND a.id_tipo_estado_ayudantia = (SELECT id_tipo_estado_ayudantia FROM ayudantia.tipo_estado_ayudantia WHERE codigo = 'ACTIVO')
+    LIMIT 1;
+
+    IF v_id_ayudantia IS NULL THEN
+        RETURN (FALSE, 'No posee una ayudant├¡a activa.', NULL)::seguridad.res_operacion;
+    END IF;
+
+    SELECT * INTO v_sesion
+    FROM ayudantia.registro_actividad
+    WHERE id_ayudantia = v_id_ayudantia
+      AND id_tipo_estado_registro = (SELECT id_tipo_estado_registro FROM ayudantia.tipo_estado_registro WHERE codigo = 'PLANIFICADO')
+      AND fecha >= CURRENT_DATE
+    ORDER BY fecha ASC, hora_inicio ASC
+    LIMIT 1;
+
+    IF v_sesion.id_registro_actividad IS NULL THEN
+        RETURN (FALSE, 'No tiene sesiones pr├│ximas planificadas.', NULL)::seguridad.res_operacion;
+    END IF;
+
+    IF (v_sesion.fecha = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Guayaquil')::DATE
+        AND (CURRENT_TIMESTAMP AT TIME ZONE 'America/Guayaquil')::TIME
+            BETWEEN v_sesion.hora_inicio AND v_sesion.hora_fin) THEN
+        v_puede_editar := TRUE;
+    END IF;
+
+    SELECT json_agg(t) INTO v_estudiantes_json
+    FROM (
+             SELECT
+                 da.id_detalle_asistencia_actividad as id_detalle,
+                 p.nombre_completo,
+                 p.curso,
+                 p.paralelo,
+                 da.asistio
+             FROM ayudantia.detalle_asistencia_actividad da
+                      JOIN ayudantia.participante_ayudantia p ON da.id_participante_ayudantia = p.id_participante_ayudantia
+             WHERE da.id_registro_actividad = v_sesion.id_registro_actividad
+             ORDER BY p.nombre_completo ASC
+         ) t;
+
+    RETURN (
+            TRUE,
+            CASE WHEN v_puede_editar THEN 'Sesi├│n activa: Puede marcar asistencia.' ELSE 'Sesi├│n fuera de horario: Modo lectura.' END,
+            json_build_object(
+                    'sesion', json_build_object(
+                    'id_registro', v_sesion.id_registro_actividad,
+                    'tema', v_sesion.tema_tratado,
+                    'fecha', v_sesion.fecha,
+                    'horario', v_sesion.hora_inicio || ' - ' || v_sesion.hora_fin,
+                    'lugar', v_sesion.lugar,
+                    'puede_editar', v_puede_editar
+                              ),
+                    'estudiantes', COALESCE(v_estudiantes_json, '[]'::json)
+            )
+        )::seguridad.res_operacion;
+
+END;
+$function$
+
+--- FUNCTION: fn_planificar_sesion ---
+CREATE OR REPLACE FUNCTION ayudantia.fn_planificar_sesion(p_id_usuario integer, p_fecha date, p_hora_inicio time without time zone, p_hora_fin time without time zone, p_lugar character varying, p_tema text)
+ RETURNS seguridad.res_operacion
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_id_ayudantia INTEGER;
+    v_id_nuevo_reg INTEGER;
+    v_id_estado_plan INTEGER;
+    v_horas_limite NUMERIC;
+    v_horas_actuales_semana NUMERIC;
+    v_horas_nueva_sesion NUMERIC;
+    v_res_asistencia seguridad.res_operacion; -- Para capturar el resultado del snapshot
+BEGIN
+    SELECT a.id_ayudantia, a.horas_semanales_max INTO v_id_ayudantia, v_horas_limite
+    FROM ayudantia.ayudantia a
+             JOIN postulacion.postulacion p ON a.id_postulacion = p.id_postulacion
+             JOIN academico.estudiante e ON p.id_estudiante = e.id_estudiante
+    WHERE e.id_usuario = p_id_usuario
+      AND a.id_tipo_estado_ayudantia = (SELECT id_tipo_estado_ayudantia FROM ayudantia.tipo_estado_ayudantia WHERE codigo = 'ACTIVO')
+    LIMIT 1;
+
+    IF v_id_ayudantia IS NULL THEN
+        RETURN (FALSE, 'No posee una ayudant├¡a activa vinculada a su cuenta.', NULL)::seguridad.res_operacion;
+    END IF;
+
+    v_horas_nueva_sesion := EXTRACT(EPOCH FROM (p_hora_fin::TIME - p_hora_inicio::TIME)) / 3600.0;
+
+    SELECT COALESCE(SUM(horas_dedicadas), 0) INTO v_horas_actuales_semana
+    FROM ayudantia.registro_actividad
+    WHERE id_ayudantia = v_id_ayudantia AND date_trunc('week', fecha) = date_trunc('week', p_fecha)
+      AND id_tipo_estado_registro != (SELECT id_tipo_estado_registro FROM ayudantia.tipo_estado_registro WHERE codigo = 'RECHAZADO');
+
+    IF (v_horas_actuales_semana + v_horas_nueva_sesion) > v_horas_limite THEN
+        RETURN (FALSE, format('L├¡mite excedido (%s/%s h). Reduzca el tiempo o elija otra semana.', ROUND(v_horas_actuales_semana, 2), v_horas_limite), NULL)::seguridad.res_operacion;
+    END IF;
+
+    IF EXISTS (SELECT 1 FROM ayudantia.registro_actividad WHERE id_ayudantia = v_id_ayudantia AND fecha = p_fecha AND (p_hora_inicio::TIME, p_hora_fin::TIME) OVERLAPS (hora_inicio, hora_fin)) THEN
+        RETURN (FALSE, 'Ya existe una sesi├│n programada en este horario.', NULL)::seguridad.res_operacion;
+    END IF;
+
+    SELECT id_tipo_estado_registro INTO v_id_estado_plan FROM ayudantia.tipo_estado_registro WHERE codigo = 'PLANIFICADO';
+
+    INSERT INTO ayudantia.registro_actividad (id_ayudantia, fecha, hora_inicio, hora_fin, lugar, tema_tratado, id_tipo_estado_registro, horas_dedicadas)
+    VALUES (v_id_ayudantia, p_fecha, p_hora_inicio, p_hora_fin, p_lugar, p_tema, v_id_estado_plan, ROUND(v_horas_nueva_sesion, 2))
+    RETURNING id_registro_actividad INTO v_id_nuevo_reg;
+
+    v_res_asistencia := ayudantia.fn_generar_snapshot_asistencia(v_id_nuevo_reg);
+
+    RETURN (
+            TRUE,
+            'Sesi├│n planificada. ' || v_res_asistencia.mensaje,
+            json_build_object('id_registro', v_id_nuevo_reg, 'detalle_asistencia', v_res_asistencia.datos)
+        )::seguridad.res_operacion;
+
+EXCEPTION WHEN OTHERS THEN
+    RETURN (FALSE, 'Error cr├¡tico en flujo de planificaci├│n: ' || SQLERRM, NULL)::seguridad.res_operacion;
+END;
+$function$
+

@@ -122,11 +122,21 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No autorizado para evaluar esta actividad");
         }
 
+        String codigoEstado = switch (request.getIdTipoEstadoRegistro()) {
+            case 1 -> "PENDIENTE";
+            case 2 -> "APROBADO";
+            case 3 -> "OBSERVADO";
+            case 4 -> "RECHAZADO";
+            default -> throw new RuntimeException("Estado inválido proporcionado por el frontend");
+        };
+        Integer idRealEstado = docenteMisAyudantesRepository.getIdEstadoRegistroPorCodigo(codigoEstado);
+        if (idRealEstado == null) throw new RuntimeException("No se encontró el código de estado en BD");
+
         // Siempre actualiza fecha_observacion al momento de evaluar (requisito)
         LocalDate ahora = LocalDate.now();
         int updated = registroActividadConfigRepository.evaluarActividad(
                 idActividad,
-                request.getIdTipoEstadoRegistro(),
+                idRealEstado,
                 request.getObservaciones(),
                 ahora
         );
@@ -135,8 +145,8 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No se pudo evaluar la actividad");
         }
 
-        // Notificación solo cuando cambia a OBSERVADO (3)
-        if (request.getIdTipoEstadoRegistro() != null && request.getIdTipoEstadoRegistro() == 3) {
+        // Notificación solo cuando cambia a OBSERVADO
+        if ("OBSERVADO".equals(codigoEstado)) {
             Integer idUsuarioAyudante = docenteMisAyudantesRepository
                     .obtenerIdUsuarioAyudantePorActividad(idUsuario, idActividad);
 
@@ -159,10 +169,21 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No autorizado para evaluar esta evidencia");
         }
 
+        String codigoEstado = switch (request.getIdTipoEstadoEvidencia()) {
+            case 1 -> "SUBIDO";
+            case 2 -> "REVISADO";
+            case 3 -> "APROBADO";
+            case 4 -> "RECHAZADO";
+            case 5 -> "OBSERVADO";
+            default -> throw new RuntimeException("Estado de evidencia inválido proporcionado");
+        };
+        Integer idRealEstado = docenteMisAyudantesRepository.getIdEstadoEvidenciaPorCodigo(codigoEstado);
+        if (idRealEstado == null) throw new RuntimeException("No se encontró el código de evidencia en BD");
+
         LocalDate ahora = LocalDate.now();
         int updated = evidenciaRegistroActividadRepository.evaluarEvidencia(
                 idEvidencia,
-                request.getIdTipoEstadoEvidencia(),
+                idRealEstado,
                 request.getObservaciones(),
                 ahora
         );
@@ -171,8 +192,8 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No se pudo evaluar la evidencia");
         }
 
-        // Notificación solo cuando cambia a OBSERVADO (5)
-        if (request.getIdTipoEstadoEvidencia() != null && request.getIdTipoEstadoEvidencia() == 5) {
+        // Notificación solo cuando cambia a OBSERVADO
+        if ("OBSERVADO".equals(codigoEstado)) {
             Integer idUsuarioAyudante = docenteMisAyudantesRepository
                     .obtenerIdUsuarioAyudantePorEvidencia(idUsuario, idEvidencia);
 

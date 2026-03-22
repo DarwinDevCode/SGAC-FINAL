@@ -179,6 +179,10 @@ export class MisAyudantesComponent implements OnInit {
       next: () => {
         // reflejar cambios en UI
         a.idTipoEstadoRegistro = payload.idTipoEstadoRegistro;
+        a.estadoRegistro = payload.idTipoEstadoRegistro === 1 ? 'PENDIENTE' :
+                           payload.idTipoEstadoRegistro === 2 ? 'APROBADO' :
+                           payload.idTipoEstadoRegistro === 3 ? 'OBSERVADO' :
+                           payload.idTipoEstadoRegistro === 4 ? 'RECHAZADO' : a.estadoRegistro;
         a.observaciones = payload.observaciones || null;
         a.fechaObservacion = new Date().toISOString().slice(0, 10);
 
@@ -215,6 +219,11 @@ export class MisAyudantesComponent implements OnInit {
     this.supervision.evaluarEvidencia(ev.idEvidencia, payload).subscribe({
       next: () => {
         ev.idTipoEstadoEvidencia = payload.idTipoEstadoEvidencia;
+        ev.estadoEvidencia = payload.idTipoEstadoEvidencia === 1 ? 'SUBIDO' :
+                             payload.idTipoEstadoEvidencia === 2 ? 'REVISADO' :
+                             payload.idTipoEstadoEvidencia === 3 ? 'APROBADO' :
+                             payload.idTipoEstadoEvidencia === 4 ? 'RECHAZADO' :
+                             payload.idTipoEstadoEvidencia === 5 ? 'OBSERVADO' : ev.estadoEvidencia;
         ev.observaciones = payload.observaciones || null;
         ev.fechaObservacion = new Date().toISOString().slice(0, 10);
 

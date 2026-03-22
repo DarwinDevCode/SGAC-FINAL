@@ -27,7 +27,7 @@ export class ListadoSesionesComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private sesionService = inject(SesionService);
   private ayudantiaService = inject(AyudantiaService); // <-- Inyectamos para usar obtenerBorrador()
-  private dialog = inject(MatDialog);
+  private dialog = inject<any>(MatDialog);
   private destroy$ = new Subject<void>();
 
   // Estado Principal
@@ -97,7 +97,7 @@ export class ListadoSesionesComponent implements OnInit, OnDestroy {
       disableClose: false,
     });
 
-    dialogRef.afterClosed().subscribe((resultado) => {
+    dialogRef.afterClosed().subscribe((resultado: boolean) => {
       if (resultado) this.cargarSesiones();
     });
   }

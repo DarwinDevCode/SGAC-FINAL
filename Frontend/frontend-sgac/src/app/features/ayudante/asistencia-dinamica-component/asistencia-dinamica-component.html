@@ -130,11 +130,11 @@
 
           <div class="ad-preview-stats">
             <span class="badge green">{{ previewData()!.totalFilas }} fila(s)</span>
-            <span *ngIf="(previewData()!.nuevos ?? 0) > 0" class="badge green">
+            <span *ngIf="previewData()!.nuevos > 0" class="badge green">
               <lucide-icon name="user-plus" size="11"></lucide-icon>
               {{ previewData()!.nuevos }} nuevo(s)
             </span>
-            <span *ngIf="(previewData()!.duplicadosBD ?? 0) > 0" class="badge amber">
+            <span *ngIf="previewData()!.duplicadosBD > 0" class="badge amber">
               <lucide-icon name="user-check" size="11"></lucide-icon>
               {{ previewData()!.duplicadosBD }} ya registrado(s)
             </span>
@@ -149,12 +149,12 @@
           <lucide-icon name="triangle-alert" size="16"></lucide-icon>
           <span>El archivo tiene errores. Corrígelos o sube otro archivo.</span>
         </div>
-        <div *ngIf="!previewData()!.tieneErrores && (previewData()!.nuevos ?? 0) === 0"
+        <div *ngIf="!previewData()!.tieneErrores && previewData()!.nuevos === 0"
              class="alert-banner warning ad-preview-banner">
           <lucide-icon name="info" size="16"></lucide-icon>
           <span>Todos los estudiantes del archivo ya están registrados. No hay nada nuevo que importar.</span>
         </div>
-        <div *ngIf="!previewData()!.tieneErrores && (previewData()!.nuevos ?? 0) > 0"
+        <div *ngIf="!previewData()!.tieneErrores && previewData()!.nuevos > 0"
              class="alert-banner success ad-preview-banner">
           <lucide-icon name="circle-check-big" size="16"></lucide-icon>
           <span>{{ previewData()!.mensaje }}</span>

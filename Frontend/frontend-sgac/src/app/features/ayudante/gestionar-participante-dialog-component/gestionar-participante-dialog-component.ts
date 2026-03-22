@@ -9,6 +9,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AyudantiaService } from '../../../core/services/ayudantia/ayudantia-service';
 import { ParticipanteRequestDTO } from '../../../core/models/general/respuesta-operacion';
 
+export interface ParticipanteDialogData {
+  idParticipanteAyudantia?: number;
+  nombreCompleto?: string;
+  curso?: string;
+  paralelo?: string;
+}
+
 @Component({
   selector: 'app-gestionar-participante-dialog',
   standalone: true,
@@ -20,8 +27,8 @@ export class GestionarParticipanteDialogComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private ayudantiaService = inject(AyudantiaService);
-  private dialogRef = inject(MatDialogRef<GestionarParticipanteDialogComponent>);
-  public data = inject(MAT_DIALOG_DATA); // Recibe el estudiante si es edición
+  private dialogRef = inject<any>(MatDialogRef);
+  public data = inject<ParticipanteDialogData>(MAT_DIALOG_DATA); // Recibe el estudiante si es edición
   private destroy$ = new Subject<void>();
 
   form!: FormGroup;
