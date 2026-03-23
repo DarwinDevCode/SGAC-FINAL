@@ -39,8 +39,8 @@ public class Ayudantia {
     @Column(name = "fecha_fin")
     private LocalDate fechaFin;
 
-    @Column(name = "horas_cumplidas")
-    private Integer horasCumplidas;
+    @Column(name = "horas_cumplidas", precision = 5, scale = 2)
+    private BigDecimal horasCumplidas;
 
     @NotNull
     @ColumnDefault("20")
@@ -50,9 +50,11 @@ public class Ayudantia {
     @Column(name = "horas_maximas", precision = 5, scale = 2)
     private BigDecimal horasMaximas;
 
+    @Builder.Default
     @OneToMany(mappedBy = "ayudantia", cascade = CascadeType.ALL)
     private List<Certificado> certificados = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "ayudantia", cascade = CascadeType.ALL)
     private List<RegistroActividad> registrosActividad = new ArrayList<>();
 }

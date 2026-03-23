@@ -1,13 +1,13 @@
 <div class="gestion-container">
     <div class="section-header">
         <div class="title-container">
-            <h2 class="title">Mis Informes Mensuales</h2>
-            <p class="subtitle">Gestiona y envía tus reportes de actividades de ayudantía.</p>
+            <h2 class="title">Mis Informes Finales</h2>
+            <p class="subtitle">Gestiona y envía tus reportes finales de actividades de ayudantía.</p>
         </div>
         <div class="actions">
             <button class="btn-primary" (click)="generarBorrador()" [disabled]="isGenerating">
                 <lucide-icon name="sparkles" size="18"></lucide-icon>
-                {{ isGenerating ? 'Generando...' : 'Generar Borrador Mes Actual (IA)' }}
+                {{ isGenerating ? 'Generando...' : 'Generar Borrador Informe Final' }}
             </button>
         </div>
     </div>

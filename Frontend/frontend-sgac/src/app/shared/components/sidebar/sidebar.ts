@@ -61,8 +61,9 @@ export class SidebarComponent {
       { label: 'Sala de Evaluación',       icon: 'MicVocal',        route: '/comision/sala' },
       { label: 'Ver Resultados',           icon: 'Trophy',          route: '/resultados-evaluacion' },
       { label: 'Mis Ayudantes',            icon: 'Users',           route: '/docente/mis-ayudantes' },
-      { label: 'Planificación Actividades',icon: 'CalendarClock',   route: '/docente/planificacion' },
+
       { label: 'Aprobar Informes',         icon: 'CheckSquare',     route: '/docente/aprobar-informes' },
+      { label: 'Informe Final',            icon: 'FileCheck',      route: '/docente/aprobar-informes-mensuales' },
       { label: 'Notificaciones',           icon: 'Bell',            route: '/notificaciones' },
     ],
     COORDINADOR: [
@@ -78,6 +79,7 @@ export class SidebarComponent {
       { label: 'Ver Resultados',         icon: 'Trophy',          route: '/resultados-evaluacion' },
       { label: 'Resoluciones y Actas',   icon: 'FileSignature',   route: '/coordinador/resoluciones' },
       { label: 'Reportes y Consultas',   icon: 'ClipboardList',   route: '/coordinador/reportes' },
+      { label: 'Informe Final',          icon: 'FileCheck',      route: '/docente/aprobar-informes-mensuales' },
       { label: 'Notificaciones',         icon: 'Bell',            route: '/notificaciones' },
     ],
     COMISION_SELECCION: [
@@ -96,6 +98,7 @@ export class SidebarComponent {
       { label: 'Sala de Evaluación',   icon: 'MicVocal',        route: '/comision/sala' },
       { label: 'Ver Resultados',       icon: 'Trophy',          route: '/resultados-evaluacion' },
       { label: 'Auditoría y Reportes', icon: 'BarChart3',       route: '/decano/reportes' },
+      { label: 'Informe Final',        icon: 'FileCheck',      route: '/docente/aprobar-informes-mensuales' },
       { label: 'Notificaciones',       icon: 'Bell',            route: '/notificaciones' },
     ],
     ADMINISTRADOR: [

@@ -274,9 +274,9 @@ public class InformeMensualServiceImpl implements InformeMensualService {
     }
 
     @Override
-    public List<InformeMensualResponse> listarInformesPorDocenteYEstado(Integer idDocente, String codigoEstado) {
+    public List<InformeMensualResponse> listarInformesPorDocenteYEstado(Integer idUsuarioDocente, String codigoEstado) {
         return informeRepository.findAll().stream()
-                .filter(inf -> inf.getAyudantia().getPostulacion().getConvocatoria().getDocente().getIdDocente().equals(idDocente))
+                .filter(inf -> inf.getAyudantia().getPostulacion().getConvocatoria().getDocente().getUsuario().getIdUsuario().equals(idUsuarioDocente))
                 .filter(inf -> inf.getTipoEstadoInforme().getCodigo().equals(codigoEstado))
                 .map(this::mapToDto)
                 .collect(Collectors.toList());

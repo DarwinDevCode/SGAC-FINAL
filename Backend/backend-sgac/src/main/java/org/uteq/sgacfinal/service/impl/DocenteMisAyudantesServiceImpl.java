@@ -1,6 +1,12 @@
 package org.uteq.sgacfinal.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +19,9 @@ import org.uteq.sgacfinal.dto.request.EvaluarEvidenciaRequestDTO;
 import org.uteq.sgacfinal.dto.request.NotificationRequest;
 import org.uteq.sgacfinal.dto.response.ActividadDetalleDTO;
 import org.uteq.sgacfinal.dto.response.AyudanteResponseDTO;
+import org.uteq.sgacfinal.entity.Ayudantia;
+import org.uteq.sgacfinal.entity.RegistroActividad;
+import org.uteq.sgacfinal.repository.AyudantiaRepository;
 import org.uteq.sgacfinal.repository.DocenteMisAyudantesRepository;
 import org.uteq.sgacfinal.repository.EvidenciaRegistroActividadRepository;
 import org.uteq.sgacfinal.repository.RegistroActividadConfigRepository;
@@ -20,12 +29,7 @@ import org.uteq.sgacfinal.service.IDocenteMisAyudantesService;
 import org.uteq.sgacfinal.service.INotificacionService;
 import org.uteq.sgacfinal.service.IUsuarioSesionService;
 
-import java.io.File;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,7 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
     private final IUsuarioSesionService usuarioSesionService;
     private final DocenteMisAyudantesRepository docenteMisAyudantesRepository;
     private final RegistroActividadConfigRepository registroActividadConfigRepository;
+    private final AyudantiaRepository ayudantiaRepository;
     private final EvidenciaRegistroActividadRepository evidenciaRegistroActividadRepository;
     private final INotificacionService notificacionService;
 
@@ -60,7 +65,7 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
                     .fechaInicio((LocalDate) r[9])
                     .fechaFin((LocalDate) r[10])
                     .horasMaximas((java.math.BigDecimal) r[11])
-                    .horasCumplidas((Integer) r[12])
+                    .horasCumplidas(r[12] != null ? ((java.math.BigDecimal) r[12]).intValue() : 0)
                     .estadoAyudantia((String) r[13])
                     .build());
         }
@@ -128,7 +133,7 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
         if (request.getIdTipoEstadoRegistro() != null) {
             switch (request.getIdTipoEstadoRegistro()) {
                 case 1 -> codigoEstado = "PENDIENTE";
-                case 2 -> codigoEstado = "APROBADO";
+                case 2 -> codigoEstado = "ACEPTADO";
                 case 3 -> codigoEstado = "OBSERVADO";
                 case 4 -> codigoEstado = "RECHAZADO";
                 default -> codigoEstado = "PENDIENTE";
@@ -138,9 +143,21 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
         Integer idRealEstado = docenteMisAyudantesRepository.getIdEstadoRegistroPorCodigo(codigoEstado);
         
         if (idRealEstado == null) {
-            throw new RuntimeException("Código de estado no válido en la base de datos: " + codigoEstado);
+            // Reintento con APROBADO por si la migración se cambió
+            codigoEstado = "APROBADO";
+            idRealEstado = docenteMisAyudantesRepository.getIdEstadoRegistroPorCodigo(codigoEstado);
         }
 
+        if (idRealEstado == null) {
+            throw new RuntimeException("Código de estado no válido en la base de datos para: " + codigoEstado);
+        }
+
+        // CARGAR ACTIVIDAD PARA ACTUALIZAR HORAS SI ES NECESARIO
+        RegistroActividad ra = registroActividadConfigRepository.findById(idActividad)
+                .orElseThrow(() -> new RuntimeException("Actividad no encontrada"));
+
+        String estadoAnterior = ra.getIdTipoEstadoRegistro() != null ? ra.getIdTipoEstadoRegistro().getCodigo() : "";
+        
         LocalDate ahora = LocalDate.now();
         int updated = registroActividadConfigRepository.evaluarActividad(
                 idActividad,
@@ -153,20 +170,59 @@ public class DocenteMisAyudantesServiceImpl implements IDocenteMisAyudantesServi
             throw new RuntimeException("No se pudo evaluar la actividad");
         }
 
-        // Notificación solo cuando cambia a OBSERVADO (3)
-        if (request.getIdTipoEstadoRegistro() != null && request.getIdTipoEstadoRegistro() == 3) {
-            Integer idUsuarioAyudante = docenteMisAyudantesRepository
-                    .obtenerIdUsuarioAyudantePorActividad(idUsuario, idActividad);
+        // --- ACTUALIZAR HORAS EN LA AYUDANTÍA ---
+        boolean esAprobacion = "ACEPTADO".equals(codigoEstado) || "APROBADO".equals(codigoEstado);
+        boolean eraAprobado = "ACEPTADO".equals(estadoAnterior) || "APROBADO".equals(estadoAnterior);
 
-            if (idUsuarioAyudante != null) {
+        if (esAprobacion && !eraAprobado) {
+            // Sumar horas
+            actualizarHorasAyudantia(ra.getAyudantia(), ra.getHorasDedicadas());
+        } else if (!esAprobacion && eraAprobado) {
+            // Restar horas (si se cambia de aprobado a otro estado)
+            actualizarHorasAyudantia(ra.getAyudantia(), ra.getHorasDedicadas() != null ? ra.getHorasDedicadas().negate() : java.math.BigDecimal.ZERO);
+        }
+
+        // --- NOTIFICACIÓN AL AYUDANTE ---
+        Integer idUsuarioAyudante = docenteMisAyudantesRepository.obtenerIdUsuarioAyudantePorActividad(idUsuario, idActividad);
+        if (idUsuarioAyudante != null) {
+            String titulo = "";
+            String mensaje = "";
+            String tipo = "INFO";
+
+            if (esAprobacion) {
+                titulo = "Actividad Aprobada";
+                mensaje = "Tu actividad '" + ra.getTemaTratado() + "' ha sido aprobada. Se han sumado " + ra.getHorasDedicadas() + " horas.";
+                tipo = "SUCCESS";
+            } else if ("OBSERVADO".equals(codigoEstado)) {
+                titulo = "Actividad Observada";
+                mensaje = "Tienes una actividad observada: '" + ra.getTemaTratado() + "'. Tienes 24h para corregirla.";
+                tipo = "WARNING";
+            } else if ("RECHAZADO".equals(codigoEstado)) {
+                titulo = "Actividad Rechazada";
+                mensaje = "Tu actividad '" + ra.getTemaTratado() + "' ha sido rechazada.";
+                tipo = "ERROR";
+            }
+
+            if (!titulo.isEmpty()) {
                 notificacionService.enviarNotificacion(idUsuarioAyudante, NotificationRequest.builder()
-                        .titulo("Actividad observada")
-                        .mensaje("Tienes una actividad observada. Tu plazo de 24 horas para corregir ha iniciado.")
-                        .tipo("OBSERVACION")
+                        .titulo(titulo)
+                        .mensaje(mensaje)
+                        .tipo(tipo)
                         .idReferencia(idActividad)
                         .build());
             }
         }
+    }
+
+    private void actualizarHorasAyudantia(Ayudantia ayudantia, java.math.BigDecimal delta) {
+        if (delta == null) return;
+        
+        java.math.BigDecimal actuales = ayudantia.getHorasCumplidas() != null 
+                ? ayudantia.getHorasCumplidas() 
+                : java.math.BigDecimal.ZERO;
+        
+        ayudantia.setHorasCumplidas(actuales.add(delta));
+        ayudantiaRepository.save(ayudantia);
     }
 
     @Override

@@ -51,15 +51,15 @@ public class AiReportServiceImpl implements AiReportService {
             headers.setBearerAuth(groqApiKey);
 
             String prompt = "Actúa como un Rector o Decano universitario experto en GESTIÓN DE CALIDAD ACADÉMICA. " +
-                    "Tu misión es redactar un INFORME DE GESTIÓN MENSUAL DE AYUDANTÍA DE CÁTEDRA de nivel superior.\n\n" +
+                    "Tu misión es redactar un INFORME FINAL DE AYUDANTÍA DE CÁTEDRA de nivel superior.\n\n" +
                     "### DIRECTRICES DE ALTA CALIDAD:\n" +
                     "1. **Dominio Lingüístico**: Usa un léxico sofisticado y técnico (ej. 'Paradigma pedagógico', 'Sinergia educativa', 'Mitigación de brechas de aprendizaje').\n" +
                     "2. **Elaboración Narrativa**: NO resumas. EXPANDE. Si los datos dicen 'Tutoría de Matrices', redacta: 'Se lideró una sesión de fortalecimiento cognitivo enfocada en el álgebra matricial, permitiendo a los estudiantes internalizar estructuras de datos complejas aplicadas a la ingeniería'.\n" +
                     "3. **Análisis Crítico**: Incluye párrafos de reflexión sobre cómo estas actividades impactan en los indicadores de rendimiento estudiantil.\n" +
                     "4. **Estética Ejecutiva**: Entrega código HTML con estilos CSS inline sofisticados (bordes redondeados, tipografía elegante, espaciado generoso, colores institucionales #0d47a1).\n\n" +
                     "### ESTRUCTURA DEL DOCUMENTO:\n" +
-                    "- **Título**: 'INFORME EJECUTIVO DE DESEMPEÑO DOCENTE Y ASISTENCIA ACADÉMICA'.\n" +
-                    "- **Contextualización**: Un análisis profundo del entorno educativo del mes.\n" +
+                    "- **Título**: 'INFORME EJECUTIVO FINAL DE DESEMPEÑO DOCENTE Y ASISTENCIA ACADÉMICA'.\n" +
+                    "- **Contextualización**: Un análisis profundo del entorno educativo del periodo.\n" +
                     "- **Matriz de Intervenciones**: Una TABLA HTML impecable con columnas: 'Cronología', 'Eje Temático/Intervención', 'Carga Horaria', 'Resultado/Logro Alcanzado'.\n" +
                     "- **Evaluación de Competencias**: Un apartado detallando las competencias desarrolladas por los estudiantes.\n" +
                     "- **Recomendaciones Estratégicas**: Sugerencias para el próximo ciclo basadas en lo observado.\n\n" +

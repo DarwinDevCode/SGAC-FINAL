@@ -1,0 +1,121 @@
+<div class="page-header animate__animated animate__fadeIn">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h1 class="page-title">Gesti&oacute;n de Informe Final</h1>
+      <p class="page-subtitle">Revisi&oacute;n y aprobaci&oacute;n de Reporte Final</p>
+    </div>
+    <div class="header-stats d-none d-md-flex">
+      <div class="stat-item">
+        <span class="stat-value">{{ informes.length }}</span>
+        <span class="stat-label">Pendientes</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid py-4 animate__animated animate__fadeIn">
+  <div *ngIf="error" class="custom-alert alert-error mb-4">
+    <i-lucide name="alert-triangle"></i-lucide>
+    <span>{{ error }}</span>
+  </div>
+
+  <div *ngIf="success" class="custom-alert alert-success mb-4">
+    <i-lucide name="sparkles"></i-lucide>
+    <span>{{ success }}</span>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="loader-ripple"><div></div><div></div></div>
+    <p>Sincronizando con el servidor...</p>
+  </div>
+
+  <div *ngIf="!isLoading && informes.length > 0" class="reports-grid">
+    <div *ngFor="let informe of informes" class="report-card animate__animated animate__zoomIn">
+      <div class="card-status-strip"></div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="report-meta">
+            <span class="mes-anio">Periodo {{ informe.mes | number:'2.0' }}/{{ informe.anio }}</span>
+            <h3 class="ayudante-name">Ayudant&iacute;a #{{ informe.idAyudantia }}</h3>
+          </div>
+          <div class="status-pill">Pendiente</div>
+        </div>
+
+        <div class="report-preview-mini" [innerHTML]="informe.contenidoBorrador"></div>
+
+        <div class="card-footer-actions mt-3">
+          <button class="btn-premium-primary w-100" (click)="verDetalle(informe)">
+            <i-lucide name="layout-list" class="me-2"></i-lucide>
+            Revisar Informe
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && informes.length === 0" class="empty-glass-state">
+    <div class="glass-icon">
+      <i-lucide name="search-check"></i-lucide>
+    </div>
+    <h2>Bandeja Limpia</h2>
+    <p>No tienes informes pendientes de revisi&oacute;n en este momento.</p>
+    <button class="btn-refresh" (click)="cargarPendientes()">
+      <i-lucide name="refresh-cw"></i-lucide> Actualizar
+    </button>
+  </div>
+
+  <!-- MODAL DE REVISIÓN PREMIUM -->
+  <div *ngIf="selectedInforme" class="premium-modal-backdrop" (click)="cerrarDetalle()">
+    <div class="premium-modal-content animate__animated animate__slideInUp" (click)="$event.stopPropagation()">
+      <div class="modal-premium-header">
+        <div class="d-flex align-items-center">
+            <div class="icon-circle me-3">
+                <i-lucide name="file-text"></i-lucide>
+            </div>
+            <div>
+                <h4 class="modal-title mb-0">Revisi&oacute;n de Informe Final {{ selectedInforme.mes }}/{{ selectedInforme.anio }}</h4>
+                <small class="text-muted">ID Ayudant&iacute;a: {{ selectedInforme.idAyudantia }}</small>
+            </div>
+        </div>
+        <button class="close-glass-btn" (click)="cerrarDetalle()">
+          <i-lucide name="x"></i-lucide>
+        </button>
+      </div>
+
+      <div class="modal-premium-body">
+        <div class="document-viewer-container">
+            <div class="ai-badge">
+                <i-lucide name="cpu" class="me-1"></i-lucide> BORRADOR GENERADO
+            </div>
+            <div class="document-content" [innerHTML]="selectedInforme.contenidoBorrador">
+            </div>
+        </div>
+
+        <div class="feedback-section mt-4">
+          <label class="premium-label">Observaciones del Docente</label>
+          <textarea class="premium-textarea" rows="3" [(ngModel)]="observaciones"
+            placeholder="Escribe aqu&iacute; tus observaciones o motivos de rechazo..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-premium-footer">
+        <div class="footer-left">
+            <button class="btn-glass-secondary" (click)="cerrarDetalle()" [disabled]="isProcessing">Cancelar</button>
+        </div>
+        <div class="footer-right">
+            <button class="btn-danger-soft me-2" (click)="rechazar()" [disabled]="isProcessing">
+                <i-lucide name="x-circle" class="me-1"></i-lucide> Rechazar
+            </button>
+            <button class="btn-warning-soft me-2" (click)="observar()" [disabled]="isProcessing">
+                <i-lucide name="eye-off" class="me-1"></i-lucide> Observar
+            </button>
+            <button class="btn-success-premium" (click)="aprobar()" [disabled]="isProcessing">
+                <div *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></div>
+                <i-lucide *ngIf="!isProcessing" name="check-circle" class="me-1"></i-lucide>
+                Aprobar Informe
+            </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

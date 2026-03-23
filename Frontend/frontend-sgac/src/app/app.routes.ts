@@ -239,6 +239,10 @@ export const routes: Routes = [
         path: 'docente/mis-ayudantes/:idAyudantia/actividades',
         loadComponent: () => import('./features/docente/actividades-ayudante/actividades-ayudante').then(m => m.ActividadesAyudanteComponent)
       },
+      {
+        path: 'docente/aprobar-informes-mensuales',
+        loadComponent: () => import('./features/docente/aprobar-informe-mensual/aprobar-informe-mensual.component').then(m => m.AprobarInformeMensualComponent)
+      },
 
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],

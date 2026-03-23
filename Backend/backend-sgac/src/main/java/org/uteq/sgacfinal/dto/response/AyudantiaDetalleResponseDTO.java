@@ -16,6 +16,6 @@ public class AyudantiaDetalleResponseDTO {
     private Integer idAyudantia;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
-    private Integer horasCumplidas;
+    private java.math.BigDecimal horasCumplidas;
     private List<RegistroActividadDetalleDTO> actividades;
 }

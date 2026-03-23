@@ -18,14 +18,14 @@ public interface AyudantiaRepository extends JpaRepository<Ayudantia, Integer> {
                                @Param("idPostulacion") Integer idPostulacion,
                                @Param("inicio") LocalDate fechaInicio,
                                @Param("fin") LocalDate fechaFin,
-                               @Param("horas") Integer horasCumplidas);
+                               @Param("horas") java.math.BigDecimal horasCumplidas);
 
     @Query(value = "SELECT public.sp_actualizar_ayudantia(:id, :idEstado, :inicio, :fin, :horas)", nativeQuery = true)
     Integer actualizarAyudantia(@Param("id") Integer idAyudantia,
                                 @Param("idEstado") Integer idTipoEstado,
                                 @Param("inicio") LocalDate fechaInicio,
                                 @Param("fin") LocalDate fechaFin,
-                                @Param("horas") Integer horasCumplidas);
+                                @Param("horas") java.math.BigDecimal horasCumplidas);
 
     @Query(value = "SELECT * FROM public.sp_obtener_ayudantia_por_id(:id)", nativeQuery = true)
     Optional<Ayudantia> buscarPorIdSP(@Param("id") Integer id);
