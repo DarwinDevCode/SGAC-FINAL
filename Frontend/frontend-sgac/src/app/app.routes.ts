@@ -84,6 +84,10 @@ export const routes: Routes = [
         path: 'admin/periodos',
         loadComponent: () => import('./features/admin/gestion-periodos/gestion-periodos.component').then(m => m.GestionPeriodosComponent)
       },
+      {
+        path: 'admin/respaldos',
+        loadComponent: () => import('./features/admin/respaldos-component/respaldos-component').then(m => m.RespaldosComponent)
+      },
 
       // ── Postulante / Estudiante ──────────────────────────────────────
       {

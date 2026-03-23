@@ -108,6 +108,7 @@ export class SidebarComponent {
       { label: 'Configuración Global',icon: 'Settings',        route: '/admin/configuracion' },
       { label: 'Roles y Permisos',    icon: 'Settings',        route: '/admin/rol-permiso' },
       { label: 'Registro de Auditoría',icon: 'History',        route: '/admin/reportes-auditoria' },
+      { label: 'Respaldos de BD', icon: 'DatabaseBackup', route: '/admin/respaldos' },
       { label: 'Notificaciones',      icon: 'Bell',            route: '/notificaciones' },
     ],
   };

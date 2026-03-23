@@ -1,0 +1,136 @@
+<!-- TOAST -->
+<div class="toast-container">
+  @for (t of toasts; track t.id) {
+    <div class="toast-item toast-{{ t.severity }}">
+      <div class="toast-body">
+        <div class="toast-icon">
+          @switch (t.severity) {
+            @case ('success') { <lucide-icon name="CheckCircle2" size="18"></lucide-icon> }
+            @case ('error')   { <lucide-icon name="XCircle"      size="18"></lucide-icon> }
+            @case ('warn')    { <lucide-icon name="AlertTriangle" size="18"></lucide-icon> }
+            @default          { <lucide-icon name="Info"          size="18"></lucide-icon> }
+          }
+        </div>
+        <div class="toast-text">
+          <strong class="toast-summary">{{ t.summary }}</strong>
+          <span class="toast-detail">{{ t.detail }}</span>
+        </div>
+      </div>
+      <button class="toast-close" (click)="removeToast(t.id)">
+        <lucide-icon name="X" size="14"></lucide-icon>
+      </button>
+    </div>
+  }
+</div>
+
+<!-- VISTA PRINCIPAL -->
+<div class="gestion-container">
+  <div class="section-header" style="margin-bottom: 20px;">
+    <div>
+      <h2 class="title" style="margin-bottom: 5px;">Respaldos de Base de Datos</h2>
+      <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
+        Genera copias de seguridad de la información del sistema y restáuralas en caso de emergencia.
+      </p>
+    </div>
+    <button class="btn-primary" (click)="generarRespaldo()" [disabled]="generando || restaurando">
+      @if (generando) {
+        <lucide-icon name="Loader" size="18" class="spin"></lucide-icon> Generando...
+      } @else {
+        <lucide-icon name="DatabaseBackup" size="18"></lucide-icon> Generar Respaldo
+      }
+    </button>
+  </div>
+
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th style="width: 60px;">#</th>
+        <th>Nombre del Archivo</th>
+        <th>Fecha y Hora de Creación</th>
+        <th style="width: 180px;" class="text-right">Acción</th>
+      </tr>
+      </thead>
+      <tbody>
+        @if (cargandoLista) {
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
+              <lucide-icon name="Loader" size="24" class="spin"></lucide-icon>
+              <p style="margin-top: 10px;">Cargando historial...</p>
+            </td>
+          </tr>
+        } @else {
+          @for (archivo of archivosRespaldo; track archivo; let i = $index) {
+            <tr>
+              <td style="font-weight: 600; color: #94a3b8;">{{ i + 1 }}</td>
+              <td style="font-weight: 500; font-family: monospace; font-size: 0.85rem;">
+                <lucide-icon name="FileArchive" size="15" style="vertical-align: middle; margin-right: 5px; color:#64748b;"></lucide-icon>
+                {{ archivo }}
+              </td>
+              <td style="font-size: 0.85rem; color: #64748b;">
+                {{ formatearFechaDesdeNombre(archivo) }}
+              </td>
+              <td class="text-right">
+                <button class="btn-ghost btn-danger-hover" title="Restaurar este backup"
+                        (click)="abrirModalRestaurar(archivo)" [disabled]="generando || restaurando">
+                  <lucide-icon name="RotateCcw" size="16"></lucide-icon> Restaurar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">
+                <lucide-icon name="Database" size="32" style="opacity: 0.5; margin-bottom: 10px;"></lucide-icon>
+                <p>No hay respaldos registrados en el servidor.</p>
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL: Confirmar Restauración -->
+@if (modalRestaurarAbierto && respaldoSeleccionado) {
+  <div class="modal-backdrop">
+    <div class="modal-box modal-confirm">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color: #dc2626;">
+          <lucide-icon name="AlertTriangle" size="20"></lucide-icon>
+          Peligro: Restauración de Datos
+        </h3>
+        <button type="button" class="btn-icon" [disabled]="restaurando" (click)="cerrarModalRestaurar()">
+          <lucide-icon name="X" size="18"></lucide-icon>
+        </button>
+      </div>
+      <div class="confirm-body">
+        <div class="confirm-warning" style="background: #fef2f2; border-color: #fecaca; color: #991b1b;">
+          <lucide-icon name="ShieldAlert" size="24" style="flex-shrink:0; margin-top: 5px;"></lucide-icon>
+          <div>
+            <strong style="font-size: 0.95rem;">Estás a punto de sobreescribir la base de datos</strong>
+            <p style="margin-top: 5px;">
+              Esta acción eliminará <b>todos los datos actuales</b> (Periodos, Convocatorias, Postulaciones, etc.) y los reemplazará con la información contenida en el archivo:
+            </p>
+            <div style="margin-top: 10px; padding: 8px; background: white; border-radius: 4px; border: 1px dashed #fca5a5; font-family: monospace; font-size: 0.8rem; word-break: break-all;">
+              {{ respaldoSeleccionado }}
+            </div>
+          </div>
+        </div>
+        <p style="font-size:.85rem; color:#64748b; margin:0; text-align: center;">
+          ¿Estás absolutamente seguro de que deseas proceder? Esta acción no se puede deshacer.
+        </p>
+      </div>
+      <div class="form-footer" style="justify-content: flex-end;">
+        <button class="btn-ghost" (click)="cerrarModalRestaurar()" [disabled]="restaurando">Cancelar</button>
+        <button class="btn-danger" (click)="confirmarRestauracion()" [disabled]="restaurando">
+          @if (restaurando) {
+            <lucide-icon name="Loader" size="16" class="spin"></lucide-icon> Restaurando Sistema...
+          } @else {
+            <lucide-icon name="RotateCcw" size="16"></lucide-icon> Sí, Destruir y Restaurar
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

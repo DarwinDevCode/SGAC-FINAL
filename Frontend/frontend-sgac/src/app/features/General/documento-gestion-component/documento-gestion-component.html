@@ -108,16 +108,16 @@
             @if (!esCoordinador()) {
               <label class="radio-option">
                 <input type="radio" [value]="NivelDocumento.GLOBAL" [checked]="formNivel() === NivelDocumento.GLOBAL" (change)="formNivel.set(NivelDocumento.GLOBAL)"/>
-                <span><strong>Global</strong><small>Toda la universidad</small></span>
+                <span><strong>Global</strong></span>
               </label>
             }
             <label class="radio-option">
               <input type="radio" [value]="NivelDocumento.FACULTAD" [checked]="formNivel() === NivelDocumento.FACULTAD" (change)="formNivel.set(NivelDocumento.FACULTAD)"/>
-              <span><strong>{{ esCoordinador() ? 'Mi Facultad' : 'Por Facultad' }}</strong><small>Solo tu facultad</small></span>
+              <span><strong>{{ esCoordinador() ? 'Mi Facultad' : 'Por Facultad' }}</strong></span>
             </label>
             <label class="radio-option">
               <input type="radio" [value]="NivelDocumento.CARRERA" [checked]="formNivel() === NivelDocumento.CARRERA" (change)="formNivel.set(NivelDocumento.CARRERA)"/>
-              <span><strong>{{ esCoordinador() ? 'Mi Carrera' : 'Por Carrera' }}</strong><small>Solo tu carrera</small></span>
+              <span><strong>{{ esCoordinador() ? 'Mi Carrera' : 'Por Carrera' }}</strong></span>
             </label>
           </div>
         </div>

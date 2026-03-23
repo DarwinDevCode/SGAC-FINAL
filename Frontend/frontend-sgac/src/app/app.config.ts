@@ -110,7 +110,8 @@ import {
   Mic, BookMarked, Mail, BadgeCheck, Trophy, ArrowDown, ArrowDownWideNarrow, ArrowUpNarrowWide, Table, Star, LockOpen,
   Tag, LayoutGrid, Landmark, Square, FileSpreadsheet, Files, Globe, CloudUpload, FileCheck, FolderX, Image,
   File, HardDrive, CalendarCheck, ListOrdered, CloudCheck, Table2, AlignLeft, LoaderCircle, ClipboardX, UserCog,
-  Hourglass, UploadCloud, Activity, FileJson, MinusCircle, FileJson2, FileMinus, FilePlus, Clock4
+  Hourglass, UploadCloud, Activity, FileJson, MinusCircle, FileJson2, FileMinus, FilePlus, Clock4, DatabaseBackup,
+  FileArchive, RotateCcw
 } from 'lucide-angular';
 import { authInterceptor } from './core/interceptors/auth-interceptor';
 
@@ -244,7 +245,10 @@ export const appConfig: ApplicationConfig = {
         FileJson2,
         FileMinus,
         FilePlus,
-        Clock4
+        Clock4,
+        DatabaseBackup,
+        FileArchive,
+        RotateCcw
       })
     )
   ]
