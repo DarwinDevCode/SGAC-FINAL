@@ -23,12 +23,10 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   private subs = new Subscription();
 
-  // Data - Ahora usa ConvocatoriaEstudianteDTO
   convocatoriasList: ConvocatoriaEstudianteDTO[] = [];
   convocatoriasFiltradas: ConvocatoriaEstudianteDTO[] = [];
   tiposRequisito: TipoRequisitoPostulacionResponseDTO[] = [];
 
-  // UI State
   loading = true;
   mostrarModal = false;
   busqueda = '';
@@ -37,14 +35,12 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
   /** Mapa: idConvocatoria → true si el estudiante ya se postuló a esa convocatoria */
   postulacionPorConvocatoria: Record<number, boolean> = {};
 
-  // Mensajes de estado
   mensajeError: string | null = null;
   mensajeInfo: string | null = null;
   esElegible = true;
 
-  // Form State
   idEstudianteBase = 0;
-  archivosSubidos: { idRequisito: number, file: File }[] = [];
+  archivosSubidos: { idRequisito: number; file: File }[] = [];
   observacionesGenerales = '';
   observacionesPorRequisito: { [idRequisito: number]: string } = {};
 
@@ -61,18 +57,20 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     if (!this.idEstudianteBase || this.convocatoriasFiltradas.length === 0) return;
     this.postulacionPorConvocatoria = {};
 
-
-    this.convocatoriasFiltradas.forEach(conv => {
+    this.convocatoriasFiltradas.forEach((conv) => {
       if (!conv.idConvocatoria) return;
+
       this.subs.add(
-        this.postulanteService.existePostulacion(this.idEstudianteBase, conv.idConvocatoria).subscribe({
-          next: (existe: boolean) => {
-            this.postulacionPorConvocatoria[conv.idConvocatoria!] = existe;
-          },
-          error: () => {
-            this.postulacionPorConvocatoria[conv.idConvocatoria!] = false;
-          }
-        })
+        this.postulanteService
+          .existePostulacion(this.idEstudianteBase, conv.idConvocatoria)
+          .subscribe({
+            next: (existe: boolean) => {
+              this.postulacionPorConvocatoria[conv.idConvocatoria!] = existe;
+            },
+            error: () => {
+              this.postulacionPorConvocatoria[conv.idConvocatoria!] = false;
+            },
+          })
       );
     });
   }
@@ -81,10 +79,6 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     this.subs.unsubscribe();
   }
 
-  /**
-   * Lista las convocatorias elegibles para el estudiante autenticado.
-   * Usa el nuevo endpoint que aplica filtros de elegibilidad académica.
-   */
   listarConvocatoriasElegibles() {
     this.loading = true;
     this.mensajeError = null;
@@ -92,42 +86,50 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
     this.esElegible = true;
 
     this.subs.add(
-      this.convocatoriaService.listarConvocatoriasElegibles(this.idEstudianteBase).subscribe({
-        next: (convocatorias: ConvocatoriaEstudianteDTO[]) => {
-          this.convocatoriasList = convocatorias || [];
-          this.aplicarFiltro(this.busqueda);
+      this.convocatoriaService
+        .listarConvocatoriasElegibles(this.idEstudianteBase)
+        .subscribe({
+          next: (convocatorias: ConvocatoriaEstudianteDTO[]) => {
+            this.convocatoriasList = convocatorias || [];
+            this.aplicarFiltro(this.busqueda);
 
-          if (this.convocatoriasList.length === 0) {
-            this.mensajeInfo = 'No hay convocatorias disponibles para tu carrera y nivel académico en este momento.';
-          }
+            if (this.convocatoriasList.length === 0) {
+              this.mensajeInfo =
+                'No hay convocatorias disponibles para tu carrera y nivel académico en este momento.';
+            }
 
-          // Verificar cuáles ya tiene postulación
-          this.checkPostulacionesGranulares();
-          this.loading = false;
-        },
-        error: (err: HttpErrorResponse) => {
-          console.error('Error al cargar convocatorias:', err);
-          // Verificar si es un error de negocio (no cumple requisitos)
-          const errorMsg = err.error?.message || err.error || err.message;
-          if (errorMsg && (errorMsg.includes('Requisito no cumplido') || errorMsg.includes('Acceso denegado'))) {
-            this.esElegible = false;
-            this.mensajeError = errorMsg;
-          } else {
-            this.mensajeError = 'Error al cargar las convocatorias. Por favor, intenta de nuevo.';
-          }
-          this.convocatoriasList = [];
-          this.convocatoriasFiltradas = [];
-          this.loading = false;
-        }
-      })
+            this.checkPostulacionesGranulares();
+            this.loading = false;
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Error al cargar convocatorias:', err);
+
+            const errorMsg = err.error?.message || err.error || err.message;
+            if (
+              errorMsg &&
+              (errorMsg.includes('Requisito no cumplido') ||
+                errorMsg.includes('Acceso denegado'))
+            ) {
+              this.esElegible = false;
+              this.mensajeError = errorMsg;
+            } else {
+              this.mensajeError =
+                'Error al cargar las convocatorias. Por favor, intenta de nuevo.';
+            }
+
+            this.convocatoriasList = [];
+            this.convocatoriasFiltradas = [];
+            this.loading = false;
+          },
+        })
     );
   }
 
   cargarRequisitos() {
     this.subs.add(
       this.postulanteService.listarTiposRequisitos().subscribe({
-        next: (data) => this.tiposRequisito = data || [],
-        error: (err) => console.error('Error al cargar requisitos', err)
+        next: (data) => (this.tiposRequisito = data || []),
+        error: (err) => console.error('Error al cargar requisitos', err),
       })
     );
   }
@@ -139,16 +141,21 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
 
   private aplicarFiltro(texto: string) {
     const term = (texto || '').toLowerCase().trim();
+
     if (!term) {
       this.convocatoriasFiltradas = [...this.convocatoriasList];
+      this.checkPostulacionesGranulares();
       return;
     }
 
-    this.convocatoriasFiltradas = this.convocatoriasList.filter(c =>
-      (c.nombreAsignatura || '').toLowerCase().includes(term) ||
-      (c.nombreCarrera || '').toLowerCase().includes(term) ||
-      (c.nombreDocente || '').toLowerCase().includes(term)
+    this.convocatoriasFiltradas = this.convocatoriasList.filter(
+      (c) =>
+        (c.nombreAsignatura || '').toLowerCase().includes(term) ||
+        (c.nombreCarrera || '').toLowerCase().includes(term) ||
+        (c.nombreDocente || '').toLowerCase().includes(term)
     );
+
+    this.checkPostulacionesGranulares();
   }
 
   abrirModalPostulacion(convocatoria: ConvocatoriaEstudianteDTO) {
@@ -167,7 +174,10 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
   onFileChange(event: any, idRequisito: number) {
     const file = event.target.files[0];
     if (file) {
-      const index = this.archivosSubidos.findIndex(a => a.idRequisito === idRequisito);
+      const index = this.archivosSubidos.findIndex(
+        (a) => a.idRequisito === idRequisito
+      );
+
       if (index !== -1) {
         this.archivosSubidos[index].file = file;
       } else {
@@ -184,47 +194,98 @@ export class ConvocatoriasComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Ordenar archivos e IDs para que coincidan en el backend
-    const idsRequisitos = this.archivosSubidos.map(a => a.idRequisito);
-    const files = this.archivosSubidos.map(a => a.file);
+    const idsRequisitos = this.archivosSubidos.map((a) => a.idRequisito);
+    const files = this.archivosSubidos.map((a) => a.file);
 
     const datosFormulario = {
       idConvocatoria: this.convocatoriaSeleccionada.idConvocatoria,
       idEstudiante: this.idEstudianteBase,
       observaciones: this.observacionesGenerales,
-      idTipoEstado: 1
+      idTipoEstado: 1,
     };
 
     this.subs.add(
-      this.postulanteService.registrarPostulacion(datosFormulario, files, idsRequisitos).subscribe({
-        next: () => {
-          alert('Postulación registrada exitosamente');
-          this.cerrarModal();
-          this.listarConvocatoriasElegibles();
-        },
-        error: (err: HttpErrorResponse) => {
-          console.error('Error al postular:', err);
-          const msg = typeof err.error === 'string' ? err.error : (err.message || 'Error al enviar la postulación');
-          alert(msg);
-        }
-      })
+      this.postulanteService
+        .registrarPostulacion(datosFormulario, files, idsRequisitos)
+        .subscribe({
+          next: () => {
+            alert('Postulación registrada exitosamente');
+            this.cerrarModal();
+            this.listarConvocatoriasElegibles();
+          },
+          error: (err: HttpErrorResponse) => {
+            console.error('Error al postular:', err);
+            const msg =
+              typeof err.error === 'string'
+                ? err.error
+                : err.message || 'Error al enviar la postulación';
+            alert(msg);
+          },
+        })
     );
   }
 
-  /**
-   * Formatea la fecha para mostrar en formato legible.
-   */
   formatearFecha(fecha: string): string {
     if (!fecha) return 'N/A';
+
     try {
       const date = new Date(fecha);
       return date.toLocaleDateString('es-EC', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
       });
     } catch {
       return fecha;
     }
+  }
+
+  getEstadoVisual(conv: ConvocatoriaEstudianteDTO): 'PENDIENTE' | 'ABIERTA' | 'FINALIZADA' {
+    const estado = (conv.estadoConvocatoria || '').toUpperCase().trim();
+
+    if (estado === 'FINALIZADA') {
+      return 'FINALIZADA';
+    }
+
+    if (conv.puedePostular) {
+      return 'ABIERTA';
+    }
+
+    return 'PENDIENTE';
+  }
+
+  getTextoBoton(conv: ConvocatoriaEstudianteDTO): string {
+    const estadoVisual = this.getEstadoVisual(conv);
+
+    if (estadoVisual === 'PENDIENTE') return 'Pendiente';
+    if (estadoVisual === 'FINALIZADA') return 'Cerrada';
+    if (conv.cuposDisponibles === 0) return 'Sin Cupos';
+    return 'Postular';
+  }
+
+  getIconoBoton(conv: ConvocatoriaEstudianteDTO): string {
+    const estadoVisual = this.getEstadoVisual(conv);
+
+    if (estadoVisual === 'PENDIENTE') return 'clock';
+    if (estadoVisual === 'FINALIZADA') return 'lock';
+    return 'send';
+  }
+
+  getTituloBoton(conv: ConvocatoriaEstudianteDTO): string {
+    const estadoVisual = this.getEstadoVisual(conv);
+
+    if (estadoVisual === 'PENDIENTE') {
+      return 'La convocatoria aún no está habilitada para postulación';
+    }
+
+    if (estadoVisual === 'FINALIZADA') {
+      return 'El periodo de postulación ha finalizado';
+    }
+
+    if (conv.cuposDisponibles === 0) {
+      return 'No hay cupos disponibles';
+    }
+
+    return 'Postular a la convocatoria';
   }
 }
