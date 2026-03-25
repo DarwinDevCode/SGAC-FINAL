@@ -70,6 +70,18 @@
             </div>
           </div>
           <div *ngIf="asistenciaError()" class="alert-banner error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ asistenciaError() }}</span></div>
+          
+          <div class="controles-asistencia" style="display: flex; gap: 1rem; margin-bottom: 1rem;" *ngIf="puedeEditar()">
+            <button class="btn btn-ghost" (click)="marcarTodos(true)" [disabled]="asistenciaEnvio()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+              <lucide-icon name="check-square" size="14"></lucide-icon>
+              <span>Todos Presentes</span>
+            </button>
+            <button class="btn btn-ghost" (click)="marcarTodos(false)" [disabled]="asistenciaEnvio()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
+              <lucide-icon name="square" size="14"></lucide-icon>
+              <span>Todos Ausentes</span>
+            </button>
+          </div>
+
           <div class="estudiantes-list">
             <div *ngFor="let est of estudiantes(); trackBy: trackByEstudiante" class="estudiante-item" style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #f3f4f6;">
               <div class="estudiante-info">

@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { Subject, takeUntil, finalize, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, takeUntil, finalize, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { AyudantiaService } from '../../../core/services/ayudantia/ayudantia-service';
@@ -160,6 +160,39 @@ export class DetalleSesionComponent implements OnInit, OnDestroy {
           this.asistenciaError.set(err?.error?.message ?? 'Error al marcar asistencia.');
           this.actualizarAsistenciaLocal(estudiante.idDetalle, !asistio);
         },
+      });
+  }
+
+  marcarTodos(asistio: boolean): void {
+    if (!this.puedeEditar()) return;
+    this.asistenciaError.set(null);
+    this.asistenciaEnvio.set(true);
+
+    const estudiantesAActualizar = this.estudiantes().filter(e => e.asistio !== asistio);
+    if (estudiantesAActualizar.length === 0) {
+      this.asistenciaEnvio.set(false);
+      return;
+    }
+
+    const peticiones = estudiantesAActualizar.map(e => {
+      this.actualizarAsistenciaLocal(e.idDetalle, asistio);
+      return this.ayudantiaService.marcarAsistencia({ idDetalle: e.idDetalle, asistio });
+    });
+
+    forkJoin(peticiones)
+      .pipe(takeUntil(this.destroy$), finalize(() => this.asistenciaEnvio.set(false)))
+      .subscribe({
+        next: (respuestas) => {
+          const hayErrores = respuestas.some(r => !r.valido);
+          if (hayErrores) {
+            this.asistenciaError.set('Algunas asistencias no se pudieron actualizar.');
+            this.cargarSesion();
+          }
+        },
+        error: () => {
+          this.asistenciaError.set('Error general al marcar asistencias masivamente.');
+          this.cargarSesion();
+        }
       });
   }
 

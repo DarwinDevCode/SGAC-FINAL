@@ -37,10 +37,10 @@
         <input id="lugar" type="text" class="form-input" formControlName="lugar" placeholder="Ej: Aula 204, Laboratorio 3, Virtual, etc." [class.form-input-error]="form.get('lugar')?.invalid && form.get('lugar')?.touched" />
         <span *ngIf="obtenerErrorCampo('lugar')" class="form-error">{{ obtenerErrorCampo('lugar') }}</span>
       </div>
+
       <div class="form-group full-width">
         <label for="tema" class="form-label">Tema de la sesión *</label>
-        <textarea id="tema" class="form-textarea" formControlName="tema" placeholder="Describe brevemente el tema a tratar en esta sesión…" rows="3" [class.form-input-error]="form.get('tema')?.invalid && form.get('tema')?.touched"></textarea>
-        <div class="form-hint"><span>{{ form.get('tema')?.value?.length || 0 }} caracteres</span></div>
+        <input id="tema" type="text" class="form-input" formControlName="tema" placeholder="Escriba el tema a impartir..." [class.form-input-error]="form.get('tema')?.invalid && form.get('tema')?.touched" />
         <span *ngIf="obtenerErrorCampo('tema')" class="form-error">{{ obtenerErrorCampo('tema') }}</span>
       </div>
     </form>

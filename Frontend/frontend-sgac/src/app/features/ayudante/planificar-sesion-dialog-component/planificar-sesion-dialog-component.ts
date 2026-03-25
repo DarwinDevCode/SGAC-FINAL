@@ -24,10 +24,14 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
 
   form!: FormGroup;
   enviando = signal(false);
+  cargandoDatos = signal(false);
   errorMsg = signal<string | null>(null);
 
-  ngOnInit(): void { this.inicializarFormulario(); }
+  ngOnInit(): void {
+    this.inicializarFormulario();
+  }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
 
   inicializarFormulario(): void {
     this.form = this.fb.group({
@@ -35,7 +39,7 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
       horaInicio: ['', [Validators.required]],
       horaFin: ['', [Validators.required]],
       lugar: ['', [Validators.required]],
-      tema: ['', [Validators.required, Validators.minLength(5)]],
+      tema: ['', [Validators.required, Validators.minLength(3)]],
     }, { validators: this.validarHorarios });
   }
 
@@ -55,7 +59,14 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
     this.enviando.set(true);
 
     const v = this.form.value;
-    const request: PlanificarSesionRequestDTO = { fecha: v.fecha, horaInicio: v.horaInicio, horaFin: v.horaFin, lugar: v.lugar, tema: v.tema };
+
+    const request: PlanificarSesionRequestDTO = { 
+      fecha: v.fecha, 
+      horaInicio: v.horaInicio, 
+      horaFin: v.horaFin, 
+      lugar: v.lugar, 
+      tema: v.tema 
+    };
 
     this.ayudantiaService.planificarSesion(request)
       .pipe(takeUntil(this.destroy$), finalize(() => this.enviando.set(false)))
