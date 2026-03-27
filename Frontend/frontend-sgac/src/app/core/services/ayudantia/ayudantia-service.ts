@@ -27,7 +27,7 @@ export class AyudantiaService {
   private readonly URL_SESIONES = `${environment.apiUrl}/ayudantias/sesiones`;
   private readonly URL_CIERRE = `${environment.apiUrl}/ayudantias/sesiones/cierre`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   gestionarParticipante(request: ParticipanteRequestDTO): Observable<RespuestaOperacion<ParticipanteIdResponseDTO>> {
     return this.http.post<RespuestaOperacion<ParticipanteIdResponseDTO>>(

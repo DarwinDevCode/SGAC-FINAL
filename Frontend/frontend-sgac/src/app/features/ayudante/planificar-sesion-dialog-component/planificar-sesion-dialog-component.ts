@@ -8,6 +8,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 import { AyudantiaService } from '../../../core/services/ayudantia/ayudantia-service';
 import { PlanificarSesionRequestDTO } from '../../../core/models/ayudantia/asistencia';
+import { TemasExternosService } from '../../../core/services/temas-externos.service';
+import { MateriaDTO, TemaDTO } from '../../../core/models/temas/temas';
 
 @Component({
   selector: 'app-planificar-sesion-dialog',
@@ -19,6 +21,7 @@ import { PlanificarSesionRequestDTO } from '../../../core/models/ayudantia/asist
 export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private ayudantiaService = inject(AyudantiaService);
+  private temasService = inject(TemasExternosService);
   private dialogRef = inject(MatDialogRef<PlanificarSesionDialogComponent>);
   private destroy$ = new Subject<void>();
 
@@ -27,10 +30,40 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
   cargandoDatos = signal(false);
   errorMsg = signal<string | null>(null);
 
+  materias = signal<MateriaDTO[]>([]);
+  temas = signal<TemaDTO[]>([]);
+  cargandoMaterias = signal(false);
+  cargandoTemas = signal(false);
+
   ngOnInit(): void {
     this.inicializarFormulario();
+    this.cargarMaterias();
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
+  cargarMaterias(): void {
+    this.cargandoMaterias.set(true);
+    this.temasService.getMaterias()
+      .pipe(takeUntil(this.destroy$), finalize(() => this.cargandoMaterias.set(false)))
+      .subscribe({
+        next: (res) => this.materias.set(res),
+        error: () => this.errorMsg.set('Error al cargar materias.')
+      });
+  }
+
+  onMateriaChange(idMateria: string): void {
+    this.temas.set([]);
+    this.form.get('idTema')?.setValue('');
+    if (!idMateria) return;
+
+    this.cargandoTemas.set(true);
+    this.temasService.getTemasPorMateria(+idMateria)
+      .pipe(takeUntil(this.destroy$), finalize(() => this.cargandoTemas.set(false)))
+      .subscribe({
+        next: (res) => this.temas.set(res),
+        error: () => this.errorMsg.set('Error al cargar temas.')
+      });
+  }
 
 
   inicializarFormulario(): void {
@@ -39,7 +72,8 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
       horaInicio: ['', [Validators.required]],
       horaFin: ['', [Validators.required]],
       lugar: ['', [Validators.required]],
-      tema: ['', [Validators.required, Validators.minLength(3)]],
+      idMateria: ['', [Validators.required]],
+      idTema: ['', [Validators.required]]
     }, { validators: this.validarHorarios });
   }
 
@@ -59,13 +93,14 @@ export class PlanificarSesionDialogComponent implements OnInit, OnDestroy {
     this.enviando.set(true);
 
     const v = this.form.value;
+    const temaSeleccionado = this.temas().find(t => t.idTema === +v.idTema)?.nombreTema || '';
 
-    const request: PlanificarSesionRequestDTO = { 
-      fecha: v.fecha, 
-      horaInicio: v.horaInicio, 
-      horaFin: v.horaFin, 
-      lugar: v.lugar, 
-      tema: v.tema 
+    const request: PlanificarSesionRequestDTO = {
+      fecha: v.fecha,
+      horaInicio: v.horaInicio,
+      horaFin: v.horaFin,
+      lugar: v.lugar,
+      tema: temaSeleccionado
     };
 
     this.ayudantiaService.planificarSesion(request)

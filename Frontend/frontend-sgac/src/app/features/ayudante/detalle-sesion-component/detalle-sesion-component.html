@@ -74,11 +74,11 @@
           <div class="controles-asistencia" style="display: flex; gap: 1rem; margin-bottom: 1rem;" *ngIf="puedeEditar()">
             <button class="btn btn-ghost" (click)="marcarTodos(true)" [disabled]="asistenciaEnvio()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
               <lucide-icon name="check-square" size="14"></lucide-icon>
-              <span>Todos Presentes</span>
+              <span>seleccionar todos</span>
             </button>
             <button class="btn btn-ghost" (click)="marcarTodos(false)" [disabled]="asistenciaEnvio()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
               <lucide-icon name="square" size="14"></lucide-icon>
-              <span>Todos Ausentes</span>
+              <span>seleccionar ninguno</span>
             </button>
           </div>
 

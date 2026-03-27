@@ -39,9 +39,22 @@
       </div>
 
       <div class="form-group full-width">
-        <label for="tema" class="form-label">Tema de la sesión *</label>
-        <input id="tema" type="text" class="form-input" formControlName="tema" placeholder="Escriba el tema a impartir..." [class.form-input-error]="form.get('tema')?.invalid && form.get('tema')?.touched" />
-        <span *ngIf="obtenerErrorCampo('tema')" class="form-error">{{ obtenerErrorCampo('tema') }}</span>
+        <label for="idMateria" class="form-label">Materia *</label>
+        <select id="idMateria" class="form-input" formControlName="idMateria" (change)="onMateriaChange(form.get('idMateria')?.value)" [class.form-input-error]="form.get('idMateria')?.invalid && form.get('idMateria')?.touched">
+          <option value="">Seleccione una materia</option>
+          <option *ngFor="let m of materias()" [value]="m.idMateria">{{ m.nombreMateria }}</option>
+        </select>
+        <div *ngIf="cargandoMaterias()" class="form-hint">Cargando materias...</div>
+        <span *ngIf="obtenerErrorCampo('idMateria')" class="form-error">{{ obtenerErrorCampo('idMateria') }}</span>
+      </div>
+
+      <div class="form-group full-width">
+        <label for="idTema" class="form-label">Tema de la sesión *</label>
+        <select id="idTema" class="form-input" formControlName="idTema" [class.form-input-error]="form.get('idTema')?.invalid && form.get('idTema')?.touched" [disabled]="!form.get('idMateria')?.value || cargandoTemas()">
+          <option value="">{{ cargandoTemas() ? 'Cargando temas...' : 'Seleccione un tema' }}</option>
+          <option *ngFor="let t of temas()" [value]="t.idTema">{{ t.nombreTema }}</option>
+        </select>
+        <span *ngIf="obtenerErrorCampo('idTema')" class="form-error">{{ obtenerErrorCampo('idTema') }}</span>
       </div>
     </form>
     <div *ngIf="errorMsg()" class="dialog-error"><lucide-icon name="alert-circle" size="16"></lucide-icon><span>{{ errorMsg() }}</span></div>
