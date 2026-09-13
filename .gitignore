@@ -1,0 +1,13 @@
+# Entorno
+.env
+application-local.properties
+
+# Backups
+/backups/
+
+# IDE
+.idea/
+*.iml
+
+# Dependencias raiz huerfanas
+/package-lock.json
