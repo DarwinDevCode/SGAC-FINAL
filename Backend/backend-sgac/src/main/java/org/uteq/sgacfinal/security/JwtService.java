@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -29,11 +30,24 @@ public class JwtService {
     private static final String TYPE_PRE_AUTH = "PRE_AUTH";
     private static final String TYPE_FINAL    = "FINAL";
 
-    private static final long PRE_AUTH_EXPIRY_MS = 1000L * 60 * 5;
-    private static final long FINAL_EXPIRY_MS    = 1000L * 60 * 60 * 10;
-
-    @Value("${jwt.secret:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}")
+    @Value("${jwt.secret}")
     private String secretKey;
+
+    @Value("${jwt.pre-auth-expiration:300000}")
+    private long preAuthExpiryMs;
+
+    @Value("${jwt.expiration:36000000}")
+    private long finalExpiryMs;
+
+    @PostConstruct
+    public void init() {
+        if (secretKey == null || secretKey.trim().isEmpty()) {
+            throw new IllegalStateException("El secreto JWT (jwt.secret) no puede ser nulo o vacio");
+        }
+        if (secretKey.length() < 32) {
+            throw new IllegalStateException("El secreto JWT (jwt.secret) debe tener al menos 32 bytes de longitud por seguridad");
+        }
+    }
 
     public String generatePreAuthToken(String username, Integer idUsuario,
                                        String nombres, String apellidos,
@@ -46,7 +60,7 @@ public class JwtService {
         claims.put(CLAIM_CORREO,     correo);
         claims.put(CLAIM_ID_USUARIO, idUsuario);
 
-        return buildToken(claims, username, PRE_AUTH_EXPIRY_MS);
+        return buildToken(claims, username, preAuthExpiryMs);
     }
 
     public String generateToken(String username, String rolActual, Integer idUsuario) {
@@ -54,7 +68,7 @@ public class JwtService {
         claims.put(CLAIM_ROL,  rolActual);
         claims.put(CLAIM_TYPE, TYPE_FINAL);
         claims.put(CLAIM_ID_USUARIO, idUsuario);
-        return buildToken(claims, username, FINAL_EXPIRY_MS);
+        return buildToken(claims, username, finalExpiryMs);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -65,8 +79,8 @@ public class JwtService {
     public boolean isPreAuthTokenValid(String token) {
         try {
             Claims claims = extractAllClaims(token);
-            // Si llegamos aquí la firma es correcta y el token no expiró
-            // (extractAllClaims lanza ExpiredJwtException si está expirado)
+            // Si llegamos aqui la firma es correcta y el token no expiro
+            // (extractAllClaims lanza ExpiredJwtException si esta expirado)
             return TYPE_PRE_AUTH.equals(claims.get(CLAIM_TYPE, String.class));
         } catch (Exception e) {
             return false;
@@ -128,3 +142,4 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }
+

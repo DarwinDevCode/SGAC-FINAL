@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.service.impl;
+﻿package org.uteq.sgacfinal.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ import org.uteq.sgacfinal.repository.DocenteRepository;
 import org.uteq.sgacfinal.repository.IAsignaturaRepository;
 import org.uteq.sgacfinal.repository.IConvocatoriaRepository;
 import org.uteq.sgacfinal.repository.IPeriodoAcademicoRepository;
+import org.uteq.sgacfinal.repository.estudiante.IGestionConvocatoria;
 import org.uteq.sgacfinal.service.IConvocatoriaService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -92,6 +93,13 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
 
     @Override
     @Transactional
+        @Override
+    @Transactional(readOnly = true)
+    public List<org.uteq.sgacfinal.dto.response.estudiante.ConvocatoriaEstudianteDTO> listarConvocatoriasEstudiante(Integer idUsuario) {
+        return gestionConvocatoria.listarConvocatoriasEstudiante(idUsuario);
+    }
+
+    @Override
     public void delete(Integer id) {
         if (!convocatoriaRepo.existsById(id)) {
             throw new EntityNotFoundException("Convocatoria no encontrada");
@@ -338,3 +346,4 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
 //        return mapearADTO(guardada);
 //    }
 }
+

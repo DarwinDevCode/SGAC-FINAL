@@ -5,11 +5,12 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth-service';
 import { filter } from 'rxjs/operators';
+import { IaChatComponent } from '../../features/General/ia-chat/ia-chat.component';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, SidebarComponent, HeaderComponent, RouterOutlet],
+  imports: [CommonModule, SidebarComponent, HeaderComponent, RouterOutlet, IaChatComponent],
   templateUrl: './main-layout.html'
 })
 export class MainLayoutComponent implements OnInit {

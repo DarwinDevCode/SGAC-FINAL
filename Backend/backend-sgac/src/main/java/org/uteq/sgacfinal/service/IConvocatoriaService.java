@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.service;
+﻿package org.uteq.sgacfinal.service;
 
 import org.uteq.sgacfinal.dto.request.ConvocatoriaRequestDTO;
 import org.uteq.sgacfinal.dto.request.configuracion.ConvocatoriaActualizarRequestDTO;
@@ -15,6 +15,7 @@ public interface IConvocatoriaService {
     ConvocatoriaResponseDTO update(ConvocatoriaRequestDTO dto);
     List<ConvocatoriaResponseDTO> findAll();
     ConvocatoriaResponseDTO findById(Integer id);
+    List<org.uteq.sgacfinal.dto.response.estudiante.ConvocatoriaEstudianteDTO> listarConvocatoriasEstudiante(Integer idUsuario);
     void delete(Integer id);
 
     VerificarFaseResponseDTO verificarFase();

@@ -1,7 +1,8 @@
-package org.uteq.sgacfinal.controller;
+﻿package org.uteq.sgacfinal.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.request.LogAuditoriaRequestDTO;
 import org.uteq.sgacfinal.dto.request.PostulacionRequestDTO;
@@ -29,12 +30,14 @@ public class PostulacionController {
     private final ILogAuditoriaService logAuditoriaService;
     private final IPostulacionTypeService postulacionTypeService;
 
+    @PreAuthorize("hasRole('DOCENTE')")
     @GetMapping("/tribunal/{idUsuario}")
     public ResponseEntity<RespuestaOperacionDTO<TribunalEvaluacionResponseDTO>> obtenerTribunalEvaluacion(
             @PathVariable Integer idUsuario) {
         return ResponseEntity.ok(postulacionTypeService.obtenerTribunalEvaluacion(idUsuario));
     }
 
+    @PreAuthorize("hasRole('ESTUDIANTE')")
     @PostMapping(value = "/registrar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> registrar(
             @RequestPart("datos") String datosJson,
@@ -54,11 +57,13 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ESTUDIANTE', 'COORDINADOR', 'ADMINISTRADOR', 'DECANO')")
     @GetMapping("/listar-activos")
     public ResponseEntity<List<TipoRequisitoPostulacionResponseDTO>> listar() {
         return ResponseEntity.ok(requisitoService.listarRequisitosActivos());
     }
 
+    @PreAuthorize("hasRole('COORDINADOR')")
     @PutMapping("/cambiar-estado/{id}")
     public ResponseEntity<?> cambiarEstado(@PathVariable Integer id,
                                            @RequestParam String estado,
@@ -86,6 +91,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasRole('ESTUDIANTE')")
     @GetMapping("/mis-postulaciones/{idEstudiante}")
     public ResponseEntity<?> listarPorEstudiante(@PathVariable Integer idEstudiante) {
         try {
@@ -95,6 +101,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'COORDINADOR', 'DECANO')")
     @GetMapping("/convocatoria/{idConvocatoria}")
     public ResponseEntity<?> listarPorConvocatoria(@PathVariable Integer idConvocatoria) {
         try {
@@ -104,6 +111,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'COORDINADOR', 'DECANO')")
     @GetMapping("/carrera/{idCarrera}")
     public ResponseEntity<?> listarPorCarrera(@PathVariable Integer idCarrera) {
         try {
@@ -113,6 +121,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasRole('COORDINADOR')")
     @GetMapping("/pendientes/carrera/{idCarrera}")
     public ResponseEntity<?> listarPendientesPorCarrera(@PathVariable Integer idCarrera) {
         try {
@@ -122,6 +131,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasRole('COORDINADOR')")
     @GetMapping("/en-evaluacion/carrera/{idCarrera}")
     public ResponseEntity<?> listarEnEvaluacionPorCarrera(@PathVariable Integer idCarrera) {
         try {
@@ -131,6 +141,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasRole('ESTUDIANTE')")
     @GetMapping("/existe")
     public ResponseEntity<?> existe(
             @RequestParam Integer idEstudiante,
@@ -144,6 +155,7 @@ public class PostulacionController {
         }
     }
 
+    @PreAuthorize("hasRole('ESTUDIANTE')")
     @GetMapping("/mi-postulacion/{idUsuario}")
     public ResponseEntity<?> obtenerMiPostulacion(@PathVariable Integer idUsuario) {
         try {

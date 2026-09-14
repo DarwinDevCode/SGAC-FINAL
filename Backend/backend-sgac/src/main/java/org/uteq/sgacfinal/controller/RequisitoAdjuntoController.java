@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.controller;
+﻿package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.entity.RequisitoAdjunto;
 import org.uteq.sgacfinal.entity.TipoEstadoRequisito;
-import org.uteq.sgacfinal.repository.RequisitoAdjuntoRepository;
 import org.uteq.sgacfinal.service.IRequisitoAdjuntoService;
 
 import java.util.List;
@@ -21,8 +20,7 @@ import java.util.List;
 public class RequisitoAdjuntoController {
 
     private final IRequisitoAdjuntoService requisitoService;
-    private final RequisitoAdjuntoRepository requisitoRepository;
-
+    
     /**
      * Lista los requisitos (sin el archivo binario) de una postulación.
      * El coordinador usa esto para ver qué documentos subió el estudiante.
@@ -133,3 +131,4 @@ public class RequisitoAdjuntoController {
         }
     }
 }
+

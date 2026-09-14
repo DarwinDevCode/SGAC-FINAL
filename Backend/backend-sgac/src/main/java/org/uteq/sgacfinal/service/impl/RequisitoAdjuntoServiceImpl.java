@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.service.impl;
+﻿package org.uteq.sgacfinal.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +26,27 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional
 public class RequisitoAdjuntoServiceImpl implements IRequisitoAdjuntoService {
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public org.uteq.sgacfinal.entity.RequisitoAdjunto descargarArchivo(Integer idRequisito) {
+        return requisitoRepository.findById(idRequisito)
+                .orElseThrow(() -> new RuntimeException("Requisito no encontrado"));
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public void observarDocumento(Integer id, Integer idTipoEstadoRequisito, String observacion) {
+        org.uteq.sgacfinal.entity.RequisitoAdjunto requisito = requisitoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Requisito no encontrado"));
+                
+        org.uteq.sgacfinal.entity.TipoEstadoRequisito estado = new org.uteq.sgacfinal.entity.TipoEstadoRequisito();
+        estado.setIdTipoEstadoRequisito(idTipoEstadoRequisito);
+        
+        requisito.setTipoEstadoRequisito(estado);
+        requisito.setObservacion(observacion);
+        
+        requisitoRepository.save(requisito);
+    }
 
     private final RequisitoAdjuntoRepository requisitoRepository;
     private final ObjectMapper objectMapper;
@@ -240,3 +261,4 @@ public class RequisitoAdjuntoServiceImpl implements IRequisitoAdjuntoService {
         }
     }
 }
+

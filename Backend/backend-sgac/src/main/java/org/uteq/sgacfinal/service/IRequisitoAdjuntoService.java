@@ -1,4 +1,4 @@
-package org.uteq.sgacfinal.service;
+﻿package org.uteq.sgacfinal.service;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.request.RequisitoAdjuntoRequestDTO;
@@ -8,6 +8,8 @@ import org.uteq.sgacfinal.dto.response.SubsanacionDocumentoResponseDTO;
 import java.util.List;
 
 public interface IRequisitoAdjuntoService {
+    org.uteq.sgacfinal.entity.RequisitoAdjunto descargarArchivo(Integer idRequisito);
+    void observarDocumento(Integer id, Integer idTipoEstadoRequisito, String observacion);
 
     RequisitoAdjuntoResponseDTO crear(RequisitoAdjuntoRequestDTO request);
 
