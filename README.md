@@ -490,3 +490,14 @@ Firma digital	Mecanismo de autenticación electrónica con validez legal, emitid
 
 Documento de análisis y contexto — SGAC v1.0
 Basado en: Análisis, Estructuración y Modelado de Requerimientos del Sistema de Ayudantías de Cátedra de la UTEQ
+
+## 🐳 Restauración de la Base de Datos con Docker
+
+Para levantar la base de datos localmente usando el esquema oficial (V1 + Migraciones posteriores):
+
+1. **Inicia el contenedor de PostgreSQL:**
+   `ash
+   docker-compose up -d
+   `
+2. **Ejecuta la aplicación Spring Boot.**
+   Al iniciar, Flyway tomará automáticamente el archivo V1__esquema_inicial.sql y las demás migraciones para construir la estructura completa de la base de datos (con todos sus esquemas, funciones y triggers).

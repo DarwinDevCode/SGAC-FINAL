@@ -1,0 +1,17 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: sgac_postgres
+    environment:
+      POSTGRES_USER: administrador_consultas
+      POSTGRES_PASSWORD: admin_password_seguro
+      POSTGRES_DB: SGAC-FINAL
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
