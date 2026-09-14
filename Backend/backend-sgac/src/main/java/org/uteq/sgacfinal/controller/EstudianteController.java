@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.EstudianteRequestDTO;
 import org.uteq.sgacfinal.dto.response.EstudianteResponseDTO;
@@ -32,11 +33,13 @@ public class EstudianteController {
         return ResponseEntity.ok(estudianteService.buscarPorUsuario(idUsuario));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<EstudianteResponseDTO> create(@Valid @RequestBody EstudianteRequestDTO request) {
         return new ResponseEntity<>(estudianteService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<EstudianteResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody EstudianteRequestDTO request) {
         return ResponseEntity.ok(estudianteService.actualizar(id, request));

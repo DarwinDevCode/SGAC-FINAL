@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.DecanoRequestDTO;
 import org.uteq.sgacfinal.dto.response.DecanoResponseDTO;
@@ -53,16 +54,19 @@ public class DecanoController {
     }
 
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<DecanoResponseDTO> create(@Valid @RequestBody DecanoRequestDTO request) {
         return new ResponseEntity<>(decanoService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<DecanoResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody DecanoRequestDTO request) {
         return ResponseEntity.ok(decanoService.actualizar(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         decanoService.desactivar(id);

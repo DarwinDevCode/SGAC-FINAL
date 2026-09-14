@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;
 import org.uteq.sgacfinal.service.IUsuariosService;
@@ -12,6 +13,7 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class UsuarioController {
 
     private final IUsuariosService usuarioService;

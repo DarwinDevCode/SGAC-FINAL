@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.dto.response;
+package org.uteq.sgacfinal.dto.response;
 
 import lombok.Builder;
 import lombok.Data;

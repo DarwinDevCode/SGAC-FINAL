@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.service;
+package org.uteq.sgacfinal.service;
 
 public interface IFirmaElectronicaService {
     String generarHashDocumento(byte[] contenidoPdf);

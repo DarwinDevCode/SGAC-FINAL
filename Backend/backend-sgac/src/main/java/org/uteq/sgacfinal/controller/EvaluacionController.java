@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.EvaluacionMeritosRequestDTO;
 import org.uteq.sgacfinal.dto.request.EvaluacionOposicionRequestDTO;
@@ -24,6 +25,7 @@ public class EvaluacionController {
     private final IEvaluacionOposicionService evaluacionOposicionService;
     private final JdbcTemplate jdbcTemplate;
 
+    @PreAuthorize("hasAuthority('COORDINADOR')")
     @PostMapping("/meritos")
     public ResponseEntity<?> registrarMeritos(@RequestBody EvaluacionMeritosRequestDTO request) {
         try {
@@ -33,6 +35,7 @@ public class EvaluacionController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'COMISION_SELECCION')")
     @PostMapping("/oposicion")
     public ResponseEntity<?> registrarOposicion(@RequestBody EvaluacionOposicionRequestDTO request) {
         try {
@@ -42,6 +45,7 @@ public class EvaluacionController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'ESTUDIANTE')")
     @GetMapping("/meritos/postulacion/{idPostulacion}")
     public ResponseEntity<?> obtenerMeritosPorPostulacion(@PathVariable Integer idPostulacion) {
         try {
@@ -51,6 +55,10 @@ public class EvaluacionController {
         }
     }
 
+    // Nota: SecurityConfig ya restringe /api/evaluaciones/oposicion/postulacion/** a
+    // ESTUDIANTE a nivel de URL (filtro corre antes que @PreAuthorize); se deja igual aqui
+    // para que ambas capas digan lo mismo.
+    @PreAuthorize("hasAuthority('ESTUDIANTE')")
     @GetMapping("/oposicion/postulacion/{idPostulacion}")
     public ResponseEntity<?> obtenerOposicionPorPostulacion(@PathVariable Integer idPostulacion) {
         try {
@@ -64,6 +72,7 @@ public class EvaluacionController {
      * P13 (Ítem 15): Ranking completo de una convocatoria.
      * GET /api/evaluaciones/ranking/convocatoria/{idConvocatoria}
      */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO')")
     @GetMapping("/ranking/convocatoria/{idConvocatoria}")
     public ResponseEntity<?> rankingPorConvocatoria(@PathVariable Integer idConvocatoria) {
         try {
@@ -93,6 +102,7 @@ public class EvaluacionController {
      * P13 (Ítem 15): Resultado final para una postulación.
      * GET /api/evaluaciones/resultado-final/{idPostulacion}
      */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'ESTUDIANTE')")
     @GetMapping("/resultado-final/{idPostulacion}")
     public ResponseEntity<?> resultadoFinal(@PathVariable Integer idPostulacion) {
         try {

@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.dto.request;
+package org.uteq.sgacfinal.dto.request;
 
 import lombok.Data;
 

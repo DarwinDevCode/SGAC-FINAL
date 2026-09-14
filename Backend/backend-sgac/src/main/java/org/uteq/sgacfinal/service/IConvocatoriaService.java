@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.service;
+package org.uteq.sgacfinal.service;
 
 import org.uteq.sgacfinal.dto.request.ConvocatoriaRequestDTO;
 import org.uteq.sgacfinal.dto.request.configuracion.ConvocatoriaActualizarRequestDTO;

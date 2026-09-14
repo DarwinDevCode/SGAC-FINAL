@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.response.AyudanteCatedraResponseDTO;
 import org.uteq.sgacfinal.service.IAyudanteCatedraService;
@@ -17,6 +18,7 @@ public class AyudanteCatedraController {
 
     private final IAyudanteCatedraService ayudanteService;
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'DOCENTE')")
     @GetMapping("/listar")
     public ResponseEntity<List<AyudanteCatedraResponseDTO>> listarTodos() {
         try {

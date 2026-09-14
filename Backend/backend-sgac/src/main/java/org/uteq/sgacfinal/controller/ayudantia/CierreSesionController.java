@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller.ayudantia;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.request.ayudantia.FinalizarSesionRequestDTO;
@@ -16,6 +17,7 @@ import org.uteq.sgacfinal.service.ayudantia.CierreSesionService;
 @RestController
 @RequestMapping("/api/ayudantias/sesiones/cierre")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
 public class CierreSesionController {
 
     private final CierreSesionService cierreService;

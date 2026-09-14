@@ -5,10 +5,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -124,6 +128,46 @@ public class GlobalExceptionHandler {
                 "error",     "Datos inválidos",
                 "message",   errores
         ));
+    }
+
+    // Antes caia al handler generico y devolvia 500 "Internal Server Error"
+    // para denegaciones de @PreAuthorize; el frontend no puede distinguir
+    // eso de un bug real. Ahora se mapea al 403 que le corresponde.
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Acceso denegado", "No tiene permisos para realizar esta acción.");
+    }
+
+    // AccesoDenegadoException es la excepcion propia del proyecto (usada en
+    // AuthServiceImpl, SesionServiceImpl, RankingController, etc. para casos
+    // de "no es el dueno de este recurso"); no es subclase de la de Spring
+    // Security, asi que sin este handler tambien caia al generico como 500.
+    @ExceptionHandler(AccesoDenegadoException.class)
+    public ResponseEntity<Map<String, Object>> handleAccesoDenegado(AccesoDenegadoException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Acceso denegado", ex.getMessage());
+    }
+
+    // Login con usuario/contrasena invalidos devolvia 500 (RuntimeException
+    // generica en AuthServiceImpl.loginUsuario). Un intento fallido de login
+    // no es un error del servidor.
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "No autorizado", ex.getMessage());
+    }
+
+    // Rutas inexistentes tambien caian al handler generico como 500 y se
+    // logueaban como "Excepcion no controlada", ensuciando los logs con
+    // errores que en realidad son 404s normales.
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(NoResourceFoundException ex) {
+        return buildResponse(HttpStatus.NOT_FOUND, "Not Found", "El recurso solicitado no existe.");
+    }
+
+    // Body ausente o JSON mal formado (@RequestBody) tambien caia al handler
+    // generico como 500; es un error del cliente, no del servidor.
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleNotReadable(HttpMessageNotReadableException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Datos inválidos", "El cuerpo de la petición falta o no es JSON válido.");
     }
 
     @ExceptionHandler(Exception.class)

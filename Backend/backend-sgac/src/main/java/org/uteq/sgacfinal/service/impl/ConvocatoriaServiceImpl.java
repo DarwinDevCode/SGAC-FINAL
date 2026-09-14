@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.service.impl;
+package org.uteq.sgacfinal.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +44,7 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     private final DocenteRepository docenteRepo;
     private final ObjectMapper mapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final IGestionConvocatoria gestionConvocatoria;
 
     @Override
     @Transactional
@@ -92,8 +93,6 @@ public class ConvocatoriaServiceImpl implements IConvocatoriaService {
     }
 
     @Override
-    @Transactional
-        @Override
     @Transactional(readOnly = true)
     public List<org.uteq.sgacfinal.dto.response.estudiante.ConvocatoriaEstudianteDTO> listarConvocatoriasEstudiante(Integer idUsuario) {
         return gestionConvocatoria.listarConvocatoriasEstudiante(idUsuario);

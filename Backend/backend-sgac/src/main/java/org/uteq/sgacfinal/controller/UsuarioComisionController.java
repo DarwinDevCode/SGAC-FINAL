@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.UsuarioComisionRequestDTO;
 import org.uteq.sgacfinal.dto.response.UsuarioComisionResponseDTO;
@@ -19,6 +20,7 @@ public class UsuarioComisionController {
     private final IUsuarioComisionService usuarioComisionService;
 
     /** POST /api/comisiones/integrantes — asignar un integrante a la comisión */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<?> asignar(@RequestBody UsuarioComisionRequestDTO request) {
         try {
@@ -31,6 +33,7 @@ public class UsuarioComisionController {
     }
 
     /** GET /api/comisiones/integrantes/comision/{id} — listar integrantes de una comisión */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'COMISION_SELECCION')")
     @GetMapping("/comision/{id}")
     public ResponseEntity<?> listar(@PathVariable Integer id) {
         try {
@@ -43,6 +46,7 @@ public class UsuarioComisionController {
     }
 
     /** DELETE /api/comisiones/integrantes/{id} — remover integrante */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> remover(@PathVariable Integer id) {
         try {

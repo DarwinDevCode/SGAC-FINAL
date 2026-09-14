@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller.ayudantia;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.ayudantia.PlanificarSesionRequestDTO;
 import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
@@ -14,6 +15,7 @@ import org.uteq.sgacfinal.service.ayudantia.AsistenciaSesionService;
 @RestController
 @RequestMapping("/api/ayudantias/sesiones")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('AYUDANTE_CATEDRA')")
 public class AsistenciaSesionController {
 
     private final AsistenciaSesionService asistenciaService;

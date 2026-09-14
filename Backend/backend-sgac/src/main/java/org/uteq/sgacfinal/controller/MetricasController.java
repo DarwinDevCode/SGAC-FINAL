@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.service.impl.NotificacionMasivaService;
 
@@ -21,6 +22,7 @@ public class MetricasController {
 
 
     /** GET /api/metricas/coordinador?idCarrera=X */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO')")
     @GetMapping("/coordinador")
     public ResponseEntity<?> metricasCoordinador(@RequestParam Integer idCarrera) {
         try {
@@ -32,6 +34,7 @@ public class MetricasController {
     }
 
     /** GET /api/metricas/postulante?idUsuario=X */
+    @PreAuthorize("hasAuthority('ESTUDIANTE')")
     @GetMapping("/postulante")
     public ResponseEntity<?> metricasPostulante(@RequestParam Integer idUsuario) {
         try {
@@ -49,6 +52,7 @@ public class MetricasController {
      * Body: { "mensaje": "...", "tipo": "CONVOCATORIA", "tipoNotificacion": "MASIVA_ROL",
      *         "idRol": 2, "idConvocatoria": null }
      */
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR')")
     @PostMapping("/notificaciones/masiva")
     public ResponseEntity<?> enviarMasiva(@RequestBody Map<String, Object> body) {
         try {

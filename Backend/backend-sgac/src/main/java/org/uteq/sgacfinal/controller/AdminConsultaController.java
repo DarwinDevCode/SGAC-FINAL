@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.service.IAdminConsultaService;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 @RequestMapping("/api/admin/consulta")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class AdminConsultaController {
 
     private final IAdminConsultaService adminConsultaService;

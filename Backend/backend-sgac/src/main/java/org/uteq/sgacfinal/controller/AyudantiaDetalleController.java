@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.response.AyudantiaDetalleResponseDTO;
 import org.uteq.sgacfinal.dto.response.RegistroActividadDetalleDTO;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api/ayudantia-detalle")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@PreAuthorize("hasAnyAuthority('DOCENTE', 'COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'AYUDANTE_CATEDRA')")
 public class AyudantiaDetalleController {
 
     private final IAyudantiaService ayudantiaDetalleService;

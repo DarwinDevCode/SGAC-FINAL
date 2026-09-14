@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.AsignarComisionRequestDTO;
 import org.uteq.sgacfinal.dto.request.EvaluacionOposicionRequestDTO;
@@ -12,6 +13,7 @@ import org.uteq.sgacfinal.service.IEvaluacionOposicionService;
 @RequestMapping("/api/evaluaciones")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
+@PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
 public class EvaluacionOposicionController {
 
     private final IEvaluacionOposicionService evaluacionService;

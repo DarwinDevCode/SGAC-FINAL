@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.NotificationRequest;
 import org.uteq.sgacfinal.dto.response.NotificacionResponseDTO;
@@ -37,9 +38,9 @@ public class NotificacionController {
     }
 
     /**
-     * Endpoint auxiliar (para pruebas) para enviar una notificación a un usuario destino.
-     * Puedes restringirlo por rol si lo vas a usar en producción.
+     * Envía una notificación puntual a un usuario destino.
      */
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR')")
     @PostMapping("/enviar/{idUsuario}")
     public ResponseEntity<NotificacionResponseDTO> enviar(@PathVariable Integer idUsuario,
                                                           @Valid @RequestBody NotificationRequest request) {

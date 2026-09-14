@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.*;
 import org.uteq.sgacfinal.dto.response.PrivilegioFuncionResponseDTO;
@@ -23,6 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/catalogos-maestros")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class CatalogoMaestroController {
 
     private final ITipoSancionCatalogoService tipoSancionService;

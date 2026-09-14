@@ -1,14 +1,14 @@
-﻿package org.uteq.sgacfinal.controller;
+package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.entity.RequisitoAdjunto;
-import org.uteq.sgacfinal.entity.TipoEstadoRequisito;
 import org.uteq.sgacfinal.service.IRequisitoAdjuntoService;
 
 import java.util.List;
@@ -25,6 +25,7 @@ public class RequisitoAdjuntoController {
      * Lista los requisitos (sin el archivo binario) de una postulación.
      * El coordinador usa esto para ver qué documentos subió el estudiante.
      */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO')")
     @GetMapping("/postulacion/{idPostulacion}")
     public ResponseEntity<?> listarPorPostulacion(@PathVariable Integer idPostulacion) {
         try {
@@ -39,10 +40,10 @@ public class RequisitoAdjuntoController {
      * Descarga el archivo de un requisito adjunto específico.
      * El coordinador puede hacer clic para ver/descargar el documento.
      */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'ESTUDIANTE')")
     @GetMapping("/descargar/{idRequisito}")
     public ResponseEntity<?> descargar(@PathVariable Integer idRequisito) {
-        RequisitoAdjunto requisito = requisitoRepository.findById(idRequisito)
-                .orElseThrow(() -> new RuntimeException("Requisito no encontrado"));
+        RequisitoAdjunto requisito = requisitoService.descargarArchivo(idRequisito);
 
         if (requisito.getArchivo() == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Archivo no encontrado.");
@@ -69,6 +70,7 @@ public class RequisitoAdjuntoController {
      * Ítem 8: El postulante reemplaza un documento observado.
      * PUT /api/requisitos-adjuntos/reemplazar/{idAdjunto}
      */
+    @PreAuthorize("hasAuthority('ESTUDIANTE')")
     @PutMapping("/reemplazar/{idAdjunto}")
     public ResponseEntity<?> reemplazar(@PathVariable Integer idAdjunto,
                                          @RequestParam("archivo") MultipartFile archivo) {
@@ -84,23 +86,15 @@ public class RequisitoAdjuntoController {
      * Observar un documento (Cambia estado parcial y agrega observación)
      * PUT /api/requisitos-adjuntos/{id}
      */
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<?> observarDocumento(
             @PathVariable Integer id,
             @RequestParam Integer idTipoEstadoRequisito,
             @RequestParam String observacion) {
-        
-        RequisitoAdjunto requisito = requisitoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Requisito no encontrado"));
-                
-        TipoEstadoRequisito estado = new TipoEstadoRequisito();
-        estado.setIdTipoEstadoRequisito(idTipoEstadoRequisito);
-        
-        requisito.setTipoEstadoRequisito(estado);
-        requisito.setObservacion(observacion);
-        
-        requisitoRepository.save(requisito);
-        
+
+        requisitoService.observarDocumento(id, idTipoEstadoRequisito, observacion);
+
         // Return JSON explicitly as the frontend expects { "nombreEstado": "..." }
         return ResponseEntity.ok("{\"nombreEstado\": \"OBSERVADO\", \"message\": \"Observación guardada.\"}");
     }
@@ -118,6 +112,7 @@ public class RequisitoAdjuntoController {
      * 2. Cambia estado a CORREGIDO
      * 3. Notifica automáticamente al coordinador
      */
+    @PreAuthorize("hasAuthority('ESTUDIANTE')")
     @PutMapping("/subsanar/{idUsuario}/{idAdjunto}")
     public ResponseEntity<?> subsanarDocumento(
             @PathVariable Integer idUsuario,

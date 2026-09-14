@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.AsignaturaRequestDTO;
 import org.uteq.sgacfinal.dto.response.AsignaturaResponseDTO;
@@ -34,16 +35,19 @@ public class AsignaturaController {
         return ResponseEntity.ok(asignaturaService.buscarPorId(id));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<AsignaturaResponseDTO> create(@Valid @RequestBody AsignaturaRequestDTO request) {
         return new ResponseEntity<>(asignaturaService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<AsignaturaResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody AsignaturaRequestDTO request) {
         return ResponseEntity.ok(asignaturaService.actualizar(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         asignaturaService.desactivar(id);

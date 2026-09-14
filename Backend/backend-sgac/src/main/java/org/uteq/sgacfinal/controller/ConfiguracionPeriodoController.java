@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.configuracion.AjusteCronogramaRequestDTO;
 import org.uteq.sgacfinal.dto.request.configuracion.PeriodoAcademicoRequestDTO;
@@ -17,6 +18,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/configuracion")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class ConfiguracionPeriodoController {
 
     private final IPeriodoAcademicoService periodoService;

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.CoordinadorRequestDTO;
 import org.uteq.sgacfinal.dto.response.CoordinadorResponseDTO;
@@ -51,16 +52,19 @@ public class CoordinadorController {
         return ResponseEntity.ok(coordinadorService.reportePostulantesPropios(idUsuario));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<CoordinadorResponseDTO> create(@Valid @RequestBody CoordinadorRequestDTO request) {
         return new ResponseEntity<>(coordinadorService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<CoordinadorResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody CoordinadorRequestDTO request) {
         return ResponseEntity.ok(coordinadorService.actualizar(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         coordinadorService.desactivar(id);

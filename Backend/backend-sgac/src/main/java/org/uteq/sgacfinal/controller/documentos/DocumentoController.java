@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller.documentos;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.uteq.sgacfinal.dto.request.documentos.DocumentoUpdateRequestDTO;
@@ -32,6 +33,7 @@ public class DocumentoController {
         return ResponseEntity.ok(documentoService.getTiposDocumento());
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR')")
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<RespuestaOperacionDTO<DocumentoIdResponseDTO>> guardar(
             @RequestParam("archivo") MultipartFile archivo,
@@ -44,11 +46,13 @@ public class DocumentoController {
         return ResponseEntity.ok(documentoService.guardarDocumento(archivo, nombre, idTipo, idUsuario, idFacultad, idCarrera));
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR')")
     @PutMapping
     public ResponseEntity<RespuestaOperacionDTO<Void>> actualizar(@RequestBody DocumentoUpdateRequestDTO req) {
         return ResponseEntity.ok(documentoService.actualizarDocumento(req));
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR')")
     @DeleteMapping("/{id}")
     public ResponseEntity<RespuestaOperacionDTO<Void>> eliminar(@PathVariable Integer id) {
         return ResponseEntity.ok(documentoService.eliminarDocumento(id));

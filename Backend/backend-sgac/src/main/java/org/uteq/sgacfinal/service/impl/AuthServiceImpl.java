@@ -7,6 +7,7 @@ import org.uteq.sgacfinal.dto.request.LoginRequestDTO;
 import org.uteq.sgacfinal.dto.request.SeleccionarRolRequestDTO;
 import org.uteq.sgacfinal.dto.response.TipoRolResponseDTO;
 import org.uteq.sgacfinal.dto.response.UsuarioResponseDTO;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.uteq.sgacfinal.exception.AccesoDenegadoException;
 import org.uteq.sgacfinal.repository.IAuthRepository;
 import org.uteq.sgacfinal.security.JwtService;
@@ -32,7 +33,7 @@ public class AuthServiceImpl implements IAuthService {
         );
 
         if (resultados.isEmpty()) {
-            throw new RuntimeException("Credenciales incorrectas o usuario inactivo.");
+            throw new BadCredentialsException("Credenciales incorrectas o usuario inactivo.");
         }
 
         Object[] row = resultados.get(0);

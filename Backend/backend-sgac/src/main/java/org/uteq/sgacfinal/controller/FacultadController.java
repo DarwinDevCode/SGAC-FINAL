@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.FacultadRequestDTO;
 import org.uteq.sgacfinal.dto.response.FacultadResponseDTO;
@@ -29,16 +30,19 @@ public class FacultadController {
         return ResponseEntity.ok(facultadService.buscarPorId(id));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<FacultadResponseDTO> create(@Valid @RequestBody FacultadRequestDTO request) {
         return new ResponseEntity<>(facultadService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<FacultadResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody FacultadRequestDTO request) {
         return ResponseEntity.ok(facultadService.actualizar(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         facultadService.desactivar(id);

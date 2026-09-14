@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.PeriodoAcademicoRequestDTO;
 import org.uteq.sgacfinal.dto.response.PeriodoAcademicoResponseDTO;
@@ -33,22 +34,26 @@ public class PeriodoAcademicoController {
         return ResponseEntity.ok(periodoAcademicoService.buscarPorId(id));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<PeriodoAcademicoResponseDTO> create(@Valid @RequestBody PeriodoAcademicoRequestDTO request) {
         return new ResponseEntity<>(periodoAcademicoService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<PeriodoAcademicoResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody PeriodoAcademicoRequestDTO request) {
         return ResponseEntity.ok(periodoAcademicoService.actualizar(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         periodoAcademicoService.desactivar(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/activar")
     public ResponseEntity<?> activar(@PathVariable Integer id) {
         try {
@@ -59,6 +64,7 @@ public class PeriodoAcademicoController {
         }
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping("/{id}/importar-requisitos")
     public ResponseEntity<?> importarRequisitos(@PathVariable Integer id, @RequestParam Integer fuentePeriodoId) {
         try {

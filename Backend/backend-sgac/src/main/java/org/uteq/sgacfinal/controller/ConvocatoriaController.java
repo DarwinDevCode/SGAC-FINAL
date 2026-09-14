@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.controller;
+package org.uteq.sgacfinal.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,38 +24,38 @@ public class ConvocatoriaController {
 
     private final IConvocatoriaService convocatoriaService;
     
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'COORDINADOR', 'DECANO', 'ESTUDIANTE', 'DOCENTE', 'AYUDANTE_CATEDRA')")
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR', 'DECANO', 'ESTUDIANTE', 'DOCENTE', 'AYUDANTE_CATEDRA')")
     @GetMapping("/listar-vista")
     public ResponseEntity<List<ConvocatoriaResponseDTO>> listarTodo() {
         return ResponseEntity.ok(convocatoriaService.findAll());
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'COORDINADOR', 'DECANO', 'ESTUDIANTE', 'DOCENTE', 'AYUDANTE_CATEDRA')")
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR', 'DECANO', 'ESTUDIANTE', 'DOCENTE', 'AYUDANTE_CATEDRA')")
     @GetMapping("/{id}")
     public ResponseEntity<ConvocatoriaResponseDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(convocatoriaService.findById(id));
     }
 
-    @PreAuthorize("hasRole('ESTUDIANTE')")
+    @PreAuthorize("hasAuthority('ESTUDIANTE')")
     @GetMapping("/listar-por-estudiante/{idUsuario}")
     public ResponseEntity<List<ConvocatoriaEstudianteDTO>> listarPorEstudiante(@PathVariable Integer idUsuario) {
         return ResponseEntity.ok(convocatoriaService.listarConvocatoriasEstudiante(idUsuario));
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @GetMapping("/verificar-fase")
     public ResponseEntity<VerificarFaseResponseDTO> verificarFase() {
         return ResponseEntity.ok(convocatoriaService.verificarFase());
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @GetMapping("/check-postulantes/{id}")
     public ResponseEntity<VerificarPostulantesResponseDTO> checkPostulantes(
             @PathVariable Integer id) {
         return ResponseEntity.ok(convocatoriaService.checkPostulantes(id));
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR', 'DECANO')")
     @PostMapping("/guardar")
     public ResponseEntity<ConvocatoriaNativaResponseDTO> guardar(
             @Valid @RequestBody ConvocatoriaCrearRequestDTO request) {
@@ -63,14 +63,14 @@ public class ConvocatoriaController {
                 .body(convocatoriaService.crear(request));
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR', 'DECANO')")
     @PutMapping("/actualizar")
     public ResponseEntity<ConvocatoriaNativaResponseDTO> actualizar(
             @Valid @RequestBody ConvocatoriaActualizarRequestDTO request) {
         return ResponseEntity.ok(convocatoriaService.actualizar(request));
     }
 
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/desactivar/{id}")
     public ResponseEntity<ConvocatoriaNativaResponseDTO> desactivar(
             @PathVariable Integer id) {

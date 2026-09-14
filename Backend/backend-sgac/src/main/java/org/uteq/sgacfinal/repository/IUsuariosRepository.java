@@ -91,8 +91,11 @@ public interface IUsuariosRepository extends JpaRepository<Usuario, Integer> {
             @Param("password") String password
     );
 
+    // La version "public.*" de este SP referencia tablas inexistentes
+    // (public.usuario, public.tipo_rol, ...) y siempre fallaba. La version
+    // correcta vive en el esquema seguridad (ver V?? historico).
     @Modifying
-    @Query(value = "CALL public.sp_promover_estudiante_a_ayudante(:username, :horasAsignadas)", nativeQuery = true)
+    @Query(value = "CALL seguridad.sp_promover_estudiante_a_ayudante(:username, :horasAsignadas)", nativeQuery = true)
     void promoverEstudianteAAyudante(
             @Param("username") String username,
             @Param("horasAsignadas") BigDecimal horasAsignadas

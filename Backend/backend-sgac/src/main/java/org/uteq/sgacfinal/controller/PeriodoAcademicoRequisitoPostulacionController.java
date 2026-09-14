@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.PeriodoAcademicoRequisitoPostulacionRequestDTO;
 import org.uteq.sgacfinal.dto.response.PeriodoAcademicoRequisitoPostulacionResponseDTO;
@@ -14,6 +15,7 @@ import java.util.Map;
 @RequestMapping("/api/periodos-requisitos")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:4200")
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class PeriodoAcademicoRequisitoPostulacionController {
 
     private final IPeriodoAcademicoRequisitoPostulacionService service;

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.AsignaturaRequestDTO;
 import org.uteq.sgacfinal.dto.request.CarreraRequestDTO;
@@ -21,6 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/catalogos")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class CatalogoController {
 
     private final IFacultadService facultadService;

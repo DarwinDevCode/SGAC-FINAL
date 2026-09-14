@@ -97,7 +97,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/login",
-                                "/api/auth/seleccionar-rol"
+                                "/api/auth/seleccionar-rol",
+                                "/api/auth/roles-activos",
+                                "/api/auth/registro-estudiante",
+                                "/api/auth/registro-docente",
+                                "/api/auth/registro-decano",
+                                "/api/auth/registro-coordinador"
                         ).permitAll()
                         .requestMatchers("/ws-sgac/**").permitAll()
 

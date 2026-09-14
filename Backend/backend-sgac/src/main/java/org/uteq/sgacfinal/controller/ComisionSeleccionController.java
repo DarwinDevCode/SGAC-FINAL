@@ -3,6 +3,7 @@ package org.uteq.sgacfinal.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.ComisionSeleccionRequestDTO;
 import org.uteq.sgacfinal.dto.response.ComisionSeleccionResponseDTO;
@@ -18,6 +19,7 @@ public class ComisionSeleccionController {
 
     private final IComisionSeleccionService comisionService;
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
     @PostMapping("/crear")
     public ResponseEntity<?> crear(@RequestBody ComisionSeleccionRequestDTO request) {
         try {
@@ -29,6 +31,7 @@ public class ComisionSeleccionController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizar(@PathVariable Integer id,
                                         @RequestBody ComisionSeleccionRequestDTO request) {
@@ -40,6 +43,7 @@ public class ComisionSeleccionController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'COMISION_SELECCION')")
     @GetMapping("/convocatoria/{idConvocatoria}")
     public ResponseEntity<?> listarPorConvocatoria(@PathVariable Integer idConvocatoria) {
         try {
@@ -51,6 +55,7 @@ public class ComisionSeleccionController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR', 'DECANO', 'COMISION_SELECCION')")
     @GetMapping("/{id}")
     public ResponseEntity<?> buscarPorId(@PathVariable Integer id) {
         try {
@@ -61,6 +66,7 @@ public class ComisionSeleccionController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'ADMINISTRADOR')")
     @DeleteMapping("/desactivar/{id}")
     public ResponseEntity<?> desactivar(@PathVariable Integer id) {
         try {

@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.CambiarEstadoActividadRequest;
@@ -25,14 +26,17 @@ public class DocenteController {
     private final IDocenteActividadesService docenteActividadesService;
 
     // ── Existente ──────────────────────────────────────────────────────────────
+    // Lectura general (ej. dropdown "docente responsable" al crear una convocatoria)
 
+    @PreAuthorize("hasAnyAuthority('ADMINISTRADOR', 'COORDINADOR', 'DECANO', 'DOCENTE')")
     @GetMapping
     public ResponseEntity<List<DocenteResponseDTO>> listarDocentesActivos() {
         return ResponseEntity.ok(docenteService.listarDocentesActivos());
     }
 
-    // ── Dashboard ───────────────────────────────────────────────────────────────
+    // ── Dashboard y gestion de los propios ayudantes: solo el docente dueno ──────
 
+    @PreAuthorize("hasAuthority('DOCENTE')")
     @GetMapping("/dashboard")
     public ResponseEntity<DocenteDashboardDTO> getDashboard(
             @AuthenticationPrincipal UsuarioPrincipal principal) {
@@ -42,6 +46,7 @@ public class DocenteController {
 
     // ── Ayudantes ───────────────────────────────────────────────────────────────
 
+    @PreAuthorize("hasAuthority('DOCENTE')")
     @GetMapping("/ayudantes")
     public ResponseEntity<List<AyudanteResumenDTO>> listarAyudantes(
             @AuthenticationPrincipal UsuarioPrincipal principal) {
@@ -51,6 +56,7 @@ public class DocenteController {
 
     // ── Actividades de un ayudante ──────────────────────────────────────────────
 
+    @PreAuthorize("hasAuthority('DOCENTE')")
     @GetMapping("/ayudantes/{idAyudantia}/actividades")
     public ResponseEntity<List<RegistroActividadDocenteDTO>> getActividadesAyudante(
             @PathVariable Integer idAyudantia) {
@@ -60,6 +66,7 @@ public class DocenteController {
 
     // ── Detalle de una actividad ────────────────────────────────────────────────
 
+    @PreAuthorize("hasAuthority('DOCENTE')")
     @GetMapping("/actividades/{idActividad}")
     public ResponseEntity<RegistroActividadDocenteDTO> getDetalleActividad(
             @PathVariable Integer idActividad) {
@@ -69,6 +76,7 @@ public class DocenteController {
 
     // ── Cambiar estado global de actividad ──────────────────────────────────────
 
+    @PreAuthorize("hasAuthority('DOCENTE')")
     @PutMapping("/actividades/{idActividad}/estado")
     public ResponseEntity<Void> cambiarEstadoActividad(
             @PathVariable Integer idActividad,
@@ -81,6 +89,7 @@ public class DocenteController {
 
     // ── Cambiar estado de evidencia específica ──────────────────────────────────
 
+    @PreAuthorize("hasAuthority('DOCENTE')")
     @PutMapping("/evidencias/{idEvidencia}/estado")
     public ResponseEntity<Void> cambiarEstadoEvidencia(
             @PathVariable Integer idEvidencia,

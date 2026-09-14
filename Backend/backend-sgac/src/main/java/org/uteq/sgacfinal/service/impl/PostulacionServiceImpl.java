@@ -179,8 +179,8 @@ public class PostulacionServiceImpl implements IPostulacionService {
     @Transactional
     public String registrarPostulacionCompleta(PostulacionRequestDTO request, List<MultipartFile> archivos, List<Integer> tiposRequisito) {
         try {
-            Estudiante estudiante = estudianteRepository.findByUsuario_IdUsuario(request.getIdEstudiante())
-                    .orElseThrow(() -> new RuntimeException("Estudiante no encontrado para el usuario con ID: " + request.getIdEstudiante()));
+            Estudiante estudiante = estudianteRepository.findByUsuario_IdUsuario(request.getIdUsuario())
+                    .orElseThrow(() -> new RuntimeException("Estudiante no encontrado para el usuario con ID: " + request.getIdUsuario()));
             long postulacionesActivas = postulacionRepository.contarPostulacionesActivasPorEstudiante(estudiante.getIdEstudiante());
             if (postulacionesActivas > 0) {
                 throw new RuntimeException("Ya tienes una postulación activa. No puedes postularte a más de una convocatoria a la vez.");

@@ -2,6 +2,7 @@ package org.uteq.sgacfinal.controller.configuracion;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.response.RespuestaOperacionDTO;
 import org.uteq.sgacfinal.service.impl.configuracion.DatabaseBackupService;
@@ -10,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/configuracion/respaldos")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('ADMINISTRADOR')")
 public class DatabaseBackupController {
     private final DatabaseBackupService backupService;
 

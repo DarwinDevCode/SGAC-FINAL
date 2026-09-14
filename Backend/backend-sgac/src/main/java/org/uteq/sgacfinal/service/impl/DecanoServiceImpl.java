@@ -5,8 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.uteq.sgacfinal.dto.request.DecanoRequestDTO;
 import org.uteq.sgacfinal.dto.response.DecanoResponseDTO;
+import org.uteq.sgacfinal.entity.Convocatoria;
 import org.uteq.sgacfinal.entity.Decano;
 import org.uteq.sgacfinal.entity.LogAuditoria;
+import org.uteq.sgacfinal.entity.Postulacion;
 import org.uteq.sgacfinal.repository.DecanoRepository;
 import org.uteq.sgacfinal.repository.IConvocatoriaRepository;
 import org.uteq.sgacfinal.repository.PostulacionRepository;
@@ -16,8 +18,8 @@ import org.uteq.sgacfinal.dto.response.DecanoEstadisticasDTO;
 import org.uteq.sgacfinal.dto.response.ConvocatoriaReporteDTO;
 import org.uteq.sgacfinal.dto.response.LogAuditoriaDTO;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,7 +99,6 @@ public class DecanoServiceImpl implements IDecanoService {
     @Override
     @Transactional(readOnly = true)
     public DecanoEstadisticasDTO obtenerEstadisticasPorFacultad(Integer idFacultad) {
-        /*
         List<Convocatoria> convocatorias = convocatoriaRepository.findByFacultadPropia(idFacultad);
         List<Postulacion> postulaciones = postulacionRepository.findByFacultadPropia(idFacultad);
 
@@ -106,9 +107,9 @@ public class DecanoServiceImpl implements IDecanoService {
         long inactivas = totalConvocatorias - activas;
 
         long totalPostulantes = postulaciones.size();
-        long aprobados = postulaciones.stream().filter(p -> "APROBADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-        long rechazados = postulaciones.stream().filter(p -> "RECHAZADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
-        long enEvaluacion = postulaciones.stream().filter(p -> "EN_EVALUACION".equalsIgnoreCase(p.getEstadoPostulacion()) || "ASIGNADO".equalsIgnoreCase(p.getEstadoPostulacion())).count();
+        long aprobados = postulaciones.stream().filter(p -> "APROBADA".equalsIgnoreCase(codigoEstado(p))).count();
+        long rechazados = postulaciones.stream().filter(p -> "RECHAZADA".equalsIgnoreCase(codigoEstado(p))).count();
+        long enEvaluacion = postulaciones.stream().filter(p -> "EN_EVALUACION".equalsIgnoreCase(codigoEstado(p)) || "SELECCIONADO".equalsIgnoreCase(codigoEstado(p))).count();
 
         // Agrupar convocatorias por nombre del coordinador activo de cada carrera
         Map<String, Long> actividadPorCoord = convocatorias.stream()
@@ -135,21 +136,20 @@ public class DecanoServiceImpl implements IDecanoService {
                 .postulantesEnEvaluacion(enEvaluacion)
                 .actividadPorCoordinador(actividadList)
                 .build();
+    }
 
-         */
-        return new DecanoEstadisticasDTO();
+    private String codigoEstado(Postulacion p) {
+        return p.getTipoEstadoPostulacion() != null ? p.getTipoEstadoPostulacion().getCodigo() : null;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ConvocatoriaReporteDTO> reporteConvocatoriasPorFacultad(Integer idFacultad) {
-
-        /*
         List<Convocatoria> convocatorias = convocatoriaRepository.findByFacultadPropia(idFacultad);
         // Podríamos optimizar esto, pero como es un reporte con volumen moderado, está bien.
         return convocatorias.stream().map(c -> {
             long postulantes = c.getPostulaciones() != null ? c.getPostulaciones().size() : 0L;
-            
+
             String nombreCoord = c.getAsignatura().getCarrera().getCoordinadores().stream()
                     .filter(coord -> Boolean.TRUE.equals(coord.getActivo()))
                     .findFirst()
@@ -161,15 +161,12 @@ public class DecanoServiceImpl implements IDecanoService {
                     .nombreAsignatura(c.getAsignatura().getNombreAsignatura())
                     .nombreCarrera(c.getAsignatura().getCarrera().getNombreCarrera())
                     .nombreCoordinador(nombreCoord)
-                    .fechaInicio(c.getFechaPublicacion())
-                    .fechaFin(c.getFechaCierre())
+                    .fechaInicio(c.getPeriodoAcademico().getFechaInicio())
+                    .fechaFin(c.getPeriodoAcademico().getFechaFin())
                     .estado(Boolean.TRUE.equals(c.getActivo()) ? "ACTIVO" : "INACTIVO")
                     .numeroPostulantes(postulantes)
                     .build();
         }).collect(Collectors.toList());
-
-         */
-        return new ArrayList<>();
     }
 
     @Override

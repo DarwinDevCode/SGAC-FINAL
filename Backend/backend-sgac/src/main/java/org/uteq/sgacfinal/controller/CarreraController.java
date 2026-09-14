@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.uteq.sgacfinal.dto.request.CarreraRequestDTO;
 import org.uteq.sgacfinal.dto.response.CarreraResponseDTO;
@@ -34,16 +35,19 @@ public class CarreraController {
         return ResponseEntity.ok(carreraService.buscarPorId(id));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PostMapping
     public ResponseEntity<CarreraResponseDTO> create(@Valid @RequestBody CarreraRequestDTO request) {
         return new ResponseEntity<>(carreraService.crear(request), HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<CarreraResponseDTO> update(@PathVariable Integer id, @Valid @RequestBody CarreraRequestDTO request) {
         return ResponseEntity.ok(carreraService.actualizar(id, request));
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PatchMapping("/{id}/desactivar")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         carreraService.desactivar(id);

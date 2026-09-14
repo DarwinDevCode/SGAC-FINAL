@@ -135,7 +135,10 @@ public class UsuariosImpl implements IUsuariosService, UserDetailsService {
     private void applyCurrentDbRole() {
         String username = UserContext.getUsername();
         if (username == null || username.isBlank()) {
-            throw new IllegalStateException("No hay usuario autenticado para aplicar rol de BD");
+            // Operaciones publicas (auto-registro) no tienen usuario autenticado todavia;
+            // se ejecutan con el rol base de la conexion, igual que hace DatabaseRoleAspect.
+            log.debug("[UsuariosImpl] Sin usuario autenticado; se omite SET ROLE (fase anonima/registro)");
+            return;
         }
         String dbRole = resolveDbRole(username, UserContext.getAppRole());
         entityManager.createNativeQuery("SELECT set_config('role', ?1, true)")

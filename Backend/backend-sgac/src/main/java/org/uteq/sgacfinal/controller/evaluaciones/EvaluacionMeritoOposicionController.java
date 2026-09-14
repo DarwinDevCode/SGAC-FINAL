@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,30 +41,35 @@ public class EvaluacionMeritoOposicionController {
         }
     }
 
+    @PreAuthorize("hasAuthority('COORDINADOR')")
     @PostMapping("/temas")
     public ResponseEntity<String> gestionarTemas(
             @Valid @RequestBody BancoTemasRequest request) {
         return json(service.gestionarBancoTemas(request));
     }
 
+    @PreAuthorize("hasAuthority('COORDINADOR')")
     @PostMapping("/sorteo")
     public ResponseEntity<String> ejecutarSorteo(
             @Valid @RequestBody SorteoOposicionRequest request) {
         return json(service.ejecutarSorteo(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'COMISION_SELECCION')")
     @PatchMapping("/estado")
     public ResponseEntity<String> cambiarEstado(
             @Valid @RequestBody CambiarEstadoEvaluacionRequest request) {
         return json(service.cambiarEstadoEvaluacion(request));
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'COMISION_SELECCION', 'ESTUDIANTE')")
     @GetMapping("/cronograma/{idConvocatoria}")
     public ResponseEntity<String> obtenerCronograma(
             @PathVariable Integer idConvocatoria) {
         return json(service.consultarCronograma(idConvocatoria));
     }
 
+    @PreAuthorize("hasAuthority('COMISION_SELECCION')")
     @PostMapping("/puntaje")
     public ResponseEntity<String> registrarPuntaje(
             @Valid @RequestBody PuntajeJuradoRequest request,
@@ -76,8 +82,9 @@ public class EvaluacionMeritoOposicionController {
         return json(service.registrarPuntajeJurado(request));
     }
 
+    @PreAuthorize("hasAuthority('ESTUDIANTE')")
     @GetMapping("/mi-turno/{idConvocatoria}")
-    public ResponseEntity<JsonNode> obtenerMiTurno(
+    public ResponseEntity<String> obtenerMiTurno(
             @PathVariable Integer idConvocatoria,
             Authentication authentication) {
 
@@ -89,9 +96,15 @@ public class EvaluacionMeritoOposicionController {
         if (idUsuario == null)
             return ResponseEntity.status(401).build();
 
-        return ResponseEntity.ok(service.obtenerMiTurno(idConvocatoria, idUsuario));
+        // Se serializa manualmente con el ObjectMapper (Jackson 2) de este archivo,
+        // igual que el resto de endpoints del controlador (ver metodo json()).
+        // Devolver el JsonNode directo aqui hacia que Spring (Jackson 3) lo tratara
+        // como un bean generico en vez de como un arbol JSON, exponiendo metodos
+        // internos como "isArray"/"isBigDecimal" en la respuesta.
+        return json(service.obtenerMiTurno(idConvocatoria, idUsuario));
     }
 
+    @PreAuthorize("hasAnyAuthority('COORDINADOR', 'COMISION_SELECCION')")
     @GetMapping("/convocatorias-aptas")
     public ResponseEntity<StandardResponseDTO<List<ConvocatoriaOposicionDTO>>> listarConvocatoriasAptas(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -102,6 +115,7 @@ public class EvaluacionMeritoOposicionController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasAnyAuthority('ESTUDIANTE', 'COMISION_SELECCION')")
     @GetMapping("/mi-sala")
     public ResponseEntity<String> resolverMiSala(Authentication authentication) {
         if (authentication == null ||

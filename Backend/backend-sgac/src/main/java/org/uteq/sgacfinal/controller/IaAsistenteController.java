@@ -1,4 +1,4 @@
-﻿package org.uteq.sgacfinal.controller;
+package org.uteq.sgacfinal.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
